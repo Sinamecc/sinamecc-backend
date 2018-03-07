@@ -13,14 +13,15 @@ On a working directory (for example /home/dev/sinamecc):
 Server Execution:
 =================
 - `python manage.py migrate` to sync database changes
+- `python manage.py  createsuperuser --username admin --email "admin@foo.com"` this will be used on SINAMECC_PASSWORD variable 
 - `python manage.py runserver` to run a server on http://localhost:8000
 
 Example Requests:
 =================
 You need to have two environment variable:
 ```
-export SINAMECC_USERNAME=msalgado
-export SINAMECC_PASSWORD=cambiame315
+export SINAMECC_USERNAME=admin
+export SINAMECC_PASSWORD=YOUR_PASSWORD
 ```
 
 Example to get the authenthication token:
