@@ -32,11 +32,11 @@ class GetAllReportFilesTest(TestCase):
 class GetSingleReportFileTest(TestCase):
     def setUp(self):
         self.report1 = ReportFile.objects.create(
-            name='file1', file_name="/foo/bar/file1")
+            name='file1', file="/foo/bar/file1")
         self.report2 = ReportFile.objects.create(
-            name='file2', file_name="/foo/bar/file2")
+            name='file2', file="/foo/bar/file2")
         self.report3 = ReportFile.objects.create(
-            name='file3', file_name="/foo/bar/file3")
+            name='file3', file="/foo/bar/file3")
 
     def test_get_valid_single_report_file(self):
         response = client.get(
@@ -55,11 +55,11 @@ class CreateNeReportFileTest(TestCase):
     def setUp(self):
         self.valid_payload = {
             'name': 'report1',
-            'file_name': '/foo/bar/report1'
+            'file': '/foo/bar/report1'
         }
         self.invalid_payload = {
             'name': '',
-            'file_name': '/foo/bar/reportX'
+            'file': '/foo/bar/reportX'
         }
 
     def test_create_valid_report_file(self):
@@ -82,16 +82,16 @@ class UpdateSingleReportFileTest(TestCase):
 
     def setUp(self):
         self.report1 = ReportFile.objects.create(
-            name='file1', file_name="/foo/bar/file1")
+            name='file1', file="/foo/bar/file1")
         self.report2 = ReportFile.objects.create(
-            name='file2', file_name="/foo/bar/file2")
+            name='file2', file="/foo/bar/file2")
         self.valid_payload = {
             'name': 'file1',
-            'file_name': '/foo/bar/file1'
+            'file': '/foo/bar/file1'
         }
         self.invalid_payload = {
             'name': '',
-            'file_name': '/foo/bar/reportX'
+            'file': '/foo/bar/reportX'
         }
 
     def test_valid_update_report_file(self):
@@ -113,7 +113,7 @@ class DeleteSingleReportFileTest(TestCase):
 
     def setUp(self):
         self.report1 = ReportFile.objects.create(
-            name='file1', file_name="/foo/bar/file1")
+            name='file1', file="/foo/bar/file1")
 
     def test_valid_delete_report_file(self):
         response = client.delete(

@@ -1,5 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from .models import ReportFile
 from .serializers import ReportFileSerializer
@@ -30,6 +31,7 @@ def get_delete_update_report_file(request, pk):
 
 
 @api_view(['GET', 'POST'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_report_files(request):
     # get all puppies
     if request.method == 'GET':
@@ -40,7 +42,7 @@ def get_post_report_files(request):
     elif request.method == 'POST':
         data = {
             'name': request.data.get('name'),
-            'file_name': request.data.get('file_name'),
+            'file': request.data.get('file')
         }
         serializer = ReportFileSerializer(data=data)
         if serializer.is_valid():
