@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 class ReportFile(models.Model):
     name = models.CharField(max_length=100, unique=True, blank=False, null=False)
-    file = models.FileField(blank=False, null=False)
+    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y/%m/%d/%H/%M/%S')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
