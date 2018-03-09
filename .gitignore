@@ -5,3 +5,4 @@ config/__pycache__/
 report_data/tests/__pycache__/
 report_data/migrations/__pycache__/
 report_data/__pycache__/
+env_p3/*
