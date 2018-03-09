@@ -24,9 +24,8 @@ export SINAMECC_USERNAME=admin
 export SINAMECC_PASSWORD=YOUR_PASSWORD
 ```
 
-*Example to get the authenthication token*:
-```curl -X POST -H "Content-Type: application/json" -d "{\"username\":\"$SINAMECC_USERNAME\",\"password\":\"$SINAMECC_PASSWORD\"}" http://localhost:8000/api-token-auth/```
-
-*Example to get the list of `report_file` resources*:
-```curl -X GET -H"Authorization: $(./get_token)" http://localhost:8000/api/v1/report_file/```
-
+Example to get the authenthication token:
+`curl -X POST -H "Content-Type: application/json" -d "{\"username\":\"$SINAMECC_USERNAME\",\"password\":\"$SINAMECC_PASSWORD\"}" http://localhost:8000/api/v1/token/`
+`
+Example to get the list of `report_file` resources
+`curl -X GET -H"Authorization: $(./get_token)" http://localhost:8000/api/v1/report_file/`

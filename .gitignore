@@ -6,3 +6,4 @@ report_data/tests/__pycache__/
 report_data/migrations/__pycache__/
 report_data/__pycache__/
 media/*
+env_p3/*
