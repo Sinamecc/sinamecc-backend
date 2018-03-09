@@ -48,6 +48,3 @@ def get_post_report_files(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def get_health_status(request):
-    return Response({'message': 'Testing ... 1,2,3 .... Success'}, status=status.HTTP_200_OK)

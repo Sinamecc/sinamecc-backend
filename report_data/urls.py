@@ -12,11 +12,5 @@ urlpatterns = [
         r'^api/v1/report_file/$',
         views.get_post_report_files,
         name='get_post_report_files'
-    ),
-    url(
-        r'^api/v1/health/$',
-        views.get_health_status,
-        name='get_health_status'
-    ),
-    
+    )
 ]
