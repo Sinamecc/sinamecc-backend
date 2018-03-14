@@ -29,6 +29,18 @@ def get_delete_update_report_file(request, pk):
             return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def get_report_file_versions(request, pk):
+    try:
+        report = ReportFile.objects.get(pk=pk)
+    except ReportFile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    # get versions details of a single report file
+    if request.method == 'GET':
+        return Response({
+            "status": "OK"
+        })
 
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
