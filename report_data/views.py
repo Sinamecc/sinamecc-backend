@@ -4,6 +4,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from .models import ReportFile
 from .serializers import ReportFileSerializer
+import datetime
 
 
 @api_view(['GET', 'DELETE', 'PUT'])
@@ -56,6 +57,8 @@ def get_post_report_files(request):
             'name': request.data.get('name'),
             'file': request.data.get('file')
         }
+        version_str_format = 'report_file_version_%Y_%m_%d_%H_%M_%S'
+        version_str = datetime.date.today().strftime(version_str_format)
         serializer = ReportFileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
