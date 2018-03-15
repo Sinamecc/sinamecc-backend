@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
-from .models import ReportFile
-from .serializers import ReportFileSerializer
+from .models import ReportFile, ReportFileVersion
+from .serializers import ReportFileSerializer, ReportFileVersionSerializer
 import datetime
 
 
@@ -46,22 +46,29 @@ def get_report_file_versions(request, pk):
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_report_files(request):
-    # get all puppies
+    # get all report_files
     if request.method == 'GET':
         report_files = ReportFile.objects.all()
         serializer = ReportFileSerializer(report_files, many=True)
         return Response(serializer.data)
-    # insert a new record for a puppy
+    # insert a new record for a report_file and associate it a version
     elif request.method == 'POST':
+        version_str_format = 'report_data_v_%Y_%m_%d_%H_%M_%S'
+        version_str = datetime.datetime.now().strftime(version_str_format)
         data = {
             'name': request.data.get('name'),
             'file': request.data.get('file')
         }
-        version_str_format = 'report_file_version_%Y_%m_%d_%H_%M_%S'
-        version_str = datetime.date.today().strftime(version_str_format)
+        version_data = {
+            'active': True,
+            'version': version_str
+        }
         serializer = ReportFileSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
+        version_serializer = ReportFileVersionSerializer(data=version_data)
+        if serializer.is_valid() and version_serializer.is_valid():
+            version = version_serializer.save()
+            report_file = serializer.save()
+            report_file.versions.add(version)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
