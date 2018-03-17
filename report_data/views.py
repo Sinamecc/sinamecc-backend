@@ -14,19 +14,31 @@ def get_delete_update_report_file(request, pk):
     except ReportFile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    # get details of a single puppy
+    # get details of a single report_file
     if request.method == 'GET':
         serializer = ReportFileSerializer(report)
         return Response(serializer.data)
-    # delete a single puppy
+    # delete a single report_file
     elif request.method == 'DELETE':
         report.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    # update details of a single puppy
+    # update details of a single report_file
     elif request.method == 'PUT':
+        version_str_format = 'report_data_v_%Y_%m_%d_%H_%M_%S'
+        version_str = datetime.datetime.now().strftime(version_str_format)
+        version_data = {
+            'active': True,
+            'version': version_str
+        }
         serializer = ReportFileSerializer(report, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        previous_version = report.versions.filter(active=True).first()
+        version_serializer = ReportFileVersionSerializer(data=version_data)
+        previous_version_serializer = ReportFileVersionSerializer(previous_version, data={'active': False}, partial=True)
+        if serializer.is_valid() and version_serializer.is_valid() and previous_version_serializer.is_valid():
+            previous_version_serializer.save()
+            version = version_serializer.save()
+            report_file = serializer.save()
+            report_file.versions.add(version)
             return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
