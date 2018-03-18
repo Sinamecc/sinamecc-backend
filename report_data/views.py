@@ -5,6 +5,7 @@ from rest_framework import status
 from .models import ReportFile, ReportFileVersion
 from .serializers import ReportFileSerializer, ReportFileVersionSerializer
 import datetime
+import json
 
 
 @api_view(['GET', 'DELETE', 'PUT'])
@@ -51,9 +52,14 @@ def get_report_file_versions(request, pk):
     
     # get versions details of a single report file
     if request.method == 'GET':
-        return Response({
-            "status": "OK"
-        })
+        versions_array = [{'version': v.version, 'active': v.active} for v in report.versions.all()]
+        content = {
+            'report_file_id': report.id,
+            'report_file_name': report.name,
+            'last_active_version': report.versions.filter(active=True).first().version,
+            'versions': versions_array
+        }
+        return Response(content)
 
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
