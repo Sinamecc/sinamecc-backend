@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 class ReportFileVersion(models.Model):
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     active = models.BooleanField(blank=False, null=False)
+    file = models.CharField(max_length=100 , blank=False, null=False)
 
     class Meta:
         verbose_name = _("ReportFileVersion")
