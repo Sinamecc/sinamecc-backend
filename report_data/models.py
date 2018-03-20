@@ -4,8 +4,11 @@ from django.conf import settings
 from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import get_user_model
+User =  get_user_model()
 
 class ReportFile(models.Model):
+    user = models.ForeignKey(User, related_name='report_file')
     name = models.CharField(max_length=100, unique=True, blank=False, null=False)
     file = models.FileField(blank=False, null=False, upload_to='report_data/%Y/%m/%d/%H/%M/%S')
     created = models.DateTimeField(auto_now_add=True)

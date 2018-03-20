@@ -5,4 +5,4 @@ from .models import ReportFile
 class ReportFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFile
-        fields = ('name', 'file', 'created', 'updated')
+        fields = ('name', 'user', 'file', 'created', 'updated')

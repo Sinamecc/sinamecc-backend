@@ -33,17 +33,17 @@ def get_delete_update_report_file(request, pk):
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_report_files(request):
-    # get all puppies
     if request.method == 'GET':
         report_files = ReportFile.objects.all()
         serializer = ReportFileSerializer(report_files, many=True)
         return Response(serializer.data)
-    # insert a new record for a puppy
     elif request.method == 'POST':
         data = {
             'name': request.data.get('name'),
-            'file': request.data.get('file')
+            'file': request.data.get('file'),
+            'user': request.user.id,
         }
+
         serializer = ReportFileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
