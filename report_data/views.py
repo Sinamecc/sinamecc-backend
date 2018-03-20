@@ -25,6 +25,8 @@ def get_delete_update_report_file(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     # update details of a single report_file
     elif request.method == 'PUT':
+        version_str_format = 'report_data_%Y%m%d_%H%M%S'
+        version_str = datetime.datetime.now().strftime(version_str_format)
         serializer = ReportFileSerializer(report, data=request.data)
         previous_version = report.versions.filter(active=True).first()
         previous_version_serializer = ReportFileVersionSerializer(previous_version, data={'active': False}, partial=True)
@@ -33,8 +35,8 @@ def get_delete_update_report_file(request, pk):
             report_file = serializer.save()
             version_data = {
                 'active': True,
-                'version': os.path.relpath(report_file.file.name).replace("/", "_"),
-                'file': os.path.relpath(report_file.file.name)
+                'version': version_str,
+                'file': request.data.get('file')
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():
@@ -71,17 +73,18 @@ def get_post_report_files(request):
         return Response(serializer.data)
     # insert a new record for a report_file and associate it a version
     elif request.method == 'POST':
+        version_str_format = 'report_data_%Y%m%d_%H%M%S'
+        version_str = datetime.datetime.now().strftime(version_str_format)
         data = {
-            'name': request.data.get('name'),
-            'file': request.data.get('file')
+            'name': request.data.get('name')
         }
         serializer = ReportFileSerializer(data=data)
         if serializer.is_valid():
             report_file = serializer.save()
             version_data = {
                 'active': True,
-                'version': os.path.relpath(report_file.file.name).replace("/", "_"),
-                'file': os.path.relpath(report_file.file.name)
+                'version': version_str,
+                'file': request.data.get('file')
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():
