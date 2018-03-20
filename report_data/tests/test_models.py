@@ -1,5 +1,5 @@
 from django.test import TestCase
-from ..models import ReportFile
+from report_data.models import ReportFile
 
 
 class ReportFileTest(TestCase):
@@ -11,4 +11,4 @@ class ReportFileTest(TestCase):
     def test_puppy_breed(self):
         file1 = ReportFile.objects.get(name='file1')
         self.assertEqual(
-            file1.file_name, "/foo/bar/file1")
+            file1.file, "/foo/bar/file1")
