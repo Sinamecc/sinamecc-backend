@@ -5,24 +5,10 @@ from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
-class ReportFileVersion(models.Model):
-    version = models.CharField(max_length=100, unique=True, blank=False, null=False)
-    active = models.BooleanField(blank=False, null=False)
-    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S')
-
-
-    class Meta:
-        verbose_name = _("ReportFileVersion")
-        verbose_name_plural = _("ReportFileVersions")
-    
-    def __unicode__(self):
-        return smart_unicode(self.version)
-
 class ReportFile(models.Model):
     name = models.CharField(max_length=100, unique=True, blank=False, null=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    versions = models.ManyToManyField(ReportFileVersion)
 
     class Meta:
         verbose_name = _("ReportFile")
@@ -31,3 +17,16 @@ class ReportFile(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+class ReportFileVersion(models.Model):
+    version = models.CharField(max_length=100, unique=True, blank=False, null=False)
+    active = models.BooleanField(blank=False, null=False)
+    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S')
+    report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("ReportFileVersion")
+        verbose_name_plural = _("ReportFileVersions")
+    
+    def __unicode__(self):
+        return smart_unicode(self.version)

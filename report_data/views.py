@@ -28,7 +28,7 @@ def get_delete_update_report_file(request, pk):
         version_str_format = 'report_data_%Y%m%d_%H%M%S'
         version_str = datetime.datetime.now().strftime(version_str_format)
         serializer = ReportFileSerializer(report, data=request.data)
-        previous_version = report.versions.filter(active=True).first()
+        previous_version = report.reportfileversion_set.filter(active=True).first()
         previous_version_serializer = ReportFileVersionSerializer(previous_version, data={'active': False}, partial=True)
         if serializer.is_valid() and previous_version_serializer.is_valid():
             previous_version_serializer.save()
@@ -36,12 +36,13 @@ def get_delete_update_report_file(request, pk):
             version_data = {
                 'active': True,
                 'version': version_str,
-                'file': request.data.get('file')
+                'file': request.data.get('file'),
+                'report_file': report_file.id
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():
                 version = version_serializer.save()
-                report_file.versions.add(version)
+                report_file.reportfileversion_set.add(version)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -54,11 +55,11 @@ def get_report_file_versions(request, pk):
     
     # get versions details of a single report file
     if request.method == 'GET':
-        versions_array = [{'version': v.version, 'file': v.file} for v in report.versions.all()]
+        versions_array = [{'version': v.version, 'file': os.path.relpath(v.file.name)} for v in report.reportfileversion_set.all()]
         content = {
             'report_file_id': report.id,
             'report_file_name': report.name,
-            'last_active_version': report.versions.filter(active=True).first().version,
+            'last_active_version': report.reportfileversion_set.filter(active=True).first().version,
             'versions': versions_array
         }
         return Response(content)
@@ -84,12 +85,12 @@ def get_post_report_files(request):
             version_data = {
                 'active': True,
                 'version': version_str,
-                'file': request.data.get('file')
+                'file': request.data.get('file'),
+                'report_file': report_file.id
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():
                 version = version_serializer.save()
-                report_file.versions.add(version)
+                report_file.reportfileversion_set.add(version)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

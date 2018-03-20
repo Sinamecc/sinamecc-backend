@@ -10,4 +10,4 @@ class ReportFileSerializer(serializers.ModelSerializer):
 class ReportFileVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFileVersion
-        fields = ('version', 'active', 'file')
+        fields = ('version', 'active', 'file', 'report_file')
