@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
-from .models import ReportFile, ReportFileVersion
-from .serializers import ReportFileSerializer, ReportFileVersionSerializer
+from report_data.models import ReportFile, ReportFileVersion
+from report_data.serializers import ReportFileSerializer, ReportFileVersionSerializer
 import datetime
 import os
 
