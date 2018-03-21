@@ -5,7 +5,7 @@ from .models import ReportFile, ReportFileVersion
 class ReportFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFile
-        fields = ('name', 'created', 'updated')
+        fields = ('id', 'name', 'created', 'updated')
 
 class ReportFileVersionSerializer(serializers.ModelSerializer):
     class Meta:
