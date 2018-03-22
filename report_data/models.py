@@ -10,7 +10,6 @@ User =  get_user_model()
 class ReportFile(models.Model):
     user = models.ForeignKey(User, related_name='report_file')
     name = models.CharField(max_length=100, unique=True, blank=False, null=False)
-    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y/%m/%d/%H/%M/%S')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -21,3 +20,16 @@ class ReportFile(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+class ReportFileVersion(models.Model):
+    version = models.CharField(max_length=100, unique=True, blank=False, null=False)
+    active = models.BooleanField(blank=False, null=False)
+    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S')
+    report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("ReportFileVersion")
+        verbose_name_plural = _("ReportFileVersions")
+    
+    def __unicode__(self):
+        return smart_unicode(self.version)
