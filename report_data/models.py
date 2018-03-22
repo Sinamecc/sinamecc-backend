@@ -9,7 +9,7 @@ User =  get_user_model()
 
 class ReportFile(models.Model):
     user = models.ForeignKey(User, related_name='report_file')
-    name = models.CharField(max_length=100, unique=True, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
