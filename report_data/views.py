@@ -27,7 +27,11 @@ def get_delete_update_report_file(request, pk):
     elif request.method == 'PUT':
         version_str_format = 'report_data_%Y%m%d_%H%M%S'
         version_str = datetime.datetime.now().strftime(version_str_format)
-        serializer = ReportFileSerializer(report, data=request.data)
+        data = {
+            'name': request.data.get('name'),
+            'user': request.user.id,
+        }
+        serializer = ReportFileSerializer(report, data=data)
         previous_version = report.reportfileversion_set.filter(active=True).first()
         previous_version_serializer = ReportFileVersionSerializer(previous_version, data={'active': False}, partial=True)
         if serializer.is_valid() and previous_version_serializer.is_valid():
@@ -37,7 +41,8 @@ def get_delete_update_report_file(request, pk):
                 'active': True,
                 'version': version_str,
                 'file': request.data.get('file'),
-                'report_file': report_file.id
+                'report_file': report_file.id,
+                'user': request.user.id,
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():
@@ -60,7 +65,8 @@ def get_report_file_versions(request, pk):
             'report_file_id': report.id,
             'report_file_name': report.name,
             'last_active_version': report.reportfileversion_set.filter(active=True).first().version,
-            'versions': versions_array
+            'versions': versions_array,
+            'user': request.user.id,
         }
         return Response(content)
 
@@ -87,7 +93,8 @@ def get_post_report_files(request):
                 'active': True,
                 'version': version_str,
                 'file': request.data.get('file'),
-                'report_file': report_file.id
+                'report_file': report_file.id,
+                'user': request.user.id,
             }
             version_serializer = ReportFileVersionSerializer(data=version_data)
             if version_serializer.is_valid():

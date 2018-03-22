@@ -22,6 +22,7 @@ class ReportFile(models.Model):
         return smart_unicode(self.name)
 
 class ReportFileVersion(models.Model):
+    user = models.ForeignKey(User, related_name='report_file_version')
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     active = models.BooleanField(blank=False, null=False)
     file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S')

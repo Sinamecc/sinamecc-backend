@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ReportFile, ReportFileVersion
+from report_data.models import ReportFile, ReportFileVersion
 
 
 class ReportFileSerializer(serializers.ModelSerializer):
@@ -10,4 +10,4 @@ class ReportFileSerializer(serializers.ModelSerializer):
 class ReportFileVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFileVersion
-        fields = ('version', 'active', 'file', 'report_file')
+        fields = ('version', 'active', 'file', 'report_file', 'user')
