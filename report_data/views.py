@@ -60,24 +60,31 @@ def get_report_file_versions(request, pk):
     
     # get versions details of a single report file
     if request.method == 'GET':
-        versions_array = [{'version': v.version, 'file': os.path.relpath(v.file.name)} for v in report.reportfileversion_set.all()]
-        content = {
-            'report_file_id': report.id,
-            'report_file_name': report.name,
-            'last_active_version': report.reportfileversion_set.filter(active=True).first().version,
-            'versions': versions_array,
-            'user': request.user.id,
-        }
-        return Response(content)
+        versions_array = [
+            {
+            'version': v.version, 
+            'file': os.path.relpath(v.file.name)
+            } for v in report.reportfileversion_set.all()
+        ]
+        return Response(versions_array)
 
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_report_files(request):
     # get all report_files
     if request.method == 'GET':
-        report_files = ReportFile.objects.all()
-        serializer = ReportFileSerializer(report_files, many=True)
-        return Response(serializer.data)
+        content = [
+            {
+                'id': r.id, 
+                'user': r.user.id, 
+                'name': r.name, 
+                'created': r.created, 
+                'updated': r.updated, 
+                'last_active_version': r.reportfileversion_set.filter(active=True).first().version, 
+                'versions': r.reportfileversion_set.all().count()
+            } for r in ReportFile.objects.all()
+        ]
+        return Response(content)
     # insert a new record for a report_file and associate it a version
     elif request.method == 'POST':
         version_str_format = 'report_data_%Y%m%d_%H%M%S'
