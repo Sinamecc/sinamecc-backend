@@ -66,7 +66,11 @@ def get_report_file_versions(request, pk):
             'file': os.path.relpath(v.file.name)
             } for v in report.reportfileversion_set.all()
         ]
-        return Response(versions_array)
+        content = {
+            'name': report.name,
+            'versions': versions_array
+        }
+        return Response(content)
 
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
