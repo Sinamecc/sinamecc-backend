@@ -4,6 +4,6 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 
 @api_view(['GET'])
-def mitigation_action_test_request(request)
+def mitigation_action_test_request(request):
     if request.method == 'GET':
         return Response({'status': 'OK'})
