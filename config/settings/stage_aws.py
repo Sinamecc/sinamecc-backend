@@ -16,4 +16,4 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_WHITELIST = ('stage.sinamecc-minae.com','ec2-13-58-84-4.us-east-2.compute.amazonaws.com','ip-172-31-40-51.us-east-2.compute.internal')
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "/var/www/app/sinamecc-uploads")
+MEDIA_ROOT = "/var/www/app/sinamecc-uploads"
