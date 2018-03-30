@@ -9,35 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 User =  get_user_model()
 
-class MitigationAction(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    strategy_name = models.CharField(max_length=100, blank=False, null=False)
-    name = models.CharField(max_length=100, blank=False, null=False)
-    purpose = models.CharField(max_length=500, blank=False, null=False)
-    quantitative_purpose = models.CharField(max_length=500, blank=False, null=False)
-    start_date = models.DateField(null=False)
-    end_date = models.DateField(null=False)
-    gas_inventory = models.CharField(max_length=100, blank=False, null=False)
-    emissions_source = models.CharField(max_length=100, blank=False, null=False)
-    carbon_sinks = models.CharField(max_length=100, blank=False, null=False)
-    impact_plan = models.CharField(max_length=500, blank=False, null=False)
-    impact = models.CharField(max_length=500, blank=False, null=False)
-    bibliographic_sources = models.CharField(max_length=500, blank=False, null=False)
-    is_international = models.BooleanField(blank=False, null=False)
-    international_participation = models.CharField(max_length=100, blank=False, null=False)
-    sustainability = models.CharField(max_length=100, blank=False, null=False)
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("MitigationAccess")
-        verbose_name_plural = _("MitigationAccesses")
-        ordering = ('created',)
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
 class RegistrationType(models.Model):
     type = models.CharField(max_length=100, blank=False, null=False)
 
@@ -134,3 +105,45 @@ class Location(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.geographical_site)
+
+class MitigationAction(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    strategy_name = models.CharField(max_length=100, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=False)
+    purpose = models.CharField(max_length=500, blank=False, null=False)
+    quantitative_purpose = models.CharField(max_length=500, blank=False, null=False)
+    start_date = models.DateField(null=False)
+    end_date = models.DateField(null=False)
+    gas_inventory = models.CharField(max_length=100, blank=False, null=False)
+    emissions_source = models.CharField(max_length=100, blank=False, null=False)
+    carbon_sinks = models.CharField(max_length=100, blank=False, null=False)
+    impact_plan = models.CharField(max_length=500, blank=False, null=False)
+    impact = models.CharField(max_length=500, blank=False, null=False)
+    bibliographic_sources = models.CharField(max_length=500, blank=False, null=False)
+    is_international = models.BooleanField(blank=False, null=False)
+    international_participation = models.CharField(max_length=100, blank=False, null=False)
+    sustainability = models.CharField(max_length=500, blank=False, null=False)
+
+    # Foreign Keys
+    user = models.ForeignKey(User, related_name='mitigation_action')
+    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action')
+    institution = models.ForeignKey(Institution, related_name='mitigation_action')
+    contact = models.ForeignKey(Contact, related_name='mitigation_action')
+    status = models.ForeignKey(Status, related_name='mitigation_action')
+    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action')
+    finance = models.ForeignKey(Finance, related_name='mitigation_action')
+    ingei_compliance = models.ForeignKey(IngeiCompliance, related_name='mitigation_action')
+    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action')
+    location = models.ForeignKey(Location, related_name='mitigation_action')
+
+    # Timestamps
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("MitigationAccess")
+        verbose_name_plural = _("MitigationAccesses")
+        ordering = ('created',)
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
