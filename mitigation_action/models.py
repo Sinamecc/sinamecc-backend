@@ -106,7 +106,7 @@ class Location(models.Model):
     def __unicode__(self):
         return smart_unicode(self.geographical_site)
 
-class MitigationAction(models.Model):
+class Mitigation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     strategy_name = models.CharField(max_length=100, blank=False, null=False)
     name = models.CharField(max_length=100, blank=False, null=False)
