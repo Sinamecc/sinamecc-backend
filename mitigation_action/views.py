@@ -55,9 +55,78 @@ def get_mitigations_form(request):
 def get_post_mitigations(request):
     # get all mitigation_actions
     if request.method == 'GET':
-        mitigations = Mitigation.objects.all()
-        serializer = MitigationSerializer(mitigations, many=True)
-        return Response(serializer.data)
+        # serializer = MitigationSerializer(mitigations, many=True)
+        content = [
+            {
+                'id': m.id,
+                'strategy_name': m.strategy_name,
+                'name': m.name,
+                'purpose': m.purpose,
+                'quantitative_purpose': m.quantitative_purpose,
+                'start_date': m.start_date,
+                'end_date': m.end_date,
+                'gas_inventory': m.gas_inventory,
+                'emissions_source': m.emissions_source,
+                'carbon_sinks': m.carbon_sinks,
+                'impact_plan': m.impact_plan,
+                'impact': m.impact,
+                'bibliographic_sources': m.bibliographic_sources,
+                'is_international': m.is_international,
+                'international_participation': m.international_participation,
+                'sustainability': m.sustainability,
+                'user': {
+                    'id': m.user.id,
+                    'username': m.user.username,
+                    'email': m.user.email
+                },
+                'registration_type': {
+                    'id': m.registration_type.id,
+                    'type': m.registration_type.type
+                },
+                'institution': {
+                    'id': m.institution.id,
+                    'name': m.institution.name
+                },
+                'contact': {
+                    'id': m.contact.id,
+                    'full_name': m.contact.full_name,
+                    'job_title': m.contact.job_title,
+                    'email': m.contact.email,
+                    'phone': m.contact.phone
+                },
+                'status': {
+                    'id': m.status.id,
+                    'status': m.status.status
+                },
+                'progress_indicator': {
+                    'id': m.progress_indicator.id,
+                    'type': m.progress_indicator.type,
+                    'unit': m.progress_indicator.unit,
+                    'start_date': m.progress_indicator.start_date
+                },
+                'finance': {
+                    'id': m.finance.id,
+                    'name': m.finance.name,
+                    'source': m.finance.source
+                },
+                'ingei_compliance': {
+                    'id': m.ingei_compliance.id,
+                    'name': m.ingei_compliance.name
+                },
+                'geographic_scale': {
+                    'id': m.geographic_scale.id,
+                    'name': m.geographic_scale.name
+                },
+                'location': {
+                    'id': m.location.id,
+                    'geographical_site': m.location.geographical_site,
+                    'is_gis_annexed': m.location.is_gis_annexed
+                },
+                'created': m.created,
+                'updated': m.updated
+            } for m in Mitigation.objects.all()
+        ]
+        return Response(content)
     # insert a new record for a mitigation
     elif request.method == 'POST':
         data = {
