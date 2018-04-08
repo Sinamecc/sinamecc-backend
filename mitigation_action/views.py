@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
-from mitigation_action.serializers import MitigationSerializer
+from mitigation_action.serializers import ContactSerializer, MitigationSerializer
 import uuid
 
 @api_view(['GET'])
@@ -129,37 +129,46 @@ def get_post_mitigations(request):
         return Response(content)
     # insert a new record for a mitigation
     elif request.method == 'POST':
-        data = {
-            'id': str(uuid.uuid4()),
-            'strategy_name': request.data.get('strategy_name'),
-            'name': request.data.get('name'),
-            'purpose': request.data.get('purpose'),
-            'quantitative_purpose': request.data.get('quantitative_purpose'),
-            'start_date': request.data.get('start_date'),
-            'end_date': request.data.get('end_date'),
-            'gas_inventory': request.data.get('gas_inventory'),
-            'emissions_source': request.data.get('emissions_source'),
-            'carbon_sinks': request.data.get('carbon_sinks'),
-            'impact_plan': request.data.get('impact_plan'),
-            'impact': request.data.get('impact'),
-            'bibliographic_sources': request.data.get('bibliographic_sources'),
-            'is_international': request.data.get('is_international'),
-            'international_participation': request.data.get('international_participation'),
-            'sustainability': request.data.get('sustainability'),
-            'user': request.data.get('user'),
-            'registration_type': request.data.get('registration_type'),
-            'institution': request.data.get('institution'),
-            'contact': request.data.get('contact'),
-            'status': request.data.get('status'),
-            'progress_indicator': request.data.get('progress_indicator'),
-            'finance': request.data.get('finance'),
-            'ingei_compliance': request.data.get('ingei_compliance'),
-            'geographic_scale': request.data.get('geographic_scale'),
-            'location': request.data.get('location')
+        contact_data = {
+            'full_name': request.data.get('contact').get('full_name'),
+            'job_title': request.data.get('contact').get('job_title'),
+            'email': request.data.get('contact').get('email'),
+            'phone': request.data.get('contact').get('phone'),
         }
-        serializer = MitigationSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        contact_serializer = ContactSerializer(data=contact_data)
+        if contact_serializer.is_valid():
+            contact = contact_serializer.save()
+            mitigation_data = {
+                'id': str(uuid.uuid4()),
+                'strategy_name': request.data.get('strategy_name'),
+                'name': request.data.get('name'),
+                'purpose': request.data.get('purpose'),
+                'quantitative_purpose': request.data.get('quantitative_purpose'),
+                'start_date': request.data.get('start_date'),
+                'end_date': request.data.get('end_date'),
+                'gas_inventory': request.data.get('gas_inventory'),
+                'emissions_source': request.data.get('emissions_source'),
+                'carbon_sinks': request.data.get('carbon_sinks'),
+                'impact_plan': request.data.get('impact_plan'),
+                'impact': request.data.get('impact'),
+                'bibliographic_sources': request.data.get('bibliographic_sources'),
+                'is_international': request.data.get('is_international'),
+                'international_participation': request.data.get('international_participation'),
+                'sustainability': request.data.get('sustainability'),
+                'user': request.data.get('user'),
+                'registration_type': request.data.get('registration_type'),
+                'institution': request.data.get('institution'),
+                'contact': contact.id,
+                'status': request.data.get('status'),
+                'progress_indicator': request.data.get('progress_indicator'),
+                'finance': request.data.get('finance'),
+                'ingei_compliance': request.data.get('ingei_compliance'),
+                'geographic_scale': request.data.get('geographic_scale'),
+                'location': request.data.get('location')
+            }
+            mitigation_serializer = MitigationSerializer(data=mitigation_data)
+            if mitigation_serializer.is_valid():
+                mitigation_serializer.save()
+                return Response(mitigation_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(mitigation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
