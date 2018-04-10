@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
-from mitigation_action.serializers import ContactSerializer, MitigationSerializer
+from mitigation_action.serializers import LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
 import uuid
 
 @api_view(['GET'])
@@ -135,9 +135,22 @@ def get_post_mitigations(request):
             'email': request.data.get('contact').get('email'),
             'phone': request.data.get('contact').get('phone'),
         }
+        progress_indicator_data = {
+            'type': request.data.get('progress_indicator').get('type'),
+            'unit': request.data.get('progress_indicator').get('unit'),
+            'start_date': request.data.get('progress_indicator').get('start_date')
+        }
+        location_data = {
+            'geographical_site': request.data.get('location').get('geographical_site'),
+            'is_gis_annexed': request.data.get('location').get('is_gis_annexed')
+        }
         contact_serializer = ContactSerializer(data=contact_data)
-        if contact_serializer.is_valid():
+        progress_indicator_serializer = ProgressIndicatorSerializer(data=progress_indicator_data)
+        location_serializer = LocationSerializer(data=location_data)
+        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid():
             contact = contact_serializer.save()
+            progress_indicator = progress_indicator_serializer.save()
+            location = location_serializer.save()
             mitigation_data = {
                 'id': str(uuid.uuid4()),
                 'strategy_name': request.data.get('strategy_name'),
@@ -160,15 +173,15 @@ def get_post_mitigations(request):
                 'institution': request.data.get('institution'),
                 'contact': contact.id,
                 'status': request.data.get('status'),
-                'progress_indicator': request.data.get('progress_indicator'),
+                'progress_indicator': progress_indicator.id,
                 'finance': request.data.get('finance'),
                 'ingei_compliance': request.data.get('ingei_compliance'),
                 'geographic_scale': request.data.get('geographic_scale'),
-                'location': request.data.get('location')
+                'location': location.id
             }
             mitigation_serializer = MitigationSerializer(data=mitigation_data)
             if mitigation_serializer.is_valid():
                 mitigation_serializer.save()
                 return Response(mitigation_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(mitigation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Bad Request', status=status.HTTP_400_BAD_REQUEST)
         
