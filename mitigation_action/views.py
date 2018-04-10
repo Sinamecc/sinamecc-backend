@@ -22,6 +22,12 @@ def get_mitigations_form(request):
                     'type': rt.type
                 } for rt in RegistrationType.objects.all()
             ],
+            'institutions': [
+                {
+                    'id': i.id,
+                    'name': i.name
+                } for i in Institution.objects.all()
+            ],
             'statuses': [
                 {
                     'id': st.id,
