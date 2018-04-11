@@ -6,10 +6,152 @@ from mitigation_action.models import RegistrationType, Institution, Contact, Sta
 from mitigation_action.serializers import LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
 import uuid
 
-@api_view(['GET'])
-def mitigation_action_test_request(request):
+@api_view(['GET', 'DELETE', 'PUT'])
+def get_delete_update_mitigation(request, pk):
+    try:
+        mitigation = Mitigation.objects.get(pk=pk)
+    except Mitigation.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    # get details of a single report_file
     if request.method == 'GET':
-        return Response({'status': 'OK'})
+        content = {
+            'id': mitigation.id,
+            'strategy_name': mitigation.strategy_name,
+            'name': mitigation.name,
+            'purpose': mitigation.purpose,
+            'quantitative_purpose': mitigation.quantitative_purpose,
+            'start_date': mitigation.start_date,
+            'end_date': mitigation.end_date,
+            'gas_inventory': mitigation.gas_inventory,
+            'emissions_source': mitigation.emissions_source,
+            'carbon_sinks': mitigation.carbon_sinks,
+            'impact_plan': mitigation.impact_plan,
+            'impact': mitigation.impact,
+            'bibliographic_sources': mitigation.bibliographic_sources,
+            'is_international': mitigation.is_international,
+            'international_participation': mitigation.international_participation,
+            'sustainability': mitigation.sustainability,
+            'user': {
+                'id': mitigation.user.id,
+                'username': mitigation.user.username,
+                'email': mitigation.user.email
+            },
+            'registration_type': {
+                'id': mitigation.registration_type.id,
+                'type': mitigation.registration_type.type
+            },
+            'institution': {
+                'id': mitigation.institution.id,
+                'name': mitigation.institution.name
+            },
+            'contact': {
+                'id': mitigation.contact.id,
+                'full_name': mitigation.contact.full_name,
+                'job_title': mitigation.contact.job_title,
+                'email': mitigation.contact.email,
+                'phone': mitigation.contact.phone
+            },
+            'status': {
+                'id': mitigation.status.id,
+                'status': mitigation.status.status
+            },
+            'progress_indicator': {
+                'id': mitigation.progress_indicator.id,
+                'type': mitigation.progress_indicator.type,
+                'unit': mitigation.progress_indicator.unit,
+                'start_date': mitigation.progress_indicator.start_date
+            },
+            'finance': {
+                'id': mitigation.finance.id,
+                'name': mitigation.finance.name,
+                'source': mitigation.finance.source
+            },
+            'ingei_compliance': {
+                'id': mitigation.ingei_compliance.id,
+                'name': mitigation.ingei_compliance.name
+            },
+            'geographic_scale': {
+                'id': mitigation.geographic_scale.id,
+                'name': mitigation.geographic_scale.name
+            },
+            'location': {
+                'id': mitigation.location.id,
+                'geographical_site': mitigation.location.geographical_site,
+                'is_gis_annexed': mitigation.location.is_gis_annexed
+            },
+            'created': mitigation.created,
+            'updated': mitigation.updated
+        }
+        return Response(content)
+    # delete a single mitigation
+    elif request.method == 'DELETE':
+        mitigation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # update details of a single report_file
+    elif request.method == 'PUT':
+        contact_id = request.data.get('contact').get('id')
+        progress_indicator_id = request.data.get('progress_indicator').get('id')
+        location_id = request.data.get('location').get('id')
+        contact = Contact.objects.get(pk=contact_id)
+        progress_indicator = ProgressIndicator.objects.get(pk=progress_indicator_id)
+        location = Location.objects.get(pk=location_id)
+        contact_data = {
+            'full_name': request.data.get('contact').get('full_name'),
+            'job_title': request.data.get('contact').get('job_title'),
+            'email': request.data.get('contact').get('email'),
+            'phone': request.data.get('contact').get('phone'),
+        }
+        progress_indicator_data = {
+            'type': request.data.get('progress_indicator').get('type'),
+            'unit': request.data.get('progress_indicator').get('unit'),
+            'start_date': request.data.get('progress_indicator').get('start_date')
+        }
+        location_data = {
+            'geographical_site': request.data.get('location').get('geographical_site'),
+            'is_gis_annexed': request.data.get('location').get('is_gis_annexed')
+        }
+        contact_serializer = ContactSerializer(contact, data=contact_data)
+        progress_indicator_serializer = ProgressIndicatorSerializer(progress_indicator, data=progress_indicator_data)
+        location_serializer = LocationSerializer(location, data=location_data)
+
+        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid():
+            contact_serializer.save()
+            progress_indicator_serializer.save()
+            location_serializer.save()
+            mitigation_data = {
+                'id': str(uuid.uuid4()),
+                'strategy_name': request.data.get('strategy_name'),
+                'name': request.data.get('name'),
+                'purpose': request.data.get('purpose'),
+                'quantitative_purpose': request.data.get('quantitative_purpose'),
+                'start_date': request.data.get('start_date'),
+                'end_date': request.data.get('end_date'),
+                'gas_inventory': request.data.get('gas_inventory'),
+                'emissions_source': request.data.get('emissions_source'),
+                'carbon_sinks': request.data.get('carbon_sinks'),
+                'impact_plan': request.data.get('impact_plan'),
+                'impact': request.data.get('impact'),
+                'bibliographic_sources': request.data.get('bibliographic_sources'),
+                'is_international': request.data.get('is_international'),
+                'international_participation': request.data.get('international_participation'),
+                'sustainability': request.data.get('sustainability'),
+                'user': request.data.get('user'),
+                'registration_type': request.data.get('registration_type'),
+                'institution': request.data.get('institution'),
+                'contact': contact_id,
+                'status': request.data.get('status'),
+                'progress_indicator': progress_indicator_id,
+                'finance': request.data.get('finance'),
+                'ingei_compliance': request.data.get('ingei_compliance'),
+                'geographic_scale': request.data.get('geographic_scale'),
+                'location': location_id
+            }
+            mitigation_serializer = MitigationSerializer(mitigation, data=mitigation_data)
+            if mitigation_serializer.is_valid():
+                mitigation_serializer.save()
+                return Response(mitigation_serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response('Bad Request', status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_mitigations_form(request):
