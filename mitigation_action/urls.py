@@ -3,7 +3,7 @@ from mitigation_action import views
 
 urlpatterns = [
     url(
-        r'^api/v1/mitigation/(?P<pk>[0-9a-f-]+)$',
+        r'^api/v1/mitigations/(?P<pk>[0-9a-f-]+)$',
         views.get_delete_update_mitigation,
         name='get_delete_update_mitigation'
     ),
