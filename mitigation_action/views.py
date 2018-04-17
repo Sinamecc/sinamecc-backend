@@ -97,19 +97,19 @@ def get_delete_update_mitigation(request, pk):
         progress_indicator = ProgressIndicator.objects.get(pk=progress_indicator_id)
         location = Location.objects.get(pk=location_id)
         contact_data = {
-            'full_name': request.data.get('contact').get('full_name'),
-            'job_title': request.data.get('contact').get('job_title'),
-            'email': request.data.get('contact').get('email'),
-            'phone': request.data.get('contact').get('phone'),
+            'full_name': request.data.get('contact[full_name]'),
+            'job_title': request.data.get('contact[job_title]'),
+            'email': request.data.get('contact[email]'),
+            'phone': request.data.get('contact[phone]'),
         }
         progress_indicator_data = {
-            'type': request.data.get('progress_indicator').get('type'),
-            'unit': request.data.get('progress_indicator').get('unit'),
-            'start_date': request.data.get('progress_indicator').get('start_date')
+            'type': request.data.get('progress_indicator[type]'),
+            'unit': request.data.get('progress_indicator[unit]'),
+            'start_date': request.data.get('progress_indicator[start_date]')
         }
         location_data = {
-            'geographical_site': request.data.get('location').get('geographical_site'),
-            'is_gis_annexed': request.data.get('location').get('is_gis_annexed')
+            'geographical_site': request.data.get('location[geographical_site]'),
+            'is_gis_annexed': request.data.get('location[is_gis_annexed]')
         }
         contact_serializer = ContactSerializer(contact, data=contact_data)
         progress_indicator_serializer = ProgressIndicatorSerializer(progress_indicator, data=progress_indicator_data)
@@ -278,19 +278,19 @@ def get_post_mitigations(request):
     # insert a new record for a mitigation
     elif request.method == 'POST':
         contact_data = {
-            'full_name': request.data.get('contact').get('full_name'),
-            'job_title': request.data.get('contact').get('job_title'),
-            'email': request.data.get('contact').get('email'),
-            'phone': request.data.get('contact').get('phone'),
+            'full_name': request.data.get('contact[full_name]'),
+            'job_title': request.data.get('contact[job_title]'),
+            'email': request.data.get('contact[email]'),
+            'phone': request.data.get('contact[phone]'),
         }
         progress_indicator_data = {
-            'type': request.data.get('progress_indicator').get('type'),
-            'unit': request.data.get('progress_indicator').get('unit'),
-            'start_date': request.data.get('progress_indicator').get('start_date')
+            'type': request.data.get('progress_indicator[type]'),
+            'unit': request.data.get('progress_indicator[unit]'),
+            'start_date': request.data.get('progress_indicator[start_date]')
         }
         location_data = {
-            'geographical_site': request.data.get('location').get('geographical_site'),
-            'is_gis_annexed': request.data.get('location').get('is_gis_annexed')
+            'geographical_site': request.data.get('location[geographical_site]'),
+            'is_gis_annexed': request.data.get('location[is_gis_annexed]')
         }
         contact_serializer = ContactSerializer(data=contact_data)
         progress_indicator_serializer = ProgressIndicatorSerializer(data=progress_indicator_data)
