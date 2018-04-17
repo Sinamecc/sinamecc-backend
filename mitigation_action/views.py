@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
-from mitigation_action.serializers import LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
+from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
 import uuid
 
 @api_view(['GET', 'DELETE', 'PUT'])
@@ -90,12 +90,14 @@ def get_delete_update_mitigation(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     # update details of a single report_file
     elif request.method == 'PUT':
-        contact_id = request.data.get('contact').get('id')
-        progress_indicator_id = request.data.get('progress_indicator').get('id')
-        location_id = request.data.get('location').get('id')
+        contact_id = request.data.get('contact[id]')
+        progress_indicator_id = request.data.get('progress_indicator[id]')
+        location_id = request.data.get('location[id]')
+        finance_id = request.data.get('finance[id]')
         contact = Contact.objects.get(pk=contact_id)
         progress_indicator = ProgressIndicator.objects.get(pk=progress_indicator_id)
         location = Location.objects.get(pk=location_id)
+        finance = Finance.objects.get(pk=finance_id)
         contact_data = {
             'full_name': request.data.get('contact[full_name]'),
             'job_title': request.data.get('contact[job_title]'),
@@ -111,14 +113,20 @@ def get_delete_update_mitigation(request, pk):
             'geographical_site': request.data.get('location[geographical_site]'),
             'is_gis_annexed': request.data.get('location[is_gis_annexed]')
         }
+        finance_data = {
+            'name': request.data.get('finance[name]'),
+            'source': request.data.get('finance[source]'),
+        }
         contact_serializer = ContactSerializer(contact, data=contact_data)
         progress_indicator_serializer = ProgressIndicatorSerializer(progress_indicator, data=progress_indicator_data)
         location_serializer = LocationSerializer(location, data=location_data)
+        finance_serializer = FinanceSerializer(finance, data=finance_data)
 
-        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid():
+        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid() and finance_serializer.is_valid():
             contact_serializer.save()
             progress_indicator_serializer.save()
             location_serializer.save()
+            finance_serializer.save()
             mitigation_data = {
                 'id': str(uuid.uuid4()),
                 'strategy_name': request.data.get('strategy_name'),
@@ -142,7 +150,7 @@ def get_delete_update_mitigation(request, pk):
                 'contact': contact_id,
                 'status': request.data.get('status'),
                 'progress_indicator': progress_indicator_id,
-                'finance': request.data.get('finance'),
+                'finance': finance_id,
                 'ingei_compliance': request.data.get('ingei_compliance'),
                 'geographic_scale': request.data.get('geographic_scale'),
                 'location': location_id
@@ -292,13 +300,19 @@ def get_post_mitigations(request):
             'geographical_site': request.data.get('location[geographical_site]'),
             'is_gis_annexed': request.data.get('location[is_gis_annexed]')
         }
+        finance_data = {
+            'name': request.data.get('finance[name]'),
+            'source': request.data.get('finance[source]'),
+        }
         contact_serializer = ContactSerializer(data=contact_data)
         progress_indicator_serializer = ProgressIndicatorSerializer(data=progress_indicator_data)
         location_serializer = LocationSerializer(data=location_data)
-        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid():
+        finance_serializer = FinanceSerializer(data=finance_data)
+        if contact_serializer.is_valid() and progress_indicator_serializer.is_valid() and location_serializer.is_valid() and finance_serializer.is_valid():
             contact = contact_serializer.save()
             progress_indicator = progress_indicator_serializer.save()
             location = location_serializer.save()
+            finance = finance_serializer.save()
             mitigation_data = {
                 'id': str(uuid.uuid4()),
                 'strategy_name': request.data.get('strategy_name'),
@@ -322,7 +336,7 @@ def get_post_mitigations(request):
                 'contact': contact.id,
                 'status': request.data.get('status'),
                 'progress_indicator': progress_indicator.id,
-                'finance': request.data.get('finance'),
+                'finance': finance.id,
                 'ingei_compliance': request.data.get('ingei_compliance'),
                 'geographic_scale': request.data.get('geographic_scale'),
                 'location': location.id
