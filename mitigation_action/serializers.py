@@ -24,7 +24,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class ProgressIndicatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgressIndicator
-        fields = ('type', 'unit', 'start_date')
+        fields = ('name', 'type', 'unit', 'start_date')
 
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:

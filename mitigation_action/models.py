@@ -53,6 +53,7 @@ class Status(models.Model):
         return smart_unicode(self.status)
 
 class ProgressIndicator(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
     type = models.CharField(max_length=100, blank=False, null=False)
     unit = models.CharField(max_length=100, blank=False, null=False)
     start_date = models.DateField(null=False)

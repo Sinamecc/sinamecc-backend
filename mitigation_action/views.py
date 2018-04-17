@@ -105,6 +105,7 @@ def get_delete_update_mitigation(request, pk):
             'phone': request.data.get('contact[phone]'),
         }
         progress_indicator_data = {
+            'name': request.data.get('progress_indicator[name]'),
             'type': request.data.get('progress_indicator[type]'),
             'unit': request.data.get('progress_indicator[unit]'),
             'start_date': request.data.get('progress_indicator[start_date]')
@@ -256,6 +257,7 @@ def get_post_mitigations(request):
                 },
                 'progress_indicator': {
                     'id': m.progress_indicator.id,
+                    'name': m.progress_indicator.name,
                     'type': m.progress_indicator.type,
                     'unit': m.progress_indicator.unit,
                     'start_date': m.progress_indicator.start_date
@@ -292,6 +294,7 @@ def get_post_mitigations(request):
             'phone': request.data.get('contact[phone]'),
         }
         progress_indicator_data = {
+            'name': request.data.get('progress_indicator[name]'),
             'type': request.data.get('progress_indicator[type]'),
             'unit': request.data.get('progress_indicator[unit]'),
             'start_date': request.data.get('progress_indicator[start_date]')
