@@ -67,10 +67,12 @@ def get_delete_update_mitigation(request, pk):
                 'name': mitigation.finance.name,
                 'source': mitigation.finance.source
             },
-            'ingei_compliance': {
-                'id': mitigation.ingei_compliance.id,
-                'name': mitigation.ingei_compliance.name
-            },
+            'ingei_compliances': [
+                {
+                   'id': ingei.id,
+                   'name': ingei.name
+                } for ingei in mitigation.ingei_compliances
+            ],
             'geographic_scale': {
                 'id': mitigation.geographic_scale.id,
                 'name': mitigation.geographic_scale.name
@@ -86,6 +88,7 @@ def get_delete_update_mitigation(request, pk):
         return Response(content)
     # delete a single mitigation
     elif request.method == 'DELETE':
+        mitigation.ingei_compliances.clear()
         mitigation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     # update details of a single report_file
@@ -158,7 +161,22 @@ def get_delete_update_mitigation(request, pk):
             }
             mitigation_serializer = MitigationSerializer(mitigation, data=mitigation_data)
             if mitigation_serializer.is_valid():
-                mitigation_serializer.save()
+                mitigation = mitigation_serializer.save()
+                # Clear INGEI associations
+                mitigation.ingei_compliances.clear()
+                # Asign INGEI Compliances
+                ingei_ids_str = request.data.get('ingei_compliances')
+                ingei_ids_array = list(map(int, ingei_ids_str.split(',')))
+                for id in ingei_ids_array:
+                    try:
+                        ingei = IngeiCompliance.objects.get(pk=id)
+                    except IngeiCompliance.DoesNotExist:
+                        error = {
+                            'status': status.HTTP_404_NOT_FOUND,
+                            'error': 'One or More INGEI Compliances not found.'
+                        }
+                        return Response(error)
+                    mitigation.ingei_compliances.add(ingei)
                 return Response(mitigation_serializer.data, status=status.HTTP_204_NO_CONTENT)
         return Response('Bad Request', status=status.HTTP_400_BAD_REQUEST)
 
@@ -267,10 +285,12 @@ def get_post_mitigations(request):
                     'name': m.finance.name,
                     'source': m.finance.source
                 },
-                'ingei_compliance': {
-                    'id': m.ingei_compliance.id,
-                    'name': m.ingei_compliance.name
-                },
+                'ingei_compliances': [
+                    {
+                    'id': ingei.id,
+                    'name': ingei.name
+                    } for ingei in m.ingei_compliances
+                ],
                 'geographic_scale': {
                     'id': m.geographic_scale.id,
                     'name': m.geographic_scale.name
@@ -340,13 +360,25 @@ def get_post_mitigations(request):
                 'status': request.data.get('status'),
                 'progress_indicator': progress_indicator.id,
                 'finance': finance.id,
-                'ingei_compliance': request.data.get('ingei_compliance'),
                 'geographic_scale': request.data.get('geographic_scale'),
                 'location': location.id
             }
             mitigation_serializer = MitigationSerializer(data=mitigation_data)
             if mitigation_serializer.is_valid():
-                mitigation_serializer.save()
+                mitigation = mitigation_serializer.save()
+                # Asign INGEI Compliances
+                ingei_ids_str = request.data.get('ingei_compliances')
+                ingei_ids_array = list(map(int, ingei_ids_str.split(',')))
+                for id in ingei_ids_array:
+                    try:
+                        ingei = IngeiCompliance.objects.get(pk=id)
+                    except IngeiCompliance.DoesNotExist:
+                        error = {
+                            'status': status.HTTP_404_NOT_FOUND,
+                            'error': 'One or More INGEI Compliances not found.'
+                        }
+                        return Response(error)
+                    mitigation.ingei_compliances.add(ingei)   
                 return Response(mitigation_serializer.data, status=status.HTTP_201_CREATED)
         return Response('Bad Request', status=status.HTTP_400_BAD_REQUEST)
         

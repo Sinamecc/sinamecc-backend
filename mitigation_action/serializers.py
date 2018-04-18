@@ -73,7 +73,6 @@ class MitigationSerializer(serializers.ModelSerializer):
             'status', 
             'progress_indicator', 
             'finance', 
-            'ingei_compliance', 
             'geographic_scale', 
             'location',
             'created',

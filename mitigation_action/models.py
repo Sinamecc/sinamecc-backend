@@ -133,7 +133,7 @@ class Mitigation(models.Model):
     status = models.ForeignKey(Status, related_name='mitigation_action')
     progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action')
     finance = models.ForeignKey(Finance, related_name='mitigation_action')
-    ingei_compliance = models.ForeignKey(IngeiCompliance, related_name='mitigation_action')
+    ingei_compliances = models.ManyToManyField(IngeiCompliance)
     geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action')
     location = models.ForeignKey(Location, related_name='mitigation_action')
 
