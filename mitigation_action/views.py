@@ -71,7 +71,7 @@ def get_delete_update_mitigation(request, pk):
                 {
                    'id': ingei.id,
                    'name': ingei.name
-                } for ingei in mitigation.ingei_compliances
+                } for ingei in mitigation.ingei_compliances.all()
             ],
             'geographic_scale': {
                 'id': mitigation.geographic_scale.id,
@@ -289,7 +289,7 @@ def get_post_mitigations(request):
                     {
                     'id': ingei.id,
                     'name': ingei.name
-                    } for ingei in m.ingei_compliances
+                    } for ingei in m.ingei_compliances.all()
                 ],
                 'geographic_scale': {
                     'id': m.geographic_scale.id,
