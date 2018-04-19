@@ -164,7 +164,7 @@ def get_delete_update_mitigation(request, pk):
                 mitigation = mitigation_serializer.save()
                 # Clear INGEI associations
                 mitigation.ingei_compliances.clear()
-                # Asign INGEI Compliances
+                # Assign INGEI Compliances
                 ingei_ids_str = request.data.get('ingei_compliances')
                 ingei_ids_array = list(map(int, ingei_ids_str.split(',')))
                 for id in ingei_ids_array:
@@ -366,7 +366,7 @@ def get_post_mitigations(request):
             mitigation_serializer = MitigationSerializer(data=mitigation_data)
             if mitigation_serializer.is_valid():
                 mitigation = mitigation_serializer.save()
-                # Asign INGEI Compliances
+                # Assign INGEI Compliances
                 ingei_ids_str = request.data.get('ingei_compliances')
                 ingei_ids_array = list(map(int, ingei_ids_str.split(',')))
                 for id in ingei_ids_array:
