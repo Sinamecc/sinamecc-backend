@@ -58,6 +58,7 @@ def get_delete_update_mitigation(request, pk):
             },
             'progress_indicator': {
                 'id': mitigation.progress_indicator.id,
+                'name': mitigation.progress_indicator.name,
                 'type': mitigation.progress_indicator.type,
                 'unit': mitigation.progress_indicator.unit,
                 'start_date': mitigation.progress_indicator.start_date
