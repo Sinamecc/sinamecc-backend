@@ -1,7 +1,8 @@
 #!/bin/bash
 username=$SINAMECC_USERNAME
 password=$SINAMECC_PASSWORD
+sinamecc_host=localhost:8000
 
-token=`curl -s -X POST -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" http://localhost:8000/api/v1/token/ | python -mjson.tool | awk -F: '/token/{print $2}'|sed -e 's/\"//g'|tr -d '[:space:]'`
+token=`curl -s -X POST -H "Content-Type: application/json" -d "{\"username\":\"$username\",\"password\":\"$password\"}" http://${sinamecc_host}/api/v1/token/ | python -mjson.tool | awk -F: '/token/{print $2}'|sed -e 's/\"//g'|tr -d '[:space:]'`
 
 echo "JWT $token"
