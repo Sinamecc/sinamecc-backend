@@ -156,9 +156,18 @@ class Mitigation(models.Model):
         return smart_unicode(self.name)
 
 class ChangeLog(models.Model):
+    date = models.DateField(null=False)
     # Foreign Keys
     mitigation_action = models.ForeignKey(Mitigation, related_name='change_log')
     previous_status = models.ForeignKey(ReviewStatus, related_name='change_log_previous')
     current_status = models.ForeignKey(ReviewStatus, related_name='change_log_current')
-    date = models.DateField(null=False)
+    
     user = models.ForeignKey(User, related_name='change_log')
+
+    class Meta:
+        verbose_name = _("ChangeLog")
+        verbose_name_plural = _("ChangeLogs")
+        ordering = ('date',)
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
