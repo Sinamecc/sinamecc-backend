@@ -32,6 +32,7 @@ def get_delete_update_mitigation(request, pk):
             'is_international': mitigation.is_international,
             'international_participation': mitigation.international_participation,
             'sustainability': mitigation.sustainability,
+            'question_ucc': mitigation.question_ucc,
             'user': {
                 'id': mitigation.user.id,
                 'username': mitigation.user.username,
@@ -149,6 +150,7 @@ def get_delete_update_mitigation(request, pk):
                 'is_international': request.data.get('is_international'),
                 'international_participation': request.data.get('international_participation'),
                 'sustainability': request.data.get('sustainability'),
+                'question_ucc': request.data.get('question_ucc'),
                 'user': request.data.get('user'),
                 'registration_type': request.data.get('registration_type'),
                 'institution': request.data.get('institution'),
@@ -250,6 +252,7 @@ def get_post_mitigations(request):
                 'is_international': m.is_international,
                 'international_participation': m.international_participation,
                 'sustainability': m.sustainability,
+                'question_ucc': m.question_ucc,
                 'user': {
                     'id': m.user.id,
                     'username': m.user.username,
@@ -354,6 +357,7 @@ def get_post_mitigations(request):
                 'is_international': request.data.get('is_international'),
                 'international_participation': request.data.get('international_participation'),
                 'sustainability': request.data.get('sustainability'),
+                'question_ucc': request.data.get('question_ucc'),
                 'user': request.data.get('user'),
                 'registration_type': request.data.get('registration_type'),
                 'institution': request.data.get('institution'),
@@ -379,7 +383,6 @@ def get_post_mitigations(request):
                             'error': 'One or More INGEI Compliances not found.'
                         }
                         return Response(error)
-                    mitigation.ingei_compliances.add(ingei)   
+                    mitigation.ingei_compliances.add(ingei)
                 return Response(mitigation_serializer.data, status=status.HTTP_201_CREATED)
         return Response('Bad Request', status=status.HTTP_400_BAD_REQUEST)
-        
