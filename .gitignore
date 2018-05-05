@@ -8,3 +8,5 @@ report_data/__pycache__/
 media/*
 config/media/*
 env_p3/*
+config/*.pyc
+config/settings/*.pyc

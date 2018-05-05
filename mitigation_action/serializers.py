@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation 
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
 
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,30 +50,31 @@ class MitigationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mitigation
         fields = (
-            'id', 
-            'strategy_name', 
-            'name', 
-            'purpose', 
-            'quantitative_purpose', 
-            'start_date', 
-            'end_date', 
-            'gas_inventory', 
-            'emissions_source', 
-            'carbon_sinks', 
-            'impact_plan', 
-            'impact', 
-            'bibliographic_sources', 
-            'is_international', 
-            'international_participation', 
-            'sustainability', 
-            'user', 
-            'registration_type', 
-            'institution', 
-            'contact', 
-            'status', 
-            'progress_indicator', 
-            'finance', 
-            'geographic_scale', 
+            'id',
+            'strategy_name',
+            'name',
+            'purpose',
+            'quantitative_purpose',
+            'start_date',
+            'end_date',
+            'gas_inventory',
+            'emissions_source',
+            'carbon_sinks',
+            'impact_plan',
+            'impact',
+            'bibliographic_sources',
+            'is_international',
+            'international_participation',
+            'sustainability',
+            'question_ucc',
+            'user',
+            'registration_type',
+            'institution',
+            'contact',
+            'status',
+            'progress_indicator',
+            'finance',
+            'geographic_scale',
             'location',
             'created',
             'updated'
