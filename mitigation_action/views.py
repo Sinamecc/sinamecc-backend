@@ -160,7 +160,9 @@ def get_delete_update_mitigation(request, pk):
                 'finance': finance_id,
                 'ingei_compliance': request.data.get('ingei_compliance'),
                 'geographic_scale': request.data.get('geographic_scale'),
-                'location': location_id
+                'location': location_id,
+                'review_count': 0, # TODO: Change to a null = true field and add default to zero.
+                'review_status': 1 # TODO: Create service to determine the status.
             }
             mitigation_serializer = MitigationSerializer(mitigation, data=mitigation_data)
             if mitigation_serializer.is_valid():
