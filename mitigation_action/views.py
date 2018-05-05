@@ -366,7 +366,9 @@ def get_post_mitigations(request):
                 'progress_indicator': progress_indicator.id,
                 'finance': finance.id,
                 'geographic_scale': request.data.get('geographic_scale'),
-                'location': location.id
+                'location': location.id,
+                'review_count': 0, # TODO: Change to a null = true field and add default to zero.
+                'review_status': 1 # TODO: Create service to determine the status.
             }
             mitigation_serializer = MitigationSerializer(data=mitigation_data)
             if mitigation_serializer.is_valid():
