@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'general',
     'report_data',
     'mitigation_action',
+    'mccr',
     'corsheaders'
 ]
 
