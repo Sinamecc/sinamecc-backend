@@ -125,7 +125,6 @@ class Mitigation(models.Model):
     is_international = models.BooleanField(blank=False, null=False)
     international_participation = models.CharField(max_length=100, blank=False, null=False)
     sustainability = models.CharField(max_length=500, blank=False, null=False)
-    review_count = models.IntegerField()
     question_ucc = models.CharField(max_length=500, blank=False, null=True)
 
     # Foreign Keys
@@ -141,6 +140,7 @@ class Mitigation(models.Model):
     location = models.ForeignKey(Location, related_name='mitigation_action')
 
     # Workflow
+    review_count = models.IntegerField(null=True, blank=True, default=0)
     review_status = models.ForeignKey(ReviewStatus, related_name='mitigation_action')
     comments = models.ManyToManyField(Comment)
 

@@ -163,6 +163,20 @@ class MitigationActionService():
         serializer = FinanceSerializer(finance, data=finance_data)
         return serializer
 
+    def get_review_status_id(self, status):
+        if status is 'submitted':
+            return 1
+        elif status is 'in-review':
+            return 2
+        elif status is 'on-change':
+            return 3
+        elif status is 'approved':
+            return 4
+        elif status is 'rejected':
+            return 5
+        else:
+            return False
+
     def get_serialized_mitigation_action(self, request, contact_id, progress_indicator_id, location_id, finance_id):
         mitigation_data = {
             'id': str(uuid.uuid4()),
@@ -191,8 +205,8 @@ class MitigationActionService():
             'finance': finance_id,
             'geographic_scale': request.data.get('geographic_scale'),
             'location': location_id,
-            'review_count': 0, # TODO: Change to a null = true field and add default to zero.
-            'review_status': 1 # TODO: Create service to determine the status.
+            'review_count': 0,
+            'review_status': self.get_review_status_id('submitted')
         }
         serializer = MitigationSerializer(data=mitigation_data)
         return serializer
