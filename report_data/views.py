@@ -25,7 +25,9 @@ def get_delete_update_report_file(request, pk):
     elif request.method == 'PUT':
         if update_report_file(request, report):
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # TODO: fix issue https://github.com/IncoCR/sinamecc-backend/issues/13
+        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "fixme"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_report_file_versions(request, pk):

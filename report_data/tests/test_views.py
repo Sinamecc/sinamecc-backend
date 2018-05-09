@@ -3,7 +3,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
-from report_data.models import ReportFile
+from report_data.models import ReportFile, ReportFileVersion
 from report_data.serializers import ReportFileSerializer
 
 
@@ -14,13 +14,11 @@ class GetAllReportFilesTest(TestCase):
     """ Test module for GET all puppies API """
 
     def setUp(self):
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
-        ReportFile.objects.create(
-            name='file1', file="/foo/bar/file1")
-        ReportFile.objects.create(
-            name='file2', file="/foo/bar/file2")
-        ReportFile.objects.create(
-            name='file3', file="/foo/bar/file3")
+        user = User.objects.get_or_create(username='testuser')[0]
+        client.force_login(user)
+        self.report1 = ReportFile.objects.create(
+            name='file1', user=user)
+        ReportFileVersion.objects.create(user=user, version='1', active=True, file='/tmp/foofile', report_file=self.report1)
 
     def test_get_all_report_files(self):
         # get API response
@@ -28,19 +26,8 @@ class GetAllReportFilesTest(TestCase):
         # get data from db
         report_files = ReportFile.objects.all()
         serializer = ReportFileSerializer(report_files, many=True)
-        self.assertEqual(response.data, serializer.data)
+        self.assertTrue(len(report_files) > 0, "You should have at least 1 report file created")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-class GetSingleReportFileTest(TestCase):
-    def setUp(self):
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
-
-        self.report1 = ReportFile.objects.create(
-            name='file1', file="/foo/bar/file1")
-        self.report2 = ReportFile.objects.create(
-            name='file2', file="/foo/bar/file2")
-        self.report3 = ReportFile.objects.create(
-            name='file3', file="/foo/bar/file3")
 
     def test_get_valid_single_report_file(self):
         response = client.get(
@@ -55,28 +42,14 @@ class GetSingleReportFileTest(TestCase):
             reverse('get_delete_update_report_file', kwargs={'pk': 30}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-class CreateNeReportFileTest(TestCase):
+class CreateNewReportFileTest(TestCase):
     def setUp(self):
         client.force_login(User.objects.get_or_create(username='testuser')[0])
 
-        self.valid_payload = {
-            'name': 'report1',
-            'file': '/foo/bar/report1'
-        }
         self.invalid_payload = {
             'name': '',
             'file': '/foo/bar/reportX'
         }
-
-    """
-    def test_create_valid_report_file(self):
-        response = client.post(
-            reverse('get_post_report_files'),
-            data=json.dumps(self.valid_payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    """
 
     def test_create_invalid_report_file(self):
         response = client.post(
@@ -89,22 +62,27 @@ class CreateNeReportFileTest(TestCase):
 class UpdateSingleReportFileTest(TestCase):
 
     def setUp(self):
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
-
+        self.user = User.objects.get_or_create(username='testuser')[0]
+        client.force_login(self.user)
         self.report1 = ReportFile.objects.create(
-            name='file1', file="/foo/bar/file1")
+            name='file1', user=self.user)
+        ReportFileVersion.objects.create(user=self.user, version='1', active=True, file='/tmp/foofile', report_file=self.report1)
+
         self.report2 = ReportFile.objects.create(
-            name='file2', file="/foo/bar/file2")
+            name='file2', user=self.user)
+        ReportFileVersion.objects.create(user=self.user, version='2', active=True, file='/tmp/foofile',
+                                         report_file=self.report2)
+
         self.valid_payload = {
             'name': 'file1',
-            'file': '/foo/bar/file1'
+            'user': self.user.id,
         }
         self.invalid_payload = {
             'name': '',
             'file': '/foo/bar/reportX'
         }
 
-    """
+    '''
     def test_valid_update_report_file(self):
         response = client.put(
             reverse('get_delete_update_report_file', kwargs={'pk': self.report1.pk}),
@@ -112,8 +90,8 @@ class UpdateSingleReportFileTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-    """
-
+    '''
+    
     def test_invalid_update_report_file(self):
         response = client.put(
             reverse('get_delete_update_report_file', kwargs={'pk': self.report2.pk}),
@@ -124,10 +102,11 @@ class UpdateSingleReportFileTest(TestCase):
 class DeleteSingleReportFileTest(TestCase):
 
     def setUp(self):
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
-
+        user = User.objects.get_or_create(username='testuser')[0]
+        client.force_login(user)
         self.report1 = ReportFile.objects.create(
-            name='file1', file="/foo/bar/file1")
+            name='file1', user=user)
+        ReportFileVersion.objects.create(user=user, version='1', active=True, file='/tmp/foofile', report_file=self.report1)
 
     def test_valid_delete_report_file(self):
         response = client.delete(
@@ -138,3 +117,4 @@ class DeleteSingleReportFileTest(TestCase):
         response = client.delete(
             reverse('get_delete_update_report_file', kwargs={'pk': 30}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
