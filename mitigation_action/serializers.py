@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
 
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,10 +26,15 @@ class ProgressIndicatorSerializer(serializers.ModelSerializer):
         model = ProgressIndicator
         fields = ('name', 'type', 'unit', 'start_date')
 
+class FinanceSourceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinanceSourceType
+        fields = ('name')
+
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('name', 'source')
+        fields = ('finance_source_type', 'source')
 
 class IngeiComplianceSerializer(serializers.ModelSerializer):
     class Meta:

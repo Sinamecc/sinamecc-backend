@@ -66,8 +66,18 @@ class ProgressIndicator(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
-class Finance(models.Model):
+class FinanceSourceType(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("FinanceSourceType")
+        verbose_name_plural = _("FinanceSourceTypes")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class Finance(models.Model):
+    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='finance', blank=False, null=False)
     source = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:

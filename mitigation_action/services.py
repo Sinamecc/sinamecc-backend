@@ -1,4 +1,4 @@
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
 from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
 from rest_framework.parsers import JSONParser
 import datetime
@@ -64,7 +64,10 @@ class MitigationActionService():
                     },
                     'finance': {
                         'id': m.finance.id,
-                        'name': m.finance.name,
+                        'finance_source_type': {
+                            'id': m.finance.finance_source_type.id,
+                            'name': m.finance.finance_source_type.name
+                        },
                         'source': m.finance.source
                     },
                     'ingei_compliances': [
@@ -149,7 +152,7 @@ class MitigationActionService():
 
     def get_serialized_finance(self, request):
         finance_data = {
-            'name': request.data.get('finance[name]'),
+            'finance_source_type': request.data.get('finance[finance_source_type]'),
             'source': request.data.get('finance[source]'),
         }
         serializer = FinanceSerializer(data=finance_data)
@@ -157,7 +160,7 @@ class MitigationActionService():
 
     def get_serialized_finance_for_existing(self, request, finance):
         finance_data = {
-            'name': request.data.get('finance[name]'),
+            'finance_source_type': request.data.get('finance[finance_source_type]'),
             'source': request.data.get('finance[source]'),
         }
         serializer = FinanceSerializer(finance, data=finance_data)
@@ -348,7 +351,10 @@ class MitigationActionService():
                 },
                 'finance': {
                     'id': mitigation.finance.id,
-                    'name': mitigation.finance.name,
+                    'finance_source_type': {
+                        'id': mitigation.finance.finance_source_type.id,
+                        'name': mitigation.finance.finance_source_type.name
+                    },
                     'source': mitigation.finance.source
                 },
                 'ingei_compliances': [
@@ -446,12 +452,11 @@ class MitigationActionService():
                     'status': st.status
                 } for st in Status.objects.all()
             ]
-            finances_list = [
+            finance_source_types_list = [
                 {
-                    'id': f.id,
-                    'name': f.name,
-                    'source': f.source
-                } for f in Finance.objects.all()
+                    'id': fst.id,
+                    'name': fst.name
+                } for fst in FinanceSourceType.objects.all()
             ]
             ingei_compliances_list = [
                 {
@@ -469,7 +474,7 @@ class MitigationActionService():
               'registration_types': registration_types_list,
               'institutions': institutions_list,
               'statuses': statuses_list,
-              'finances': finances_list,
+              'finance_source_types': finance_source_types_list,
               'ingei_compliances': ingei_compliances_list,
               'geographic_scales': geographic_scales_list
             }
