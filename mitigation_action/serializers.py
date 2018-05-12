@@ -76,6 +76,8 @@ class MitigationSerializer(serializers.ModelSerializer):
             'finance',
             'geographic_scale',
             'location',
+            'review_count',
+            'review_status',
             'created',
             'updated'
         )

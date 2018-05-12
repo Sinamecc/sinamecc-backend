@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from workflow.models import Comment, ReviewStatus
 User =  get_user_model()
 
 class RegistrationType(models.Model):
@@ -138,6 +139,11 @@ class Mitigation(models.Model):
     geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action')
     location = models.ForeignKey(Location, related_name='mitigation_action')
 
+    # Workflow
+    review_count = models.IntegerField(null=True, blank=True, default=0)
+    review_status = models.ForeignKey(ReviewStatus, related_name='mitigation_action')
+    comments = models.ManyToManyField(Comment)
+
     # Timestamps
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -146,6 +152,23 @@ class Mitigation(models.Model):
         verbose_name = _("MitigationAccess")
         verbose_name_plural = _("MitigationAccesses")
         ordering = ('created',)
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class ChangeLog(models.Model):
+    date = models.DateField(null=False)
+    # Foreign Keys
+    mitigation_action = models.ForeignKey(Mitigation, related_name='change_log')
+    previous_status = models.ForeignKey(ReviewStatus, related_name='change_log_previous')
+    current_status = models.ForeignKey(ReviewStatus, related_name='change_log_current')
+    
+    user = models.ForeignKey(User, related_name='change_log')
+
+    class Meta:
+        verbose_name = _("ChangeLog")
+        verbose_name_plural = _("ChangeLogs")
+        ordering = ('date',)
 
     def __unicode__(self):
         return smart_unicode(self.name)
