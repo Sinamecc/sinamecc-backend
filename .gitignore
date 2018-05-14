@@ -10,3 +10,12 @@ config/media/*
 env_p3/*
 config/*.pyc
 config/settings/*.pyc
+general/*pyc
+general/__pycache__/
+general/migrations/*.pyc
+general/migrations/__pycache__/*.pyc
+mccr/migrations/*.pyc
+mccr/migrations/__pycache__/*.pyc
+mitigation_action/migrations/*.pyc
+report_data/migrations/*.pyc
+report_data/migrations/__pycache__/*.pyc
