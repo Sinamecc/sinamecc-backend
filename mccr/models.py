@@ -36,7 +36,7 @@ class MCCRFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField(blank=False, null=False, upload_to='mccr/%Y%m%d')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    mccr = models.ForeignKey(MCCRRegistry, on_delete=models.CASCADE)
+    mccr = models.ForeignKey(MCCRRegistry, related_name='files', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("MCCRFile")

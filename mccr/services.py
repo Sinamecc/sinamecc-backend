@@ -1,5 +1,5 @@
 from mitigation_action.models import Mitigation
-from mccr.models import MCCRRegistry, MCCRUserType
+from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile
 from mccr.serializers import MCCRRegistrySerializer, MCCRFileSerializer
 from rest_framework.parsers import JSONParser
 import datetime
@@ -79,6 +79,7 @@ class MCCRService():
                     'mitigation': m.mitigation.name,
                     'user_type_id': m.user_type.id,
                     'user_type': m.user_type.name,
+                    'files': MCCRFile.objects.filter(mccr_id=m.id).count()
                 } for m in MCCRRegistry.objects.all()
             ]
             result = (True, m_list)
@@ -129,6 +130,3 @@ class MCCRService():
         except MCCRRegistry.DoesNotExist:
             result = False
         return result
-
-    def add_file(self):
-        pass
