@@ -4,11 +4,15 @@ from mccr.models import MCCRRegistry, MCCRFile
 class MCCRFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCCRFile
-        fields = ('id', 'file', 'user')
+        fields = ('id', 'file', 'user', 'mccr')
 
-class MCCRRegistrySerializer(serializers.ModelSerializer):
+class MCCRRegistrySerializerView(serializers.ModelSerializer):
     files = MCCRFileSerializer(many=True, read_only=True)
-
     class Meta:
         model = MCCRRegistry
         fields = ('id', 'user', 'mitigation', 'user_type', 'status', 'files')
+
+class MCCRRegistrySerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = MCCRRegistry
+        fields = ('id', 'user', 'mitigation', 'user_type', 'status')

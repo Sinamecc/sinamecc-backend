@@ -1,8 +1,7 @@
 from mitigation_action.models import Mitigation
 from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile
-from mccr.serializers import MCCRRegistrySerializer, MCCRFileSerializer
+from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer
 from rest_framework.parsers import JSONParser
-import datetime
 import uuid
 
 
@@ -21,7 +20,7 @@ class MCCRService():
             "mitigation": request.data.get("mitigation"),
             "user_type": request.data.get("user_type")
         }
-        serialized_mccr = MCCRRegistrySerializer(data=d)
+        serialized_mccr = MCCRRegistrySerializerCreate(data=d)
         return serialized_mccr
 
     def get_serialized_mccr_file(self, mccr_id, user_id, file):
@@ -35,7 +34,7 @@ class MCCRService():
 
     def get_serialized_for_existent(self, request, mccr_registry):
         data = JSONParser().parse(request)
-        serialized_mccr = MCCRRegistrySerializer(mccr_registry, data=data)
+        serialized_mccr = MCCRRegistrySerializerCreate(mccr_registry, data=data)
         return serialized_mccr
 
     def get_one(self, str_uuid):
@@ -56,12 +55,12 @@ class MCCRService():
             if new_mccr.id:
                 # TODO: check operation to revert
                 self.serialize_and_save_files(request, new_mccr.id)
-            return (True, MCCRRegistrySerializer(new_mccr).data)
+            return (True, MCCRRegistrySerializerCreate(new_mccr).data)
         return (False, serialized_mccr.errors)
 
     def get(self, id):
         try:
-            serialized_mccr = MCCRRegistrySerializer(self.get_one(id))
+            serialized_mccr = MCCRRegistrySerializerView(self.get_one(id))
             result = (True, serialized_mccr.data)
         except MCCRRegistry.DoesNotExist:
             result = (False, {"error": self.MCCR_ERROR_NOT_EXIST})
@@ -117,7 +116,7 @@ class MCCRService():
         mccr_registry = self.get_one(id)
         serialized_mccr = self.get_serialized_for_existent(request, mccr_registry)
         if serialized_mccr.is_valid():
-            result = (True, MCCRRegistrySerializer(serialized_mccr.save()).data)
+            result = (True, MCCRRegistrySerializerCreate(serialized_mccr.save()).data)
         else:
             result = (False, serialized_mccr.errors)
         return result
