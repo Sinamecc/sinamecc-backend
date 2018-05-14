@@ -5,6 +5,23 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 
+def insert_finance_status_data(apps, schema_editor):
+    # Models
+    FinanceSourceType = apps.get_model('mitigation_action', 'FinanceSourceType')
+
+    # Data
+    finance_source_type_data = [
+        'Por obtener',
+        'Asegurado'
+    ]
+
+    # Clear current data
+    FinanceSourceType.objects.all().delete()
+
+    # Insert seed data
+    for fst in finance_source_type_data:
+        finance_source_type = FinanceSourceType(name=fst)
+        finance_source_type.save()
 
 class Migration(migrations.Migration):
 
@@ -28,10 +45,11 @@ class Migration(migrations.Migration):
             model_name='finance',
             name='name',
         ),
+        migrations.RunPython(insert_finance_status_data),
         migrations.AddField(
             model_name='finance',
             name='finance_source_type',
-            field=models.ForeignKey(default=0, on_delete=django.db.models.deletion.CASCADE, related_name='finance', to='mitigation_action.FinanceSourceType'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='finance', to='mitigation_action.FinanceSourceType'),
             preserve_default=False,
         ),
     ]
