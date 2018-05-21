@@ -152,7 +152,7 @@ class Mitigation(models.Model):
     # Workflow
     review_count = models.IntegerField(null=True, blank=True, default=0)
     review_status = models.ForeignKey(ReviewStatus, related_name='mitigation_action')
-    comments = models.ManyToManyField(Comment)
+    comments = models.ManyToManyField(Comment, blank=True)
 
     # Timestamps
     created = models.DateTimeField(auto_now_add=True)

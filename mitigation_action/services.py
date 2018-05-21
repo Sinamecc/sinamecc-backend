@@ -1,14 +1,21 @@
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
 from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
+from workflow.models import ReviewStatus
 from rest_framework.parsers import JSONParser
 import datetime
 import uuid
+
+from workflow.services import WorkflowService
+workflow_service = WorkflowService()
 
 class MitigationActionService():
     def __init__(self):
         self.MITIGATION_ACTION_DOES_NOT_EXIST = "Mitigation Action does not exist."
         self.MITIGATION_ACTION_ERROR_GET_ALL = "Error retrieving all Mitigation Action records."
         self.INGEI_COMPLIANCE_DOES_NOT_EXIST = "INGEI compliance does not exist."
+        self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
+        self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
+        self.IN_REVIEW_STATUS_ID = 2
 
     def get_all(self):
         try:
@@ -72,8 +79,8 @@ class MitigationActionService():
                     },
                     'ingei_compliances': [
                         {
-                        'id': ingei.id,
-                        'name': ingei.name
+                            'id': ingei.id,
+                            'name': ingei.name
                         } for ingei in m.ingei_compliances.all()
                     ],
                     'geographic_scale': {
@@ -85,6 +92,18 @@ class MitigationActionService():
                         'geographical_site': m.location.geographical_site,
                         'is_gis_annexed': m.location.is_gis_annexed
                     },
+                    # Workflow
+                    'review_status': {
+                        'id': m.review_status.id,
+                        'status': m.review_status.status
+                    },
+                    'review_count': m.review_count,
+                    'comments': [
+                        {
+                            'id': comment.id,
+                            'comment': comment.comment
+                        } for comment in m.comments.all()
+                    ],
                     'created': m.created,
                     'updated': m.updated 
                 } for m in Mitigation.objects.all()
@@ -166,19 +185,11 @@ class MitigationActionService():
         serializer = FinanceSerializer(finance, data=finance_data)
         return serializer
 
-    def get_review_status_id(self, status):
-        if status is 'submitted':
-            return 1
-        elif status is 'in-review':
-            return 2
-        elif status is 'on-change':
-            return 3
-        elif status is 'approved':
-            return 4
-        elif status is 'rejected':
-            return 5
-        else:
-            return False
+    # TODO: Make this function more generic
+    def get_review_count(self, review_status_id, current_count):
+        if review_status_id == self.IN_REVIEW_STATUS_ID:
+            current_count += 1
+        return current_count
 
     def get_serialized_mitigation_action(self, request, contact_id, progress_indicator_id, location_id, finance_id):
         mitigation_data = {
@@ -208,13 +219,14 @@ class MitigationActionService():
             'finance': finance_id,
             'geographic_scale': request.data.get('geographic_scale'),
             'location': location_id,
-            'review_count': 0,
-            'review_status': self.get_review_status_id('submitted')
+            # Workflow
+            'review_count': 0, # By default when creating
+            'review_status': request.data.get('review_status')
         }
         serializer = MitigationSerializer(data=mitigation_data)
         return serializer
 
-    def get_serialized_mitigation_action_for_existing(self, request, mitigation, contact_id, progress_indicator_id, location_id, finance_id):
+    def get_serialized_mitigation_action_for_existing(self, request, mitigation, contact_id, progress_indicator_id, location_id, finance_id, review_count):
         mitigation_data = {
             'id': str(uuid.uuid4()),
             'strategy_name': request.data.get('strategy_name'),
@@ -242,8 +254,8 @@ class MitigationActionService():
             'finance': finance_id,
             'geographic_scale': request.data.get('geographic_scale'),
             'location': location_id,
-            'review_count': 0, # TODO: Change to a null = true field and add default to zero.
-            'review_status': 1 # TODO: Create service to determine the status.
+            'review_count': self.get_review_count(request.data.get('review_status'), review_count),
+            'review_status': request.data.get('review_status')
         }
         serializer = MitigationSerializer(mitigation, data=mitigation_data)
         return serializer
@@ -259,6 +271,13 @@ class MitigationActionService():
             except IngeiCompliance.DoesNotExist:
                 result = (False, self.INGEI_COMPLIANCE_DOES_NOT_EXIST)
         return result
+
+    def assign_comment(self, request, mitigation_action):
+        comment_result_status, comment_result_data = workflow_service.create_comment(request)
+        if comment_result_status:
+            comment = comment_result_data
+            mitigation_action.comments.add(comment)
+        return comment_result_status
 
     def create(self, request):
         errors = []
@@ -372,6 +391,18 @@ class MitigationActionService():
                     'geographical_site': mitigation.location.geographical_site,
                     'is_gis_annexed': mitigation.location.is_gis_annexed
                 },
+                # Workflow
+                'review_status': {
+                    'id': mitigation.review_status.id,
+                    'status': mitigation.review_status.status
+                },
+                'review_count': mitigation.review_count,
+                'comments': [
+                    {
+                        'id': comment.id,
+                        'comment': comment.comment
+                    } for comment in mitigation.comments.all()
+                ],
                 'created': mitigation.created,
                 'updated': mitigation.updated
             }
@@ -410,7 +441,7 @@ class MitigationActionService():
             progress_indicator = serialized_progress_indicator.save()
             location = serialized_location.save()
             finance = serialized_finance.save()
-            serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request, mitigation, contact.id, progress_indicator.id, location.id, finance.id)
+            serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request, mitigation, contact.id, progress_indicator.id, location.id, finance.id, mitigation.review_count)
 
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
@@ -430,6 +461,27 @@ class MitigationActionService():
             errors.append(serialized_location.errors)
             errors.append(serialized_finance.errors)
             result = (False, errors)
+        return result
+
+    def patch(self, id, request):
+        mitigation = self.get_one(id)
+        if (request.data.get('review_status')):
+            patch_data = {
+                'review_status': request.data.get('review_status'),
+                'review_count': self.get_review_count(request.data.get('review_status'), mitigation.review_count)
+            }
+            serialized_mitigation_action = MitigationSerializer(mitigation, data=patch_data, partial=True)
+            if serialized_mitigation_action.is_valid():
+                mitigation_action = serialized_mitigation_action.save()
+                result = (True, MitigationSerializer(mitigation_action).data)
+            if (request.data.get('comment')):
+                comment_status = self.assign_comment(request, mitigation_action)
+                if comment_status:
+                    result = (True, MitigationSerializer(mitigation_action).data)
+                else:
+                    result = (False, self.COMMENT_NOT_ASSIGNED)
+        else:
+            result = (False, self.NO_PATCH_DATA_PROVIDED)
         return result
 
     def get_form_data(self):

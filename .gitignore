@@ -19,3 +19,4 @@ mccr/migrations/__pycache__/*.pyc
 mitigation_action/migrations/*.pyc
 report_data/migrations/*.pyc
 report_data/migrations/__pycache__/*.pyc
+.vscode/

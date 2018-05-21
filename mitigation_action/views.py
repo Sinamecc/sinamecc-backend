@@ -8,14 +8,16 @@ import uuid
 
 service = MitigationActionService()
 
-@api_view(['GET', 'DELETE', 'PUT'])
-def get_delete_update_mitigation(request, pk):
+@api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
+def get_delete_update_patch_mitigation(request, pk):
     if request.method == 'GET':
         result = _get_one(pk)
     elif request.method == 'DELETE':
         result = _delete(pk)
     elif request.method == 'PUT':
         result = _put(pk, request)
+    elif request.method == 'PATCH':
+        result = _patch(pk, request)
     return result
 
 @api_view(['GET'])
@@ -66,6 +68,14 @@ def _delete(id):
 
 def _put(id, request):
     result_status, result_data = service.update(id, request)
+    if result_status:
+        result = Response(result_data)
+    else:
+        result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
+    return result
+
+def _patch(id, request):
+    result_status, result_data = service.patch(id, request)
     if result_status:
         result = Response(result_data)
     else:

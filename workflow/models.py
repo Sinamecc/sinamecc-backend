@@ -10,11 +10,14 @@ from django.contrib.auth import get_user_model
 User =  get_user_model()
 
 class Comment(models.Model):
-    comment = models.CharField(max_length=500, blank=False, null=False)
+    comment = models.CharField(max_length=3000, blank=False, null=False)
 
     class Meta:
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
 
 class ReviewStatus(models.Model):
     status = models.CharField(max_length=100, blank=False, null=False)
@@ -22,3 +25,6 @@ class ReviewStatus(models.Model):
     class Meta:
         verbose_name = _("ReviewStatus")
         verbose_name_plural = _("ReviewStatuses")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)

@@ -4,8 +4,8 @@ from mitigation_action import views
 urlpatterns = [
     url(
         r'^api/v1/mitigations/(?P<pk>[0-9a-f-]+)$',
-        views.get_delete_update_mitigation,
-        name='get_delete_update_mitigation'
+        views.get_delete_update_patch_mitigation,
+        name='get_delete_update__patch_mitigation'
     ),
     url(
         r'^api/v1/mitigations/form',

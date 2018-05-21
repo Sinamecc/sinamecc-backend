@@ -83,6 +83,7 @@ class MitigationSerializer(serializers.ModelSerializer):
             'location',
             'review_count',
             'review_status',
+            'comments',
             'created',
             'updated'
         )

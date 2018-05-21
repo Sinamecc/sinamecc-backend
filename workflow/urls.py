@@ -1,4 +1,10 @@
 from django.conf.urls import url
-from report_data import views
+from workflow import views
 
-urlpatterns = []
+urlpatterns = [
+    url(
+        r'^api/v1/workflow/status',
+        views.get_review_status,
+        name='get_review_status'
+    )
+]
