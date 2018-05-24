@@ -6,6 +6,19 @@ class WorkflowService():
     def __init__(self):
         self.COMMENT_DOES_NOT_EXIST = "Comment does not exist."
         self.REVIEW_STATUS_DOES_NOT_EXIST = "Review status does not exist."
+        self.SUBMITTED_STATUS = 'submitted'
+        self.IN_REVIEW_STATUS = 'in-review'
+        self.ON_CHANGE_STATUS = 'on-change'
+        self.APPROVED_STATUS = 'approved'
+        self.REJECTED_STATUS = 'rejected'
+
+    def get_review_status_id(self, review_status):
+        try:
+            rs_id = ReviewStatus.objects.filter(status=review_status)[0].id
+            result = (True, rs_id)
+        except:
+            result = (False, self.REVIEW_STATUS_DOES_NOT_EXIST)
+        return result
 
     def get_serialized_comment(self, request):
         comment_data = {

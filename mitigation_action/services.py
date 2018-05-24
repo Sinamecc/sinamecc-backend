@@ -15,7 +15,6 @@ class MitigationActionService():
         self.INGEI_COMPLIANCE_DOES_NOT_EXIST = "INGEI compliance does not exist."
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
-        self.IN_REVIEW_STATUS_ID = 2
 
     def get_all(self):
         try:
@@ -186,9 +185,13 @@ class MitigationActionService():
         serializer = FinanceSerializer(finance, data=finance_data)
         return serializer
 
-    # TODO: Make this function more generic
+    def get_review_status_id(self, status):
+        review_status_id_result, review_status_id_data = workflow_service.get_review_status_id(status)
+        return review_status_id_data
+
     def get_review_count(self, review_status_id, current_count):
-        if review_status_id == self.IN_REVIEW_STATUS_ID:
+        in_review_status_id = self.get_review_status_id(workflow_service.IN_REVIEW_STATUS)
+        if review_status_id == in_review_status_id:
             current_count += 1
         return current_count
 
@@ -223,7 +226,7 @@ class MitigationActionService():
             'location': location_id,
             # Workflow
             'review_count': 0, # By default when creating
-            'review_status': request.data.get('review_status')
+            'review_status': self.get_review_status_id(workflow_service.SUBMITTED_STATUS)
         }
         serializer = MitigationSerializer(data=mitigation_data)
         return serializer
@@ -257,8 +260,8 @@ class MitigationActionService():
             'finance': finance_id,
             'geographic_scale': request.data.get('geographic_scale'),
             'location': location_id,
-            'review_count': self.get_review_count(request.data.get('review_status'), review_count),
-            'review_status': request.data.get('review_status')
+            'review_count': mitigation.review_count,
+            'review_status': mitigation.review_status.id
         }
         serializer = MitigationSerializer(mitigation, data=mitigation_data)
         return serializer
