@@ -136,6 +136,7 @@ class Mitigation(models.Model):
     international_participation = models.CharField(max_length=100, blank=False, null=False)
     sustainability = models.CharField(max_length=500, blank=False, null=False)
     question_ucc = models.CharField(max_length=500, blank=False, null=True)
+    question_ovv = models.CharField(max_length=500, blank=False, null=False)
 
     # Foreign Keys
     user = models.ForeignKey(User, related_name='mitigation_action')

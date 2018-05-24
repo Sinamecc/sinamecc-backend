@@ -38,6 +38,7 @@ class MitigationActionService():
                     'international_participation': m.international_participation,
                     'sustainability': m.sustainability,
                     'question_ucc': m.question_ucc,
+                    'question_ovv': m.question_ovv,
                     'user': {
                         'id': m.user.id,
                         'username': m.user.username,
@@ -210,6 +211,7 @@ class MitigationActionService():
             'international_participation': request.data.get('international_participation'),
             'sustainability': request.data.get('sustainability'),
             'question_ucc': request.data.get('question_ucc'),
+            'question_ovv': request.data.get('question_ovv'),
             'user': request.data.get('user'),
             'registration_type': request.data.get('registration_type'),
             'institution': request.data.get('institution'),
@@ -245,6 +247,7 @@ class MitigationActionService():
             'international_participation': request.data.get('international_participation'),
             'sustainability': request.data.get('sustainability'),
             'question_ucc': request.data.get('question_ucc'),
+            'question_ovv': request.data.get('question_ovv'),
             'user': request.data.get('user'),
             'registration_type': request.data.get('registration_type'),
             'institution': request.data.get('institution'),
@@ -337,6 +340,7 @@ class MitigationActionService():
                 'international_participation': mitigation.international_participation,
                 'sustainability': mitigation.sustainability,
                 'question_ucc': mitigation.question_ucc,
+                'question_ovv': mitigation.question_ovv,
                 'user': {
                     'id': mitigation.user.id,
                     'username': mitigation.user.username,

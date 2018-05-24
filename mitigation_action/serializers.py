@@ -72,6 +72,7 @@ class MitigationSerializer(serializers.ModelSerializer):
             'international_participation',
             'sustainability',
             'question_ucc',
+            'question_ovv',
             'user',
             'registration_type',
             'institution',
