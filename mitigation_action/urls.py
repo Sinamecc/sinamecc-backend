@@ -8,6 +8,11 @@ urlpatterns = [
         name='get_delete_update__patch_mitigation'
     ),
     url(
+        r'^api/v1/mitigations/changelog/(?P<pk>[0-9a-f-]+)$',
+        views.get_mitigation_change_log,
+        name='get_mitigation_change_log'
+    ),
+    url(
         r'^api/v1/mitigations/form',
         views.get_mitigations_form,
         name='get_mitigations_form'

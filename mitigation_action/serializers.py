@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, ChangeLog, Mitigation
 
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,6 +50,11 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ('geographical_site', 'is_gis_annexed')
+
+class ChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChangeLog
+        fields = ('mitigation_action', 'previous_status', 'current_status', 'user')
 
 class MitigationSerializer(serializers.ModelSerializer):
     class Meta:

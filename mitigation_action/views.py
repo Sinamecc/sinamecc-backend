@@ -20,6 +20,12 @@ def get_delete_update_patch_mitigation(request, pk):
         result = _patch(pk, request)
     return result
 
+@api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
+def get_mitigation_change_log(request, pk):
+    if request.method == 'GET':
+        result = _get_change_log(pk)
+    return result
+
 @api_view(['GET'])
 def get_mitigations_form(request):
     if request.method == 'GET':
@@ -54,6 +60,14 @@ def _post(request):
 def _get_one(id):
     result_status, result_data = service.get(id)
     if result_status:
+        result = Response(result_data)
+    else:
+        result = Response(result_data, status=status.HTTP_404_NOT_FOUND)
+    return result
+
+def _get_change_log(id):
+    result_status, result_data = service.get_change_log(id)
+    if result_data:
         result = Response(result_data)
     else:
         result = Response(result_data, status=status.HTTP_404_NOT_FOUND)

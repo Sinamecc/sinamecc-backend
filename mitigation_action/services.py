@@ -1,5 +1,5 @@
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation
-from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog
+from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
 from workflow.models import ReviewStatus
 from rest_framework.parsers import JSONParser
 import datetime
@@ -15,6 +15,7 @@ class MitigationActionService():
         self.INGEI_COMPLIANCE_DOES_NOT_EXIST = "INGEI compliance does not exist."
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
+        self.CHANGE_LOG_DOES_NOT_EXIST = "Mitigation Action change log does not exist."
 
     def get_all(self):
         try:
@@ -285,6 +286,42 @@ class MitigationActionService():
             mitigation_action.comments.add(comment)
         return comment_result_status
 
+    def get_serialized_change_log(self, mitigation_id, previous_status_id, current_status_id, user):
+        change_log_data = {
+            'mitigation_action': mitigation_id,
+            'previous_status': previous_status_id,
+            'current_status': current_status_id,
+            'user': user
+        }
+        serializer = ChangeLogSerializer(data=change_log_data)
+        return serializer
+
+    def create_change_log_entry(self, mitigation, previous_status, current_status, user):
+        serialized_change_log = self.get_serialized_change_log(mitigation.id, previous_status, current_status, user)
+        if serialized_change_log.is_valid():
+            serialized_change_log.save()
+            result = (True, serialized_change_log.data)
+        else:
+            result = (False, serialized_change_log.errors)
+        return result
+
+    def get_change_log(self, str_uuid):
+        try:
+            f_uuid = uuid.UUID(str_uuid)
+            change_log_content = [
+                {
+                    'date': log.date,
+                    'mitigation_action': log.mitigation_action.id,
+                    'previous_status': log.previous_status.id if log.previous_status else None,
+                    'current_status': log.current_status.id,
+                    'user': log.user.id
+                } for log in ChangeLog.objects.filter(mitigation_action=str_uuid)
+            ]
+            result = (True, change_log_content)
+        except ChangeLog.DoesNotExist:
+            result = (False, self.CHANGE_LOG_DOES_NOT_EXIST)
+        return result
+
     def create(self, request):
         errors = []
         serialized_contact = self.get_serialized_contact(request)
@@ -300,7 +337,9 @@ class MitigationActionService():
             serialized_mitigation_action = self.get_serialized_mitigation_action(request, contact.id, progress_indicator.id, location.id, finance.id)
 
             if serialized_mitigation_action.is_valid():
+                mitigation_previous_status = None
                 mitigation_action = serialized_mitigation_action.save()
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, self.get_review_status_id(workflow_service.SUBMITTED_STATUS), request.data.get('user'))
                 get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
                 if get_ingei_result:
                     result = (True, MitigationSerializer(mitigation_action).data)
@@ -479,7 +518,9 @@ class MitigationActionService():
             }
             serialized_mitigation_action = MitigationSerializer(mitigation, data=patch_data, partial=True)
             if serialized_mitigation_action.is_valid():
+                mitigation_previous_status = mitigation.review_status.id
                 mitigation_action = serialized_mitigation_action.save()
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.review_status.id, request.data.get('user'))
                 result = (True, MitigationSerializer(mitigation_action).data)
             if (request.data.get('comment')):
                 comment_status = self.assign_comment(request, mitigation_action)

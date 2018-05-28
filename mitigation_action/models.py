@@ -168,10 +168,10 @@ class Mitigation(models.Model):
         return smart_unicode(self.name)
 
 class ChangeLog(models.Model):
-    date = models.DateField(null=False)
+    date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
     mitigation_action = models.ForeignKey(Mitigation, related_name='change_log')
-    previous_status = models.ForeignKey(ReviewStatus, related_name='change_log_previous')
+    previous_status = models.ForeignKey(ReviewStatus, null=True, related_name='change_log_previous')
     current_status = models.ForeignKey(ReviewStatus, related_name='change_log_current')
     
     user = models.ForeignKey(User, related_name='change_log')
