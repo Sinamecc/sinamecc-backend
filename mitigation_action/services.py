@@ -305,21 +305,38 @@ class MitigationActionService():
             result = (False, serialized_change_log.errors)
         return result
 
-    def get_change_log(self, str_uuid):
+    def getReviewStatus(self, id):
+        return ReviewStatus.objects.get(pk=id)
+
+    def get_change_log(self, id):
         try:
-            f_uuid = uuid.UUID(str_uuid)
-            change_log_content = [
-                {
+            mitigation = self.get_one(id)
+            change_log_content = []
+            for log in ChangeLog.objects.filter(mitigation_action=mitigation.id):
+                previous_status = self.getReviewStatus(log.previous_status.id) if log.previous_status else None
+                if previous_status:
+                    previous_status_data = {
+                        'id': previous_status.id,
+                        'status': previous_status.status
+                    }
+                else:
+                    previous_status_data = None
+                current_status = self.getReviewStatus(log.current_status.id)
+                current_status_data = {
+                    'id': current_status.id,
+                    'status': current_status.status
+                }
+                change_log_data = {
                     'date': log.date,
                     'mitigation_action': log.mitigation_action.id,
-                    'previous_status': log.previous_status.id if log.previous_status else None,
-                    'current_status': log.current_status.id,
+                    'previous_status': previous_status_data,
+                    'current_status': current_status_data,
                     'user': log.user.id
-                } for log in ChangeLog.objects.filter(mitigation_action=str_uuid)
-            ]
+                }
+                change_log_content.append(change_log_data)
             result = (True, change_log_content)
-        except ChangeLog.DoesNotExist:
-            result = (False, self.CHANGE_LOG_DOES_NOT_EXIST)
+        except Mitigation.DoesNotExist:
+            result = (False, self.MITIGATION_ACTION_DOES_NOT_EXIST)
         return result
 
     def create(self, request):
