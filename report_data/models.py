@@ -5,6 +5,8 @@ from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+
+from general.storages import PrivateMediaStorage
 User =  get_user_model()
 
 class ReportFile(models.Model):
@@ -25,7 +27,7 @@ class ReportFileVersion(models.Model):
     user = models.ForeignKey(User, related_name='report_file_version')
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     active = models.BooleanField(blank=False, null=False)
-    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S')
+    file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S', storage=PrivateMediaStorage())
     report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
 
     class Meta:
