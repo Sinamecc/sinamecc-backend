@@ -4,7 +4,7 @@ from mitigation_action.models import RegistrationType, Institution, Contact, Sta
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationType
-        fields = ('type')
+        fields = ('type_es','type_en')
 
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +19,7 @@ class ContactSerializer(serializers.ModelSerializer):
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ('status')
+        fields = ('status_es','status_en')
 
 class ProgressIndicatorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,7 +29,7 @@ class ProgressIndicatorSerializer(serializers.ModelSerializer):
 class FinanceSourceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinanceSourceType
-        fields = ('name')
+        fields = ('name_es','name_en')
 
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,12 +39,12 @@ class FinanceSerializer(serializers.ModelSerializer):
 class IngeiComplianceSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngeiCompliance
-        fields = ('name')
+        fields = ('name_es', 'name_en')
 
 class GeographicScaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeographicScale
-        fields = ('name')
+        fields = ('name_es', 'name_en')
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:

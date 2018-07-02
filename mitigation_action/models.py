@@ -11,7 +11,8 @@ from workflow.models import Comment, ReviewStatus
 User =  get_user_model()
 
 class RegistrationType(models.Model):
-    type = models.CharField(max_length=100, blank=False, null=False)
+    type_es = models.CharField(max_length=100, blank=False, null=False)
+    type_en = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:
         verbose_name = _("RegistrationType")
@@ -44,7 +45,8 @@ class Contact(models.Model):
         return smart_unicode(self.full_name)
 
 class Status(models.Model):
-    status = models.CharField(max_length=100, blank=False, null=False)
+    status_es = models.CharField(max_length=100, blank=False, null=False)
+    status_en = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:
         verbose_name = _("Status")
@@ -67,7 +69,8 @@ class ProgressIndicator(models.Model):
         return smart_unicode(self.type)
 
 class FinanceSourceType(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:
         verbose_name = _("FinanceSourceType")
@@ -88,7 +91,8 @@ class Finance(models.Model):
         return smart_unicode(self.name)
 
 class IngeiCompliance(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:
         verbose_name = _("IngeiCompliance")
@@ -98,7 +102,8 @@ class IngeiCompliance(models.Model):
         return smart_unicode(self.name)
 
 class GeographicScale(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
 
     class Meta:
         verbose_name = _("GeographicScale")

@@ -46,7 +46,8 @@ class MitigationActionService():
                     },
                     'registration_type': {
                         'id': m.registration_type.id,
-                        'type': m.registration_type.type
+                        'type_es': m.registration_type.type_es,
+                        'type_en': m.registration_type.type_en
                     },
                     'institution': {
                         'id': m.institution.id,
@@ -61,7 +62,8 @@ class MitigationActionService():
                     },
                     'status': {
                         'id': m.status.id,
-                        'status': m.status.status
+                        'status_es': m.status.status_es,
+                        'status_en': m.status.status_en
                     },
                     'progress_indicator': {
                         'id': m.progress_indicator.id,
@@ -74,19 +76,22 @@ class MitigationActionService():
                         'id': m.finance.id,
                         'finance_source_type': {
                             'id': m.finance.finance_source_type.id,
-                            'name': m.finance.finance_source_type.name
+                            'name_es': m.finance.finance_source_type.name_es,
+                            'name_en': m.finance.finance_source_type.name_en
                         },
                         'source': m.finance.source
                     },
                     'ingei_compliances': [
                         {
                             'id': ingei.id,
-                            'name': ingei.name
+                            'name_es': ingei.name_es,
+                            'name_en': ingei.name_en,
                         } for ingei in m.ingei_compliances.all()
                     ],
                     'geographic_scale': {
                         'id': m.geographic_scale.id,
-                        'name': m.geographic_scale.name
+                        'name_es': m.geographic_scale.name_es,
+                        'name_en': m.geographic_scale.name_en
                     },
                     'location': {
                         'id': m.location.id,
@@ -407,7 +412,8 @@ class MitigationActionService():
                 },
                 'registration_type': {
                     'id': mitigation.registration_type.id,
-                    'type': mitigation.registration_type.type
+                    'type_es': mitigation.registration_type.type_es,
+                    'type_en': mitigation.registration_type.type_en
                 },
                 'institution': {
                     'id': mitigation.institution.id,
@@ -422,7 +428,8 @@ class MitigationActionService():
                 },
                 'status': {
                     'id': mitigation.status.id,
-                    'status': mitigation.status.status
+                    'status_es': mitigation.status.status_es,
+                    'status_en': mitigation.status.status_en
                 },
                 'progress_indicator': {
                     'id': mitigation.progress_indicator.id,
@@ -435,19 +442,22 @@ class MitigationActionService():
                     'id': mitigation.finance.id,
                     'finance_source_type': {
                         'id': mitigation.finance.finance_source_type.id,
-                        'name': mitigation.finance.finance_source_type.name
+                        'name_es': mitigation.finance.finance_source_type.name_es,
+                        'name_en': mitigation.finance.finance_source_type.name_en
                     },
                     'source': mitigation.finance.source
                 },
                 'ingei_compliances': [
                     {
                       'id': ingei.id,
-                      'name': ingei.name
+                      'name_es': ingei.name_es,
+                      'name_en': ingei.name_en
                     } for ingei in mitigation.ingei_compliances.all()
                 ],
                 'geographic_scale': {
                     'id': mitigation.geographic_scale.id,
-                    'name': mitigation.geographic_scale.name
+                    'name_es': mitigation.geographic_scale.name_es,
+                    'name_en': mitigation.geographic_scale.name_en
                 },
                 'location': {
                     'id': mitigation.location.id,
@@ -549,12 +559,13 @@ class MitigationActionService():
             result = (False, self.NO_PATCH_DATA_PROVIDED)
         return result
 
-    def get_form_data(self):
+    def get_form_data(self):       
         try:
             registration_types_list = [
                 {
                     'id': rt.id,
-                    'type': rt.type
+                    'type_es': rt.type_es,
+                    'type_en':rt.type_en
                 } for rt in RegistrationType.objects.all()
             ]
             institutions_list = [
@@ -566,25 +577,29 @@ class MitigationActionService():
             statuses_list = [
                 {
                     'id': st.id,
-                    'status': st.status
+                    'status_en': st.status_en,
+                    'status_es': st.status_es
                 } for st in Status.objects.all()
             ]
             finance_source_types_list = [
                 {
                     'id': fst.id,
-                    'name': fst.name
+                    'name_es': fst.name_es,
+                    'name_en': fst.name_en,
                 } for fst in FinanceSourceType.objects.all()
             ]
             ingei_compliances_list = [
                 {
                     'id': i.id,
-                    'name': i.name
+                    'name_es': i.name_es,
+                    'name_en': i.name_en,
                 } for i in IngeiCompliance.objects.all()
             ]
             geographic_scales_list = [
                 {
                     'id': g.id,
-                    'name': g.name
+                    'name_es': g.name_es,
+                    'name_en': g.name_en
                 } for g in GeographicScale.objects.all()
             ]
             form_list = {
@@ -600,3 +615,53 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
+    def get_form_data_es_en(self, language):
+        try:
+            registration_types_list = [
+                {
+                    'id': rt.id,
+                    'type': rt.type_es if language=="es" else rt.type_en
+                } for rt in RegistrationType.objects.all()
+            ]
+            institutions_list = [
+                {
+                    'id': i.id,
+                    'name': i.name 
+                } for i in Institution.objects.all()
+            ]
+            statuses_list = [
+                {
+                    'id': st.id, 
+                    'status': st.status_es if language=="es" else st.status_en
+                  } for st in Status.objects.all()
+            ]
+            finance_source_types_list = [
+                {
+                    'id': fst.id,
+                    'name': fst.name_es if language=="es" else fst.name_en
+                } for fst in FinanceSourceType.objects.all()
+            ]
+            ingei_compliances_list = [
+                {
+                    'id': i.id,
+                    'name': i.name_es if language=="es" else i.name_en
+                } for i in IngeiCompliance.objects.all()
+            ]
+            geographic_scales_list = [
+                {
+                    'id': g.id,
+                    'name': g.name_es if language=="es" else g.name_en 
+                } for g in GeographicScale.objects.all()
+            ]
+            form_list = {
+              'registration_types': registration_types_list,
+              'institutions': institutions_list,
+              'statuses': statuses_list,
+              'finance_source_types': finance_source_types_list,
+              'ingei_compliances': ingei_compliances_list,
+              'geographic_scales': geographic_scales_list
+            }
+            result = (True, form_list)
+        except Mitigation.DoesNotExist:
+            result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
+        return result

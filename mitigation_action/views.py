@@ -32,6 +32,12 @@ def get_mitigations_form(request):
         result = _get_form_data()
     return result
 
+@api_view(['GET'])
+def get_mitigations_form_es_en(request, language):
+    if request.method == 'GET':
+        result = _get_form_data_es_en(language)
+    return result
+
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_mitigations(request):
@@ -98,6 +104,14 @@ def _patch(id, request):
 
 def _get_form_data():
     get_result, data_result = service.get_form_data()
+    if get_result:
+        result = Response(data_result)
+    else:
+        result = Response(data_result, status=status.HTTP_400_BAD_REQUEST)
+    return result
+
+def _get_form_data_es_en(language):
+    get_result, data_result = service.get_form_data_es_en(language)
     if get_result:
         result = Response(data_result)
     else:
