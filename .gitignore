@@ -20,3 +20,5 @@ mitigation_action/migrations/*.pyc
 report_data/migrations/*.pyc
 report_data/migrations/__pycache__/*.pyc
 .vscode/
+config/settings/local_sqlite.py
+config/settings/local.py

@@ -9,9 +9,9 @@ import uuid
 service = MitigationActionService()
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
-def get_delete_update_patch_mitigation(request, pk):
+def get_delete_update_patch_mitigation(request, pk, language):
     if request.method == 'GET':
-        result = _get_one(pk)
+        result = _get_one(pk,language)
     elif request.method == 'DELETE':
         result = _delete(pk)
     elif request.method == 'PUT':
@@ -33,22 +33,27 @@ def get_mitigations_form(request):
     return result
 
 @api_view(['GET'])
-def get_mitigations_form_es_en(request, language):
+def get_mitigations_form_es_en(request, language, option):
     if request.method == 'GET':
-        result = _get_form_data_es_en(language)
+        result = _get_form_data_es_en(language, option)
     return result
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
-def get_post_mitigations(request):
+def get_mitigation(request, language):
     if request.method == 'GET':
-        result = _get_all()
-    elif request.method == 'POST':
-        result = _post(request)
-    return result
+        result = _get_all(language)
+        return result
 
-def _get_all():
-    get_result, data_result = service.get_all()
+@api_view(['POST'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+def post_mitigations(request):
+    if request.method == 'POST':
+        result = _post(request)
+        return result
+
+def _get_all(language):
+    get_result, data_result = service.get_all(language)
     if get_result:
         result = Response(data_result)
     else:
@@ -63,8 +68,8 @@ def _post(request):
         result = Response(result_detail, status=status.HTTP_400_BAD_REQUEST)
     return result
 
-def _get_one(id):
-    result_status, result_data = service.get(id)
+def _get_one(id, language):
+    result_status, result_data = service.get(id,language)
     if result_status:
         result = Response(result_data)
     else:
@@ -110,8 +115,8 @@ def _get_form_data():
         result = Response(data_result, status=status.HTTP_400_BAD_REQUEST)
     return result
 
-def _get_form_data_es_en(language):
-    get_result, data_result = service.get_form_data_es_en(language)
+def _get_form_data_es_en(language, option):
+    get_result, data_result = service.get_form_data_es_en(language, option)
     if get_result:
         result = Response(data_result)
     else:

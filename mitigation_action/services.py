@@ -17,7 +17,7 @@ class MitigationActionService():
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.CHANGE_LOG_DOES_NOT_EXIST = "Mitigation Action change log does not exist."
 
-    def get_all(self):
+    def get_all(self, language):
         try:
             mitigations_list = [
                 {
@@ -46,8 +46,7 @@ class MitigationActionService():
                     },
                     'registration_type': {
                         'id': m.registration_type.id,
-                        'type_es': m.registration_type.type_es,
-                        'type_en': m.registration_type.type_en
+                        'type': m.registration_type.type_es if language=="es" else m.registration_type.type_en,
                     },
                     'institution': {
                         'id': m.institution.id,
@@ -62,8 +61,7 @@ class MitigationActionService():
                     },
                     'status': {
                         'id': m.status.id,
-                        'status_es': m.status.status_es,
-                        'status_en': m.status.status_en
+                        'status': m.status.status_es if language=="es" else m.status.status_en
                     },
                     'progress_indicator': {
                         'id': m.progress_indicator.id,
@@ -76,22 +74,19 @@ class MitigationActionService():
                         'id': m.finance.id,
                         'finance_source_type': {
                             'id': m.finance.finance_source_type.id,
-                            'name_es': m.finance.finance_source_type.name_es,
-                            'name_en': m.finance.finance_source_type.name_en
+                            'name': m.finance.finance_source_type.name_es if language=="es" else m.finance.finance_source_type.name_en
                         },
                         'source': m.finance.source
                     },
                     'ingei_compliances': [
                         {
                             'id': ingei.id,
-                            'name_es': ingei.name_es,
-                            'name_en': ingei.name_en,
+                            'name': ingei.name_es if language=="es" else ingei.name_en,
                         } for ingei in m.ingei_compliances.all()
                     ],
                     'geographic_scale': {
                         'id': m.geographic_scale.id,
-                        'name_es': m.geographic_scale.name_es,
-                        'name_en': m.geographic_scale.name_en
+                        'name': m.geographic_scale.name_es if language=="es" else m.geographic_scale.name_en
                     },
                     'location': {
                         'id': m.location.id,
@@ -383,7 +378,7 @@ class MitigationActionService():
         f_uuid = uuid.UUID(str_uuid)
         return Mitigation.objects.get(pk=f_uuid)
 
-    def get(self, id):
+    def get(self, id, language):
         try:
             mitigation = self.get_one(id)
             content = {
@@ -412,8 +407,7 @@ class MitigationActionService():
                 },
                 'registration_type': {
                     'id': mitigation.registration_type.id,
-                    'type_es': mitigation.registration_type.type_es,
-                    'type_en': mitigation.registration_type.type_en
+                    'type': mitigation.registration_type.type_es if language=="es" else mitigation.registration_type.type_en,
                 },
                 'institution': {
                     'id': mitigation.institution.id,
@@ -428,8 +422,7 @@ class MitigationActionService():
                 },
                 'status': {
                     'id': mitigation.status.id,
-                    'status_es': mitigation.status.status_es,
-                    'status_en': mitigation.status.status_en
+                    'status': mitigation.status.status_es if language=="es" else mitigation.status.status_en
                 },
                 'progress_indicator': {
                     'id': mitigation.progress_indicator.id,
@@ -442,22 +435,19 @@ class MitigationActionService():
                     'id': mitigation.finance.id,
                     'finance_source_type': {
                         'id': mitigation.finance.finance_source_type.id,
-                        'name_es': mitigation.finance.finance_source_type.name_es,
-                        'name_en': mitigation.finance.finance_source_type.name_en
+                        'name': mitigation.finance.finance_source_type.name_es if language=="es" else mitigation.finance.finance_source_type.name_en
                     },
                     'source': mitigation.finance.source
                 },
                 'ingei_compliances': [
                     {
                       'id': ingei.id,
-                      'name_es': ingei.name_es,
-                      'name_en': ingei.name_en
+                      'name': ingei.name_es if language=="es" else ingei.name_en
                     } for ingei in mitigation.ingei_compliances.all()
                 ],
                 'geographic_scale': {
                     'id': mitigation.geographic_scale.id,
-                    'name_es': mitigation.geographic_scale.name_es,
-                    'name_en': mitigation.geographic_scale.name_en
+                    'name': mitigation.geographic_scale.name_es if language=="es" else mitigation.geographic_scale.name_en
                 },
                 'location': {
                     'id': mitigation.location.id,
@@ -615,13 +605,21 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
-    def get_form_data_es_en(self, language):
+    def get_form_data_es_en(self, language, option):
+        Registration_Type = []
+        if (option=="new"):
+            Registration_Type.append(RegistrationType.objects.get(id=3))
+        elif (option=="update"):
+            Registration_Type.append(RegistrationType.objects.get(id=4))
+        else:
+            Registration_Type = RegistrationType.objects.all()
+
         try:
             registration_types_list = [
                 {
-                    'id': rt.id,
-                    'type': rt.type_es if language=="es" else rt.type_en
-                } for rt in RegistrationType.objects.all()
+                    'id': rg.id,
+                    'type': rg.type_es if language=="es" else rg.type_en
+                } for rg in Registration_Type
             ]
             institutions_list = [
                 {
