@@ -11,6 +11,7 @@ from workflow.models import Comment, ReviewStatus
 User =  get_user_model()
 
 class RegistrationType(models.Model):
+    type_key = models.CharField(max_length=20, blank=False, null=False)
     type_es = models.CharField(max_length=100, blank=False, null=False)
     type_en = models.CharField(max_length=100, blank=False, null=False)
 

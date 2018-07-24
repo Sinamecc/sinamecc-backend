@@ -605,14 +605,14 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
+    # TODO Fix this multi-return method
     def get_form_data_es_en(self, language, option):
         Registration_Type = []
-        if (option=="new"):
-            Registration_Type.append(RegistrationType.objects.get(id=3))
-        elif (option=="update"):
-            Registration_Type.append(RegistrationType.objects.get(id=4))
+
+        if (option == "new" or option == "update"):
+            Registration_Type.append(RegistrationType.objects.filter(type_key=option).get())
         else:
-            Registration_Type = RegistrationType.objects.all()
+            return (False, {'error': "Parameter is not valid"})
 
         try:
             registration_types_list = [

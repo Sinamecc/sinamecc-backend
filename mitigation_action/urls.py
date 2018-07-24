@@ -13,7 +13,7 @@ urlpatterns = [
         name='get_mitigation_change_log'
     ),
     url(
-        r'^api/v1/mitigations/form/(?P<language>[A-Za-z0-9]+)/(?P<option>[A-Za-z0-9]+)$',
+        r'^api/v1/mitigations/form/(?P<language>[A-Za-z]+)/(?P<option>[A-Za-z]+)$',
         views.get_mitigations_form_es_en,
         name='get_mitigations_form_es_en',
     ),
