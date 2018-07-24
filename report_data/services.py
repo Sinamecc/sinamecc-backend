@@ -4,6 +4,7 @@ from report_data.serializers import ReportFileSerializer, ReportFileVersionSeria
 from django.urls import reverse
 import datetime
 import os
+from io import BytesIO
 
 # TODO: Add exception handling
 class ReportFileService():
@@ -90,7 +91,7 @@ class ReportFileService():
                 serializer = ReportFileSerializer(report_file, data=data)
                 previous_version = report_file.reportfileversion_set.filter(active=True).first()
                 previous_version_serializer = ReportFileVersionSerializer(previous_version, data={'active': False},
-                                                                        partial=True)
+                                                                          partial=True)
                 if serializer.is_valid() and previous_version_serializer.is_valid():
                     previous_version_serializer.save()
                     saved_report_file = serializer.save()
@@ -130,12 +131,15 @@ class ReportFileService():
         return content
 
     def _get_file_path(self, report_file_id, report_file_version_id):
-        url = reverse("get_report_file_version_url", kwargs={'report_file_id': report_file_id, 'report_file_version_id': report_file_version_id})
+        url = reverse("get_report_file_version_url",
+                      kwargs={'report_file_id': report_file_id, 'report_file_version_id': report_file_version_id})
         return url
 
-    def get_final_download_path(self, report_file_id, report_file_version_id):
-        # TODO: handle errors
-        # get file path
+    # TODO: handle errors
+    def get_file_content(self, report_file_id, report_file_version_id):
         report_file_version = ReportFileVersion.objects.get(pk=report_file_version_id)
-        # get signed s3 url
-        return self.storage.get_file(report_file_version.file.name)
+        path, filename = os.path.split(report_file_version.file.name)
+        return (filename, BytesIO(self.storage.get_file(report_file_version.file.name)), )
+
+    def download_file(self, report_file_id, report_file_version_id):
+        return self.get_file_content(report_file_id, report_file_version_id)

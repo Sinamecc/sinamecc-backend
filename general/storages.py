@@ -11,7 +11,7 @@ class S3Storage():
     def __init__(self):
         self.storage = PrivateMediaStorage()
 
-    def get_file(self, file_path):
+    def get_file_signed_url(self, file_path):
         signed_url = None
         if (self.storage.exists(file_path)):
             # get signed url
@@ -19,3 +19,11 @@ class S3Storage():
 
         # handle exception
         return signed_url
+
+    def get_file(self, file_path):
+        file_content = None
+        if (self.storage.exists(file_path)):
+            file = self.storage.open(file_path, 'r')
+            file_content = file.read()
+            file.close()
+        return file_content
