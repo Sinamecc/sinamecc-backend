@@ -3,9 +3,9 @@ from mitigation_action import views
 
 urlpatterns = [
     url(
-        r'^api/v1/mitigations/(?P<language>[A-Za-z0-9]+)/(?P<pk>[0-9a-f-]+)$',
-        views.get_delete_update_patch_mitigation,
-        name='get_delete_update__patch_mitigation'
+        r'^api/v1/mitigations/$',
+        views.post_mitigations,
+        name='post_mitigations'
     ),
     url(
         r'^api/v1/mitigations/changelog/(?P<pk>[0-9a-f-]+)$',
@@ -28,8 +28,8 @@ urlpatterns = [
         name='get_mitigation'
     ),
     url(
-        r'^api/v1/mitigations/',
-        views.post_mitigations,
-        name='post_mitigations'
+        r'^api/v1/mitigations(/(?P<language>[A-Za-z]{2}))?/(?P<pk>[0-9a-zA-Z\-]+)$',
+        views.get_delete_put_patch_mitigation,
+        name='get_delete_put_patch_mitigation'
     )
 ]

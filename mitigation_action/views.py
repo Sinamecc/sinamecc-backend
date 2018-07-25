@@ -9,7 +9,7 @@ import uuid
 service = MitigationActionService()
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
-def get_delete_update_patch_mitigation(request, pk, language):
+def get_delete_put_patch_mitigation(request, pk, language):
     if request.method == 'GET':
         result = _get_one(pk,language)
     elif request.method == 'DELETE':

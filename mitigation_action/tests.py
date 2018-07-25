@@ -71,7 +71,7 @@ class MitigationActionTest(TestCase):
         self.changeLog = ChangeLog.objects.create(date = timezone.now(), mitigation_action = self.mitigation, previous_status =  self.review_status, current_status = self.review_status, user = user )
 
     def test_get_valid_single_mitigations(self):
-        response = client.get(reverse('get_delete_update__patch_mitigation', kwargs={'pk': self.mitigation.pk}))
+        response = client.get(reverse('get_delete_put_patch_mitigation', kwargs={'pk': self.mitigation.pk}))
         mitigation = Mitigation.objects.get(pk=self.mitigation.pk)
         serializer = MitigationSerializer(mitigation)
         uuidStr = uuid.UUID(str(response.data.get('id'))).hex
@@ -180,12 +180,12 @@ class MitigationActionTest(TestCase):
         seralizer = MitigationSerializer(mitigation)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_delete_update_mitigation(self):
-        response = client.delete(reverse('get_delete_update__patch_mitigation', kwargs={'pk': self.mitigation.pk} ))
+    def get_delete_put_patch_mitigation(self):
+        response = client.delete(reverse('get_delete_put_patch_mitigation', kwargs={'pk': self.mitigation.pk} ))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invalid_get_delete_update_mitigation(self):
-        response = client.delete(reverse('get_delete_update__patch_mitigation', kwargs={'pk': 3}))
+        response = client.delete(reverse('get_delete_put_patch_mitigation', kwargs={'pk': 3}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
     def test_url_form_es_en(self):
