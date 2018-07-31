@@ -1,8 +1,12 @@
+from django.urls import reverse
+from general.storages import S3Storage
 from mitigation_action.models import Mitigation
 from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile
 from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer
 from rest_framework.parsers import JSONParser
+from io import BytesIO
 import uuid
+import os
 
 
 # TODO: Change is_valid() to exception
@@ -12,6 +16,8 @@ class MCCRService():
         self.MCCR_ERROR_GET_ALL = "Error retrieving all MCCR records"
         self.MCCR_ERROR_EMPTY_MITIGATIONS_LIST = "Empty mitigation actions list"
         self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST = "Unknown error retrieving mitigation actions list"
+
+        self.storage = S3Storage()
 
     def get_serialized_mccr(self, request):
         d = {
@@ -60,8 +66,11 @@ class MCCRService():
 
     def get(self, id):
         try:
-            serialized_mccr = MCCRRegistrySerializerView(self.get_one(id))
-            result = (True, serialized_mccr.data)
+            mccr = self.get_one(id)
+            serialized_mccr = MCCRRegistrySerializerView(mccr)
+            content = serialized_mccr.data
+            content['files'] = self._get_files_list(mccr.files)
+            result = (True, content)
         except MCCRRegistry.DoesNotExist:
             result = (False, {"error": self.MCCR_ERROR_NOT_EXIST})
         return result
@@ -129,3 +138,22 @@ class MCCRService():
         except MCCRRegistry.DoesNotExist:
             result = False
         return result
+
+    def get_file_content(self, mccr_id, mccr_file_id):
+        mccr_file = MCCRFile.objects.get(pk=mccr_file_id)
+        path, filename = os.path.split(mccr_file.file.name)
+        return (filename, BytesIO(self.storage.get_file(mccr_file.file.name)),)
+
+    def download_file(self, mccr_id, mccr_file_id):
+        return self.get_file_content(mccr_id, mccr_file_id)
+
+    def _get_files_list(self, file_list):
+        return [{'name': self._get_filename(f.file.name), 'file': self._get_file_path(str(f.mccr.id), str(f.id))} for f in file_list.all() ]
+
+    def _get_file_path(self, mccr_id, mccr_file_id):
+        url = reverse("get_mccr_file_version", kwargs={'id': mccr_id, 'mccr_file_id': mccr_file_id})
+        return url
+
+    def _get_filename(self, filename):
+        fpath, fname = os.path.split(filename)
+        return fname

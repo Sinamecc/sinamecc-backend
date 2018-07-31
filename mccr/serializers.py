@@ -6,8 +6,9 @@ class MCCRFileSerializer(serializers.ModelSerializer):
         model = MCCRFile
         fields = ('id', 'file', 'user', 'mccr')
 
+
 class MCCRRegistrySerializerView(serializers.ModelSerializer):
-    files = MCCRFileSerializer(many=True, read_only=True)
+    files = MCCRFileSerializer(many=True)
     class Meta:
         model = MCCRRegistry
         fields = ('id', 'user', 'mitigation', 'user_type', 'status', 'files')

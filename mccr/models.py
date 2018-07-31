@@ -2,10 +2,13 @@ from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db import models
+from general.storages import PrivateMediaStorage
 from mitigation_action.models import Mitigation
 import uuid
 
+
 User =  get_user_model()
+
 
 class MCCRUserType(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -16,6 +19,7 @@ class MCCRUserType(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
 
 # TODO: fix upload_to to include MCCR UUID
 class MCCRRegistry(models.Model):
@@ -32,15 +36,18 @@ class MCCRRegistry(models.Model):
     def __unicode__(self):
         return smart_unicode(self.id)
 
+
 class MCCRFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    file = models.FileField(blank=False, null=False, upload_to='mccr/%Y%m%d')
+    file = models.FileField(blank=False, null=False, upload_to='mccr/%Y%m%d/%H%M%S', storage=PrivateMediaStorage())
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     mccr = models.ForeignKey(MCCRRegistry, related_name='files', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("MCCRFile")
         verbose_name_plural = _("MCCRFiles")
 
     def __unicode__(self):
-        return smart_unicode(self.type)
+        return smart_unicode(self.name)
