@@ -68,7 +68,7 @@ class ReportFileService():
                     'name': r.name,
                     'created': r.created,
                     'updated': r.updated,
-                    'last_active_version': r.reportfileversion_set.filter(active=True).first().version,
+                    'last_active_version': r.reportfileversion_set.filter(active=True).first().version if r.reportfileversion_set.all().count() else "---",
                     'versions': r.reportfileversion_set.all().count()
                 } for r in ReportFile.objects.all()
             ]

@@ -8,6 +8,7 @@ from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from workflow.models import Comment, ReviewStatus
+
 User =  get_user_model()
 
 class RegistrationType(models.Model):

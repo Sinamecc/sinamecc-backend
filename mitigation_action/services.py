@@ -1,6 +1,7 @@
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog
 from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
 from workflow.models import ReviewStatus
+from general.storages import S3Storage
 from rest_framework.parsers import JSONParser
 import datetime
 import uuid
@@ -10,6 +11,7 @@ workflow_service = WorkflowService()
 
 class MitigationActionService():
     def __init__(self):
+        self.storage = S3Storage()
         self.MITIGATION_ACTION_DOES_NOT_EXIST = "Mitigation Action does not exist."
         self.MITIGATION_ACTION_ERROR_GET_ALL = "Error retrieving all Mitigation Action records."
         self.INGEI_COMPLIANCE_DOES_NOT_EXIST = "INGEI compliance does not exist."
@@ -305,6 +307,7 @@ class MitigationActionService():
             result = (False, serialized_change_log.errors)
         return result
 
+
     def getReviewStatus(self, id):
         return ReviewStatus.objects.get(pk=id)
 
@@ -378,7 +381,9 @@ class MitigationActionService():
         f_uuid = uuid.UUID(str_uuid)
         return Mitigation.objects.get(pk=f_uuid)
 
+
     def get(self, id, language):
+
         try:
             mitigation = self.get_one(id)
             content = {

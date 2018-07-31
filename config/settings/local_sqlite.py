@@ -8,7 +8,6 @@ DATABASES = {
 }
 
 DEBUG = True
-
 # TODO:
 # - Set duration time for signed url
 
