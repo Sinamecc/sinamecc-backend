@@ -30,7 +30,7 @@ def update_type_key_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mitigation_action', '0014_auto_20180604_2002'),
+        ('mitigation_action', '0015_auto_20180722_2021'),
     ]
 
     operations = [

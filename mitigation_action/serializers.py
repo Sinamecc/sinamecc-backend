@@ -89,7 +89,6 @@ class MitigationSerializer(serializers.ModelSerializer):
             'geographic_scale',
             'location',
             'review_count',
-            'review_status',
             'comments',
             'created',
             'updated'

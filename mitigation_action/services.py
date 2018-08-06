@@ -3,6 +3,7 @@ from mitigation_action.serializers import FinanceSerializer, LocationSerializer,
 from workflow.models import ReviewStatus
 from general.storages import S3Storage
 from rest_framework.parsers import JSONParser
+from django_fsm import can_proceed
 import datetime
 import uuid
 
@@ -18,6 +19,7 @@ class MitigationActionService():
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.CHANGE_LOG_DOES_NOT_EXIST = "Mitigation Action change log does not exist."
+        self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
 
     def get_all(self, language):
         try:
@@ -96,10 +98,6 @@ class MitigationActionService():
                         'is_gis_annexed': m.location.is_gis_annexed
                     },
                     # Workflow
-                    'review_status': {
-                        'id': m.review_status.id,
-                        'status': m.review_status.status
-                    },
                     'review_count': m.review_count,
                     'comments': [
                         {
@@ -107,6 +105,7 @@ class MitigationActionService():
                             'comment': comment.comment
                         } for comment in m.comments.all()
                     ],
+                    'fsm_state': m.fsm_state,
                     'created': m.created,
                     'updated': m.updated 
                 } for m in Mitigation.objects.all()
@@ -229,7 +228,6 @@ class MitigationActionService():
             'location': location_id,
             # Workflow
             'review_count': 0, # By default when creating
-            'review_status': self.get_review_status_id(workflow_service.SUBMITTED_STATUS)
         }
         serializer = MitigationSerializer(data=mitigation_data)
         return serializer
@@ -359,7 +357,11 @@ class MitigationActionService():
             if serialized_mitigation_action.is_valid():
                 mitigation_previous_status = None
                 mitigation_action = serialized_mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, self.get_review_status_id(workflow_service.SUBMITTED_STATUS), request.data.get('user'))
+                #self.create_change_log_entry(mitigation_action, mitigation_previous_status, self.get_review_status_id(workflow_service.SUBMITTED_STATUS), request.data.get('user'))
+                if not can_proceed(mitigation_action.submit):
+                    errors.append(self.INVALID_STATUS_TRANSITION)
+                mitigation_action.submit()
+                mitigation_action.save()
                 get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
                 if get_ingei_result:
                     result = (True, MitigationSerializer(mitigation_action).data)
@@ -381,6 +383,56 @@ class MitigationActionService():
         f_uuid = uuid.UUID(str_uuid)
         return Mitigation.objects.get(pk=f_uuid)
 
+    def possible_next_state(self, current_fsm_state):
+        result_arr = []
+        if current_fsm_state == 'new':
+            result_arr.append({
+                'state': 'submitted'
+            })
+        elif current_fsm_state == 'submitted' or current_fsm_state == 'updating_by_request':
+            result_arr.append({
+                'state': 'in_evaluation_by_DCC'
+            })
+        elif current_fsm_state == 'in_evaluation_by_DCC':
+            result_arr.append(
+                {'state': 'submit_evaluation_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'changes_requested_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'rejected_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'registering'}
+            )
+        elif current_fsm_state == 'submit_evaluation_by_DCC':
+            result_arr.append(
+                {'state': 'changes_requested_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'rejected_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'registering'}
+            )
+        elif current_fsm_state == 'changes_requested_by_DCC':
+            result_arr.append(
+                {'state': 'updating_by_request'}
+            )
+        elif current_fsm_state == 'rejected_by_DCC':
+            result_arr.append(
+                {'state': 'end'}
+            )
+        elif current_fsm_state == 'registering':
+            result_arr.append(
+                {'state': 'in_evaluation_INGEI_by_DCC_IMN'}
+            )
+        elif current_fsm_state == 'in_evaluation_INGEI_by_DCC_IMN':
+            result_arr.append(
+                {'state': 'submit_INGEI_harmonization_required'}
+            )
+        return result_arr    
 
     def get(self, id, language):
 
@@ -460,10 +512,6 @@ class MitigationActionService():
                     'is_gis_annexed': mitigation.location.is_gis_annexed
                 },
                 # Workflow
-                'review_status': {
-                    'id': mitigation.review_status.id,
-                    'status': mitigation.review_status.status
-                },
                 'review_count': mitigation.review_count,
                 'comments': [
                     {
@@ -471,6 +519,8 @@ class MitigationActionService():
                         'comment': comment.comment
                     } for comment in mitigation.comments.all()
                 ],
+                'fsm_state': mitigation.fsm_state,
+                'next_state': self.possible_next_state(mitigation.fsm_state),
                 'created': mitigation.created,
                 'updated': mitigation.updated
             }

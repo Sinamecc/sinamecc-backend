@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'mitigation_action',
     'workflow',
     'mccr',
-    'corsheaders'
+    'corsheaders',
+    'django_fsm'
 ]
 
 MIDDLEWARE = [
