@@ -1,8 +1,8 @@
 from django.urls import reverse
 from general.storages import S3Storage
 from mitigation_action.models import Mitigation
-from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile
-from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer
+from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile, OVV
+from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer, MCCRRegistryOVVRelationSerializer
 from rest_framework.parsers import JSONParser
 from io import BytesIO
 import uuid
@@ -15,6 +15,7 @@ class MCCRService():
         self.MCCR_ERROR_NOT_EXIST = "MCCR does not exists"
         self.MCCR_ERROR_GET_ALL = "Error retrieving all MCCR records"
         self.MCCR_ERROR_EMPTY_MITIGATIONS_LIST = "Empty mitigation actions list"
+        self.MCCR_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
         self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST = "Unknown error retrieving mitigation actions list"
 
         self.storage = S3Storage()
@@ -36,6 +37,11 @@ class MCCRService():
                 "mccr": mccr_id
             }
         serializer = MCCRFileSerializer(data=file_list)
+        return serializer
+
+    def get_serialized_mccr_ovv_relation(self, mccr_id, ovv_id):
+        mccr_ovv_relation = {"ovv": ovv_id, "mccr": mccr_id, "status": "ovv_assigned_first_review"}
+        serializer = MCCRRegistryOVVRelationSerializer(data=mccr_ovv_relation)
         return serializer
 
     def get_serialized_for_existent(self, request, mccr_registry):
@@ -120,6 +126,22 @@ class MCCRService():
             result = (False, {"error": self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST})
         return result
 
+    def get_all_ovv(self):
+        try:
+            ovv_list = [
+                {
+                    "id": o.id,
+                    "email": o.email,
+                    "phone": o.phone
+                } for o in OVV.objects.all()
+            ]
+            result = (True, ovv_list, )
+        except OVV.DoesNotExist:
+            result = (False, {"error": self.MCCR_ERROR_EMPTY_OVV_LIST})
+        except:
+            result = (False, {"error": self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST})
+        return result
+
     # TODO: handle exception when id not exist
     def update(self, id, request):
         mccr_registry = self.get_one(id)
@@ -128,6 +150,16 @@ class MCCRService():
             result = (True, MCCRRegistrySerializerCreate(serialized_mccr.save()).data)
         else:
             result = (False, serialized_mccr.errors)
+        return result
+
+    def update_mccr_ovv_relation(self, mccr_id, ovv_id):
+        serialized_mccr_ovv_relation = self.get_serialized_mccr_ovv_relation(mccr_id, ovv_id)
+        if serialized_mccr_ovv_relation.is_valid():
+            # TODO: should check if we have a previous registered status for the tuple mccr,ovv
+            serialized_mccr_ovv_relation.save()
+            result = (True, serialized_mccr_ovv_relation.data)
+        else:
+            result = (False, serialized_mccr_ovv_relation.errors)
         return result
 
     def delete(self, id):

@@ -46,3 +46,17 @@ def get_mccr_file_version(request, id, mccr_file_id):
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
     return view_helper.error_message("Unsupported METHOD for get_report_file_version_url view")
+
+@api_view(['GET'])
+@csrf_exempt
+def get_all_ovv(request):
+    if request.method == 'GET':
+        result = view_helper.get_by_name("get_all_ovv")
+    return result
+
+@api_view(['PATCH'])
+@csrf_exempt
+def patch_mccr_ovv(request, mccr_id, ovv_id):
+    if request.method == 'PATCH':
+        result = view_helper.execute_by_name("update_mccr_ovv_relation", mccr_id, ovv_id)
+    return result

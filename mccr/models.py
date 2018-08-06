@@ -6,9 +6,7 @@ from general.storages import PrivateMediaStorage
 from mitigation_action.models import Mitigation
 import uuid
 
-
 User =  get_user_model()
-
 
 class MCCRUserType(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -20,7 +18,6 @@ class MCCRUserType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name)
 
-
 # TODO: fix upload_to to include MCCR UUID
 class MCCRRegistry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -28,6 +25,8 @@ class MCCRRegistry(models.Model):
     user = models.ForeignKey(User, related_name='mccr')
     mitigation = models.ForeignKey(Mitigation, related_name='mccr')
     user_type = models.ForeignKey(MCCRUserType, related_name='mccr')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("MCCRRegistry")
@@ -48,6 +47,34 @@ class MCCRFile(models.Model):
     class Meta:
         verbose_name = _("MCCRFile")
         verbose_name_plural = _("MCCRFiles")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class OVV(models.Model):
+    name = models.CharField(max_length=200, blank=False, null=False)
+    email = models.CharField(max_length=50, blank=False, null=False)
+    phone = models.CharField(max_length=30, blank=False, null=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Organismo Validador Verifador")
+        verbose_name_plural = _("Organismos Validadores Verificadores")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class MCCRRegistryOVVRelation(models.Model):
+    mccr = models.ForeignKey(MCCRRegistry, on_delete=models.CASCADE)
+    ovv = models.ForeignKey(OVV, on_delete=models.CASCADE)
+    status = models.CharField(max_length=100, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("MCCR OVV Relation")
+        verbose_name_plural = _("MCCR OVV Relations")
 
     def __unicode__(self):
         return smart_unicode(self.name)

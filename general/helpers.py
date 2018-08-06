@@ -5,28 +5,36 @@ class ViewHelper():
     def __init__(self, service):
         self.service = service
 
-    def get_all(self):
-        get_result, data_result = self.service.get_all()
-        if get_result:
-            result = Response(data_result)
-        else:
-            result = Response(data_result, status=status.HTTP_404_NOT_FOUND)
-        return result
-
-    def get_form_data(self):
-        get_result, data_result = self.service.get_form_data()
-        if get_result:
-            result = Response(data_result)
-        else:
-            result = Response(data_result, status=status.HTTP_400_BAD_REQUEST)
-        return result
-
     def get_one(self, id):
         result_status, result_data = self.service.get(id)
         if result_status:
             result = Response(result_data)
         else:
             result = Response(result_data, status=status.HTTP_404_NOT_FOUND)
+        return result
+
+    def get_by_name(self, method_name):
+        method_to_call = getattr(self.service, method_name)
+        result_status, result_data = method_to_call()
+        if result_status:
+            result = Response(result_data)
+        else:
+            result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
+        return result
+
+    def get_all(self):
+        return self.get_by_name("get_all")
+
+    def get_form_data(self):
+        return self.get_by_name("get_form_data")
+
+    def execute_by_name(self, method_name, *args):
+        method_to_call = getattr(self.service, method_name)
+        result_status, result_data = method_to_call(*args)
+        if result_status:
+            result = Response(result_data)
+        else:
+            result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
         return result
 
     def delete(self, id):
