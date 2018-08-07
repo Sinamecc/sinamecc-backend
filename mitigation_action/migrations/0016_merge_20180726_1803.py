@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('mitigation_action', '0015_harmonizationingei'),
-        ('mitigation_action', '0015_registrationtype_type_key'),
+        ('mitigation_action', '0016_registrationtype_type_key'),
     ]
 
     operations = [
