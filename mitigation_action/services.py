@@ -191,12 +191,6 @@ class MitigationActionService():
         review_status_id_result, review_status_id_data = workflow_service.get_review_status_id(status)
         return review_status_id_data
 
-    def get_review_count(self, review_status_id, current_count):
-        in_review_status_id = self.get_review_status_id(workflow_service.IN_REVIEW_STATUS)
-        if review_status_id == in_review_status_id:
-            current_count += 1
-        return current_count
-
     def get_serialized_mitigation_action(self, request, contact_id, progress_indicator_id, location_id, finance_id):
         mitigation_data = {
             'id': str(uuid.uuid4()),
@@ -262,7 +256,7 @@ class MitigationActionService():
             'geographic_scale': request.data.get('geographic_scale'),
             'location': location_id,
             'review_count': mitigation.review_count,
-            'review_status': mitigation.review_status.id
+            'fsm_state': mitigation.fsm_state
         }
         serializer = MitigationSerializer(mitigation, data=mitigation_data)
         return serializer
@@ -355,13 +349,13 @@ class MitigationActionService():
             serialized_mitigation_action = self.get_serialized_mitigation_action(request, contact.id, progress_indicator.id, location.id, finance.id)
 
             if serialized_mitigation_action.is_valid():
-                mitigation_previous_status = None
                 mitigation_action = serialized_mitigation_action.save()
-                #self.create_change_log_entry(mitigation_action, mitigation_previous_status, self.get_review_status_id(workflow_service.SUBMITTED_STATUS), request.data.get('user'))
+                mitigation_previous_status = mitigation_action.fsm_state
                 if not can_proceed(mitigation_action.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
                 mitigation_action.submit()
                 mitigation_action.save()
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
                 get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
                 if get_ingei_result:
                     result = (True, MitigationSerializer(mitigation_action).data)
@@ -581,19 +575,129 @@ class MitigationActionService():
             result = (False, errors)
         return result
 
+    def update_fsm_state(self, next_state, mitigation_action):
+        # --- Transition ---
+        # submitted -> in_evaluation_by_DCC
+        if next_state == 'in_evaluation_by_DCC':
+            if not can_proceed(mitigation_action.evaluate_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # updating_by_request -> in_evaluation_by_DCC
+        elif next_state == 'in_evaluation_by_DCC':
+            if not can_proceed(mitigation_action.update_evaluate_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.update_evaluate_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_by_DCC -> submit_evaluation_by_DCC
+        elif next_state == 'submit_evaluation_by_DCC':
+            if not can_proceed(mitigation_action.submit_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.submit_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # submit_evaluation_by_DCC -> changes_requested_by_DCC
+        elif next_state == 'changes_requested_by_DCC':
+            if not can_proceed(mitigation_action.request_changes_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.request_changes_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # submit_evaluation_by_DCC -> rejected_by_DCC
+        elif next_state == 'rejected_by_DCC':
+            if not can_proceed(mitigation_action.reject_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.reject_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # submit_evaluation_by_DCC -> registering
+        elif next_state == 'registering':
+            if not can_proceed(mitigation_action.register):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.register()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_by_DCC -> changes_requested_by_DCC
+        elif next_state == 'changes_requested_by_DCC':
+            if not can_proceed(mitigation_action.evaluate_request_changes_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_request_changes_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # changes_requested_by_DCC -> updating_by_request
+        elif next_state == 'updating_by_request':
+            if not can_proceed(mitigation_action.update_by_request):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.update_by_request()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_by_DCC -> rejected_by_DCC
+        elif next_state == 'rejected_by_DCC':
+            if not can_proceed(mitigation_action.evaluate_reject_by_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_reject_by_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # rejected_by_DCC -> end
+        elif next_state == 'end':
+            if not can_proceed(mitigation_action.end):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.end()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_by_DCC -> registering
+        elif next_state == 'registering':
+            if not can_proceed(mitigation_action.evaluate_register):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_register()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # registering -> in_evaluation_INGEI_by_DCC_IMN
+        elif next_state == 'in_evaluation_INGEI_by_DCC_IMN':
+            if not can_proceed(mitigation_action.evaluate_INGEI):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_INGEI()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_INGEI_by_DCC_IMN -> submit_INGEI_harmonization_required
+        elif next_state == 'submit_INGEI_harmonization_required':
+            if not can_proceed(mitigation_action.submit_INGEI):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.submit_INGEI()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        return result
+            
     def patch(self, id, request):
         mitigation = self.get_one(id)
-        if (request.data.get('review_status')):
+        if (request.data.get('fsm_state')):
             patch_data = {
-                'review_status': request.data.get('review_status'),
-                'review_count': self.get_review_count(request.data.get('review_status'), mitigation.review_count)
+                'review_count': mitigation.review_count + 1
             }
             serialized_mitigation_action = MitigationSerializer(mitigation, data=patch_data, partial=True)
             if serialized_mitigation_action.is_valid():
-                mitigation_previous_status = mitigation.review_status.id
+                mitigation_previous_status = mitigation.fsm_state
                 mitigation_action = serialized_mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.review_status.id, request.data.get('user'))
-                result = (True, MitigationSerializer(mitigation_action).data)
+                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mitigation_action)
+                if update_state_status:
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
+                    result = (True, update_state_data)
+                else:
+                    result = (False, update_state_data)
             if (request.data.get('comment')):
                 comment_status = self.assign_comment(request, mitigation_action)
                 if comment_status:
