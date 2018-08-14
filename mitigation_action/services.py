@@ -602,7 +602,7 @@ class MitigationActionService():
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
         # submit_evaluation_by_DCC -> changes_requested_by_DCC
-        elif next_state == 'changes_requested_by_DCC':
+        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'submit_evaluation_by_DCC':
             if not can_proceed(mitigation_action.request_changes_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.request_changes_DCC()
@@ -626,7 +626,7 @@ class MitigationActionService():
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
         # in_evaluation_by_DCC -> changes_requested_by_DCC
-        elif next_state == 'changes_requested_by_DCC':
+        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'in_evaluation_by_DCC':
             if not can_proceed(mitigation_action.evaluate_request_changes_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.evaluate_request_changes_DCC()

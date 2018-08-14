@@ -236,7 +236,7 @@ class Mitigation(models.Model):
         # Verify current state
         # - submit_evaluation_by_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' || self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
 
     @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='changes_requested_by_DCC', conditions=[can_request_changes_DCC], on_error='failed', permission='')
     def request_changes_DCC(self):
@@ -251,7 +251,7 @@ class Mitigation(models.Model):
         # Verify current state
         # - submit_evaluation_by_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' || self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
 
     @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission='')
     def reject_DCC(self):
@@ -266,7 +266,7 @@ class Mitigation(models.Model):
         # Verify current state
         # - submit_evaluation_by_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' || self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
     
     @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='registering', conditions=[can_register], on_error='failed', permission='')
     def register(self):
