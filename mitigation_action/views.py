@@ -13,45 +13,45 @@ view_helper = ViewHelper(service)
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 def get_delete_put_patch_mitigation(request, pk, language):
     if request.method == 'GET':
-        result = _get_one(pk,language)
+        result = view_helper.get_one(pk,language)
     elif request.method == 'DELETE':
-        result = _delete(pk)
+        result = view_helper.delete(pk)
     elif request.method == 'PUT':
-        result = _put(pk, request)
+        result = view_helper.put(pk, request)
     elif request.method == 'PATCH':
-        result = _patch(pk, request)
+        result = view_helper.patch(pk, request)
     return result
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 def get_mitigation_change_log(request, pk):
     if request.method == 'GET':
-        result = _get_change_log(pk)
+        result = view_helper.execute_by_name("get_change_log", pk)
     return result
 
 @api_view(['GET'])
 def get_mitigations_form(request):
     if request.method == 'GET':
-        result = _get_form_data()
+        result = view_helper.get_form_data()
     return result
 
 @api_view(['GET'])
 def get_mitigations_form_es_en(request, language, option):
     if request.method == 'GET':
-        result = _get_form_data_es_en(language, option)
+        result = view_helper.execute_by_name( "get_form_data_es_en", language, option)
     return result
 
 @api_view(['GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_mitigation(request, language):
     if request.method == 'GET':
-        result = _get_all(language)
+        result = view_helper.get_all(language)
         return result
 
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def post_mitigations(request):
     if request.method == 'POST':
-        result = _post(request)
+        result = view_helper.post(request)
         return result
 
 def _get_all(language):

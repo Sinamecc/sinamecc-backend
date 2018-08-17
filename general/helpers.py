@@ -5,32 +5,32 @@ class ViewHelper():
     def __init__(self, service):
         self.service = service
 
-    def get_one(self, id):
-        result_status, result_data = self.service.get(id)
+    def get_one(self, *args):
+        result_status, result_data = self.service.get(*args)
         if result_status:
             result = Response(result_data)
         else:
             result = Response(result_data, status=status.HTTP_404_NOT_FOUND)
         return result
 
-    def get_by_name(self, method_name):
-        method_to_call = getattr(self.service, method_name)
-        result_status, result_data = method_to_call()
+    def get_by_name(self,  *args):
+        method_to_call = getattr(self.service, args[0])
+        result_status, result_data = method_to_call(*args[1:])
         if result_status:
             result = Response(result_data)
         else:
             result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
         return result
 
-    def get_all(self):
-        return self.get_by_name("get_all")
+    def get_all(self, *args):
+        return self.get_by_name("get_all", *args)
 
-    def get_form_data(self):
-        return self.get_by_name("get_form_data")
+    def get_form_data(self, *args):
+        return self.get_by_name("get_form_data", *args)
 
-    def execute_by_name(self, method_name, *args):
-        method_to_call = getattr(self.service, method_name)
-        result_status, result_data = method_to_call(*args)
+    def execute_by_name(self, *args):
+        method_to_call = getattr(self.service, args[0])
+        result_status, result_data = method_to_call(*args[1:])
         if result_status:
             result = Response(result_data)
         else:
@@ -54,6 +54,15 @@ class ViewHelper():
 
     def put(self, id, request):
         result_status, result_data = self.service.update(id, request)
+        if result_status:
+            result = Response(result_data)
+        else:
+            result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
+        return result
+    
+    def patch(self, id, request):
+
+        result_status, result_data = self.service.patch(id, request)
         if result_status:
             result = Response(result_data)
         else:
