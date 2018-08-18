@@ -308,24 +308,11 @@ class MitigationActionService():
             mitigation = self.get_one(id)
             change_log_content = []
             for log in ChangeLog.objects.filter(mitigation_action=mitigation.id):
-                previous_status = self.getReviewStatus(log.previous_status.id) if log.previous_status else None
-                if previous_status:
-                    previous_status_data = {
-                        'id': previous_status.id,
-                        'status': previous_status.status
-                    }
-                else:
-                    previous_status_data = None
-                current_status = self.getReviewStatus(log.current_status.id)
-                current_status_data = {
-                    'id': current_status.id,
-                    'status': current_status.status
-                }
                 change_log_data = {
                     'date': log.date,
                     'mitigation_action': log.mitigation_action.id,
-                    'previous_status': previous_status_data,
-                    'current_status': current_status_data,
+                    'previous_state': log.previous_status,
+                    'current_status': log.current_status,
                     'user': log.user.id
                 }
                 change_log_content.append(change_log_data)
@@ -577,19 +564,19 @@ class MitigationActionService():
 
     def update_fsm_state(self, next_state, mitigation_action):
         # --- Transition ---
-        # submitted -> in_evaluation_by_DCC
-        if next_state == 'in_evaluation_by_DCC':
-            if not can_proceed(mitigation_action.evaluate_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
         # updating_by_request -> in_evaluation_by_DCC
-        elif next_state == 'in_evaluation_by_DCC':
+        if next_state == 'in_evaluation_by_DCC' and mitigation_action.fsm_state == 'updating_by_request':
             if not can_proceed(mitigation_action.update_evaluate_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.update_evaluate_DCC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # submitted -> in_evaluation_by_DCC
+        elif next_state == 'in_evaluation_by_DCC':
+            if not can_proceed(mitigation_action.evaluate_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.evaluate_DCC()
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
