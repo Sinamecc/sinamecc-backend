@@ -1,4 +1,4 @@
-db.sqlite3
+gitdb.sqlite3
 .idea
 __pycache__/
 config/__pycache__/
@@ -22,4 +22,11 @@ report_data/migrations/__pycache__/*.pyc
 .vscode/
 config/settings/local_sqlite.py
 config/settings/local.py
+ppcn/migrations/*.pyc
+ppcn/*.pyc
+db.sqlite3
+mccr/*.pyc
+mitigation_action/*.pyc
+report_data/*.pyc
+workflow/*.pyc
 

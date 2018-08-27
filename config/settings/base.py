@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'mitigation_action',
     'workflow',
     'mccr',
+    'ppcn',
     'corsheaders',
     'django_fsm'
 ]
