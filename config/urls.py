@@ -4,8 +4,8 @@ from rest_framework_jwt.views import obtain_jwt_token
 
 urlpatterns = [
     url(r'^', include('report_data.urls')),
+    url(r'^', include('mitigation_action.workflow_steps.urls')),
     url(r'^', include('mitigation_action.urls')),
-    url(r'^', include('mitigation_action.ingei.urls')),
     url(r'^', include('workflow.urls')),
     url(r'^', include('mccr.urls')),
     url(r'^', include('general.urls')),
