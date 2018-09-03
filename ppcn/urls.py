@@ -37,7 +37,7 @@ urlpatterns = [
         name='get_sub_sector'
     ),
    
-    url(r'^api/v1/ppcn/(?P<language>es|en)*/*$',
+    url(r'^api/v1/ppcn/*(?P<language>es|en)*/*$',
         views.get_post_ppcn,
         name='get_post_ppcn'
     ), 

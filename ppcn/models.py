@@ -98,11 +98,11 @@ class Organization(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
     representative_name = models.CharField(max_length=200, blank=False, null=False)
     phone_organization = models.CharField(max_length=200, blank=False, null=True)
-    postal_code = models.CharField(max_length=200, blank=False, null=False)
-    fax = models.CharField(max_length=200, blank=False, null=False)
+    postal_code = models.CharField(max_length=200, blank=True, null=True)
+    fax = models.CharField(max_length=200, blank=True, null=True)
     address = models.CharField(max_length=200, blank=False, null=False)
     contact = models.ForeignKey(Contact, related_name='organization', on_delete=models.CASCADE)
-    ciiu = models.CharField(max_length=200, blank=False, null=True)
+    ciiu = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         verbose_name = _("Organization")
