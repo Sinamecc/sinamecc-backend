@@ -15,7 +15,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ('full_name', 'job_title', 'email', 'phone')
+        fields = ('id','full_name', 'job_title', 'email', 'phone')
 
 class RequiredLevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,9 +30,9 @@ class RecognitionTypeSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('organization', 'geographicLevel', 'requiredLevel', 'sector','subsector', 'recognitionType', 'base_year', 'created', 'updated')
+        fields = ('id','organization', 'geographicLevel', 'requiredLevel', 'sector','subsector', 'recognitionType', 'base_year', 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):
     class Meta:
         model = PPCNFile
-        fields = ('user', 'file', 'created', 'updated', 'ppcn_form')
+        fields = ('id', 'user', 'file', 'created', 'updated', 'ppcn_form')
