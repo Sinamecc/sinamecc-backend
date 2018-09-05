@@ -14,6 +14,8 @@ from django.urls import reverse
 import os
 import pdb
 
+email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
+ses_service = EmailServices(email_sender)
 
 class PpcnService():
 
@@ -462,4 +464,20 @@ class PpcnService():
             result = (True, form_list)
         except RequiredLevel.DoesNotExist:
             result (False, self.LEVEL_ERROR_GET_ALL)
+        return result
+
+    def sendNotification(recipient_list, subject, message_body):
+
+        result = ses_service.send_notification(recipient_list, subject, message_body)
+        
+        return result
+            
+    def sendStatusNotification(recipient_list, subject, message_body, link):
+
+         """first implementation"""
+        subject = "PPCN: " + subject
+        message_body += "\nlink: " + link
+
+        result = self.sendNotification(recipient_list, subject, message_body)
+
         return result

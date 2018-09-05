@@ -44,3 +44,14 @@ class EmailServices():
         else:
 
             return (True, response)
+
+    def send_status_notification(self, recipient_list, subject, message_body, link = False):
+        """first implementation"""
+        subject = "General: " + subject
+
+        if link:
+            message_body += "\nlink: " + link
+
+        result = self.send_notification(recipient_list, subject, message_body)
+
+        return result

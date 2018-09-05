@@ -8,10 +8,16 @@ import datetime
 import uuid
 
 from workflow.services import WorkflowService
+from general.services import EmailServices
+
 workflow_service = WorkflowService()
+
+email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
+ses_service = EmailServices(email_sender)
 
 class MitigationActionService():
     def __init__(self):
+
         self.storage = S3Storage()
         self.MITIGATION_ACTION_DOES_NOT_EXIST = "Mitigation Action does not exist."
         self.MITIGATION_ACTION_ERROR_GET_ALL = "Error retrieving all Mitigation Action records."
@@ -809,3 +815,25 @@ class MitigationActionService():
         except Mitigation.DoesNotExist:
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
+
+    def sendNotification(recipient_list, subject, message_body):
+
+        result = ses_service.send_notification(recipient_list, subject, message_body)
+        
+        return result
+            
+    def sendStatusNotification(recipient_list, subject, message_body, link):
+
+        """first implementation"""
+        subject = "Mitigation Action: " + subject
+        message_body += "\nlink: " + link
+
+        result = self.sendNotification(recipient_list, subject, message_body)
+
+        return result
+        
+
+
+
+
+

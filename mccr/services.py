@@ -189,3 +189,21 @@ class MCCRService():
     def _get_filename(self, filename):
         fpath, fname = os.path.split(filename)
         return fname
+    
+
+    ##email services
+    def sendNotification(recipient_list, subject, message_body):
+
+        result = ses_service.send_notification(recipient_list, subject, message_body)
+        
+        return result
+            
+    def sendStatusNotification(recipient_list, subject, message_body, link):
+
+        """first implementation"""
+        subject = "MMCR: " + subject
+        message_body += "\nlink: " + link
+
+        result = self.sendNotification(recipient_list, subject, message_body)
+
+        return result
