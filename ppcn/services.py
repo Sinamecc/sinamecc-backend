@@ -13,7 +13,7 @@ from django.http import FileResponse
 from django.urls import reverse
 import os
 import pdb
-
+from general.services import EmailServices
 email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
 
@@ -466,15 +466,15 @@ class PpcnService():
             result (False, self.LEVEL_ERROR_GET_ALL)
         return result
 
-    def sendNotification(recipient_list, subject, message_body):
+    def sendNotification(self, recipient_list, subject, message_body):
 
         result = ses_service.send_notification(recipient_list, subject, message_body)
         
         return result
             
-    def sendStatusNotification(recipient_list, subject, message_body, link):
+    def sendStatusNotification(self, recipient_list, subject, message_body, link):
 
-         """first implementation"""
+        """first implementation"""
         subject = "PPCN: " + subject
         message_body += "\nlink: " + link
 

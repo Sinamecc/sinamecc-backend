@@ -8,7 +8,9 @@ from io import BytesIO
 import uuid
 import os
 
-
+from general.services import EmailServices
+email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
+ses_service = EmailServices(email_sender)
 # TODO: Change is_valid() to exception
 class MCCRService():
     def __init__(self):
@@ -192,13 +194,13 @@ class MCCRService():
     
 
     ##email services
-    def sendNotification(recipient_list, subject, message_body):
+    def sendNotification(self, recipient_list, subject, message_body):
 
         result = ses_service.send_notification(recipient_list, subject, message_body)
         
         return result
             
-    def sendStatusNotification(recipient_list, subject, message_body, link):
+    def sendStatusNotification(self, recipient_list, subject, message_body, link):
 
         """first implementation"""
         subject = "MMCR: " + subject

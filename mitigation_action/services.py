@@ -816,13 +816,13 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
-    def sendNotification(recipient_list, subject, message_body):
+    def sendNotification(self, recipient_list, subject, message_body):
 
         result = ses_service.send_notification(recipient_list, subject, message_body)
         
         return result
             
-    def sendStatusNotification(recipient_list, subject, message_body, link):
+    def sendStatusNotification(self, recipient_list, subject, message_body, link):
 
         """first implementation"""
         subject = "Mitigation Action: " + subject
