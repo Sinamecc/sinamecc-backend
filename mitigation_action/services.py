@@ -112,6 +112,7 @@ class MitigationActionService():
                         } for comment in m.comments.all()
                     ],
                     'fsm_state': m.fsm_state,
+                    'next_state': self.next_action(m.fsm_state),
                     'created': m.created,
                     'updated': m.updated 
                 } for m in Mitigation.objects.all()
@@ -370,56 +371,25 @@ class MitigationActionService():
         f_uuid = uuid.UUID(str_uuid)
         return Mitigation.objects.get(pk=f_uuid)
 
-    def possible_next_state(self, current_fsm_state):
-        result_arr = []
+    def next_action(self, current_fsm_state):
+        result = None
         if current_fsm_state == 'new':
-            result_arr.append({
-                'state': 'submitted'
-            })
+            result = 'submitted'
         elif current_fsm_state == 'submitted' or current_fsm_state == 'updating_by_request':
-            result_arr.append({
-                'state': 'in_evaluation_by_DCC'
-            })
+            result = 'in_evaluation_by_DCC'
         elif current_fsm_state == 'in_evaluation_by_DCC':
-            result_arr.append(
-                {'state': 'submit_evaluation_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'changes_requested_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'rejected_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'registering'}
-            )
-        elif current_fsm_state == 'submit_evaluation_by_DCC':
-            result_arr.append(
-                {'state': 'changes_requested_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'rejected_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'registering'}
-            )
+            result = 'decision_step_DCC'
+        elif current_fsm_state == 'decision_step_DCC':
+            result = False
         elif current_fsm_state == 'changes_requested_by_DCC':
-            result_arr.append(
-                {'state': 'updating_by_request'}
-            )
+            result = 'updating_by_request'
         elif current_fsm_state == 'rejected_by_DCC':
-            result_arr.append(
-                {'state': 'end'}
-            )
+            result = 'end'
         elif current_fsm_state == 'registering':
-            result_arr.append(
-                {'state': 'in_evaluation_INGEI_by_DCC_IMN'}
-            )
+            result = 'in_evaluation_INGEI_by_DCC_IMN'
         elif current_fsm_state == 'in_evaluation_INGEI_by_DCC_IMN':
-            result_arr.append(
-                {'state': 'submit_INGEI_harmonization_required'}
-            )
-        return result_arr    
+            result = 'submit_INGEI_harmonization_required'
+        return result  
 
     def get(self, id, language):
 
@@ -507,7 +477,7 @@ class MitigationActionService():
                     } for comment in mitigation.comments.all()
                 ],
                 'fsm_state': mitigation.fsm_state,
-                'next_state': self.possible_next_state(mitigation.fsm_state),
+                'next_state': self.next_action(mitigation.fsm_state),
                 'created': mitigation.created,
                 'updated': mitigation.updated
             }
@@ -550,6 +520,12 @@ class MitigationActionService():
 
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
+                mitigation_previous_status = mitigation_action.fsm_state
+                if not can_proceed(mitigation_action.update_by_request):
+                    errors.append(self.INVALID_STATUS_TRANSITION)
+                mitigation_action.update_by_request()
+                mitigation_action.save()
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
                 mitigation.ingei_compliances.clear()
                 get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
                 if get_ingei_result:
@@ -586,23 +562,23 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # in_evaluation_by_DCC -> submit_evaluation_by_DCC
-        elif next_state == 'submit_evaluation_by_DCC':
+        # in_evaluation_by_DCC -> decision_step_DCC
+        elif next_state == 'decision_step_DCC':
             if not can_proceed(mitigation_action.submit_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.submit_DCC()
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # submit_evaluation_by_DCC -> changes_requested_by_DCC
-        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'submit_evaluation_by_DCC':
+        # decision_step_DCC -> changes_requested_by_DCC
+        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'decision_step_DCC':
             if not can_proceed(mitigation_action.request_changes_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.request_changes_DCC()
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # submit_evaluation_by_DCC -> rejected_by_DCC
+        # decision_step_DCC -> rejected_by_DCC
         elif next_state == 'rejected_by_DCC':
             if not can_proceed(mitigation_action.reject_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
@@ -610,7 +586,7 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # submit_evaluation_by_DCC -> registering
+        # decision_step_DCC -> registering
         elif next_state == 'registering':
             if not can_proceed(mitigation_action.register):
                 result = (False, self.INVALID_STATUS_TRANSITION)

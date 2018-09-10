@@ -184,7 +184,8 @@ class Mitigation(models.Model):
     @transition(field='fsm_state', source='new', target='submitted', conditions=[can_submit], on_error='failed', permission='')
     def submit(self):
         print('The mitigation action is transitioning from new to submitted')
-        # Additional logic goes here.
+        # Notify to DCC placeholder
+        # self.notify_submission_DCC()
         pass
 
     # --- Transition ---
@@ -216,62 +217,65 @@ class Mitigation(models.Model):
         pass
 
     # --- Transition ---
-    # in_evaluation_by_DCC -> submit_evaluation_by_DCC
+    # in_evaluation_by_DCC -> decision_step_DCC
     def can_submit_DCC(self):
         # Transition condition logic goes here
         # Verify current state
         # - in_evaluation_by_DCC
         return self.fsm_state == 'in_evaluation_by_DCC'
 
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='submit_evaluation_by_DCC', conditions=[can_submit_DCC], on_error='failed', permission='')
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='decision_step_DCC', conditions=[can_submit_DCC], on_error='failed', permission='')
     def submit_DCC(self):
-        print('The mitigation action is transitioning from in_evaluation_by_DCC to submit_evaluation_by_DCC')
+        print('The mitigation action is transitioning from in_evaluation_by_DCC to decision_step_DCC')
         # Additional logic goes here.
         pass
 
     # --- Transition ---
-    # submit_evaluation_by_DCC -> changes_requested_by_DCC
+    # decision_step_DCC -> changes_requested_by_DCC
     def can_request_changes_DCC(self):
         # Transition condition logic goes here
         # Verify current state
-        # - submit_evaluation_by_DCC
+        # - decision_step_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'decision_step_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
 
-    @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='changes_requested_by_DCC', conditions=[can_request_changes_DCC], on_error='failed', permission='')
+    @transition(field='fsm_state', source='decision_step_DCC', target='changes_requested_by_DCC', conditions=[can_request_changes_DCC], on_error='failed', permission='')
     def request_changes_DCC(self):
-        print('The mitigation action is transitioning from submit_evaluation_by_DCC to changes_requested_by_DCC')
-        # Additional logic goes here.
+        print('The mitigation action is transitioning from decision_step_DCC to changes_requested_by_DCC')
+        # Notify to DCC placeholder
+        # self.notify_changes_requested_DCC()
         pass
 
     # --- Transition ---
-    # submit_evaluation_by_DCC -> rejected_by_DCC
+    # decision_step_DCC -> rejected_by_DCC
     def can_reject_DCC(self):
         # Transition condition logic goes here
         # Verify current state
-        # - submit_evaluation_by_DCC
+        # - decision_step_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'decision_step_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
 
-    @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission='')
+    @transition(field='fsm_state', source='decision_step_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission='')
     def reject_DCC(self):
-        print('The mitigation action is transitioning from submit_evaluation_by_DCC to rejected_by_DCC')
-        # Additional logic goes here.
+        print('The mitigation action is transitioning from decision_step_DCC to rejected_by_DCC')
+        # Notify to DCC placeholder
+        # self.notify_reject_DCC()
         pass
 
     # --- Transition ---
-    # submit_evaluation_by_DCC -> registering
+    # decision_step_DCC -> registering
     def can_register(self):
         # Transition condition logic goes here
         # Verify current state
-        # - submit_evaluation_by_DCC
+        # - decision_step_DCC
         # - in_evaluation_by_DCC
-        return self.fsm_state == 'submit_evaluation_by_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
+        return self.fsm_state == 'decision_step_DCC' or self.fsm_state == 'in_evaluation_by_DCC'
     
-    @transition(field='fsm_state', source='submit_evaluation_by_DCC', target='registering', conditions=[can_register], on_error='failed', permission='')
+    @transition(field='fsm_state', source='decision_step_DCC', target='registering', conditions=[can_register], on_error='failed', permission='')
     def register(self):
-        print('The mitigation action is transitioning from submit_evaluation_by_DCC to registering')
-        # Additional logic goes here.
+        print('The mitigation action is transitioning from decision_step_DCC to registering')
+        # Notify to DCC placeholder
+        # self.notify_registering_DCC()
         pass
 
     # --- Transition ---
