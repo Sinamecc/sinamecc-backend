@@ -4,9 +4,11 @@ from mitigation_action.models import Contact
 from mitigation_action.serializers import ContactSerializer
 import json
 from ppcn.serializers import *
+from ppcn.workflow_steps.models import PPCNWorkflowStepFile
 from rest_framework.parsers import JSONParser
 import datetime
 import uuid
+from django_fsm import can_proceed
 from io import BytesIO
 from general.storages import S3Storage
 from django.http import FileResponse
@@ -16,6 +18,11 @@ import pdb
 from general.services import EmailServices
 email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
+from workflow.models import ReviewStatus
+
+from workflow.services import WorkflowService
+
+workflow_service = WorkflowService()
 
 class PpcnService():
 
@@ -31,8 +38,11 @@ class PpcnService():
         self.PPCN_ERROR_GET_ALL = "Error retrieving all PPCN records."
         self.PPCN_DOES_NOT_EXIST = "PPCN does not exist."
         self.PPCN_FILE_DOES_NOT_EXIST = "PPCN file does not exist."
+        self.INVALID_STATUS_TRANSITION = "Invalid ppcn state transition."
+        self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
 
-# serialized objects
+
+    # serialized objects
     def get_serialized_geographic_level(self, request):
 
         geographic_level_data = {
@@ -55,6 +65,16 @@ class PpcnService():
             serializer = ContactSerializer(contact, data=contact_data)
         else:
             serializer = ContactSerializer(data = contact_data)
+        return serializer
+
+    def get_serialized_change_log(self, ppcn_id, previous_status_id, current_status_id, user):
+        change_log_data = {
+            'ppcn': ppcn_id,
+            'previous_status': previous_status_id,
+            'current_status': current_status_id,
+            'user': user
+        }
+        serializer = ChangeLogSerializer(data=change_log_data)
         return serializer
 
     def get_serialized_organization(self, request ,contact_id, organization = False):
@@ -82,7 +102,8 @@ class PpcnService():
             'sector': request.data.get('sector'),
             'subsector': request.data.get('subsector'), 
             'recognitionType':request.data.get('recognitionType'),
-            'base_year':request.data.get('base_year')
+            'base_year':request.data.get('base_year'),
+            'user':request.data.get('user')
         }
         if ppcn:
             serializer = PPCNSerializer(ppcn ,data=ppcn_data)
@@ -216,7 +237,7 @@ class PpcnService():
         return result
 
     def put_organization(self, request, pk):
-
+        errors = []
         contact_id = request.data.get('contact').get('id')
         contact = Contact.objects.get(id=contact_id)
         contact_serialized = self.get_serialized_contact(request.data.get('organization'), contact)
@@ -289,7 +310,8 @@ class PpcnService():
                         'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
                     },
                     'base_year': pp.base_year,
-                    'create': pp.created,
+                    'fsm_state': pp.fsm_state,
+                    'created': pp.created,
                     'updated': pp.updated
                 }for pp in PPCN.objects.all()
             ]
@@ -297,23 +319,79 @@ class PpcnService():
         except Sector.DoesNotExist:
             result (False, self.PPCN_ERROR_GET_ALL)
         return result
-    
+
+
+    def create_change_log_entry(self, ppcn, previous_status, current_status, user):
+        serialized_change_log = self.get_serialized_change_log(ppcn.id, previous_status, current_status, user)
+        if serialized_change_log.is_valid():
+            serialized_change_log.save()
+            result = (True, serialized_change_log.data)
+        else:
+            result = (False, serialized_change_log.errors)
+        return result
+
     def create(self, request):
 
+        errors =[]
         save_result, result_detail= self.post_organization(request)
         if save_result:
             organization_id = result_detail.get('id')
             serialized_ppcn = self.get_serialized_ppcn(request, organization_id)
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
+                ppcn_previous_status = ppcn.fsm_state
+                if not can_proceed(ppcn.submit):
+                    errors.append(self.INVALID_STATUS_TRANSITION)
+                ppcn.submit()
+                ppcn.save()
+                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
+                
                 result = (True, PPCNSerializer(ppcn).data)
             else:
-                errors = serialized_ppcn.errors
+                errors.append(serialized_ppcn.errors)
                 result = (False, errors)
 
         else:
             result = (False, result_detail)
         return result
+
+    def possible_next_state(self, current_fsm_state):
+        result_arr = []
+        if current_fsm_state == 'new':
+            result_arr.append({
+                'state': 'submitted'
+            })
+        elif current_fsm_state == 'submitted':
+            result_arr.append({
+                'state': 'evaluation_by_DCC'
+            })
+        elif current_fsm_state == 'evaluation_by_DCC':
+            result_arr.append(
+                {'state': 'accepted_request_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'rejected_request'}
+            )
+        elif current_fsm_state == 'accepted_request_by_DCC':
+            result_arr.append(
+                {'state': 'evaluation_by_CA'}
+            )
+        elif current_fsm_state == 'evaluation_by_CA':
+            result_arr.append(
+                {'state': 'accepted_request_by_DCC'}
+            )
+            result_arr.append(
+                {'state': 'rejected_request'}
+            )
+        elif current_fsm_state == 'rejected_request':
+            result_arr.append(
+                {'state': 'end'}
+            )
+        elif current_fsm_state == 'accepted_request_by_DCC':
+            result_arr.append(
+                {'state': 'send_recognition_certificate'}
+            )
+        return result_arr
 
     def get(self, id ,language = 'en'):
         try:
@@ -360,9 +438,11 @@ class PpcnService():
                         'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
                     },
                     'base_year': pp.base_year,
-                    'create': pp.created,
+                    'created': pp.created,
                     'updated': pp.updated,
-                    'file': self._get_files_list(pp.files)
+                    'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
+                    'fsm_state': pp.fsm_state,
+                    'next_state': self.possible_next_state(pp.fsm_state)
                 }
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
@@ -380,7 +460,7 @@ class PpcnService():
 
     def update(self, id, request):
 
-        error = None
+        errors = None
         ppcn = PPCN.objects.get(id=id)
         organization = Organization.objects.get(id=ppcn.organization.id)
         contact = Contact.objects.get(id=organization.contact.id)
@@ -406,7 +486,6 @@ class PpcnService():
             result = (False, errors)
         return result
 
-    
     def post_PPCNFILE(self, request):
         result = []
         for f in request.data.getlist("files[]"):
@@ -421,15 +500,18 @@ class PpcnService():
         return  (True, result)
 
     def get_file_content(self, file_id):
-        ppcn_file = PPCNFile.objects.get(id=file_id)
+        ppcn_file = PPCNWorkflowStepFile.objects.get(id=file_id)
         path, filename = os.path.split(ppcn_file.file.name)
         return  (filename, BytesIO(self.storage.get_file(ppcn_file.file.name)))
+
 
     def download_file(self, id, file_id):
         return self.get_file_content(file_id)
 
     def _get_files_list(self, file_list):
-        return [{'name': self._get_filename(f.file.name), 'file': self._get_file_path(str(f.ppcn_form.id), str(f.id))} for f in file_list.all() ]
+        file_list = [file_list[0].union(q) for q in file_list[1:]] if len(file_list) > 1 else file_list
+        file_list = file_list[0] if len(file_list) > 0 else file_list
+        return [{'name': self._get_filename(f.file.name), 'file': self._get_file_path(str(f.workflow_step.ppcn.id), str(f.id))} for f in file_list ]
 
     def _get_file_path(self, ppcn_id, ppcn_file_id):
         url = reverse("get_ppcn_file_version", kwargs={'id': ppcn_id, 'ppcn_file_id': ppcn_file_id})
@@ -463,7 +545,7 @@ class PpcnService():
             }
             result = (True, form_list)
         except RequiredLevel.DoesNotExist:
-            result (False, self.LEVEL_ERROR_GET_ALL)
+            result (False, self.REQUIRED_LEVEL_ERROR_GET_ALL)
         return result
 
     def sendNotification(self, recipient_list, subject, message_body):
@@ -480,4 +562,127 @@ class PpcnService():
 
         result = self.sendNotification(recipient_list, subject, message_body)
 
+        return result
+
+    def getReviewStatus(self, id):
+        return ReviewStatus.objects.get(pk=id)
+
+    def get_change_log(self, id):
+        try:
+            ppcn = PPCN.objects.get(id=id)
+            change_log_content = []
+            for log in ChangeLog.objects.filter(ppcn=ppcn.id):
+                change_log_data = {
+                    'date': log.date,
+                    'ppcn': log.ppcn.id,
+                    'previous_state': log.previous_status,
+                    'current_status': log.current_status,
+                    'user': log.user.id
+                }
+                change_log_content.append(change_log_data)
+            result = (True, change_log_content)
+        except PPCN.DoesNotExist:
+            result = (False, self.PPCN_DOES_NOT_EXIST)
+        return result
+
+    def assign_comment(self, request, ppcn):
+        comment_result_status, comment_result_data = workflow_service.create_comment(request)
+        if comment_result_status:
+            comment = comment_result_data
+            ppcn.comments.add(comment)
+        return comment_result_status
+
+    def update_fsm_state(self, next_state, ppcn):
+        # --- Transition ---
+        # submitted -> evaluation_by_DCC
+        if next_state == 'evaluation_by_DCC':
+            if not can_proceed(ppcn.evaluate_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.evaluate_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        # --- Transition ---
+        # submitted -> rejectd_request_by_DCC
+        elif next_state == 'rejected_request':
+            if not can_proceed(ppcn.rejected_request_by_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.rejected_request_by_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # evaluation_by_DCC -> accepted_request_by_DCC
+        elif next_state == 'accepted_request_by_DCC':
+            if not can_proceed(ppcn.accept_request_by_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.accept_request_by_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        # --- Transition ---
+        # submitted -> rejectd_request_by_CA
+        elif next_state == 'rejected_request':
+            if not can_proceed(ppcn.rejected_request_by_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.rejected_request_by_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        # --- Transition ---
+        # accepted_request_by_DCC -> evaluation_by_CA
+        elif next_state == 'evaluation_by_CA':
+            if not can_proceed(ppcn.evaluate_by_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.evaluate_by_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        # --- Transition ---
+        # evaluation_by_CA -> accept_request_by_CA
+        elif next_state == 'accept_request_by_CA':
+            if not can_proceed(ppcn.accept_request_by_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.accept_request_by_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # evaluation_by_CA -> accept_request_by_CA
+        elif next_state == 'send_recognition_certificate':
+            if not can_proceed(ppcn.send_recognition_certificate):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.send_recognition_certificate()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        # --- Transition ---
+        # rejected_request_by_CDD_and_CA -> end
+        elif next_state == 'end':
+            if not can_proceed(ppcn.end):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.end()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+        return result
+
+    def patch(self, id, request):
+        ppcn =  PPCN.objects.get(id=id)
+        if(request.data.get('fsm_state')):
+            patch_data = {
+                'review_count': ppcn.review_count + 1
+            }
+            serialized_ppcn = PPCNSerializer(ppcn, data=patch_data, partial=True)
+            if serialized_ppcn.is_valid():
+                ppcn_previous_status = ppcn.fsm_state
+                ppcn = serialized_ppcn.save()
+                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), ppcn)
+                if update_state_status:
+                    self.create_change_log_entry(ppcn,ppcn_previous_status,ppcn.fsm_state,request.data.get('user'))
+                    result = (True, update_state_data)
+                else:
+                    result = (False, update_state_data)
+            if request.data.get('comment'):
+                comment_status = self.assign_comment(request, ppcn)
+                if comment_status:
+                    result = (True, PPCNSerializer(ppcn).data)
+                else:
+                    result = (False, self.COMMENT_NOT_ASSIGNED)
+        else:
+            result = (False, self.NO_PATCH_DATA_PROVIDED)
         return result

@@ -65,13 +65,15 @@ def get_one_ppcn(request, id , language = 'en'):
         result = view_helper.get_one(id, language)
     return result
 
-@api_view(['DELETE', 'PUT'])
+@api_view(['DELETE', 'PUT', 'PATCH'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
-def put_delete_ppcn(request, id , language = 'en'):
+def put_delete_patch_ppcn(request, id , language = 'en'):
     if request.method == 'PUT':
         result = view_helper.put(id, request)
     elif request.method == 'DELETE':
         result = view_helper.delete(id)
+    elif request.method == 'PATCH':
+        result = view_helper.patch(id, request)
     return result
 
 
@@ -98,3 +100,9 @@ def get_ppcn_file_version(request, id, ppcn_file_id):
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
     return view_helper.error_message("Unsupported METHOD for get_ppcn_file_version_url view")
+
+@api_view(['GET'])
+def get_ppcn_change_log(request, id):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_change_log", id)
+    return result

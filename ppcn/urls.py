@@ -47,12 +47,17 @@ urlpatterns = [
         name='get_one_ppcn'
     ), 
     url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/*$',
-        views.put_delete_ppcn,
-        name='put_delete_ppcn'
+        views.put_delete_patch_ppcn,
+        name='put_delete_patch_ppcn'
     ),
     url(r'^api/v1/ppcn/form/(?P<geographicLevel_id>[0-9]+)/(?P<language>es|en)*/*$',
         views.get_form_ppcn,
         name='get_form_ppcn'
-    )
+    ),
+    url(
+        r'^api/v1/ppcn/changelog/(?P<id>[0-9a-f-]+)$',
+        views.get_ppcn_change_log,
+        name='get_mitigation_change_log'
+    ),
    
 ]
