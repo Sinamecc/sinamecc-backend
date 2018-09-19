@@ -17,8 +17,8 @@ def workflow_step_directory_path(instance, filename):
 
 
 class MAWorkflowStep(models.Model):
-    user = models.ForeignKey(User, related_name='workflow_step')
-    mitigation_action = models.ForeignKey(Mitigation, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    mitigation_action = models.ForeignKey(Mitigation, related_name='workflow_step', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=False, null=False)
     entry_name = models.CharField(max_length=100, blank=False, null=False)
     status = models.CharField(max_length=50, blank=True) # Accepted, Rejected, Commented
@@ -34,8 +34,8 @@ class MAWorkflowStep(models.Model):
 
 
 class MAWorkflowStepFile(models.Model):
-    user = models.ForeignKey(User, related_name='harmonization_ingei_file')
-    workflow_step = models.ForeignKey(MAWorkflowStep, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    workflow_step = models.ForeignKey(MAWorkflowStep,related_name='workflow_step_file', on_delete=models.CASCADE)
     file = models.FileField(blank=False, null=False, upload_to=workflow_step_directory_path,
                             storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add=True)

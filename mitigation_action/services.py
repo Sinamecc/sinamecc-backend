@@ -1,4 +1,5 @@
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog
+from mitigation_action.workflow_steps.models import * 
 from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
 from workflow.models import ReviewStatus
 from general.storages import S3Storage
@@ -6,6 +7,9 @@ from rest_framework.parsers import JSONParser
 from django_fsm import can_proceed
 import datetime
 import uuid
+from io import BytesIO
+from django.urls import reverse
+import os
 
 from workflow.services import WorkflowService
 from general.services import EmailServices
@@ -478,6 +482,7 @@ class MitigationActionService():
                 ],
                 'fsm_state': mitigation.fsm_state,
                 'next_state': self.next_action(mitigation.fsm_state),
+                'files': self._get_files_list([f.workflow_step_file.all() for f in mitigation.workflow_step.all()]),
                 'created': mitigation.created,
                 'updated': mitigation.updated
             }
@@ -497,6 +502,7 @@ class MitigationActionService():
         return result
 
     def update(self, id, request):
+        errors = None
         mitigation = self.get_one(id)
         contact_id = request.data.get('contact[id]')
         progress_indicator_id = request.data.get('progress_indicator[id]')
@@ -531,13 +537,13 @@ class MitigationActionService():
                 if get_ingei_result:
                     result = (True, MitigationSerializer(mitigation_action).data)
                 else:
-                    errors.append(data_ingei_result)
+                    errors = data_ingei_result
                     result = (False, errors)
             else:
-                errors.append(serialized_mitigation_action.errors)
+                errors = serialized_mitigation_action.errors
                 result = (False, errors)
         else:
-            errors.append(serialized_contact.errors)
+            errors = [serialized_contact.errors]
             errors.append(serialized_progress_indicator.errors)
             errors.append(serialized_location.errors)
             errors.append(serialized_finance.errors)
@@ -792,6 +798,29 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
+    def get_file_content(self, file_id):
+        
+        MA_files = MAWorkflowStepFile.objects.get(id=file_id)
+        path, filename = os.path.split(MA_files.file.name)
+        return  (filename, BytesIO(self.storage.get_file(MA_files.file.name)))
+
+    def download_file(self, id, file_id):
+        return self.get_file_content(file_id)
+
+    def _get_files_list(self, file_list):
+        
+        file_list = [file_list[0].union(q) for q in file_list[1:]] if len(file_list) > 1 else file_list
+        file_list = file_list[0] if len(file_list) > 0 else file_list
+        return [{'name': self._get_filename(f.file.name), 'file': self._get_file_path(str(f.workflow_step.mitigation_action.id), str(f.id))} for f in file_list]
+
+    def _get_file_path(self, mitigation_action_id, mitigation_action_file_id):
+        url = reverse("get_mitigation_action_file", kwargs={'id': mitigation_action_id, 'file_id': mitigation_action_file_id})
+        return url
+
+    def _get_filename(self, filename):
+        fpath, fname = os.path.split(filename)
+        return fname
+      
     def sendNotification(self, recipient_list, subject, message_body):
 
         result = ses_service.send_notification(recipient_list, subject, message_body)
@@ -808,6 +837,7 @@ class MitigationActionService():
 
         return result
         
+
 
 
 

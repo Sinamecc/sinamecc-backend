@@ -31,5 +31,10 @@ urlpatterns = [
         r'^api/v1/mitigations(/(?P<language>[A-Za-z]{2}))?/(?P<pk>[0-9a-zA-Z\-]+)$',
         views.get_delete_put_patch_mitigation,
         name='get_delete_put_patch_mitigation'
-    )
+    ),
+    url(
+        r'^api/v1/mitigations/(?P<id>[0-9a-fA-F-]+)/file/(?P<file_id>[0-9a-fA-F-]+)/*$',
+        views.get_mitigation_action_file,
+        name='get_mitigation_action_file'
+    ),
 ]

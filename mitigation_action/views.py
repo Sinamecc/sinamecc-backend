@@ -6,6 +6,7 @@ from general.helpers import ViewHelper
 from django.shortcuts import redirect
 from mitigation_action.services import MitigationActionService
 import uuid
+from django.http import FileResponse
 
 service = MitigationActionService()
 view_helper = ViewHelper(service)
@@ -124,3 +125,13 @@ def _get_form_data_es_en(language, option):
     else:
         result = Response(data_result, status=status.HTTP_400_BAD_REQUEST)
     return result
+
+@api_view(['GET'])
+def get_mitigation_action_file(request, id, file_id):
+    if request.method == 'GET':
+        file_name, file_data = service.download_file(id, file_id)
+        attachment_file_name_value = "attachment; filename=\"{}\"".format(file_name)
+        response = FileResponse(file_data, content_type='application/octet-stream')
+        response.setdefault('Content-Disposition', attachment_file_name_value)
+        return response
+    return view_helper.error_message("Unsupported METHOD for get_mitigation_action_file_version_url view")
