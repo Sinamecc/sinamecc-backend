@@ -722,7 +722,6 @@ class Mitigation(models.Model):
         # Additional logic goes here.
         pass
 
-
     # --- Transition ---
     # SINAMECC_integration_changes_requested -> submitted_SINAMECC_integration_changes
     def can_submit_SINAMECC_integration_changes(self):
