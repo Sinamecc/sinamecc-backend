@@ -378,6 +378,7 @@ class MitigationActionService():
         elif current_fsm_state == 'submitted' or current_fsm_state == 'updating_by_request':
             result = 'in_evaluation_by_DCC'
         elif current_fsm_state == 'in_evaluation_by_DCC':
+            # Transitory step (FE input)
             result = 'decision_step_DCC'
         elif current_fsm_state == 'decision_step_DCC':
             result = False
@@ -385,10 +386,60 @@ class MitigationActionService():
             result = 'updating_by_request'
         elif current_fsm_state == 'rejected_by_DCC':
             result = 'end'
-        elif current_fsm_state == 'registering':
+        elif current_fsm_state == 'registering' or current_fsm_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN':
             result = 'in_evaluation_INGEI_by_DCC_IMN'
         elif current_fsm_state == 'in_evaluation_INGEI_by_DCC_IMN':
+            # Transitory step (FE input)
             result = 'submit_INGEI_harmonization_required'
+        elif current_fsm_state == 'submit_INGEI_harmonization_required':
+            result = False
+        elif current_fsm_state == 'INGEI_harmonization_required':
+            result = 'updating_INGEI_changes_proposal'
+        elif current_fsm_state == 'updating_INGEI_changes_proposal':
+            result = 'submitted_INGEI_changes_proposal_evaluation'
+        elif current_fsm_state == 'submitted_INGEI_changes_proposal_evaluation':
+            result = 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN'
+        elif current_fsm_state == 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN':
+            # Transitory step (FE input)
+            result = 'submit_INGEI_changes_proposal_evaluation_result'
+        elif current_fsm_state == 'submit_INGEI_changes_proposal_evaluation_result':
+            result = False
+        elif current_fsm_state == 'INGEI_changes_proposal_changes_requested_by_DCC_IMN':
+            result = 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN'
+        elif current_fsm_state == 'INGEI_changes_proposal_rejected_by_DCC_IMN':
+            result = 'submitted_SINAMECC_conceptual_proposal_integration'
+        elif current_fsm_state == 'INGEI_changes_proposal_accepted_by_DCC_IMN':
+            result = 'implementing_INGEI_changes'  
+        elif current_fsm_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN':
+            result = 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN'
+        elif current_fsm_state == 'implementing_INGEI_changes':
+            result = 'submitted_SINAMECC_conceptual_proposal_integration'
+        elif current_fsm_state == 'submitted_SINAMECC_conceptual_proposal_integration':
+            result = 'in_evaluation_conceptual_proposal_by_DCC'
+        elif current_fsm_state == 'in_evaluation_conceptual_proposal_by_DCC':
+            # Transitory step (FE input)
+            result = 'decision_step_DCC_proposal'
+        elif current_fsm_state == 'decision_step_DCC_proposal':
+            result = False
+        elif current_fsm_state == 'conceptual_proposal_approved':
+            result = 'planning_integration_with_SINAMECC'
+        elif current_fsm_state == 'changes_requested_to_conceptual_proposal':
+            result = 'submitted_conceptual_proposal_changes'
+        elif current_fsm_state == 'submitted_conceptual_proposal_changes':
+            result = 'submitted_SINAMECC_conceptual_proposal_integration'
+        elif current_fsm_state == 'planning_integration_with_SINAMECC':
+            # Transitory step (FE input)
+            result = 'decision_step_SINAMEC'
+        elif current_fsm_state == 'decision_step_SINAMEC':
+            result = False
+        elif current_fsm_state == 'SINAMECC_integration_approved':
+            result = 'implementing_SINAMECC_changes'
+        elif current_fsm_state == 'SINAMECC_integration_changes_requested':
+            result = 'submitted_SINAMECC_integration_changes'
+        elif current_fsm_state == 'submitted_SINAMECC_integration_changes':
+            result = 'planning_integration_with_SINAMECC'
+        elif current_fsm_state == 'implementing_SINAMECC_changes':
+            result = 'end'
         return result  
 
     def get(self, id, language):
