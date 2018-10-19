@@ -358,6 +358,412 @@ class Mitigation(models.Model):
         # Additional logic goes here.
         pass
 
+    # --- Transition ---
+    # submit_INGEI_harmonization_required -> INGEI_harmonization_required
+    def can_require_INGEI_harmonization(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submit_INGEI_harmonization_required
+        return self.fsm_state == 'submit_INGEI_harmonization_required'
+
+    @transition(field='fsm_state', source='submit_INGEI_harmonization_required', target='INGEI_harmonization_required', conditions=[can_require_INGEI_harmonization], on_error='failed', permission='')
+    def require_INGEI_harmonization(self):
+        print('The mitigation action is transitioning from submit_INGEI_harmonization_required to INGEI_harmonization_required')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submit_INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
+    def can_submit_SINAMECC_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submit_INGEI_harmonization_required
+        return self.fsm_state == 'submit_INGEI_harmonization_required'
+
+    @transition(field='fsm_state', source='submit_INGEI_harmonization_required', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal], on_error='failed', permission='')
+    def submit_SINAMECC_conceptual_proposal(self):
+        print('The mitigation action is transitioning from submit_INGEI_harmonization_required to submitted_SINAMECC_conceptual_proposal_integration')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # in_evaluation_INGEI_by_DCC_IMN -> INGEI_harmonization_required
+    def can_evaluate_require_INGEI_harmonization(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_INGEI_by_DCC_IMN
+        return self.fsm_state == 'in_evaluation_INGEI_by_DCC_IMN'
+
+    @transition(field='fsm_state', source='in_evaluation_INGEI_by_DCC_IMN', target='INGEI_harmonization_required', conditions=[can_evaluate_require_INGEI_harmonization], on_error='failed', permission='')
+    def evaluate_require_INGEI_harmonization(self):
+        print('The mitigation action is transitioning from in_evaluation_INGEI_by_DCC_IMN to INGEI_harmonization_required')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_harmonization_required -> updating_INGEI_changes_proposal
+    def can_update_INGEI_changes_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_harmonization_required
+        return self.fsm_state == 'INGEI_harmonization_required'
+
+    @transition(field='fsm_state', source='INGEI_harmonization_required', target='updating_INGEI_changes_proposal', conditions=[can_update_INGEI_changes_proposal], on_error='failed', permission='')
+    def update_INGEI_changes_proposal(self):
+        print('The mitigation action is transitioning from INGEI_harmonization_required to updating_INGEI_changes_proposal')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
+    def can_submit_SINAMECC_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_harmonization_required
+        return self.fsm_state == 'INGEI_harmonization_required'
+
+    @transition(field='fsm_state', source='INGEI_harmonization_required', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal], on_error='failed', permission='')
+    def submit_SINAMECC_conceptual_proposal(self):
+        print('The mitigation action is transitioning from INGEI_harmonization_required to submitted_SINAMECC_conceptual_proposal_integration')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_harmonization_required -> updating_INGEI_changes_proposal
+    def can_update_INGEI_changes_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_harmonization_required
+        return self.fsm_state == 'INGEI_harmonization_required'
+    
+    @transition(field='fsm_state', source='INGEI_harmonization_required', target='updating_INGEI_changes_proposal', conditions=[update_INGEI_changes_proposal], on_error='failed', permission='')
+    def update_INGEI_changes_proposal(self):
+        print('The mitigation action is transitioning from INGEI_harmonization_required to updating_INGEI_changes_proposal')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # updating_INGEI_changes_proposal -> submitted_INGEI_changes_proposal_evaluation
+    def can_submit_INGEI_changes_evaluation(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - updating_INGEI_changes_proposal
+        return self.fsm_state == 'updating_INGEI_changes_proposal'
+
+    @transition(field='fsm_state', source='updating_INGEI_changes_proposal', target='submitted_INGEI_changes_proposal_evaluation', conditions=[can_submit_INGEI_changes_evaluation], on_error='failed', permission='')
+    def submit_INGEI_changes_evaluation(self):
+        print('The mitigation action is transitioning from updating_INGEI_changes_proposal to submitted_INGEI_changes_proposal_evaluation')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submitted_INGEI_changes_proposal_evaluation -> in_evaluation_INGEI_changes_proposal_by_DCC_IMN
+    def can_evaluate_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submitted_INGEI_changes_proposal_evaluation
+        return self.fsm_state == 'submitted_INGEI_changes_proposal_evaluation'
+
+    @transition(field='fsm_state', source='submitted_INGEI_changes_proposal_evaluation', target='in_evaluation_INGEI_changes_proposal_by_DCC_IMN', conditions=[can_evaluate_DCC_IMN], on_error='failed', permission='')
+    def evaluate_DCC_IMN(self):
+        print('The mitigation action is transitioning from submitted_INGEI_changes_proposal_evaluation to in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # in_evaluation_INGEI_changes_proposal_by_DCC_IMN -> submit_INGEI_changes_proposal_evaluation_result
+    def can_submit_INGEI_changes_proposal_evaluation_result(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_INGEI_changes_proposal_by_DCC_IMN
+        return self.fsm_state == 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN'
+
+    @transition(field='fsm_state', source='in_evaluation_INGEI_changes_proposal_by_DCC_IMN', target='submit_INGEI_changes_proposal_evaluation_result', conditions=[can_submit_INGEI_changes_proposal_evaluation_result], on_error='failed', permission='')
+    def submit_INGEI_changes_proposal_evaluation_result(self):
+        print('The mitigation action is transitioning from in_evaluation_INGEI_changes_proposal_by_DCC_IMN to submit_INGEI_changes_proposal_evaluation_result')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_changes_requested_by_DCC_IMN
+    def can_request_changes_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submit_INGEI_changes_proposal_evaluation_result
+        return self.fsm_state == 'submit_INGEI_changes_proposal_evaluation_result'
+
+    @transition(field='fsm_state', source='submit_INGEI_changes_proposal_evaluation_result', target='INGEI_changes_proposal_changes_requested_by_DCC_IMN', conditions=[can_request_changes_DCC_IMN], on_error='failed', permission='')
+    def request_changes_DCC_IMN(self):
+        print('The mitigation action is transitioning from submit_INGEI_changes_proposal_evaluation_result to INGEI_changes_proposal_changes_requested_by_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_rejected_by_DCC_IMN
+    def can_reject_changes_proposal_by_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submit_INGEI_changes_proposal_evaluation_result
+        return self.fsm_state == 'submit_INGEI_changes_proposal_evaluation_result'
+
+    @transition(field='fsm_state', source='submit_INGEI_changes_proposal_evaluation_result', target='INGEI_changes_proposal_rejected_by_DCC_IMN', conditions=[can_reject_changes_proposal_by_DCC_IMN], on_error='failed', permission='')
+    def reject_changes_proposal_by_DCC_IMN(self):
+        print('The mitigation action is transitioning from submit_INGEI_changes_proposal_evaluation_result to INGEI_changes_proposal_rejected_by_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_accepted_by_DCC_IMN
+    def can_accept_changes_proposal_by_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submit_INGEI_changes_proposal_evaluation_result
+        return self.fsm_state == 'submit_INGEI_changes_proposal_evaluation_result'
+
+    @transition(field='fsm_state', source='submit_INGEI_changes_proposal_evaluation_result', target='INGEI_changes_proposal_accepted_by_DCC_IMN', conditions=[can_accept_changes_proposal_by_DCC_IMN], on_error='failed', permission='')
+    def accept_changes_proposal_by_DCC_IMN(self):
+        print('The mitigation action is transitioning from submit_INGEI_changes_proposal_evaluation_result to INGEI_changes_proposal_accepted_by_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_changes_proposal_changes_requested_by_DCC_IMN -> updating_INGEI_changes_proposal_by_request_of_DCC_IMN
+    def can_update_changes_proposal_by_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_changes_proposal_changes_requested_by_DCC_IMN
+        return self.fsm_state == 'INGEI_changes_proposal_changes_requested_by_DCC_IMN'
+
+    @transition(field='fsm_state', source='INGEI_changes_proposal_changes_requested_by_DCC_IMN', target='updating_INGEI_changes_proposal_by_request_of_DCC_IMN', conditions=[can_update_changes_proposal_by_DCC_IMN], on_error='failed', permission='')
+    def update_changes_proposal_by_DCC_IMN(self):
+        print('The mitigation action is transitioning from INGEI_changes_proposal_changes_requested_by_DCC_IMN to updating_INGEI_changes_proposal_by_request_of_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_changes_proposal_rejected_by_DCC_IMN -> submitted_SINAMECC_conceptual_proposal_integration
+    def can_submit_SINAMECC_conceptual_proposal_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_changes_proposal_rejected_by_DCC_IMN
+        return self.fsm_state == 'INGEI_changes_proposal_rejected_by_DCC_IMN'
+
+    @transition(field='fsm_state', source='INGEI_changes_proposal_rejected_by_DCC_IMN', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal_integration], on_error='failed', permission='')
+    def submit_SINAMECC_conceptual_proposal_integration(self):
+        print('The mitigation action is transitioning from INGEI_changes_proposal_rejected_by_DCC_IMN to submitted_SINAMECC_conceptual_proposal_integration')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # INGEI_changes_proposal_accepted_by_DCC_IMN -> implementing_INGEI_changes
+    def can_implement_INGEI_changes(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - INGEI_changes_proposal_accepted_by_DCC_IMN
+        return self.fsm_state == 'INGEI_changes_proposal_accepted_by_DCC_IMN'
+
+    @transition(field='fsm_state', source='INGEI_changes_proposal_accepted_by_DCC_IMN', target='implementing_INGEI_changes', conditions=[can_implement_INGEI_changes], on_error='failed', permission='')
+    def implement_INGEI_changes(self):
+        print('The mitigation action is transitioning from INGEI_changes_proposal_accepted_by_DCC_IMN to implementing_INGEI_changes')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # updating_INGEI_changes_proposal_by_request_of_DCC_IMN -> in_evaluation_INGEI_changes_proposal_by_DCC_IMN
+    def can_update_evaluate_DCC_IMN(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - updating_INGEI_changes_proposal_by_request_of_DCC_IMN
+        return self.fsm_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN'
+
+    @transition(field='fsm_state', source='updating_INGEI_changes_proposal_by_request_of_DCC_IMN', target='in_evaluation_INGEI_changes_proposal_by_DCC_IMN', conditions=[can_update_evaluate_DCC_IMN], on_error='failed', permission='')
+    def update_evaluate_DCC_IMN(self):
+        print('The mitigation action is transitioning from updating_INGEI_changes_proposal_by_request_of_DCC_IMN to in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # implementing_INGEI_changes -> submitted_SINAMECC_conceptual_proposal_integration
+    def can_implement_submit_SINAMECC_conceptual_proposal_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - implementing_INGEI_changes
+        return self.fsm_state == 'implementing_INGEI_changes'
+
+    @transition(field='fsm_state', source='implementing_INGEI_changes', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_implement_submit_SINAMECC_conceptual_proposal_integration], on_error='failed', permission='')
+    def implement_submit_SINAMECC_conceptual_proposal_integration(self):
+        print('The mitigation action is transitioning from implementing_INGEI_changes to submitted_SINAMECC_conceptual_proposal_integration')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submitted_SINAMECC_conceptual_proposal_integration -> in_evaluation_conceptual_proposal_by_DCC
+    def can_evaluate_conceptual_proposal_DCC(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submitted_SINAMECC_conceptual_proposal_integration
+        return self.fsm_state == 'submitted_SINAMECC_conceptual_proposal_integration'
+
+    @transition(field='fsm_state', source='submitted_SINAMECC_conceptual_proposal_integration', target='in_evaluation_conceptual_proposal_by_DCC', conditions=[can_evaluate_conceptual_proposal_DCC], on_error='failed', permission='')
+    def evaluate_conceptual_proposal_DCC(self):
+        print('The mitigation action is transitioning from submitted_SINAMECC_conceptual_proposal_integration to in_evaluation_conceptual_proposal_by_DCC')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # in_evaluation_conceptual_proposal_by_DCC -> conceptual_proposal_approved
+    def can_approve_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_conceptual_proposal_by_DCC
+        return self.fsm_state == 'in_evaluation_conceptual_proposal_by_DCC'
+
+    @transition(field='fsm_state', source='in_evaluation_conceptual_proposal_by_DCC', target='conceptual_proposal_approved', conditions=[can_approve_conceptual_proposal], on_error='failed', permission='')
+    def approve_conceptual_proposal(self):
+        print('The mitigation action is transitioning from in_evaluation_conceptual_proposal_by_DCC to conceptual_proposal_approved')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # in_evaluation_conceptual_proposal_by_DCC -> changes_requested_to_conceptual_proposal
+    def can_request_changes_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_conceptual_proposal_by_DCC
+        return self.fsm_state == 'in_evaluation_conceptual_proposal_by_DCC'
+
+    @transition(field='fsm_state', source='in_evaluation_conceptual_proposal_by_DCC', target='changes_requested_to_conceptual_proposal', conditions=[can_request_changes_conceptual_proposal], on_error='failed', permission='')
+    def request_changes_conceptual_proposal(self):
+        print('The mitigation action is transitioning from in_evaluation_conceptual_proposal_by_DCC to changes_requested_to_conceptual_proposal')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # conceptual_proposal_approved -> planning_integration_with_SINAMECC
+    def can_plan_integration_SINAMECC(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - conceptual_proposal_approved
+        return self.fsm_state == 'conceptual_proposal_approved'
+
+    @transition(field='fsm_state', source='conceptual_proposal_approved', target='planning_integration_with_SINAMECC', conditions=[can_plan_integration_SINAMECC], on_error='failed', permission='')
+    def plan_integration_SINAMECC(self):
+        print('The mitigation action is transitioning from conceptual_proposal_approved to planning_integration_with_SINAMECC')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # changes_requested_to_conceptual_proposal -> submitted_conceptual_proposal_changes
+    def can_submit_conceptual_proposal_changes(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - changes_requested_to_conceptual_proposal
+        return self.fsm_state == 'changes_requested_to_conceptual_proposal'
+
+    @transition(field='fsm_state', source='changes_requested_to_conceptual_proposal', target='submitted_conceptual_proposal_changes', conditions=[can_submit_conceptual_proposal_changes], on_error='failed', permission='')
+    def submit_conceptual_proposal_changes(self):
+        print('The mitigation action is transitioning from changes_requested_to_conceptual_proposal to submitted_conceptual_proposal_changes')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submitted_conceptual_proposal_changes -> submitted_SINAMECC_conceptual_proposal_integration
+    def can_submit_SINAMECC_conceptual_proposal_changes(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submitted_conceptual_proposal_changes
+        return self.fsm_state == 'submitted_conceptual_proposal_changes'
+
+    @transition(field='fsm_state', source='submitted_conceptual_proposal_changes', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal_changes], on_error='failed', permission='')
+    def submit_SINAMECC_conceptual_proposal_changes(self):
+        print('The mitigation action is transitioning from submitted_conceptual_proposal_changes to submitted_SINAMECC_conceptual_proposal_integration')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # planning_integration_with_SINAMECC -> SINAMECC_integration_approved
+    def can_approve_SINAMECC_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - planning_integration_with_SINAMECC
+        return self.fsm_state == 'planning_integration_with_SINAMECC'
+
+    @transition(field='fsm_state', source='planning_integration_with_SINAMECC', target='SINAMECC_integration_approved', conditions=[can_approve_SINAMECC_integration], on_error='failed', permission='')
+    def approve_SINAMECC_integration(self):
+        print('The mitigation action is transitioning from planning_integration_with_SINAMECC to SINAMECC_integration_approved')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # planning_integration_with_SINAMECC -> SINAMECC_integration_changes_requested
+    def can_request_changes_SINAMECC_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - planning_integration_with_SINAMECC
+        return self.fsm_state == 'planning_integration_with_SINAMECC'
+
+    @transition(field='fsm_state', source='planning_integration_with_SINAMECC', target='SINAMECC_integration_changes_requested', conditions=[can_request_changes_SINAMECC_integration], on_error='failed', permission='')
+    def request_changes_SINAMECC_integration(self):
+        print('The mitigation action is transitioning from planning_integration_with_SINAMECC to SINAMECC_integration_changes_requested')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # SINAMECC_integration_approved -> implementing_SINAMECC_changes
+    def can_implement_SINAMECC_changes(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - SINAMECC_integration_approved
+        return self.fsm_state == 'SINAMECC_integration_approved'
+
+    @transition(field='fsm_state', source='SINAMECC_integration_approved', target='implementing_SINAMECC_changes', conditions=[can_implement_SINAMECC_changes], on_error='failed', permission='')
+    def implement_SINAMECC_changes(self):
+        print('The mitigation action is transitioning from SINAMECC_integration_approved to implementing_SINAMECC_changes')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # SINAMECC_integration_changes_requested -> submitted_SINAMECC_integration_changes
+    def can_submit_SINAMECC_integration_changes(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - SINAMECC_integration_changes_requested
+        return self.fsm_state == 'SINAMECC_integration_changes_requested'
+
+    @transition(field='fsm_state', source='SINAMECC_integration_changes_requested', target='submitted_SINAMECC_integration_changes', conditions=[can_submit_SINAMECC_integration_changes], on_error='failed', permission='')
+    def submit_SINAMECC_integration_changes(self):
+        print('The mitigation action is transitioning from SINAMECC_integration_changes_requested to submitted_SINAMECC_integration_changes')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # submitted_SINAMECC_integration_changes -> planning_integration_with_SINAMECC
+    def can_submit_plan_integration_SINAMECC(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - submitted_SINAMECC_integration_changes
+        return self.fsm_state == 'submitted_SINAMECC_integration_changes'
+
+    @transition(field='fsm_state', source='submitted_SINAMECC_integration_changes', target='planning_integration_with_SINAMECC', conditions=[can_submit_plan_integration_SINAMECC], on_error='failed', permission='')
+    def submit_plan_integration_SINAMECC(self):
+        print('The mitigation action is transitioning from submitted_SINAMECC_integration_changes to planning_integration_with_SINAMECC')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # implementing_SINAMECC_changes -> end
+    def can_end_SINAMECC(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - implementing_SINAMECC_changes
+        return self.fsm_state == 'implementing_SINAMECC_changes'
+
+    @transition(field='fsm_state', source='implementing_SINAMECC_changes', target='end', conditions=[can_end_SINAMECC], on_error='failed', permission='')
+    def end_SINAMECC(self):
+        print('The mitigation action is transitioning from implementing_SINAMECC_changes to end')
+        # Additional logic goes here.
+        pass
+
     def __unicode__(self):
         return smart_unicode(self.name)
 
