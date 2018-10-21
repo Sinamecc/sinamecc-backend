@@ -6,7 +6,7 @@ from django.http import FileResponse
 from general.helpers import ViewHelper
 from ppcn.services import PpcnService
 import uuid
-
+from django.http import HttpResponseRedirect
 service = PpcnService()
 view_helper = ViewHelper(service)
 
@@ -106,3 +106,7 @@ def get_ppcn_change_log(request, id):
     if request.method == 'GET':
         result = view_helper.execute_by_name("get_change_log", id)
     return result
+
+def redirect_notification(request, id):
+    url_frontend = 'http://localhost:4200/ppcn/{0}'.format(id) #change me in development
+    return HttpResponseRedirect(url_frontend)

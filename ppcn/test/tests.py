@@ -9,6 +9,10 @@ from ppcn.models import *
 from ppcn.serializers import *
 from mitigation_action.models import Contact
 from io import BytesIO
+from general.services import EmailServices
+
+import json
+
 import os
 # initialize the APIClient app
 client = Client()
@@ -43,6 +47,37 @@ class PPCNTest(TestCase):
         self.change_log = ChangeLog.objects.create(ppcn = self.ppcn, previous_status = "new", current_status = "sumitted", user = user)
         self.file = os.path.join(os.path.dirname(__file__), '@get_token')
         self.ppcn_file = PPCNFile.objects.create( user = user, file = self.file, ppcn_form= self.ppcn)
+
+        self.ppcn_data = {
+            "user": self.ppcn.user.id,
+            "organization":
+                {
+                    "name": self.ppcn.organization.name,
+                    "representative_name": self.ppcn.organization.representative_name,
+                    "phone_organization": self.ppcn.organization.phone_organization,
+                    "postal_code": self.ppcn.organization.postal_code,
+                    "fax": self.ppcn.organization.fax,
+                    "ciiu": self.ppcn.organization.ciiu,
+                    "address": self.ppcn.organization.address,
+                    "contact": {
+                        "full_name": self.ppcn.organization.contact.full_name,
+                        "job_title": self.ppcn.organization.contact.job_title,
+                        "email": self.ppcn.organization.contact.email,
+                        "phone": self.ppcn.organization.contact.phone
+                    }
+                },
+            "geographicLevel": self.ppcn.geographicLevel.id,
+            "requiredLevel": self.ppcn.requiredLevel.id,
+            "subsector": self.ppcn.subsector.id,
+            "sector": self.ppcn.sector.id,
+            "base_year": self.ppcn.base_year,
+            "recognitionType": self.ppcn.recognitionType.id
+        }
+
+        self.emailServicesInstance = EmailServices("sinamec@grupoincocr.com")
+        self.recipient_list = ["sinamec@grupoincocr.com","izcar@grupoincocr.com"]
+        self.subject = "UNIT-TEST, AWS - SES"
+        self.message_body = "Test, send to notification"
 
     def test_get_valid_all_ppcn(self):
         response = client.get(reverse('get_post_ppcn'), kwargs={'language':'en'})
@@ -83,6 +118,7 @@ class PPCNTest(TestCase):
                 datetime_updated_serializer = datetime.strptime(str(serial.get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
                 self.assertEqual(datetime_updated_response, datetime_updated_serializer)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response
 
     def test_get_valid_request_ppcn(self):
         response = client.get(reverse('get_one_ppcn', args=[self.ppcn.id, 'en']))
@@ -122,3 +158,45 @@ class PPCNTest(TestCase):
         self.assertEqual(datetime_updated_response, datetime_updated_serializer)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response
+
+    def test_get_post_ppcn(self):
+        response = client.post(
+            reverse('get_post_ppcn', kwargs={'language': 'en'}),
+            data=json.dumps(self.ppcn_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED )
+        assert response
+
+    def get_delete_put_patch_mitigation(self):
+        response = client.delete(reverse('put_delete_patch_ppcn', kwargs={'id': self.ppcn.id}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response
+
+    def test_send_notification_to_multiple_contacts(self):
+        recipient_list = self.recipient_list
+        subject = self.subject
+        message_body = self.message_body
+        emailServices = self.emailServicesInstance
+        response = emailServices.send_notification(recipient_list, subject, message_body)
+        self.assertEqual(response[0], True)
+        assert response
+
+    def test_send_notification_to_a_contact(self):
+        recipient_list = self.recipient_list[:1]
+        subject = self.subject
+        message_body = self.message_body
+        emailServices = self.emailServicesInstance
+        response = emailServices.send_notification(recipient_list, subject, message_body)
+        self.assertEqual(response[0], True)
+        assert response
+
+    def test_send_notification_contact_empty(self):
+        recipient_list = []
+        subject = self.subject
+        message_body = self.message_body
+        emailServices = self.emailServicesInstance
+        response = emailServices.send_notification(recipient_list, subject, message_body)
+        self.assertEqual(response[0], False)
+        assert response

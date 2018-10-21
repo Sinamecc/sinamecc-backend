@@ -1,6 +1,7 @@
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector, SubSector, PPCN, PPCNFile
 from ppcn.views import *
-from mitigation_action.models import Contact
+from django.contrib.auth.models import *
+from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer
 import json
 from ppcn.serializers import *
@@ -16,14 +17,11 @@ from django.urls import reverse
 import os
 import pdb
 from general.services import EmailServices
-email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
+email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
 from workflow.models import ReviewStatus
-
 from workflow.services import WorkflowService
-
 workflow_service = WorkflowService()
-
 class PpcnService():
 
     def __init__(self):
@@ -122,7 +120,6 @@ class PpcnService():
         else:
             serializer = PPCNFileSeriaizer(data=ppcnFileData)
         return serializer
-
 
     def get_all_geographic_level(self, language):
 
@@ -339,6 +336,11 @@ class PpcnService():
             serialized_ppcn = self.get_serialized_ppcn(request, organization_id)
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
+
+                url = "http://{0}{1}".format(request.META['HTTP_HOST'], reverse('redirect_notification', kwargs={'id': ppcn.id}))
+                message = self.buil_message_ppcn(ppcn.organization)
+                self.sendStatusNotification( "DCC" , str(ppcn.id), message , url)
+
                 ppcn_previous_status = ppcn.fsm_state
                 if not can_proceed(ppcn.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
@@ -504,7 +506,6 @@ class PpcnService():
         path, filename = os.path.split(ppcn_file.file.name)
         return  (filename, BytesIO(self.storage.get_file(ppcn_file.file.name)))
 
-
     def download_file(self, id, file_id):
         return self.get_file_content(file_id)
 
@@ -551,18 +552,37 @@ class PpcnService():
     def sendNotification(self, recipient_list, subject, message_body):
 
         result = ses_service.send_notification(recipient_list, subject, message_body)
-        
+
         return result
             
-    def sendStatusNotification(self, recipient_list, subject, message_body, link):
+    def sendStatusNotification(self, group, subject, message_body, link):
 
         """first implementation"""
-        subject = "PPCN: " + subject
-        message_body += "\nlink: " + link
-
-        result = self.sendNotification(recipient_list, subject, message_body)
-
+        subject = "Request of PPCN #: {0}".format(subject)
+        hyperlink =  "<br>Detalles en <a href={0}>ver ma&#769;s</a>".format(link)
+        recipient_list = self.get_user_by_group(group)
+        result = self.sendNotification(recipient_list, subject, message_body+hyperlink)
         return result
+
+    def buil_message_ppcn(self, data):
+        organization = "<p><b>Organización, Distrito o Cantón: </b> {0}".format(str(data.name))
+        representative_name = "<p><b>Nombre  del Representante: </b>{0}</p>".format(str(data.representative_name))
+        phone_organization = "<p><b>Teléfono: </b>{0}</p>".format(str(data.phone_organization))
+        fax = postal_code = ""
+        if data.postal_code != None:
+            postal_code = "<p><b>Código Postal: </b>{0}</p>".format(str(data.postal_code))
+        if data.fax != None:
+            fax = "<p><b>Fax </b>{0}</p>".format(str(data.fax))
+        address = "<p><b>Dirección: </b>{0}".format(str(data.address))
+        ciiu = "<p><b>CIIU: </b>{0}</p>".format(str(data.ciiu))
+        message = "<h3>PPCN</h3> {0} {1} {2} {3} {4} {5} {6}".format(organization, representative_name, phone_organization, fax, postal_code, address, ciiu)
+        return message
+
+    def get_user_by_group(self, user_group):
+        list = []
+        for user in User.objects.filter(groups__name=user_group):
+            list.append(user.email)
+        return list
 
     def getReviewStatus(self, id):
         return ReviewStatus.objects.get(pk=id)

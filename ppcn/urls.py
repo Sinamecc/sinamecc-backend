@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from ppcn import views
 
+
 urlpatterns = [
     url(
         r'^api/v1/ppcn/geographic/level/(?P<language>es|en)/*',
@@ -59,5 +60,8 @@ urlpatterns = [
         views.get_ppcn_change_log,
         name='get_mitigation_change_log'
     ),
-   
+    url(r'^api/v1/ppcn/notification/(?P<id>[0-9a-f-]+)$',
+        views.redirect_notification,
+        name='redirect_notification'
+    ),
 ]
