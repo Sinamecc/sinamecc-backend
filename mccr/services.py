@@ -7,9 +7,10 @@ from rest_framework.parsers import JSONParser
 from io import BytesIO
 import uuid
 import os
+from django.contrib.auth.models import *
 
 from general.services import EmailServices
-email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
+email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
 # TODO: Change is_valid() to exception
 class MCCRService():
@@ -150,6 +151,11 @@ class MCCRService():
         serialized_mccr = self.get_serialized_for_existent(request, mccr_registry)
         if serialized_mccr.is_valid():
             result = (True, MCCRRegistrySerializerCreate(serialized_mccr.save()).data)
+
+            if serialized_mccr.data.get('status')=="approved" and self.validate_user_group(request.user, 'OVV')==True:
+                url = "http://{0}{1}".format(request.META['HTTP_HOST'], reverse('redirect_notification', kwargs={'mccr_id': mccr_registry.id}))
+                message = self.buil_message_mccr(mccr_registry)
+                self.sendStatusNotification("Executive Secretary", str(mccr_registry.id), message, url)
         else:
             result = (False, serialized_mccr.errors)
         return result
@@ -200,12 +206,32 @@ class MCCRService():
         
         return result
             
-    def sendStatusNotification(self, recipient_list, subject, message_body, link):
+    def sendStatusNotification(self, group, subject, message_body, link):
 
         """first implementation"""
-        subject = "MMCR: " + subject
-        message_body += "\nlink: " + link
-
+        subject = "MCCR approved: " + subject
+        message_body += "<br>Detalles en <a href=" + link + ">ver más</a>"
+        recipient_list = self.get_user_by_group(group)
         result = self.sendNotification(recipient_list, subject, message_body)
 
         return result
+
+    def get_user_by_group(self, user_group):
+        list = []
+        for user in User.objects.filter(groups__name=user_group):
+            list.append(user.email)
+        return list
+
+    def validate_user_group(self, user, user_group):
+        result = False
+        for g in user.groups.all():
+            if g.name == user_group:
+                result=True
+        return  result
+
+    def buil_message_mccr(self, data):
+        id = "<p><b>Código: </b>{0}</p>".format(str(data.id))
+        mitigation = "<p><b>Acción de mitigación: </b>{0}</p>".format(str(data.mitigation.name))
+        status = "<p><b>Status: </b>{0}</p>".format(str(data.status))
+        message = "<h3>Datos Generales</h3> {0} {1} {2}".format(id,mitigation,status)
+        return message

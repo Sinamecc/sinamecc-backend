@@ -6,6 +6,7 @@ from django.http import FileResponse
 from rest_framework import status
 from mccr.services import MCCRService
 from general.helpers import ViewHelper
+from django.http import HttpResponseRedirect
 
 service = MCCRService()
 view_helper = ViewHelper(service)
@@ -60,3 +61,7 @@ def patch_mccr_ovv(request, mccr_id, ovv_id):
     if request.method == 'PATCH':
         result = view_helper.execute_by_name("update_mccr_ovv_relation", mccr_id, ovv_id)
     return result
+
+def redirect_notification(request, mccr_id):
+    url_frontend = 'http://localhost:4200/mccr/registries/{0}'.format(mccr_id) #change me in development
+    return HttpResponseRedirect(url_frontend)
