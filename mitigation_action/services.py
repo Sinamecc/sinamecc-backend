@@ -398,7 +398,7 @@ class MitigationActionService():
         elif current_fsm_state == 'submit_INGEI_harmonization_required':
             result = False
         elif current_fsm_state == 'INGEI_harmonization_required':
-            result = 'updating_INGEI_changes_proposal'
+            result = False
         elif current_fsm_state == 'updating_INGEI_changes_proposal':
             result = 'submitted_INGEI_changes_proposal_evaluation'
         elif current_fsm_state == 'submitted_INGEI_changes_proposal_evaluation':
@@ -716,10 +716,10 @@ class MitigationActionService():
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
         # submit_INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration':
-            if not can_proceed(mitigation_action.submit_SINAMECC_conceptual_proposal):
+        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration' and mitigation_action.fsm_state == 'submit_INGEI_harmonization_required':
+            if not can_proceed(mitigation_action.submit_INGEI_SINAMECC_conceptual_proposal):
                 result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_SINAMECC_conceptual_proposal()
+            mitigation_action.submit_INGEI_SINAMECC_conceptual_proposal()
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
@@ -740,7 +740,7 @@ class MitigationActionService():
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
         # INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration':
+        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration'  and mitigation_action.fsm_state == 'INGEI_harmonization_required':
             if not can_proceed(mitigation_action.submit_SINAMECC_conceptual_proposal):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.submit_SINAMECC_conceptual_proposal()

@@ -1,19 +1,22 @@
 from mitigation_action.workflow_steps.models import MAWorkflowStep, MAWorkflowStepFile
-from mitigation_action.models import Mitigation
 from mitigation_action.workflow_steps.serializers import MAWorkflowStepFileSerializer, MAWorkflowStepSerializer
 from mitigation_action.workflow_steps.active_steps import WorkflowActiveSteps
+from mitigation_action.services import MitigationActionService
 from general.storages import S3Storage
+from django_fsm import can_proceed
 from io import BytesIO
 import os
 
 
 class MitigationActionWorkflowStepService():
     def __init__(self):
-        self.storage = S3Storage()
         self.WORKFLOW_STEP_FILE_DOES_NOT_EXIST = "Mitigation Action workflow step file does not exist"
         self.WORKFLOW_STEP_DOES_NOT_EXIST = "Mitigation Action workflow step does not exist"
         self.CANT_UPLOAD = "Can't upload Harmonization Ingei file"
+
+        self.storage = S3Storage()
         self.active_steps = WorkflowActiveSteps()
+        self.service = MitigationActionService()
 
     def _get_error_message(self, message):
         return {"error": message}
@@ -41,8 +44,19 @@ class MitigationActionWorkflowStepService():
         """ Check if the step is enabled for the workflow """
         if serialized_step.is_valid() and \
                 self.active_steps.is_enabled(serialized_step.validated_data.get("name")):
-            newly_saved_step = serialized_step.save()
-            if newly_saved_step.id:
+            # get the mitigation action
+            mitigation_action = serialized_step.validated_data.get("mitigation_action")
+            newly_saved_step = None
+            # update workflow step
+            if mitigation_action != None:
+                next_state_label = self.active_steps.get_next_state(serialized_step.validated_data.get("name"))
+                next_state = getattr(mitigation_action, next_state_label)
+                if can_proceed(next_state):
+                    next_state()
+                    mitigation_action.save()
+                    newly_saved_step = serialized_step.save()
+
+            if newly_saved_step != None and newly_saved_step.id:
                 self.serialize_and_save_step_file(request, newly_saved_step)
                 result = (True, MAWorkflowStepSerializer(newly_saved_step).data)
             else:

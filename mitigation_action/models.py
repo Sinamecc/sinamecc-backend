@@ -161,7 +161,7 @@ class Mitigation(models.Model):
     # Workflow
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
-    fsm_state = FSMField(default='new', protected=True)
+    fsm_state = FSMField(default='new', protected=True, max_length=100)
 
     # Timestamps
     created = models.DateTimeField(auto_now_add=True)
@@ -374,14 +374,14 @@ class Mitigation(models.Model):
 
     # --- Transition ---
     # submit_INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
-    def can_submit_SINAMECC_conceptual_proposal(self):
+    def can_submit_INGEI_SINAMECC_conceptual_proposal(self):
         # Transition condition logic goes here
         # Verify current state
         # - submit_INGEI_harmonization_required
         return self.fsm_state == 'submit_INGEI_harmonization_required'
 
-    @transition(field='fsm_state', source='submit_INGEI_harmonization_required', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal], on_error='failed', permission='')
-    def submit_SINAMECC_conceptual_proposal(self):
+    @transition(field='fsm_state', source='submit_INGEI_harmonization_required', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_INGEI_SINAMECC_conceptual_proposal], on_error='failed', permission='')
+    def submit_INGEI_SINAMECC_conceptual_proposal(self):
         print('The mitigation action is transitioning from submit_INGEI_harmonization_required to submitted_SINAMECC_conceptual_proposal_integration')
         # Additional logic goes here.
         pass
@@ -425,20 +425,6 @@ class Mitigation(models.Model):
     @transition(field='fsm_state', source='INGEI_harmonization_required', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal], on_error='failed', permission='')
     def submit_SINAMECC_conceptual_proposal(self):
         print('The mitigation action is transitioning from INGEI_harmonization_required to submitted_SINAMECC_conceptual_proposal_integration')
-        # Additional logic goes here.
-        pass
-
-    # --- Transition ---
-    # INGEI_harmonization_required -> updating_INGEI_changes_proposal
-    def can_update_INGEI_changes_proposal(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - INGEI_harmonization_required
-        return self.fsm_state == 'INGEI_harmonization_required'
-    
-    @transition(field='fsm_state', source='INGEI_harmonization_required', target='updating_INGEI_changes_proposal', conditions=[update_INGEI_changes_proposal], on_error='failed', permission='')
-    def update_INGEI_changes_proposal(self):
-        print('The mitigation action is transitioning from INGEI_harmonization_required to updating_INGEI_changes_proposal')
         # Additional logic goes here.
         pass
 

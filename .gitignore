@@ -29,4 +29,5 @@ mccr/*.pyc
 mitigation_action/*.pyc
 report_data/*.pyc
 workflow/*.pyc
-
+.DS_Store
+**/.DS_Store
