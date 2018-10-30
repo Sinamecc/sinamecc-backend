@@ -851,7 +851,7 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # in_evaluation_conceptual_proposal_by_DCC -> conceptual_proposal_approved
+        # decision_step_DCC_proposal -> conceptual_proposal_approved
         elif next_state == 'conceptual_proposal_approved':
             if not can_proceed(mitigation_action.approve_conceptual_proposal):
                 result = (False, self.INVALID_STATUS_TRANSITION)
@@ -859,7 +859,7 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # in_evaluation_conceptual_proposal_by_DCC -> changes_requested_to_conceptual_proposal
+        # decision_step_DCC_proposal -> changes_requested_to_conceptual_proposal
         elif next_state == 'changes_requested_to_conceptual_proposal':
             if not can_proceed(mitigation_action.request_changes_conceptual_proposal):
                 result = (False, self.INVALID_STATUS_TRANSITION)
@@ -891,7 +891,7 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # planning_integration_with_SINAMECC -> SINAMECC_integration_approved
+        # decision_step_SINAMEC -> SINAMECC_integration_approved
         elif next_state == 'SINAMECC_integration_approved':
             if not can_proceed(mitigation_action.approve_SINAMECC_integration):
                 result = (False, self.INVALID_STATUS_TRANSITION)
@@ -899,7 +899,7 @@ class MitigationActionService():
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---
-        # planning_integration_with_SINAMECC -> SINAMECC_integration_changes_requested
+        # decision_step_SINAMEC -> SINAMECC_integration_changes_requested
         elif next_state == 'SINAMECC_integration_changes_requested':
             if not can_proceed(mitigation_action.request_changes_SINAMECC_integration):
                 result = (False, self.INVALID_STATUS_TRANSITION)
@@ -928,6 +928,22 @@ class MitigationActionService():
             if not can_proceed(mitigation_action.submit_plan_integration_SINAMECC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             mitigation_action.submit_plan_integration_SINAMECC()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # in_evaluation_conceptual_proposal_by_DCC -> decision_step_DCC_proposal
+        elif next_state == 'decision_step_DCC_proposal':
+            if not can_proceed(mitigation_action.decide_DCC_proposal):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.decide_DCC_proposal()
+            mitigation_action.save()
+            result = (True, MitigationSerializer(mitigation_action).data)
+        # --- Transition ---
+        # planning_integration_with_SINAMECC -> decision_step_SINAMEC
+        elif next_state == 'decision_step_SINAMEC':
+            if not can_proceed(mitigation_action.decide_SINAMECC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            mitigation_action.decide_SINAMECC()
             mitigation_action.save()
             result = (True, MitigationSerializer(mitigation_action).data)
         # --- Transition ---

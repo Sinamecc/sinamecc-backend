@@ -611,34 +611,6 @@ class Mitigation(models.Model):
         pass
 
     # --- Transition ---
-    # in_evaluation_conceptual_proposal_by_DCC -> conceptual_proposal_approved
-    def can_approve_conceptual_proposal(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - in_evaluation_conceptual_proposal_by_DCC
-        return self.fsm_state == 'in_evaluation_conceptual_proposal_by_DCC'
-
-    @transition(field='fsm_state', source='in_evaluation_conceptual_proposal_by_DCC', target='conceptual_proposal_approved', conditions=[can_approve_conceptual_proposal], on_error='failed', permission='')
-    def approve_conceptual_proposal(self):
-        print('The mitigation action is transitioning from in_evaluation_conceptual_proposal_by_DCC to conceptual_proposal_approved')
-        # Additional logic goes here.
-        pass
-
-    # --- Transition ---
-    # in_evaluation_conceptual_proposal_by_DCC -> changes_requested_to_conceptual_proposal
-    def can_request_changes_conceptual_proposal(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - in_evaluation_conceptual_proposal_by_DCC
-        return self.fsm_state == 'in_evaluation_conceptual_proposal_by_DCC'
-
-    @transition(field='fsm_state', source='in_evaluation_conceptual_proposal_by_DCC', target='changes_requested_to_conceptual_proposal', conditions=[can_request_changes_conceptual_proposal], on_error='failed', permission='')
-    def request_changes_conceptual_proposal(self):
-        print('The mitigation action is transitioning from in_evaluation_conceptual_proposal_by_DCC to changes_requested_to_conceptual_proposal')
-        # Additional logic goes here.
-        pass
-
-    # --- Transition ---
     # conceptual_proposal_approved -> planning_integration_with_SINAMECC
     def can_plan_integration_SINAMECC(self):
         # Transition condition logic goes here
@@ -677,34 +649,6 @@ class Mitigation(models.Model):
     @transition(field='fsm_state', source='submitted_conceptual_proposal_changes', target='submitted_SINAMECC_conceptual_proposal_integration', conditions=[can_submit_SINAMECC_conceptual_proposal_changes], on_error='failed', permission='')
     def submit_SINAMECC_conceptual_proposal_changes(self):
         print('The mitigation action is transitioning from submitted_conceptual_proposal_changes to submitted_SINAMECC_conceptual_proposal_integration')
-        # Additional logic goes here.
-        pass
-
-    # --- Transition ---
-    # planning_integration_with_SINAMECC -> SINAMECC_integration_approved
-    def can_approve_SINAMECC_integration(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - planning_integration_with_SINAMECC
-        return self.fsm_state == 'planning_integration_with_SINAMECC'
-
-    @transition(field='fsm_state', source='planning_integration_with_SINAMECC', target='SINAMECC_integration_approved', conditions=[can_approve_SINAMECC_integration], on_error='failed', permission='')
-    def approve_SINAMECC_integration(self):
-        print('The mitigation action is transitioning from planning_integration_with_SINAMECC to SINAMECC_integration_approved')
-        # Additional logic goes here.
-        pass
-
-    # --- Transition ---
-    # planning_integration_with_SINAMECC -> SINAMECC_integration_changes_requested
-    def can_request_changes_SINAMECC_integration(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - planning_integration_with_SINAMECC
-        return self.fsm_state == 'planning_integration_with_SINAMECC'
-
-    @transition(field='fsm_state', source='planning_integration_with_SINAMECC', target='SINAMECC_integration_changes_requested', conditions=[can_request_changes_SINAMECC_integration], on_error='failed', permission='')
-    def request_changes_SINAMECC_integration(self):
-        print('The mitigation action is transitioning from planning_integration_with_SINAMECC to SINAMECC_integration_changes_requested')
         # Additional logic goes here.
         pass
 
@@ -761,6 +705,90 @@ class Mitigation(models.Model):
     @transition(field='fsm_state', source='implementing_SINAMECC_changes', target='end', conditions=[can_end_SINAMECC], on_error='failed', permission='')
     def end_SINAMECC(self):
         print('The mitigation action is transitioning from implementing_SINAMECC_changes to end')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # in_evaluation_conceptual_proposal_by_DCC -> decision_step_DCC_proposal
+    def can_decide_DCC_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - implementing_SINAMECC_changes
+        return self.fsm_state == 'in_evaluation_conceptual_proposal_by_DCC'
+
+    @transition(field='fsm_state', source='in_evaluation_conceptual_proposal_by_DCC', target='decision_step_DCC_proposal', conditions=[can_decide_DCC_proposal], on_error='failed', permission='')
+    def decide_DCC_proposal(self):
+        print('The mitigation action is transitioning from in_evaluation_conceptual_proposal_by_DCC to decision_step_DCC_proposal')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # decision_step_DCC_proposal -> conceptual_proposal_approved
+    def can_approve_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_conceptual_proposal_by_DCC
+        return self.fsm_state == 'decision_step_DCC_proposal'
+
+    @transition(field='fsm_state', source='decision_step_DCC_proposal', target='conceptual_proposal_approved', conditions=[can_approve_conceptual_proposal], on_error='failed', permission='')
+    def approve_conceptual_proposal(self):
+        print('The mitigation action is transitioning from decision_step_DCC_proposal to conceptual_proposal_approved')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # decision_step_DCC_proposal -> changes_requested_to_conceptual_proposal
+    def can_request_changes_conceptual_proposal(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - in_evaluation_conceptual_proposal_by_DCC
+        return self.fsm_state == 'decision_step_DCC_proposal'
+
+    @transition(field='fsm_state', source='decision_step_DCC_proposal', target='changes_requested_to_conceptual_proposal', conditions=[can_request_changes_conceptual_proposal], on_error='failed', permission='')
+    def request_changes_conceptual_proposal(self):
+        print('The mitigation action is transitioning from decision_step_DCC_proposal to changes_requested_to_conceptual_proposal')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # planning_integration_with_SINAMECC -> decision_step_SINAMEC
+    def can_decide_SINAMECC(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - implementing_SINAMECC_changes
+        return self.fsm_state == 'planning_integration_with_SINAMECC'
+
+    @transition(field='fsm_state', source='planning_integration_with_SINAMECC', target='decision_step_SINAMEC', conditions=[can_decide_SINAMECC], on_error='failed', permission='')
+    def decide_SINAMECC(self):
+        print('The mitigation action is transitioning from planning_integration_with_SINAMECC to decision_step_SINAMEC')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # decision_step_SINAMEC -> SINAMECC_integration_approved
+    def can_approve_SINAMECC_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - decision_step_SINAMEC
+        return self.fsm_state == 'decision_step_SINAMEC'
+
+    @transition(field='fsm_state', source='decision_step_SINAMEC', target='SINAMECC_integration_approved', conditions=[can_approve_SINAMECC_integration], on_error='failed', permission='')
+    def approve_SINAMECC_integration(self):
+        print('The mitigation action is transitioning from decision_step_SINAMEC to SINAMECC_integration_approved')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # decision_step_SINAMEC -> SINAMECC_integration_changes_requested
+    def can_request_changes_SINAMECC_integration(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - decision_step_SINAMEC
+        return self.fsm_state == 'decision_step_SINAMEC'
+
+    @transition(field='fsm_state', source='decision_step_SINAMEC', target='SINAMECC_integration_changes_requested', conditions=[can_request_changes_SINAMECC_integration], on_error='failed', permission='')
+    def request_changes_SINAMECC_integration(self):
+        print('The mitigation action is transitioning from decision_step_SINAMEC to SINAMECC_integration_changes_requested')
         # Additional logic goes here.
         pass
 
