@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, ChangeLog,  Mitigation
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, \
+GeographicScale, Location, ChangeLog,  Mitigation, Initiative, InitiativeType, InitiativeFinance
 
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,8 +35,12 @@ class FinanceSourceTypeSerializer(serializers.ModelSerializer):
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('finance_source_type', 'source')
-
+        fields = ('status', 'source')
+class InitiativeFinanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InitiativeFinance
+        fields = ('status', 'finance_source_type')
+        
 class IngeiComplianceSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngeiCompliance
@@ -56,6 +61,23 @@ class ChangeLogSerializer(serializers.ModelSerializer):
         model = ChangeLog
         fields = ('mitigation_action', 'previous_status', 'current_status', 'user')
 
+class InitiaveSerializer(serializers.ModelSerializer):
+     
+     class Meta:
+         model = Initiative
+         fields = (
+             'id',
+             'name',
+             'objective',
+             'description',
+             'goal',
+             'initiative_type',
+             'entity_responsible',
+             'contact',
+             'budget',
+             'finance',
+             'status'
+            )
 
 class MitigationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,6 +103,7 @@ class MitigationSerializer(serializers.ModelSerializer):
             'question_ovv',
             'user',
             'registration_type',
+            'initiative',
             'institution',
             'contact',
             'status',

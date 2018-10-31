@@ -18,7 +18,7 @@ def get_delete_put_patch_mitigation(request, pk, language):
     elif request.method == 'DELETE':
         result = view_helper.delete(pk)
     elif request.method == 'PUT':
-        result = view_helper.put(pk, request)
+        result = view_helper.put(pk, request, language)
     elif request.method == 'PATCH':
         result = view_helper.patch(pk, request)
     return result

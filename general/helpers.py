@@ -60,8 +60,8 @@ class ViewHelper():
             result = Response(result_detail, status=status.HTTP_400_BAD_REQUEST)
         return result
 
-    def put(self, id, request):
-        result_status, result_data = self.service.update(id, request)
+    def put(self, *args):
+        result_status, result_data = self.service.update(*args)
         if result_status:
             result = Response(result_data)
         else:

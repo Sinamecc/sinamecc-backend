@@ -82,9 +82,33 @@ class FinanceSourceType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name)
 
+class FinanceStatus(models.Model):
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("FinanceStatus")
+        verbose_name_plural = _("FinanceStatuses")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class InitiativeFinance(models.Model):
+
+    status = models.ForeignKey(FinanceStatus, related_name='initiative_finance_status', blank=False, null=False)
+    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='initiative_finance_source_type', blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("InitiativeFinance")
+        verbose_name_plural = _("InitiativeFinances")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
 class Finance(models.Model):
-    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='finance', blank=False, null=False)
-    source = models.CharField(max_length=100, blank=False, null=False)
+
+    status = models.ForeignKey(FinanceStatus, related_name='finance_status', blank=False, null=False)
+    source = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = _("Finance")
@@ -126,37 +150,74 @@ class Location(models.Model):
     def __unicode__(self):
         return smart_unicode(self.geographical_site)
 
+
+
+class InitiativeType(models.Model):
+
+    initiative_type_es = models.CharField(max_length=100, blank=False, null=False)
+    initiative_type_en = models.CharField(max_length=100, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("InitiativeType")
+        verbose_name_plural = _("InitiativeTypes")
+
+    def __unicode__(self):
+        return smart_unicode(self.initiative_type_en)
+
+class Initiative(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    
+    objective = models.CharField(max_length=400, blank=False, null=False)
+    description = models.CharField(max_length=400, blank=False, null=False)
+    goal = models.CharField(max_length=400, blank=False, null=False)
+
+    initiative_type  = models.ForeignKey(InitiativeType, related_name = "initiative_type")
+    entity_responsible = models.CharField(max_length=100, blank=False, null=False)
+    contact =  models.ForeignKey(Contact, related_name='contact')
+    budget = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
+    finance = models.ForeignKey(InitiativeFinance, related_name='finance')
+    status = models.ForeignKey(Status, related_name = 'status')
+
+    class Meta:
+        verbose_name = _("Initiative")
+        verbose_name_plural = _("Initiatives")
+
+    def __unicode__(self):
+        return smart_unicode(self.initiative_type_en)
+
 class Mitigation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    strategy_name = models.CharField(max_length=100, blank=False, null=False)
-    name = models.CharField(max_length=100, blank=False, null=False)
-    purpose = models.CharField(max_length=500, blank=False, null=False)
-    quantitative_purpose = models.CharField(max_length=500, blank=False, null=False)
-    start_date = models.DateField(null=False)
-    end_date = models.DateField(null=False)
-    gas_inventory = models.CharField(max_length=100, blank=False, null=False)
-    emissions_source = models.CharField(max_length=100, blank=False, null=False)
-    carbon_sinks = models.CharField(max_length=100, blank=False, null=False)
-    impact_plan = models.CharField(max_length=500, blank=False, null=False)
-    impact = models.CharField(max_length=500, blank=False, null=False)
-    bibliographic_sources = models.CharField(max_length=500, blank=False, null=False)
-    is_international = models.BooleanField(blank=False, null=False)
-    international_participation = models.CharField(max_length=100, blank=False, null=False)
-    sustainability = models.CharField(max_length=500, blank=False, null=False)
-    question_ucc = models.CharField(max_length=500, blank=False, null=True)
-    question_ovv = models.CharField(max_length=500, blank=False, null=False)
+    strategy_name = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    purpose = models.CharField(max_length=500, blank=True, null=True)
+    quantitative_purpose = models.CharField(max_length=500, blank=True, null=True)
+    start_date = models.DateField(blank = True, null=True)
+    end_date = models.DateField(blank = True, null=True)
+    gas_inventory = models.CharField(max_length=100, blank=True, null=True)
+    emissions_source = models.CharField(max_length=100, blank=True, null=True)
+    carbon_sinks = models.CharField(max_length=100, blank=True, null=True)
+    impact_plan = models.CharField(max_length=500, blank=True, null=True)
+    impact = models.CharField(max_length=500, blank=True, null=True)
+    bibliographic_sources = models.CharField(max_length=500, blank=True, null=True)
+    is_international = models.NullBooleanField(blank=True, null=True)
+    international_participation = models.CharField(max_length=100, blank=True, null=True)
+    sustainability = models.CharField(max_length=500, blank=True, null=True)
+    question_ucc = models.CharField(max_length=500, blank=True, null=True)
+    question_ovv = models.CharField(max_length=500, blank=True, null=True)
 
     # Foreign Keys
     user = models.ForeignKey(User, related_name='mitigation_action')
-    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action')
-    institution = models.ForeignKey(Institution, related_name='mitigation_action')
-    contact = models.ForeignKey(Contact, related_name='mitigation_action')
-    status = models.ForeignKey(Status, related_name='mitigation_action')
-    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action')
-    finance = models.ForeignKey(Finance, related_name='mitigation_action')
+    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action', blank=True, null=True)
+    initiative = models.ForeignKey(Initiative, related_name='mitigation_action', blank=True, null=True)
+    institution = models.ForeignKey(Institution, related_name='mitigation_action', blank=True, null=True)
+    contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True)
+    status = models.ForeignKey(Status, related_name='mitigation_action', blank=True, null=True)
+    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action', blank=True, null=True)
+    finance = models.ForeignKey(Finance, related_name='mitigation_action', blank=True, null=True)
     ingei_compliances = models.ManyToManyField(IngeiCompliance)
-    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action')
-    location = models.ForeignKey(Location, related_name='mitigation_action')
+    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action', blank=True, null=True)
+    location = models.ForeignKey(Location, related_name='mitigation_action', blank=True, null=True)
 
     # Workflow
     review_count = models.IntegerField(null=True, blank=True, default=0)

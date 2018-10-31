@@ -42,12 +42,22 @@ def insert_form_data(apps, schema_editor):
 
     finance_source_type_data = [
         {
-            'name_es': 'Por obtener',
-            'name_en': 'To obtain' },
+            'name_es': 'Presupuesto público ',
+            'name_en': 'Public Budget' 
+        },
         {
-            'name_es': 'Asegurado',
-            'name_en': 'Insured'
+            'name_es': 'Financiamiento privado',
+            'name_en': 'Private Finance'
+        },
+        {
+            'name_es': 'Proyecto de cooperación',
+            'name_en': 'Cooperation Project' 
+        },
+        {
+            'name_es': 'Préstamo',
+            'name_en': 'Loan'
         }
+        
     ]
     ingei_compliance_data = [
         {

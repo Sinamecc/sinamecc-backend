@@ -1,6 +1,7 @@
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog
+from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, \
+IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog, Initiative, InitiativeType, FinanceStatus, InitiativeFinance
 from mitigation_action.workflow_steps.models import * 
-from mitigation_action.serializers import FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
+from mitigation_action.serializers import InitiaveSerializer, InitiativeFinanceSerializer, FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
 from workflow.models import ReviewStatus
 from general.storages import S3Storage
 from rest_framework.parsers import JSONParser
@@ -30,6 +31,9 @@ class MitigationActionService():
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.CHANGE_LOG_DOES_NOT_EXIST = "Mitigation Action change log does not exist."
         self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
+        self.MITIGATION_ACTION_NOT_INSERTED = "Mitigation action cannot be inserted"
+        self.INITIATIVE_RELATIONS = "contact_id or finance_id is not related with initiative"
+        self.RELATED_MITIGATION_ACTION = " is not related with MA"
 
     def get_all(self, language):
         try:
@@ -58,40 +62,77 @@ class MitigationActionService():
                         'username': m.user.username,
                         'email': m.user.email
                     },
+                    'initiative':{
+                        'id' : m.initiative.id,
+                        'name': m.initiative.name,
+                        'objective' : m.initiative.objective,
+                        'description': m.initiative.description,
+                        'goal' : m.initiative.goal,
+                        'initiative_type': {
+                            "id": m.initiative.initiative_type.id,
+                            "initiative_type" : m.initiative.initiative_type.initiative_type_es if language=="es" else m.initiative.initiative_type.initiative_type_en
+                            },
+                        'entity_responsible': m.initiative.entity_responsible,
+                        'budget': m.initiative.budget,
+                        'status' : {
+                            'id': m.initiative.status.id,
+                            'status': m.initiative.status.status_es if language=="es" else m.initiative.status.status_en
+                        },
+                        'contact': {
+                            'id': m.initiative.contact.id,
+                            'full_name': m.initiative.contact.full_name,
+                            'job_title': m.initiative.contact.job_title,
+                            'email': m.initiative.contact.email,
+                            'phone': m.initiative.contact.phone
+                        },
+
+                        'finance': {
+                            'id': m.initiative.finance.id,
+                            'finance_source_type': {
+                                'id': m.initiative.finance.finance_source_type.id,
+                                'name': m.initiative.finance.finance_source_type.name_es if language=="es" else m.initiative.finance.finance_source_type.name_en,
+                            },
+                            'status':{
+                                'id' : m.initiative.finance.status.id,
+                                'name' : m.initiative.finance.status.name_es if language=="es" else m.initiative.finance.status.name_en
+                            } 
+                        },
+                    } if m.initiative else {},
                     'registration_type': {
                         'id': m.registration_type.id,
                         'type': m.registration_type.type_es if language=="es" else m.registration_type.type_en,
-                    },
+                    } if m.registration_type else {},
                     'institution': {
                         'id': m.institution.id,
                         'name': m.institution.name
-                    },
+                    } if m.institution else {},
                     'contact': {
                         'id': m.contact.id,
                         'full_name': m.contact.full_name,
                         'job_title': m.contact.job_title,
                         'email': m.contact.email,
                         'phone': m.contact.phone
-                    },
+                    } if m.contact else {},
                     'status': {
                         'id': m.status.id,
                         'status': m.status.status_es if language=="es" else m.status.status_en
-                    },
+                    } if m.status else {},
                     'progress_indicator': {
                         'id': m.progress_indicator.id,
                         'name': m.progress_indicator.name,
                         'type': m.progress_indicator.type,
                         'unit': m.progress_indicator.unit,
                         'start_date': m.progress_indicator.start_date
-                    },
+                    } if m.progress_indicator else {},
                     'finance': {
                         'id': m.finance.id,
-                        'finance_source_type': {
-                            'id': m.finance.finance_source_type.id,
-                            'name': m.finance.finance_source_type.name_es if language=="es" else m.finance.finance_source_type.name_en
-                        },
+                        'status':{
+                                'id' : m.finance.status.id,
+                                'name' : m.finance.status.name_es if language=="es" else m.initiative.finance.status.name_en
+                            },
                         'source': m.finance.source
-                    },
+
+                    } if m.finance else {},
                     'ingei_compliances': [
                         {
                             'id': ingei.id,
@@ -101,12 +142,12 @@ class MitigationActionService():
                     'geographic_scale': {
                         'id': m.geographic_scale.id,
                         'name': m.geographic_scale.name_es if language=="es" else m.geographic_scale.name_en
-                    },
+                    } if m.geographic_scale else {},
                     'location': {
                         'id': m.location.id,
                         'geographical_site': m.location.geographical_site,
                         'is_gis_annexed': m.location.is_gis_annexed
-                    },
+                    } if m.location else {},
                     # Workflow
                     'review_count': m.review_count,
                     'comments': [
@@ -128,147 +169,159 @@ class MitigationActionService():
 
     def get_serialized_contact(self, request):
         contact_data = {
-            'full_name': request.data.get('contact[full_name]'),
-            'job_title': request.data.get('contact[job_title]'),
-            'email': request.data.get('contact[email]'),
-            'phone': request.data.get('contact[phone]'),
+            'full_name': request.get('contact').get('full_name'),
+            'job_title': request.get('contact').get('job_title'),
+            'email': request.get('contact').get('email'),
+            'phone': request.get('contact').get('phone'),
         }
+      
         serializer = ContactSerializer(data=contact_data)
         return serializer
 
     def get_serialized_contact_for_existing(self, request, contact):
         contact_data = {
-            'full_name': request.data.get('contact[full_name]'),
-            'job_title': request.data.get('contact[job_title]'),
-            'email': request.data.get('contact[email]'),
-            'phone': request.data.get('contact[phone]'),
+            'full_name': request.get('contact').get('full_name'),
+            'job_title': request.get('contact').get('job_title'),
+            'email': request.get('contact').get('email'),
+            'phone': request.get('contact').get('phone'),
         }
         serializer = ContactSerializer(contact, data=contact_data)
         return serializer
 
     def get_serialized_progress_indicator(self, request):
         progress_indicator_data = {
-            'name': request.data.get('progress_indicator[name]'),
-            'type': request.data.get('progress_indicator[type]'),
-            'unit': request.data.get('progress_indicator[unit]'),
-            'start_date': request.data.get('progress_indicator[start_date]')
+            'name': request.get('progress_indicator').get('name'),
+            'type': request.get('progress_indicator').get('type'),
+            'unit': request.get('progress_indicator').get('unit'),
+            'start_date': request.get('progress_indicator').get('start_date')
         }
         serializer = ProgressIndicatorSerializer(data=progress_indicator_data)
         return serializer
 
     def get_serialized_progress_indicator_for_existing(self, request, progress_indicator):
         progress_indicator_data = {
-            'name': request.data.get('progress_indicator[name]'),
-            'type': request.data.get('progress_indicator[type]'),
-            'unit': request.data.get('progress_indicator[unit]'),
-            'start_date': request.data.get('progress_indicator[start_date]')
+            'name': request.get('progress_indicator').get('name'),
+            'type': request.get('progress_indicator').get('type'),
+            'unit': request.get('progress_indicator').get('unit'),
+            'start_date': request.get('progress_indicator').get('start_date')
         }
         serializer = ProgressIndicatorSerializer(progress_indicator, data=progress_indicator_data)
         return serializer
 
     def get_serialized_location(self, request):
         location_data = {
-            'geographical_site': request.data.get('location[geographical_site]'),
-            'is_gis_annexed': request.data.get('location[is_gis_annexed]')
+            'geographical_site': request.get('location').get('geographical_site'),
+            'is_gis_annexed': request.get('location').get('is_gis_annexed')
         }
         serializer = LocationSerializer(data=location_data)
         return serializer
 
     def get_serialized_location_for_existing(self, request, location):
         location_data = {
-            'geographical_site': request.data.get('location[geographical_site]'),
-            'is_gis_annexed': request.data.get('location[is_gis_annexed]')
+            'geographical_site': request.get('location').get('geographical_site'),
+            'is_gis_annexed': request.get('location').get('is_gis_annexed')
         }
         serializer = LocationSerializer(location, data=location_data)
         return serializer
 
     def get_serialized_finance(self, request):
         finance_data = {
-            'finance_source_type': request.data.get('finance[finance_source_type]'),
-            'source': request.data.get('finance[source]'),
+            'status': request.get('finance').get('status'),
+            'source': request.get('finance').get('source'),
         }
         serializer = FinanceSerializer(data=finance_data)
         return serializer
 
     def get_serialized_finance_for_existing(self, request, finance):
         finance_data = {
-            'finance_source_type': request.data.get('finance[finance_source_type]'),
-            'source': request.data.get('finance[source]'),
+            'status': request.get('finance').get('status'),
+            'source': request.get('finance').get('source'),
         }
         serializer = FinanceSerializer(finance, data=finance_data)
+        return serializer
+
+    def get_serialized_initiative_finance(self, request):
+        finance_data = {
+            'finance_source_type': request.get('finance').get('finance_source_type'),
+            'status': request.get('finance').get('status'),
+        }
+        serializer = InitiativeFinanceSerializer(data=finance_data)
+        return serializer
+
+    def get_serialized_initiative_finance_for_existing(self, request, finance):
+        finance_data =  {
+            'finance_source_type': request.get('finance').get('finance_source_type'),
+            'status': request.get('finance').get('status'),
+        }
+        serializer = InitiativeFinanceSerializer(finance, data=finance_data)
         return serializer
 
     def get_review_status_id(self, status):
         review_status_id_result, review_status_id_data = workflow_service.get_review_status_id(status)
         return review_status_id_data
 
-    def get_serialized_mitigation_action(self, request, contact_id, progress_indicator_id, location_id, finance_id):
-        mitigation_data = {
-            'id': str(uuid.uuid4()),
-            'strategy_name': request.data.get('strategy_name'),
-            'name': request.data.get('name'),
-            'purpose': request.data.get('purpose'),
-            'quantitative_purpose': request.data.get('quantitative_purpose'),
-            'start_date': request.data.get('start_date'),
-            'end_date': request.data.get('end_date'),
-            'gas_inventory': request.data.get('gas_inventory'),
-            'emissions_source': request.data.get('emissions_source'),
-            'carbon_sinks': request.data.get('carbon_sinks'),
-            'impact_plan': request.data.get('impact_plan'),
-            'impact': request.data.get('impact'),
-            'bibliographic_sources': request.data.get('bibliographic_sources'),
-            'is_international': request.data.get('is_international'),
-            'international_participation': request.data.get('international_participation'),
-            'sustainability': request.data.get('sustainability'),
-            'question_ucc': request.data.get('question_ucc'),
-            'question_ovv': request.data.get('question_ovv'),
-            'user': request.data.get('user'),
-            'registration_type': request.data.get('registration_type'),
-            'institution': request.data.get('institution'),
+    def get_serialized_initiative(self, request, contact_id, finance_id, initiative = False):
+        
+        initiative_data = {
+            'name': request.get('initiative').get('name'),
+            'objective': request.get('initiative').get('objective'),
+            'description': request.get('initiative').get('description'),
+            'goal': request.get('initiative').get('goal'),
+            'initiative_type': request.get('initiative').get('initiative_type'),
+            'entity_responsible': request.get('initiative').get('entity_responsible'),
             'contact': contact_id,
-            'status': request.data.get('status'),
-            'progress_indicator': progress_indicator_id,
+            'budget': request.get('initiative').get('budget'),
             'finance': finance_id,
-            'geographic_scale': request.data.get('geographic_scale'),
-            'location': location_id,
-            # Workflow
-            'review_count': 0, # By default when creating
+            'status': request.get('initiative').get('status'),
         }
-        serializer = MitigationSerializer(data=mitigation_data)
+        
+        if initiative:
+            serializer = InitiaveSerializer(initiative, data = initiative_data)
+
+        else:
+            serializer = InitiaveSerializer(data = initiative_data)
+
         return serializer
 
-    def get_serialized_mitigation_action_for_existing(self, request, mitigation, contact_id, progress_indicator_id, location_id, finance_id, review_count):
+    def get_serialized_mitigation_action(self, request, contact_id = None, progress_indicator_id = None, location_id = None, finance_id = None, initiative_id = None):
+
         mitigation_data = {
             'id': str(uuid.uuid4()),
-            'strategy_name': request.data.get('strategy_name'),
-            'name': request.data.get('name'),
-            'purpose': request.data.get('purpose'),
-            'quantitative_purpose': request.data.get('quantitative_purpose'),
-            'start_date': request.data.get('start_date'),
-            'end_date': request.data.get('end_date'),
-            'gas_inventory': request.data.get('gas_inventory'),
-            'emissions_source': request.data.get('emissions_source'),
-            'carbon_sinks': request.data.get('carbon_sinks'),
-            'impact_plan': request.data.get('impact_plan'),
-            'impact': request.data.get('impact'),
-            'bibliographic_sources': request.data.get('bibliographic_sources'),
-            'is_international': request.data.get('is_international'),
-            'international_participation': request.data.get('international_participation'),
-            'sustainability': request.data.get('sustainability'),
-            'question_ucc': request.data.get('question_ucc'),
-            'question_ovv': request.data.get('question_ovv'),
-            'user': request.data.get('user'),
-            'registration_type': request.data.get('registration_type'),
-            'institution': request.data.get('institution'),
-            'contact': contact_id,
-            'status': request.data.get('status'),
-            'progress_indicator': progress_indicator_id,
-            'finance': finance_id,
-            'geographic_scale': request.data.get('geographic_scale'),
+            'contact' : contact_id,
+            'progress_indicator' : progress_indicator_id,
             'location': location_id,
-            'review_count': mitigation.review_count,
-            'fsm_state': mitigation.fsm_state
+            'finance':finance_id,
+            'initiative' : initiative_id,
+
+            #Workflow
+            'review_count': 0 # By default when creating
         }
+        fk_field = ['contact', 'progress_indicator', 'location', 'finance', 'initiative']
+
+        for field in MitigationSerializer.Meta.fields:
+            if field in request and not field in fk_field:
+                mitigation_data[field] = request.get(field)
+            
+        
+        serializer = MitigationSerializer(data = mitigation_data)
+        return serializer
+            
+        
+
+    def get_serialized_mitigation_action_for_existing(self, request, mitigation, contact_id = None, progress_indicator_id = None, location_id = None, finance_id = None, initiative_id = None, review_count = None):
+        mitigation_data =  {}
+        fk_field = ['contact', 'progress_indicator', 'location', 'finance', 'initiative', 'review_count']
+        for field in MitigationSerializer.Meta.fields:
+            if field in request and not field in fk_field:
+                mitigation_data[field] = request.get(field)
+        
+        if review_count : mitigation_data['review_count'] = review_count
+        if contact_id: mitigation_data['contact'] = contact_id
+        if progress_indicator_id: mitigation_data['progress_indicator'] = progress_indicator_id
+        if location_id: mitigation_data['location'] = location_id
+        if finance_id: mitigation_data['finance'] = finance_id
+        if initiative_id: mitigation_data['initiative'] = initiative_id
+        
         serializer = MitigationSerializer(mitigation, data=mitigation_data)
         return serializer
 
@@ -279,6 +332,7 @@ class MitigationActionService():
             try:
                 ingei = IngeiCompliance.objects.get(pk=id)
                 mitigation_action.ingei_compliances.add(ingei)
+                
                 result = (True, mitigation_action)
             except IngeiCompliance.DoesNotExist:
                 result = (False, self.INGEI_COMPLIANCE_DOES_NOT_EXIST)
@@ -332,44 +386,236 @@ class MitigationActionService():
             result = (False, self.MITIGATION_ACTION_DOES_NOT_EXIST)
         return result
 
-    def create(self, request):
-        errors = []
-        serialized_contact = self.get_serialized_contact(request)
-        serialized_progress_indicator = self.get_serialized_progress_indicator(request)
-        serialized_location = self.get_serialized_location(request)
-        serialized_finance = self.get_serialized_finance(request)  
-        valid_relations = serialized_contact.is_valid() and serialized_progress_indicator.is_valid() and serialized_location.is_valid() and serialized_finance.is_valid()
-        if valid_relations:
-            contact = serialized_contact.save()
-            progress_indicator = serialized_progress_indicator.save()
-            location = serialized_location.save()
-            finance = serialized_finance.save()
-            serialized_mitigation_action = self.get_serialized_mitigation_action(request, contact.id, progress_indicator.id, location.id, finance.id)
 
-            if serialized_mitigation_action.is_valid():
-                mitigation_action = serialized_mitigation_action.save()
+    def create_initiative(self, request):
+        
+        errors = []
+        result = (False, None)
+        
+        initiative = request.data.get('initiative')
+        serialized_contact = self.get_serialized_contact(initiative)
+        serialized_finance = self.get_serialized_initiative_finance(initiative) 
+        
+        valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
+        
+        if not valid_relations.count(False):
+            contact = serialized_contact.save()
+            finance = serialized_finance.save()
+            serialized_initiative = self.get_serialized_initiative(request.data, contact.id, finance.id)
+
+            
+            if serialized_initiative.is_valid():
+                initiative = serialized_initiative.save()
+                result = (True, initiative)
+            
+            else:
+                errors.append(serialized_initiative.errors)
+                result = (False, errors)
+        
+        else:
+            errors.append(serialized_contact.errors)
+            errors.append(serialized_finance.errors)
+            result = (False, errors)
+
+        return result
+    
+    def update_initiative(self, request, initiative):
+        errors = []
+        result = (False, None)
+        
+        contact_id = request.get('initiative').get('contact').get('id')
+        finance_id = request.get('initiative').get('finance').get('id')
+
+        if initiative.contact.id == int(contact_id) and initiative.finance.id == int(finance_id): 
+            contact = Contact.objects.get(pk = contact_id)
+            finance = InitiativeFinance.objects.get(pk = finance_id)
+
+            serialized_contact = self.get_serialized_contact_for_existing(request.get('initiative'), contact)
+            serialized_finance = self.get_serialized_initiative_finance_for_existing(request.get('initiative'), finance)
+            
+            valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
+            
+            if not valid_relations.count(False):
+                contact = serialized_contact.save()
+                finance = serialized_finance.save()
+                serialized_initiative = self.get_serialized_initiative(request, contact.id, finance.id, initiative)
+
+                if serialized_initiative.is_valid():
+                    initiative = serialized_initiative.save()
+                    result = (True, initiative)
+                
+                else:
+                    errors.append(serialized_initiative.errors)
+                    result = (False, errors)
+            
+            else:
+                errors.append(serialized_contact.errors)
+                errors.append(serialized_finance.errors)
+                result = (False, errors)
+        else:
+            result = (False, self.INITIATIVE_RELATIONS)
+
+
+        return result
+
+
+    def update_mitigation_action(self, request, mitigation_action):
+        errors = []
+        valid_relations = []
+        if "initiative" in request.data:
+            if request.data.get('initiative').get('id'):
+                initiative_id = request.data.get('initiative').get('id')
+                if mitigation_action.initiative.id != int(initiative_id):
+                    return (False, "initiative_id" + self.RELATED_MITIGATION_ACTION)
+                initiative = Initiative.objects.get(pk = initiative_id)
+                is_valid, initiative  = self.update_initiative(request.data, initiative)
+            else:
+
+                is_valid, initiative = self.create_initiative(request)
+
+            if is_valid: 
+                serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, initiative_id = initiative.id )
+                if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
+                else:
+                    result = (False, serialized_mitigation_action.errors)
+                    return result
+            else:
+                result = (False, initiative)
+                return result
+
+        if "contact" in request.data:
+            if request.data.get('contact').get('id'):
+                contact_id = request.data.get('contact').get('id')
+                if mitigation_action.contact.id != int(contact_id):
+                    return (False, "contact_id" + self.RELATED_MITIGATION_ACTION)
+                contact = Contact.objects.get(pk=contact_id)
+                serialized_contact = self.get_serialized_contact_for_existing(request.data, contact)
+
+            else:
+                serialized_contact = self.get_serialized_contact(request.data)
+
+            is_valid = serialized_contact.is_valid()
+            if is_valid: 
+                contact = serialized_contact.save()
+                serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, contact_id=contact.id )
+                if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
+                else:
+                    result = (False, serialized_mitigation_action.errors)
+                    return result
+            else:
+                valid_relations.append(is_valid)
+                errors.append(serialized_contact.errors)
+        
+        if "location" in request.data:
+            if request.data.get('location').get('id'):
+                location_id = request.data.get('location').get('id')
+                
+                if mitigation_action.location.id != int(location_id):
+                    return (False, "location_id" + self.RELATED_MITIGATION_ACTION)
+
+                location = Location.objects.get(pk = location_id)
+                serialized_location = self.get_serialized_location_for_existing(request.data, location)
+
+            else:
+                serialized_location = self.get_serialized_location(request.data)
+            is_valid = serialized_location.is_valid()
+            if is_valid: 
+                location = serialized_location.save()
+                serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, location_id=location.id )
+                if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
+                else:
+                    result = (False, serialized_mitigation_action.errors)
+                    return result
+            else:
+                valid_relations.append(is_valid)
+                errors.append(serialized_location.errors)
+        
+        if "finance" in request.data:
+            if request.data.get('finance').get('id'):
+                finance_id = request.data.get('finance').get('id')
+                if mitigation_action.finance.id != int(finance_id):
+                    return (False, "finance_id" + self.RELATED_MITIGATION_ACTION)
+                finance = Finance.objects.get(pk = finance_id)
+                serialized_finance = self.get_serialized_finance_for_existing(request.data, finance)
+
+            else:
+                serialized_finance = self.get_serialized_finance(request.data)
+
+            is_valid = serialized_finance.is_valid()
+            if is_valid:
+                finance = serialized_finance.save() 
+                serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, finance_id=finance.id )
+                if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
+                else:
+                    result = (False, serialized_mitigation_action.errors)
+                    return result
+            else:
+                valid_relations.append(is_valid)
+                errors.append(serialized_finance.errors)
+        
+        if "progress_indicator" in request.data:
+            if request.data.get('progress_indicator').get('id'):
+                progress_indicator_id = request.data.get('progress_indicator').get('id')
+                progress_indicator = ProgressIndicator.objects.get(pk = progress_indicator_id)
+                serialized_progress_indicator = self.get_serialized_progress_indicator_for_existing(request.data, progress_indicator)
+
+            else:
+                serialized_progress_indicator = self.get_serialized_progress_indicator(request.data)
+
+            is_valid = serialized_progress_indicator.is_valid()
+            if is_valid:
+                progress_indicator = serialized_progress_indicator.save() 
+                serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, progress_indicator_id=progress_indicator.id )
+                if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
+                else:
+                    result = (False, serialized_mitigation_action.errors)
+                    return result
+            else:
+                valid_relations.append(is_valid)
+                errors.append(serialized_progress_indicator.errors)
+
+        if 'ingei_compliances' in request.data:
+            mitigation_action.ingei_compliances.clear()
+            get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
+            if not get_ingei_result:
+                errors.append(data_ingei_result)
+                valid_relations.append(get_ingei_result)
+
+        valid_relations = not valid_relations.count(False) 
+        result = (valid_relations, [ MitigationSerializer(mitigation_action).data ] + errors)
+
+        return result
+
+    def create(self, request):
+        
+        result = (False, None)
+        serialized_mitigation_action = self.get_serialized_mitigation_action(request.data)
+
+        if serialized_mitigation_action.is_valid():
+            mitigation_action = serialized_mitigation_action.save()
+            result_status, mitigation_action_data  = self.update_mitigation_action(request, mitigation_action)
+            result = (result_status, mitigation_action_data)
+            if self.checkAllFieldComplete(mitigation_action_data):
                 mitigation_previous_status = mitigation_action.fsm_state
                 if not can_proceed(mitigation_action.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
                 mitigation_action.submit()
                 mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
-                get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
-                if get_ingei_result:
-                    result = (True, MitigationSerializer(mitigation_action).data)
-                else:
-                    errors.append(data_ingei_result)
-                    result = (False, errors)
-            else:
-                errors.append(serialized_mitigation_action.errors)
-                result = (False, errors)
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+                
+        
         else:
-            errors.append(serialized_contact.errors)
-            errors.append(serialized_progress_indicator.errors)
-            errors.append(serialized_location.errors)
-            errors.append(serialized_finance.errors)
-            result = (False, errors)
+            
+            result = (False, serialized_mitigation_action.errors)
+
         return result
+    
+    def checkAllFieldComplete(self, mitigation_action_data):
+        print(mitigation_action_data)
+        for field, value in mitigation_action_data[0].items():
+            if value == None and field != "progress_indicator":
+                return False
+        return True
 
     def get_one(self, str_uuid):
         f_uuid = uuid.UUID(str_uuid)
@@ -474,40 +720,76 @@ class MitigationActionService():
                     'username': mitigation.user.username,
                     'email': mitigation.user.email
                 },
+                'initiative':{
+                    'id' : mitigation.initiative.id,
+                    'name': mitigation.initiative.name,
+                    'objective' : mitigation.initiative.objective,
+                    'description': mitigation.initiative.description,
+                    'goal' : mitigation.initiative.goal,
+                    'initiative_type': {
+                            "id": mitigation.initiative.initiative_type.id,
+                            "initiative_type" : mitigation.initiative.initiative_type.initiative_type_es if language=="es" else mitigation.initiative.initiative_type.initiative_type_en,
+                    }, 
+                    'entity_responsible': mitigation.initiative.entity_responsible,
+                    'budget': mitigation.initiative.budget,
+                    'status' : {
+                        'id': mitigation.initiative.status.id,
+                        'status': mitigation.initiative.status.status_es if language=="es" else mitigation.initiative.status.status_en
+                    },
+                    'contact': {
+                        'id': mitigation.initiative.contact.id,
+                        'full_name': mitigation.initiative.contact.full_name,
+                        'job_title': mitigation.initiative.contact.job_title,
+                        'email': mitigation.initiative.contact.email,
+                        'phone': mitigation.initiative.contact.phone
+                    },
+
+                    'finance': {
+                        'id': mitigation.initiative.finance.id,
+                        'status':{
+                                'id' : mitigation.initiative.finance.status.id,
+                                'name' : mitigation.initiative.finance.status.name_es if language=="es" else mitigation.initiative.finance.status.name_en
+                        } ,
+                        'finance_source_type': {
+                            'id': mitigation.initiative.finance.finance_source_type.id,
+                            'name': mitigation.initiative.finance.finance_source_type.name_es if language=="es" else mitigation.initiative.finance.finance_source_type.name_en,
+                        }
+                    },
+                } if mitigation.initiative else {},
                 'registration_type': {
                     'id': mitigation.registration_type.id,
                     'type': mitigation.registration_type.type_es if language=="es" else mitigation.registration_type.type_en,
-                },
+                } if mitigation.registration_type else {},
                 'institution': {
                     'id': mitigation.institution.id,
                     'name': mitigation.institution.name
-                },
+                } if mitigation.institution else {},
                 'contact': {
                     'id': mitigation.contact.id,
                     'full_name': mitigation.contact.full_name,
                     'job_title': mitigation.contact.job_title,
                     'email': mitigation.contact.email,
                     'phone': mitigation.contact.phone
-                },
+                } if mitigation.contact else {},
                 'status': {
                     'id': mitigation.status.id,
                     'status': mitigation.status.status_es if language=="es" else mitigation.status.status_en
-                },
+                } if mitigation.status else {},
                 'progress_indicator': {
                     'id': mitigation.progress_indicator.id,
                     'name': mitigation.progress_indicator.name,
                     'type': mitigation.progress_indicator.type,
                     'unit': mitigation.progress_indicator.unit,
                     'start_date': mitigation.progress_indicator.start_date
-                },
+                } if mitigation.progress_indicator else {},
                 'finance': {
                     'id': mitigation.finance.id,
-                    'finance_source_type': {
-                        'id': mitigation.finance.finance_source_type.id,
-                        'name': mitigation.finance.finance_source_type.name_es if language=="es" else mitigation.finance.finance_source_type.name_en
-                    },
+                    'status':{
+                        'id' : mitigation.finance.status.id,
+                        'name' : mitigation.finance.status.name_es if language=="es" else mitigation.finance.status.name_en
+                    } ,
                     'source': mitigation.finance.source
-                },
+                } if mitigation.finance else {},
                 'ingei_compliances': [
                     {
                       'id': ingei.id,
@@ -517,12 +799,12 @@ class MitigationActionService():
                 'geographic_scale': {
                     'id': mitigation.geographic_scale.id,
                     'name': mitigation.geographic_scale.name_es if language=="es" else mitigation.geographic_scale.name_en
-                },
+                } if mitigation.geographic_scale else {},
                 'location': {
                     'id': mitigation.location.id,
                     'geographical_site': mitigation.location.geographical_site,
                     'is_gis_annexed': mitigation.location.is_gis_annexed
-                },
+                } if mitigation.location else {},
                 # Workflow
                 'review_count': mitigation.review_count,
                 'comments': [
@@ -552,53 +834,49 @@ class MitigationActionService():
             result = False
         return result
 
-    def update(self, id, request):
-        errors = None
-        mitigation = self.get_one(id)
-        contact_id = request.data.get('contact[id]')
-        progress_indicator_id = request.data.get('progress_indicator[id]')
-        location_id = request.data.get('location[id]')
-        finance_id = request.data.get('finance[id]')
-        contact = Contact.objects.get(pk=contact_id)
-        progress_indicator = ProgressIndicator.objects.get(pk=progress_indicator_id)
-        location = Location.objects.get(pk=location_id)
-        finance = Finance.objects.get(pk=finance_id)
-        serialized_contact = self.get_serialized_contact_for_existing(request, contact)
-        serialized_progress_indicator = self.get_serialized_progress_indicator_for_existing(request, progress_indicator)
-        serialized_location = self.get_serialized_finance_for_existing(request, location)
-        serialized_finance = self.get_serialized_finance_for_existing(request, finance)
-        valid_relations = serialized_contact.is_valid() and serialized_progress_indicator.is_valid() and serialized_location.is_valid() and serialized_finance.is_valid()
-        if valid_relations:
-            contact = serialized_contact.save()
-            progress_indicator = serialized_progress_indicator.save()
-            location = serialized_location.save()
-            finance = serialized_finance.save()
-            serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request, mitigation, contact.id, progress_indicator.id, location.id, finance.id, mitigation.review_count)
+    def update(self, id, request, language):
 
-            if serialized_mitigation_action.is_valid():
-                mitigation_action = serialized_mitigation_action.save()
-                mitigation_previous_status = mitigation_action.fsm_state
-                if not can_proceed(mitigation_action.update_by_request):
-                    errors.append(self.INVALID_STATUS_TRANSITION)
-                mitigation_action.update_by_request()
-                mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
-                mitigation.ingei_compliances.clear()
-                get_ingei_result, data_ingei_result = self.assign_ingei_compliances(request, mitigation_action)
-                if get_ingei_result:
-                    result = (True, MitigationSerializer(mitigation_action).data)
-                else:
-                    errors = data_ingei_result
-                    result = (False, errors)
+        errors = []
+        mitigation = self.get_one(id)
+        serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data, mitigation)
+
+        update_existing= request.data.get('update_existing_mitigation_action')
+        update_new = request.data.get('update_new_mitigation_action')
+        
+        if serialized_mitigation_action.is_valid():
+            mitigation_action = serialized_mitigation_action.save()
+            result_status, mitigation_action_data  = self.update_mitigation_action(request, mitigation_action)
+            result = (result_status, mitigation_action_data)
+            if update_new :
+                if self.checkAllFieldComplete(mitigation_action_data):
+                    mitigation_previous_status = mitigation_action.fsm_state
+                    if not can_proceed(mitigation_action.submit):
+                        errors.append(self.INVALID_STATUS_TRANSITION)
+                    mitigation_action.submit()
+                    mitigation_action.save()
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+            
+            if update_existing :
+                if self.checkAllFieldComplete(mitigation_action_data):
+                    mitigation_previous_status = mitigation_action.fsm_state
+                    if not can_proceed(mitigation_action.update_by_request):
+                        errors.append(self.INVALID_STATUS_TRANSITION)
+                    mitigation_action.update_by_request()
+                    mitigation_action.save()
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+
+            if result_status:
+
+                result_status, mitigation_action_data = self.get(str(mitigation_action.id), language)
+                result = (result_status, [mitigation_action_data])
+
             else:
-                errors = serialized_mitigation_action.errors
                 result = (False, errors)
+        
         else:
-            errors = [serialized_contact.errors]
-            errors.append(serialized_progress_indicator.errors)
-            errors.append(serialized_location.errors)
-            errors.append(serialized_finance.errors)
-            result = (False, errors)
+
+            result = (False, serialized_mitigation_action.errors)
+
         return result
 
     def update_fsm_state(self, next_state, mitigation_action):
@@ -1084,13 +1362,28 @@ class MitigationActionService():
                     'name': g.name_es if language=="es" else g.name_en 
                 } for g in GeographicScale.objects.all()
             ]
+            initiative_types_list = [
+                {
+                    'id' : i.id,
+                    'types' : i.initiative_type_es if language == "es" else i.initiative_type_en
+                } for i in InitiativeType.objects.all()
+                
+            ]
+            finance_status = [
+                {
+                    'id' : fs.id,
+                    'status': fs.name_es if language=="es" else fs.name_en
+                } for fs in FinanceStatus.objects.all()
+            ]
             form_list = {
               'registration_types': registration_types_list,
               'institutions': institutions_list,
               'statuses': statuses_list,
               'finance_source_types': finance_source_types_list,
               'ingei_compliances': ingei_compliances_list,
-              'geographic_scales': geographic_scales_list
+              'geographic_scales': geographic_scales_list,
+              'initiative_types': initiative_types_list,
+              'finance_status' : finance_status
             }
             result = (True, form_list)
         except Mitigation.DoesNotExist:
