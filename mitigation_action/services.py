@@ -595,7 +595,7 @@ class MitigationActionService():
             mitigation_action = serialized_mitigation_action.save()
             result_status, mitigation_action_data  = self.update_mitigation_action(request, mitigation_action)
             result = (result_status, mitigation_action_data)
-            if self.checkAllFieldComplete(mitigation_action_data):
+            if result_status and self.checkAllFieldComplete(mitigation_action_data):
                 mitigation_previous_status = mitigation_action.fsm_state
                 if not can_proceed(mitigation_action.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
@@ -611,7 +611,6 @@ class MitigationActionService():
         return result
     
     def checkAllFieldComplete(self, mitigation_action_data):
-        print(mitigation_action_data)
         for field, value in mitigation_action_data[0].items():
             if value == None and field != "progress_indicator":
                 return False
