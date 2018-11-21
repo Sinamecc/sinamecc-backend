@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from mitigation_action.services import MitigationActionService
 import uuid
 from django.http import FileResponse
-
+from django.http import HttpResponseRedirect
 service = MitigationActionService()
 view_helper = ViewHelper(service)
 

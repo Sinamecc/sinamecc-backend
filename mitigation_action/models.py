@@ -9,9 +9,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from workflow.models import Comment, ReviewStatus
 from django_fsm import FSMField, transition
-
+from general.services import EmailServices
+from mitigation_action.email_services import MitigationActionEmailServices
+from general.services import EmailServices
 User =  get_user_model()
-
+##Email services, defaul email -> sinamec@grupoincocr.com
+ses_service = EmailServices()
 class RegistrationType(models.Model):
     type_key = models.CharField(max_length=20, blank=False, null=False)
     type_es = models.CharField(max_length=100, blank=False, null=False)
@@ -246,8 +249,12 @@ class Mitigation(models.Model):
     def submit(self):
         print('The mitigation action is transitioning from new to submitted')
         # Notify to DCC placeholder
+        notification_service = MitigationActionEmailServices(ses_service)
         # self.notify_submission_DCC()
-        pass
+        result = notification_service.sendStatusNotification("DCC", self)
+
+        return result
+
 
     # --- Transition ---
     # submitted -> in_evaluation_by_DCC
@@ -358,8 +365,12 @@ class Mitigation(models.Model):
     @transition(field='fsm_state', source='changes_requested_by_DCC', target='updating_by_request', conditions=[can_update_by_request], on_error='failed', permission='')
     def update_by_request(self):
         print('The mitigation action is transitioning from changes_requested_by_DCC to updating_by_request')
-        # Additional logic goes here.
-        pass
+        # Notify to DCC placeholder
+        notification_service = MitigationActionEmailServices(ses_service)
+        # self.notify_submission_DCC()
+        result = notification_service.sendStatusNotification("DCC", self)
+
+        return result
     
     # --- Transition ---
     # in_evaluation_by_DCC -> rejected_by_DCC
@@ -841,6 +852,8 @@ class Mitigation(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+    
 
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)

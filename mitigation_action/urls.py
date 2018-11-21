@@ -36,5 +36,5 @@ urlpatterns = [
         r'^api/v1/mitigations/(?P<id>[0-9a-fA-F-]+)/file/(?P<file_id>[0-9a-fA-F-]+)/*$',
         views.get_mitigation_action_file,
         name='get_mitigation_action_file'
-    ),
+    )
 ]

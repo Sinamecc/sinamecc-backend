@@ -108,5 +108,6 @@ def get_ppcn_change_log(request, id):
     return result
 
 def redirect_notification(request, id):
-    url_frontend = 'http://localhost:4200/ppcn/{0}'.format(id) #change me in development
+    path = '/'.join(request.META['HTTP_REFERER'].split('/')[:3])
+    url_frontend = '{0}/ppcn/{1}'.format(path, id) #change me in development
     return HttpResponseRedirect(url_frontend)

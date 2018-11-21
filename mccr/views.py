@@ -63,5 +63,6 @@ def patch_mccr_ovv(request, mccr_id, ovv_id):
     return result
 
 def redirect_notification(request, mccr_id):
-    url_frontend = 'http://localhost:4200/mccr/registries/{0}'.format(mccr_id) #change me in development
+    path = '/'.join(request.META['HTTP_REFERER'].split('/')[:3])
+    url_frontend = '{0}/mccr/registries/{1}'.format(path, mccr_id) #change me in development
     return HttpResponseRedirect(url_frontend)

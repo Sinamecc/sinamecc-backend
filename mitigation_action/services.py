@@ -17,12 +17,9 @@ from general.services import EmailServices
 
 workflow_service = WorkflowService()
 
-email_sender  = "sinamecc@grupoincocr.com" ##change to sinamecc email
-ses_service = EmailServices(email_sender)
 
 class MitigationActionService():
     def __init__(self):
-
         self.storage = S3Storage()
         self.MITIGATION_ACTION_DOES_NOT_EXIST = "Mitigation Action does not exist."
         self.MITIGATION_ACTION_ERROR_GET_ALL = "Error retrieving all Mitigation Action records."
@@ -388,30 +385,29 @@ class MitigationActionService():
 
 
     def create_initiative(self, request):
-        
+
         errors = []
         result = (False, None)
-        
+
         initiative = request.data.get('initiative')
         serialized_contact = self.get_serialized_contact(initiative)
-        serialized_finance = self.get_serialized_initiative_finance(initiative) 
-        
+        serialized_finance = self.get_serialized_initiative_finance(initiative)
+
         valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
-        
+
         if not valid_relations.count(False):
             contact = serialized_contact.save()
             finance = serialized_finance.save()
             serialized_initiative = self.get_serialized_initiative(request.data, contact.id, finance.id)
 
-            
             if serialized_initiative.is_valid():
                 initiative = serialized_initiative.save()
                 result = (True, initiative)
-            
+
             else:
                 errors.append(serialized_initiative.errors)
                 result = (False, errors)
-        
+
         else:
             errors.append(serialized_contact.errors)
             errors.append(serialized_finance.errors)
@@ -587,7 +583,6 @@ class MitigationActionService():
         return result
 
     def create(self, request):
-        
         result = (False, None)
         serialized_mitigation_action = self.get_serialized_mitigation_action(request.data)
 
@@ -599,11 +594,10 @@ class MitigationActionService():
                 mitigation_previous_status = mitigation_action.fsm_state
                 if not can_proceed(mitigation_action.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
+                
                 mitigation_action.submit()
                 mitigation_action.save()
                 self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
-                
-        
         else:
             
             result = (False, serialized_mitigation_action.errors)
@@ -841,7 +835,7 @@ class MitigationActionService():
 
         update_existing= request.data.get('update_existing_mitigation_action')
         update_new = request.data.get('update_new_mitigation_action')
-        
+
         if serialized_mitigation_action.is_valid():
             mitigation_action = serialized_mitigation_action.save()
             result_status, mitigation_action_data  = self.update_mitigation_action(request, mitigation_action)
@@ -852,9 +846,10 @@ class MitigationActionService():
                     if not can_proceed(mitigation_action.submit):
                         errors.append(self.INVALID_STATUS_TRANSITION)
                     mitigation_action.submit()
+
                     mitigation_action.save()
-                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
-            
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
+
             if update_existing :
                 if self.checkAllFieldComplete(mitigation_action_data):
                     mitigation_previous_status = mitigation_action.fsm_state
@@ -862,7 +857,7 @@ class MitigationActionService():
                         errors.append(self.INVALID_STATUS_TRANSITION)
                     mitigation_action.update_by_request()
                     mitigation_action.save()
-                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
 
             if result_status:
 
@@ -1389,6 +1384,9 @@ class MitigationActionService():
             result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
         return result
 
+
+   
+
     def get_file_content(self, file_id):
         
         MA_files = MAWorkflowStepFile.objects.get(id=file_id)
@@ -1411,23 +1409,8 @@ class MitigationActionService():
     def _get_filename(self, filename):
         fpath, fname = os.path.split(filename)
         return fname
-      
-    def sendNotification(self, recipient_list, subject, message_body):
 
-        result = ses_service.send_notification(recipient_list, subject, message_body)
-        
-        return result
-            
-    def sendStatusNotification(self, recipient_list, subject, message_body, link):
 
-        """first implementation"""
-        subject = "Mitigation Action: " + subject
-        message_body += "\nlink: " + link
-
-        result = self.sendNotification(recipient_list, subject, message_body)
-
-        return result
-        
 
 
 
