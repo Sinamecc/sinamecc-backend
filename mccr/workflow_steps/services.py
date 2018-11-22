@@ -3,6 +3,7 @@ from mccr.models import MCCRRegistry
 from mccr.workflow_steps.serializers import MCCRWorkflowStepFileSerializer, MCCRWorkflowStepSerializer
 from mccr.workflow_steps.active_steps import WorkflowActiveSteps
 from general.storages import S3Storage
+from django_fsm import can_proceed
 from io import BytesIO
 import os
 
@@ -10,9 +11,9 @@ import os
 class MCCRWorkflowStepService():
     def __init__(self):
         self.storage = S3Storage()
-        self.WORKFLOW_STEP_FILE_DOES_NOT_EXIST = "Mitigation Action workflow step file does not exist"
-        self.WORKFLOW_STEP_DOES_NOT_EXIST = "Mitigation Action workflow step does not exist"
-        self.CANT_UPLOAD = "Can't upload Harmonization Ingei file"
+        self.WORKFLOW_STEP_FILE_DOES_NOT_EXIST = "MCCR workflow step file does not exist"
+        self.WORKFLOW_STEP_DOES_NOT_EXIST = "MCCR workflow step does not exist"
+        self.CANT_UPLOAD = "Can't upload MCCR Detail file"
         self.active_steps = WorkflowActiveSteps()
 
     def _get_error_message(self, message):
@@ -41,8 +42,15 @@ class MCCRWorkflowStepService():
         """ Check if the step is enabled for the workflow """
         if serialized_step.is_valid() and \
                 self.active_steps.is_enabled(serialized_step.validated_data.get("name")):
-            newly_saved_step = serialized_step.save()
-            if newly_saved_step.id:
+            
+            mccr_registry = serialized_step.validated_data.get("mccr")
+            newly_saved_step = None
+            if mccr_registry != None:
+                if mccr_registry.can_ovv_upload_evaluation():
+                    mccr_registry.ovv_upload_evaluation()
+                    mccr_registry.save()
+                    newly_saved_step = serialized_step.save()
+            if newly_saved_step != None and newly_saved_step.id:
                 self.serialize_and_save_step_file(request, newly_saved_step)
                 result = (True, MCCRWorkflowStepSerializer(newly_saved_step).data)
             else:

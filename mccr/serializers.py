@@ -11,7 +11,7 @@ class MCCRRegistrySerializerView(serializers.ModelSerializer):
     files = MCCRFileSerializer(many=True)
     class Meta:
         model = MCCRRegistry
-        fields = ('id', 'user', 'mitigation', 'user_type', 'status', 'files')
+        fields = ('id', 'user', 'mitigation', 'user_type', 'fsm_state', 'files')
 
 class MCCRRegistrySerializerCreate(serializers.ModelSerializer):
     class Meta:

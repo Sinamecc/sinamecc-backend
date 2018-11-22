@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 service = MCCRService()
 view_helper = ViewHelper(service)
 
-@api_view(['GET', 'DELETE', 'PUT'])
+@api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 @csrf_exempt
 def get_mccr(request, id):
     if request.method == 'GET':
@@ -20,6 +20,8 @@ def get_mccr(request, id):
         result = view_helper.put(id, request)
     elif request.method == 'DELETE':
         result = view_helper.delete(id)
+    elif request.method == 'PATCH':
+        result = view_helper.patch(id, request)
     return result
 
 @api_view(['GET','POST'])
