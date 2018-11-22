@@ -605,10 +605,21 @@ class MitigationActionService():
         return result
     
     def checkAllFieldComplete(self, mitigation_action_data):
-        for field, value in mitigation_action_data[0].items():
-            if value == None and field != "progress_indicator":
-                return False
-        return True
+
+        result = True
+        field_list = dict(mitigation_action_data[0].items())
+
+        for field in field_list.keys():
+            if field_list[field] == None and field != "progress_indicator": 
+
+                if field != "international_participation":
+                    result = False 
+
+                # international_participation -> None and is_international -> True ==> not valid
+                elif field_list['is_international']:
+                    result = False
+
+        return result
 
     def get_one(self, str_uuid):
         f_uuid = uuid.UUID(str_uuid)
