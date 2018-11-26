@@ -175,11 +175,12 @@ class MCCRService():
             ovv_list = [
                 {
                     "id": o.id,
+                    "name": o.name,
                     "email": o.email,
                     "phone": o.phone
                 } for o in OVV.objects.all()
             ]
-            result = (True, ovv_list, )
+            result = (True, ovv_list)
         except OVV.DoesNotExist:
             result = (False, {"error": self.MCCR_ERROR_EMPTY_OVV_LIST})
         except:
