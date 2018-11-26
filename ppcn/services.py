@@ -22,6 +22,7 @@ ses_service = EmailServices(email_sender)
 from workflow.models import ReviewStatus
 from workflow.services import WorkflowService
 workflow_service = WorkflowService()
+
 class PpcnService():
 
     def __init__(self):
@@ -37,7 +38,9 @@ class PpcnService():
         self.PPCN_DOES_NOT_EXIST = "PPCN does not exist."
         self.PPCN_FILE_DOES_NOT_EXIST = "PPCN file does not exist."
         self.INVALID_STATUS_TRANSITION = "Invalid ppcn state transition."
+        self.INVALID_CURRENT_STATUS = "Invalid current ppcn status."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
+        self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
 
 
     # serialized objects
@@ -133,7 +136,7 @@ class PpcnService():
             result = (True, form)
 
         except GeographicLevel.DoesNotExist:
-            result (False, self.LEVEL_ERROR_GET_ALL)
+            result = (False, self.LEVEL_ERROR_GET_ALL)
         return result
 
     def get_all_required_level(self, language):
@@ -147,7 +150,7 @@ class PpcnService():
             
             result = (True, form)
         except RequiredLevel.DoesNotExist:
-            result (False, self.GEOGRAPHIC_LEVEL_ERROR_GET_ALL)
+            result = (False, self.GEOGRAPHIC_LEVEL_ERROR_GET_ALL)
         return result
 
     def get_all_recognition_type(self, language):
@@ -160,7 +163,7 @@ class PpcnService():
             ]
             result = (True, recognition)
         except RecognitionType.DoesNotExist:
-            result (False, self.RECOGNITION_TYPE_ERROR_GET_ALL)
+            result = (False, self.RECOGNITION_TYPE_ERROR_GET_ALL)
         return result
 
     def get_all_sector(self, id ,language):
@@ -173,7 +176,7 @@ class PpcnService():
             ]
             result = (True, sector)
         except Sector.DoesNotExist:
-            result (False, self.SECTOR_ERROR_GET_ALL)
+            result = (False, self.SECTOR_ERROR_GET_ALL)
         return result
 
     def get_all_sub_sector(self, sector, language):
@@ -308,13 +311,14 @@ class PpcnService():
                     },
                     'base_year': pp.base_year,
                     'fsm_state': pp.fsm_state,
+                    'next_state': self.next_action(pp.fsm_state),
                     'created': pp.created,
                     'updated': pp.updated
                 }for pp in PPCN.objects.all()
             ]
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
-            result (False, self.PPCN_ERROR_GET_ALL)
+            result = (False, self.PPCN_ERROR_GET_ALL)
         return result
 
 
@@ -357,43 +361,42 @@ class PpcnService():
             result = (False, result_detail)
         return result
 
-    def possible_next_state(self, current_fsm_state):
-        result_arr = []
-        if current_fsm_state == 'new':
-            result_arr.append({
-                'state': 'submitted'
-            })
-        elif current_fsm_state == 'submitted':
-            result_arr.append({
-                'state': 'evaluation_by_DCC'
-            })
-        elif current_fsm_state == 'evaluation_by_DCC':
-            result_arr.append(
-                {'state': 'accepted_request_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'rejected_request'}
-            )
-        elif current_fsm_state == 'accepted_request_by_DCC':
-            result_arr.append(
-                {'state': 'evaluation_by_CA'}
-            )
-        elif current_fsm_state == 'evaluation_by_CA':
-            result_arr.append(
-                {'state': 'accepted_request_by_DCC'}
-            )
-            result_arr.append(
-                {'state': 'rejected_request'}
-            )
-        elif current_fsm_state == 'rejected_request':
-            result_arr.append(
-                {'state': 'end'}
-            )
-        elif current_fsm_state == 'accepted_request_by_DCC':
-            result_arr.append(
-                {'state': 'send_recognition_certificate'}
-            )
-        return result_arr
+    def next_action(self, current_fsm_state):
+        result = False
+
+        if 'PPCN_submitted' == current_fsm_state or 'PPCN_updating_by_request_DCC' == current_fsm_state: 
+            result = 'PPCN_evaluation_by_DCC'
+
+        elif 'PPCN_evaluation_by_DCC' == current_fsm_state:
+            result = 'PPCN_decision_step_DCC'
+
+        elif 'PPCN_decision_step_DCC' == current_fsm_state:
+            result = False
+        
+        elif 'PPCN_rejected_request_by_DCC' == current_fsm_state:
+            result = 'PPCN_end'
+        
+        elif 'PPCN_changes_requested_by_DCC' == current_fsm_state:
+            result = 'PPCN_updating_by_request_DCC'
+        
+        elif 'PPCN_accepted_request_by_DCC'== current_fsm_state:
+            result = 'PPCN_evaluation_by_CA'
+
+        elif 'PPCN_evaluation_by_CA' == current_fsm_state:
+            result = 'PPCN_decision_step_CA'
+
+        elif 'PPCN_decision_step_CA' == current_fsm_state:
+            result = False
+
+        elif 'PPCN_rejected_request_by_CA' == current_fsm_state:
+            result = 'PPCN_end'
+        
+        elif 'PPCN_accepted_request_by_CA' == current_fsm_state:
+            result = 'PPCN_send_recognition_certificate'
+
+        return result
+
+
 
     def get(self, id ,language = 'en'):
         try:
@@ -444,11 +447,11 @@ class PpcnService():
                     'updated': pp.updated,
                     'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
                     'fsm_state': pp.fsm_state,
-                    'next_state': self.possible_next_state(pp.fsm_state)
+                    'next_state': self.next_action(pp.fsm_state)
                 }
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
-            result (False, self.PPCN_ERROR_GET_ALL)
+            result = (False, self.PPCN_DOES_NOT_EXIST)
         return result
     
     def delete(self, id):
@@ -476,6 +479,13 @@ class PpcnService():
                 serialized_ppcn = self.get_serialized_ppcn(request, organization.id, ppcn)
                 if serialized_ppcn.is_valid():
                     ppcn = serialized_ppcn.save()
+                    ppcn_previous_status = ppcn.fsm_state
+                    if not can_proceed(ppcn.update_by_request_DCC):
+                        errors.append(self.INVALID_STATUS_TRANSITION)
+                    ppcn.update_by_request_DCC()
+                    ppcn.save()
+                    self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
+                
                     result = (True, PPCNSerializer(ppcn).data)
                 else:
                     errors = serialized_ppcn.errors
@@ -546,7 +556,7 @@ class PpcnService():
             }
             result = (True, form_list)
         except RequiredLevel.DoesNotExist:
-            result (False, self.REQUIRED_LEVEL_ERROR_GET_ALL)
+            result = (False, self.REQUIRED_LEVEL_ERROR_GET_ALL)
         return result
 
     def sendNotification(self, recipient_list, subject, message_body):
@@ -613,72 +623,138 @@ class PpcnService():
         return comment_result_status
 
     def update_fsm_state(self, next_state, ppcn):
+        result = (None, None)
         # --- Transition ---
-        # submitted -> evaluation_by_DCC
-        if next_state == 'evaluation_by_DCC':
+        # PPCN_submitted -> PPCN_evaluation_by_DCC
+        if next_state == 'PPCN_evaluation_by_DCC' and ppcn.fsm_state == 'PPCN_submitted':
             if not can_proceed(ppcn.evaluate_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.evaluate_DCC()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
+
         # --- Transition ---
-        # submitted -> rejectd_request_by_DCC
-        elif next_state == 'rejected_request':
+        # PPCN_evaluation_by_DCC -> PPCN_decision_step_DCC
+        elif next_state == 'PPCN_decision_step_DCC':
+            if not can_proceed(ppcn.submit_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.submit_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+
+        # --- Transition ---
+        # PPCN_decision_step_DCC -> rejectd_request_by_DCC
+        elif next_state == 'PPCN_rejected_request_by_DCC':
             if not can_proceed(ppcn.rejected_request_by_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.rejected_request_by_DCC()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
+        
+        # --- Transition ---
+        # PPCN_rejected_request_by_DCC -> PPCN_end
+        elif next_state == 'PPCN_end' and ppcn.fsm_state =='PPCN_rejected_request_by_DCC':
+            if not can_proceed(ppcn.end):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.end()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
 
         # --- Transition ---
-        # evaluation_by_DCC -> accepted_request_by_DCC
-        elif next_state == 'accepted_request_by_DCC':
+        # PPCN_decision_step_DCC -> PPCN_accepted_request_by_DCC
+        elif next_state == 'PPCN_accepted_request_by_DCC':
             if not can_proceed(ppcn.accept_request_by_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.accept_request_by_DCC()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
+
         # --- Transition ---
-        # submitted -> rejectd_request_by_CA
-        elif next_state == 'rejected_request':
-            if not can_proceed(ppcn.rejected_request_by_CA):
+        # PPCN_decision_step_DCC -> PPCN_changes_requested_by_DCC
+        elif next_state == 'PPCN_changes_requested_by_DCC':
+            if not can_proceed(ppcn.changes_requested_by_DCC):
                 result = (False, self.INVALID_STATUS_TRANSITION)
-            ppcn.rejected_request_by_CA()
+            ppcn.changes_requested_by_DCC()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
+
         # --- Transition ---
-        # accepted_request_by_DCC -> evaluation_by_CA
-        elif next_state == 'evaluation_by_CA':
+        # PPCN_changes_requested_by_DCC -> PPCN_updating_by_request_DCC
+        elif next_state == 'PPCN_updating_by_request_DCC':
+            if not can_proceed(ppcn.update_by_request_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.update_by_request_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # PPCN_updating_by_request_DCC -> PPCN_evaluation_by_DCC
+        elif next_state == 'PPCN_evaluation_by_DCC' and ppcn.fsm_state == 'PPCN_updating_by_request_DCC':
+            if not can_proceed(ppcn.update_evaluate_DCC):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.update_evaluate_DCC()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # PPCN_accepted_request_by_DCC -> PPCN_evaluation_by_CA
+        elif next_state == 'PPCN_evaluation_by_CA':
             if not can_proceed(ppcn.evaluate_by_CA):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.evaluate_by_CA()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
+
         # --- Transition ---
-        # evaluation_by_CA -> accept_request_by_CA
-        elif next_state == 'accept_request_by_CA':
+        # PPCN_evaluation_by_CA -> PPCN_decision_step_CA
+        elif next_state == 'PPCN_decision_step_CA':
+            if not can_proceed(ppcn.submit_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.submit_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # PPCN_decision_step_CA -> PPCN_rejected_request_by_CA
+        elif next_state == 'PPCN_rejected_request_by_CA':
+            if not can_proceed(ppcn.rejected_request_by_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.rejected_request_by_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+        # --- Transition ---
+        # PPCN_rejected_request_by_CA -> PPCN_end
+        elif next_state == 'PPCN_end' and ppcn.fsm_state =='PPCN_rejected_request_by_CA':
+            if not can_proceed(ppcn.end_CA):
+                result = (False, self.INVALID_STATUS_TRANSITION)
+            ppcn.end_CA()
+            ppcn.save()
+            result = (True, PPCNSerializer(ppcn).data)
+
+
+        # --- Transition ---
+        # PPCN_decision_step_CA -> PPCN_accepted_request_by_CA
+        elif next_state == 'PPCN_accepted_request_by_CA':
             if not can_proceed(ppcn.accept_request_by_CA):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.accept_request_by_CA()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
 
+
         # --- Transition ---
-        # evaluation_by_CA -> accept_request_by_CA
-        elif next_state == 'send_recognition_certificate':
+        # PPCN_accepted_request_by_CA -> PPCN_send_recognition_certificate
+        elif next_state == 'PPCN_send_recognition_certificate':
             if not can_proceed(ppcn.send_recognition_certificate):
                 result = (False, self.INVALID_STATUS_TRANSITION)
             ppcn.send_recognition_certificate()
             ppcn.save()
             result = (True, PPCNSerializer(ppcn).data)
-        # --- Transition ---
-        # rejected_request_by_CDD_and_CA -> end
-        elif next_state == 'end':
-            if not can_proceed(ppcn.end):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            ppcn.end()
-            ppcn.save()
-            result = (True, PPCNSerializer(ppcn).data)
+        else:
+            result = (False, self.INVALID_STATUS_TRANSITION)
+
         return result
 
     def patch(self, id, request):
@@ -697,6 +773,7 @@ class PpcnService():
                     result = (True, update_state_data)
                 else:
                     result = (False, update_state_data)
+                    return result
             if request.data.get('comment'):
                 comment_status = self.assign_comment(request, ppcn)
                 if comment_status:
@@ -705,4 +782,5 @@ class PpcnService():
                     result = (False, self.COMMENT_NOT_ASSIGNED)
         else:
             result = (False, self.NO_PATCH_DATA_PROVIDED)
+
         return result
