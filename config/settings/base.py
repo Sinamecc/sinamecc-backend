@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'mccr',
     'ppcn',
     'corsheaders',
-    'django_fsm'
+    'django_fsm',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,4 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+AUTH_USER_MODEL = 'users.CustomUser'
