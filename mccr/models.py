@@ -7,8 +7,10 @@ from mitigation_action.models import Mitigation
 from workflow.models import Comment, ReviewStatus
 from django_fsm import FSMField, transition
 import uuid
-
+from mccr.email_services import MCCREmailServices
+from general.services import EmailServices
 User =  get_user_model()
+ses_service = EmailServices()
 
 class MCCRUserType(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -81,7 +83,14 @@ class MCCRRegistry(models.Model):
         print('The MCCR is transitioning from mccr_ovv_assigned_first_review to mccr_ovv_assigned_notification')
         # Additional logic goes here.
         # self.notify()
-        pass
+        #  get ovv 
+        mccr_ovv = MCCRRegistryOVVRelation.objects.filter(mccr = self.id).latest('id')
+        email_ovv = mccr_ovv.ovv.email
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotification(self, email_ovv)
+
+        return result
+        
 
     # --- Transition ---
     # mccr_ovv_assigned_notification -> mccr_ovv_accept_reject
@@ -109,6 +118,7 @@ class MCCRRegistry(models.Model):
     def ovv_accept_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_accept_assignation')
         # Additional logic goes here.
+
         pass
 
     # --- Transition ---
@@ -207,7 +217,9 @@ class MCCRRegistry(models.Model):
     def secretary_get_information(self):
         print('The MCCR is transitioning from mccr_ovv_accept_dp to mccr_secretary_get_information')
         # Additional logic goes here.
-        pass
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
+        return result
 
     # --- Transition ---
     # mccr_secretary_get_information -> mccr_on_evaluation_by_secretary
