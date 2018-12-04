@@ -1,4 +1,6 @@
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector, SubSector, PPCN, PPCNFile
+
+from mccr.models import OVV
 from ppcn.views import *
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
@@ -20,6 +22,10 @@ from general.services import EmailServices
 email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
 from workflow.models import ReviewStatus
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 from workflow.services import WorkflowService
 workflow_service = WorkflowService()
 
@@ -41,6 +47,7 @@ class PpcnService():
         self.INVALID_CURRENT_STATUS = "Invalid current ppcn status."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
+        self.PPCN_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
 
 
     # serialized objects
@@ -78,6 +85,25 @@ class PpcnService():
         serializer = ChangeLogSerializer(data=change_log_data)
         return serializer
 
+
+    def get_serialized_gei_organization(self, request, gei_organization = False):
+        
+        gei_organization_data = { 
+            'activity_type': request.data.get('gei_organization').get('activity_type'),
+            'ovv': request.data.get('gei_organization').get('ovv'),
+            'emission_OVV': request.data.get('gei_organization').get('emission_OVV'),
+            'report_date_start': request.data.get('gei_organization').get('report_date_start'),
+            'report_date_end': request.data.get('gei_organization').get('report_date_end'),
+            'base_year': request.data.get('gei_organization').get('base_year')
+        }
+
+        if gei_organization:
+            serializer = GeiOrganizationSerializer(gei_organization ,data=gei_organization_data)
+        else:
+            serializer = GeiOrganizationSerializer(data=gei_organization_data)
+        return serializer
+
+
     def get_serialized_organization(self, request ,contact_id, organization = False):
         organization_data = {
             'name': request.data.get('organization').get('name'),
@@ -95,7 +121,7 @@ class PpcnService():
             serializer = OrganizationSerializer(data=organization_data)
         return serializer
 
-    def get_serialized_ppcn(self, request, organization_id, ppcn = False):
+    def get_serialized_ppcn(self, request, organization_id, gei_organization_id, ppcn = False):
         ppcn_data = {
             'organization': organization_id,
             'geographicLevel': request.data.get('geographicLevel'), 
@@ -103,6 +129,7 @@ class PpcnService():
             'sector': request.data.get('sector'),
             'subsector': request.data.get('subsector'), 
             'recognitionType':request.data.get('recognitionType'),
+            'gei_organization': gei_organization_id,
             'base_year':request.data.get('base_year'),
             'user':request.data.get('user')
         }
@@ -190,6 +217,22 @@ class PpcnService():
             result = (True, subsector)
         except SubSector.DoesNotExist:
             result = (False, self.SUB_SECTOR_ERROR_GET_ALL)
+        return result
+
+    def get_all_ovv(self):
+        try:
+            ovv_list = [
+                {
+                    "id": o.id,
+                    "email": o.email,
+                    "phone": o.phone,
+                    "name": o.name
+                } for o in OVV.objects.all()
+            ]
+            result = (True, ovv_list)
+
+        except OVV.DoesNotExist:
+            result = (False, {"error": self.PPCN_ERROR_EMPTY_OVV_LIST})
         return result
 
     def get_one_organization(self, pk, language):
@@ -309,6 +352,19 @@ class PpcnService():
                         'id' : pp.recognitionType.id,
                         'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
                     },
+                    'gei_organization':{
+                        'id': pp.gei_organization.id, 
+                        'activity_type': pp.gei_organization.activity_type, 
+                        'ovv': {
+                            'id': pp.gei_organization.ovv.id,
+                            'name':  pp.gei_organization.ovv.name,
+                            'email': pp.gei_organization.ovv.email,
+                        },
+                        'emission_OVV': pp.gei_organization.emission_OVV, 
+                        'report_date_start': pp.gei_organization.report_date_start, 
+                        'report_date_end': pp.gei_organization.report_date_end, 
+                        'base_year': pp.gei_organization.base_year
+                    } if pp.gei_organization else None, 
                     'base_year': pp.base_year,
                     'fsm_state': pp.fsm_state,
                     'next_state': self.next_action(pp.fsm_state),
@@ -335,9 +391,25 @@ class PpcnService():
 
         errors =[]
         save_result, result_detail= self.post_organization(request)
-        if save_result:
+        valid_relations = [save_result]
+        
+        if request.data.get('gei_organization') != None:
+            serialized_gei_organization = self.get_serialized_gei_organization(request) 
+            valid_relations.append(serialized_gei_organization.is_valid())
+            errors.append(serialized_gei_organization.errors)
+
+        if not valid_relations.count(False):
+
             organization_id = result_detail.get('id')
-            serialized_ppcn = self.get_serialized_ppcn(request, organization_id)
+            gei_organization_id = None
+            if request.data.get('gei_organization') != None:
+                gei_organization = serialized_gei_organization.save()
+                gei_organization_id = gei_organization.id
+
+            
+            #change logic here !!
+            serialized_ppcn = self.get_serialized_ppcn(request, organization_id, gei_organization_id)
+            
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
 
@@ -358,7 +430,8 @@ class PpcnService():
                 result = (False, errors)
 
         else:
-            result = (False, result_detail)
+            
+            result = (False, errors)
         return result
 
     def next_action(self, current_fsm_state):
@@ -442,6 +515,19 @@ class PpcnService():
                         'id' : pp.recognitionType.id,
                         'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
                     },
+                    'gei_organization':{
+                        'id': pp.gei_organization.id, 
+                        'activity_type': pp.gei_organization.activity_type, 
+                        'ovv': {
+                            'id': pp.gei_organization.ovv.id,
+                            'name':  pp.gei_organization.ovv.name,
+                            'email': pp.gei_organization.ovv.email,
+                        },
+                        'emission_OVV': pp.gei_organization.emission_OVV, 
+                        'report_date_start': pp.gei_organization.report_date_start, 
+                        'report_date_end': pp.gei_organization.report_date_end, 
+                        'base_year': pp.gei_organization.base_year
+                    } if pp.gei_organization else None, 
                     'base_year': pp.base_year,
                     'created': pp.created,
                     'updated': pp.updated,
@@ -465,18 +551,31 @@ class PpcnService():
 
     def update(self, id, request):
 
-        errors = None
+        errors = []
         ppcn = PPCN.objects.get(id=id)
         organization = Organization.objects.get(id=ppcn.organization.id)
         contact = Contact.objects.get(id=organization.contact.id)
+        
+        if request.data.get('gei_organization') != None and ppcn.gei_organization.id != None:
+            gei_organization = GeiOrganization.objects.get(id=ppcn.gei_organization.id)
 
         serialized_contact = self.get_serialized_contact(request.data.get('organization'), contact)
         if serialized_contact.is_valid():
             serialized_contact.save()
             serialized_organization = self.get_serialized_organization(request, contact.id, organization)
-            if serialized_organization.is_valid():
+            valid_relations = [serialized_organization.is_valid()]
+            if request.data.get('gei_organization') != None:
+                serialized_gei_organization = self.get_serialized_gei_organization(request, gei_organization)
+                valid_relations.append(serialized_gei_organization.is_valid())
+
+            if not valid_relations.count(False):
                 organization = serialized_organization.save()
-                serialized_ppcn = self.get_serialized_ppcn(request, organization.id, ppcn)
+                gei_organization_id = None
+                if request.data.get('gei_organization') != None:
+                    gei_organization = serialized_gei_organization.save()
+                    gei_organization_id = gei_organization.id
+
+                serialized_ppcn = self.get_serialized_ppcn(request, organization.id, gei_organization_id, ppcn)
                 if serialized_ppcn.is_valid():
                     ppcn = serialized_ppcn.save()
                     ppcn_previous_status = ppcn.fsm_state
@@ -548,11 +647,13 @@ class PpcnService():
             ]
 
             sectors = self.get_all_sector(geographicLevel_id, language)[1]
+            ovvs = self.get_all_ovv()[1]
 
             form_list = {
                 'required_level': required_evel,
                 'recognition_type': recognition_type,
-                'sector': sectors
+                'sector': sectors,
+                'ovv':ovvs,
             }
             result = (True, form_list)
         except RequiredLevel.DoesNotExist:

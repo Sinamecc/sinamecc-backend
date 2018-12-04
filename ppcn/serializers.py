@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ppcn.models import Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, PPCN, PPCNFile, ChangeLog
+from ppcn.models import Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization, PPCN, PPCNFile, ChangeLog
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +27,12 @@ class RecognitionTypeSerializer(serializers.ModelSerializer):
         model = RecognitionType
         fields = ('recognition_type_es', 'recognition_type_en')
 
+class GeiOrganizationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model =  GeiOrganization
+        fields = ('id', 'activity_type', 'ovv', 'emission_OVV', 'report_date_start', 'report_date_end', 'base_year')
+
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChangeLog
@@ -35,7 +41,7 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('id','user','organization', 'geographicLevel', 'requiredLevel', 'sector','subsector', 'recognitionType', 'base_year', 'fsm_state' , 'created', 'updated')
+        fields = ('id','user','organization', 'gei_organization','geographicLevel', 'requiredLevel', 'sector','subsector', 'recognitionType', 'base_year', 'fsm_state' , 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):
     class Meta:

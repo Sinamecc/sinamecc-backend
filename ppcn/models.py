@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from mitigation_action.models import Contact
+from mccr.models import OVV
 from django.conf import settings
 import uuid
 from django.core.validators import RegexValidator
@@ -140,10 +141,11 @@ class SubSector(models.Model):
 class GeiOrganization(models.Model):
 
     activity_type = models.CharField(max_length=200, blank=False, null=False)
-    ovv = models.CharField(max_length=200, blank=False, null=False)
-    emision_OVV = models.DateField(null=False)
-    report_date = models.DateField(null=False)
-    base_year = models.DateField(null=False)
+    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=False)
+    emission_OVV = models.DateField(blank=False, null=False)
+    report_date_start = models.DateField(null=True, blank=True)
+    report_date_end = models.DateField(null=True, blank=True)
+    base_year = models.DateField(blank=False, null=False)
 
     class Meta:
         verbose_name = _("GeiOrganization")
@@ -164,11 +166,10 @@ class PPCN(models.Model):
     subsector = models.ForeignKey(SubSector, related_name='subsector')
     recognitionType = models.ForeignKey(RecognitionType, related_name='recognization')
     base_year = models.DateField(null = False)
-
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
-
+    gei_organization = models.ForeignKey(GeiOrganization, blank=False, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

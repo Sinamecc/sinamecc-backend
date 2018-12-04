@@ -92,6 +92,13 @@ def get_form_ppcn(request, geographicLevel_id, language):
     return result
 
 @api_view(['GET'])
+def get_all_ovv(request):
+    if request.method == 'GET':
+        result = view_helper.get_by_name("get_all_ovv")
+    return result
+
+
+@api_view(['GET'])
 def get_ppcn_file_version(request, id, ppcn_file_id):
     if request.method == 'GET':
         file_name, file_data = service.download_file(id, ppcn_file_id)
