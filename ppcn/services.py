@@ -366,10 +366,20 @@ class PpcnService():
                         'base_year': pp.gei_organization.base_year
                     } if pp.gei_organization else None, 
                     'base_year': pp.base_year,
+                    'comments':[
+                        {
+                            'id': comment.id,
+                            'comment': comment.comment
+                        } for comment in pp.comments.all()
+                    ],
+
                     'fsm_state': pp.fsm_state,
                     'next_state': self.next_action(pp.fsm_state),
                     'created': pp.created,
-                    'updated': pp.updated
+                    'updated': pp.updated,
+                    'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
+                    'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
+                    'user': pp.user.id
                 }for pp in PPCN.objects.all()
             ]
             result = (True, ppcn_data)
@@ -529,10 +539,19 @@ class PpcnService():
                         'base_year': pp.gei_organization.base_year
                     } if pp.gei_organization else None, 
                     'base_year': pp.base_year,
+                    'comments': [
+                        {
+                            'id': comment.id,
+                            'comment': comment.comment
+                        } for comment in pp.comments.all()
+                    ],
                     'created': pp.created,
                     'updated': pp.updated,
+                    'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
                     'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
                     'fsm_state': pp.fsm_state,
+                    'user': pp.user.id,
+
                     'next_state': self.next_action(pp.fsm_state)
                 }
             result = (True, ppcn_data)
@@ -615,16 +634,31 @@ class PpcnService():
         path, filename = os.path.split(ppcn_file.file.name)
         return  (filename, BytesIO(self.storage.get_file(ppcn_file.file.name)))
 
+    def get_ppcn_file_content(self, file_id):
+        ppcn_file = PPCNFile.objects.get(id=file_id)
+        path, filename = os.path.split(ppcn_file.file.name)
+        return  (filename, BytesIO(self.storage.get_file(ppcn_file.file.name)))
+
     def download_file(self, id, file_id):
         return self.get_file_content(file_id)
+
+    def download_ppcn_file(self, id, file_id):
+        return self.get_ppcn_file_content(file_id)
 
     def _get_files_list(self, file_list):
         file_list = [file_list[0].union(q) for q in file_list[1:]] if len(file_list) > 1 else file_list
         file_list = file_list[0] if len(file_list) > 0 else file_list
         return [{'name': self._get_filename(f.file.name), 'file': self._get_file_path(str(f.workflow_step.ppcn.id), str(f.id))} for f in file_list ]
 
+    def _get_ppcn_files_list(self, file_list):
+        return [{'name': self._get_filename(f.file.name), 'file': self._get_ppcn_file_path(str(f.ppcn_form.id), str(f.id))} for f in file_list.all()]
+
     def _get_file_path(self, ppcn_id, ppcn_file_id):
         url = reverse("get_ppcn_file_version", kwargs={'id': ppcn_id, 'ppcn_file_id': ppcn_file_id})
+        return url
+
+    def _get_ppcn_file_path(self, ppcn_id, ppcn_file_id):
+        url = reverse("get_ppcn_file", kwargs={'id': ppcn_id, 'ppcn_file_id': ppcn_file_id})
         return url
 
     def _get_filename(self, filename):

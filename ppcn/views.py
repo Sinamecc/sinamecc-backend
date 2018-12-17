@@ -112,6 +112,16 @@ def get_ppcn_file_version(request, id, ppcn_file_id):
     return view_helper.error_message("Unsupported METHOD for get_ppcn_file_version_url view")
 
 @api_view(['GET'])
+def get_ppcn_file(request, id, ppcn_file_id):
+    if request.method == 'GET':
+        file_name, file_data = service.download_ppcn_file(id, ppcn_file_id)
+        attachment_file_name_value = "attachment; filename=\"{}\"".format(file_name)
+        response = FileResponse(file_data, content_type='application/octet-stream')
+        response.setdefault('Content-Disposition', attachment_file_name_value)
+        return response
+    return view_helper.error_message("Unsupported METHOD for get_ppcn_file_version_url view")
+
+@api_view(['GET'])
 def get_ppcn_change_log(request, id):
     if request.method == 'GET':
         result = view_helper.execute_by_name("get_change_log", id)

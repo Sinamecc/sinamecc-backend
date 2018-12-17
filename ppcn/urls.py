@@ -14,6 +14,11 @@ urlpatterns = [
         name='get_ppcn_file_version'
     ),
     url(
+        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/ppcn_file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
+        views.get_ppcn_file,
+        name='get_ppcn_file'
+    ),
+    url(
         r'^api/v1/ppcn/required/level/(?P<language>es|en)/*',
         views.get_required_level,
         name='get_required_level'
