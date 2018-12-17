@@ -6,6 +6,9 @@ from django.http import FileResponse
 from general.helpers import ViewHelper
 from ppcn.services import PpcnService
 import uuid
+from django.http import HttpResponse
+from django.template import loader
+
 from django.http import HttpResponseRedirect
 service = PpcnService()
 view_helper = ViewHelper(service)
@@ -114,6 +117,23 @@ def get_ppcn_change_log(request, id):
         result = view_helper.execute_by_name("get_change_log", id)
     return result
 
+def get_notification_template(request, id, lang="en"):
+    ppcn_result, ppcn = service.get(id, 'en')
+    template = loader.get_template('ppcn/index.html')
+    if ppcn_result:
+        context = {
+            'lang': lang,
+            'ppcn': ppcn,
+        }
+        result = HttpResponse(template.render(context, request))
+    else:
+        template_error = loader.get_template('general/error.html')
+        context={
+            'error': ppcn
+        }
+        result = HttpResponse(template_error.render(context, request))
+    return  result
+    
 def redirect_notification(request, id):
     path = '/'.join(request.META['HTTP_REFERER'].split('/')[:3])
     url_frontend = '{0}/ppcn/{1}'.format(path, id) #change me in development

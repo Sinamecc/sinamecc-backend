@@ -36,5 +36,15 @@ urlpatterns = [
         r'^api/v1/mitigations/(?P<id>[0-9a-fA-F-]+)/file/(?P<file_id>[0-9a-fA-F-]+)/*$',
         views.get_mitigation_action_file,
         name='get_mitigation_action_file'
-    )
+    ),
+    url(
+        r'^notification/mitigation/(?P<uuid>[0-9a-zA-Z\-]+)$',
+        views.get_notification_template,
+        name='get_notification_template'
+    ),
+    url(
+        r'^notification/mitigation/(?P<uuid>[0-9a-zA-Z\-]+)/(?P<lang>[A-Za-z0-9]+)/*$',
+        views.get_notification_template,
+        name='get_notification_template'
+    ),
 ]

@@ -6,6 +6,8 @@ from django.http import FileResponse
 from rest_framework import status
 from mccr.services import MCCRService
 from general.helpers import ViewHelper
+from django.http import HttpResponse
+from django.template import loader
 from django.http import HttpResponseRedirect
 
 service = MCCRService()
@@ -64,6 +66,23 @@ def patch_mccr_ovv(request, mccr_id, ovv_id):
         result = view_helper.execute_by_name("update_mccr_ovv_relation", mccr_id, ovv_id)
     return result
 
+def get_notification_template(request, mccr_id, lang="en"):
+    mccr_result, mccr = service.get(mccr_id)
+    template = loader.get_template('mccr/index.html')
+    if mccr_result:
+        context = {
+            'lang': lang,
+            'mccr': mccr
+        }
+        result = HttpResponse(template.render(context, request))
+    else:
+        template_error = loader.get_template('general/error.html')
+        context={
+            'error': mccr['error']
+        }
+        result = HttpResponse(template_error.render(context, request))
+    return  result
+    
 def redirect_notification(request, mccr_id):
     path = '/'.join(request.META['HTTP_REFERER'].split('/')[:3])
     url_frontend = '{0}/mccr/registries/{1}'.format(path, mccr_id) #change me in development

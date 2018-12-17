@@ -7,9 +7,15 @@ from django.shortcuts import redirect
 from mitigation_action.services import MitigationActionService
 import uuid
 from django.http import FileResponse
+from django.http import HttpResponse
+from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+
 from django.http import HttpResponseRedirect
 service = MitigationActionService()
 view_helper = ViewHelper(service)
+from mitigation_action.models import Mitigation
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 def get_delete_put_patch_mitigation(request, pk, language):
@@ -135,3 +141,20 @@ def get_mitigation_action_file(request, id, file_id):
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
     return view_helper.error_message("Unsupported METHOD for get_mitigation_action_file_version_url view")
+
+def get_notification_template(request, uuid, lang="en"):
+    mitigation_result, mitigation_action = service.get(uuid, lang)
+    template = loader.get_template('mitigation_action/index.html')
+    if mitigation_result:
+        context = {
+            'lang':lang,
+            'mitigation_action': mitigation_action,
+        }
+        result = HttpResponse(template.render(context, request))
+    else:
+        template_error = loader.get_template('general/error.html')
+        context={
+            'error': mitigation_action
+        }
+        result = HttpResponse(template_error.render(context, request))
+    return  result

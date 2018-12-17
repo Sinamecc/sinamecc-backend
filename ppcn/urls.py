@@ -66,8 +66,14 @@ urlpatterns = [
         views.get_ppcn_change_log,
         name='get_mitigation_change_log'
     ),
-    url(r'^api/v1/ppcn/notification/(?P<id>[0-9a-f-]+)$',
-        views.redirect_notification,
-        name='redirect_notification'
+    url(
+        r'^notification/ppcn/(?P<id>[0-9a-zA-Z\-]+)$',
+        views.get_notification_template,
+        name='get_notification_template'
+    ),
+    url(
+        r'^notification/ppcn/(?P<id>[0-9a-zA-Z\-]+)/(?P<lang>[0A-Za-z0-9]+)/*$',
+        views.get_notification_template,
+        name='get_notification_template'
     ),
 ]

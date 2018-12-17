@@ -1,0 +1,73 @@
+{% extends "./../general/header.html %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Nueva Acci&oacute;n de Mintigaci&oacute;n {% else %} New Mitigation Action {% endif %}</h2>
+        </div>
+        <div class="content">
+            <h3>{% if lang == "es" %} Informaci&oacute;n Basica {% else %} Basic Info {% endif %}</h3>
+            <div><strong>ID</strong>: {{mitigation_action.id}}</div>
+            <div><strong>{% if lang == "es" %} Nombre {% else %} Name {% endif %}</strong>: {{mitigation_action.name}}</div>
+            <div><strong>{% if lang == "es" %} Nombre de la estrategia {% else %} Strategy name {% endif %}</strong>: {{mitigation_action.strategy_name}}</div>
+            <div><strong>{% if lang == "es" %} Unidad de compensaci&oacute;n costarricense  {% else %} Costa Rican compensation unit {% endif %}</strong>: {{mitigation_action.question_ucc}}</div>
+            <div><strong>{% if lang == "es" %} Organizmo validador verificador {% else %} Organization of verification and validation {% endif %}</strong>: {{mitigation_action.question_ovv}}</div>
+            <div><strong>{% if lang == "es" %} Instituti&oacute;n {% else %} Institution {% endif %}</strong>: {{mitigation_action.institution.name}}</div>
+            <div><strong>{% if lang == "es" %} Creado {% else %} Created {% endif %}</strong>: {{mitigation_action.created}}</div>
+            <div><strong>{% if lang == "es" %} Actualizado {% else %} Updated {% endif %}</strong>: {{mitigation_action.updated}}</div>
+            <div><h3>{% if lang == "es" %} Informaci&oacute;n de Contacto {% else %}  {% endif %}Contact Info</h3></div>
+            <div><strong>{% if lang == "es" %} Nombre {% else %} Name {% endif %}</strong>: {{mitigation_action.contact.full_name}}</div>
+            <div><strong>{% if lang == "es" %} T&iacute;tulo profesional {% else %} Job title {% endif %}</strong>: {{mitigation_action.contact.job_title}}</div>
+            <div><strong>{% if lang == "es" %} Correo electr&oacute;nico  {% else %} Email {% endif %}</strong>: {{mitigation_action.contact.email}}</div>
+            <div><strong>{% if lang == "es" %} N&uacute;mero de tel&eacute;fono {% else %}  {% endif %}Phone </strong>: {{mitigation_action.contact.phone}}</div>
+            <div><h3>{% if lang == "es" %} Objectivos {% else %} Objectives {% endif %}</h3></div>
+            <div><strong>{% if lang == "es" %} Objetivo {% else %} Objetive {% endif %}</strong>: {{mitigation_action.purpose}}</div>
+            <div><strong>{% if lang == "es" %} Objetivo cuantitativo {% else %} Quantitative objetive {% endif %}</strong>: {{mitigation_action.quantitative_purpose}}</div>
+            <div><strong>{% if lang == "es" %} Estatus {% else %} Status {% endif %}</strong>: {{mitigation_action.status.status}}</div>
+            <div><strong>{% if lang == "es" %} Fecha de inicio {% else %} Start date {% endif %}</strong>: {{mitigation_action.start_date}}</div>
+            <div><strong>{% if lang == "es" %} Fecha final {% else %} End date {% endif %}</strong>: {{mitigation_action.end_date}}</div>
+            <!--<div><h3>{% if lang == "es" %} Indicadores de Progreso {% else %} Progress Indicators {% endif %}</h3></div>
+            <div><strong>{% if lang == "es" %} Nombre {% else %} Name {% endif %}</strong>: {{mitigation_action.progress_indicator.name}}</div>
+            <div><strong>{% if lang == "es" %} Tipo {% else %} Type {% endif %}</strong>: {{mitigation_action.progress_indicator.type}}</div>
+            <div><strong>{% if lang == "es" %} Unidad {% else %} Unit {% endif %}</strong>: {{mitigation_action.progress_indicator.unit}}</div>
+            <div><strong>{% if lang == "es" %} Fecha de inicio {% else %} Start date {% endif %}</strong>: {{mitigation_action.progress_indicator.start_date}}</div>-->
+            <div><h3>{% if lang == "es" %} Financiamiento y gas inventario {% else %} Financing and Gas Inventory {% endif %}</h3></div>
+            <div><strong>{% if lang == "es" %} Financiamiento {% else %} Finance {% endif %}</strong>: {{mitigation_action.finance.status.name}}</div>
+            {% if mitigation_action.finance.source != "" %}
+            <div><strong>{% if lang == "es" %} Fuente de financiamiento {% else %} Finance source {% endif %}</strong>: {{mitigation_action.finance.source}}</div>
+            {% endif %}
+            <div><strong>{% if lang == "es" %} Gas inventario {% else %} Gas inventory {% endif %}</strong>: {% if mitigation_action.gas_inventory == "1" %} True {% else %} False {% endif %}</div>
+            {% if mitigation_action.ingei_compliances|length > 0 %}
+            <div><h3>INGEI</h3></div>
+            <ul>
+                {% for ingei_compliances in mitigation_action.ingei_compliances  %}
+                    <li>{{ingei_compliances.name}}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <div><h3>{% if lang == "es" %} Datos geogr&aacute;ficos {% else %} Geographical Data {% endif %}</h3></div>
+            <div><strong>{% if lang == "es" %} Escala geogr&aacute;fica {% else %} Geographic scale {% endif %}</strong>: {{mitigation_action.geographic_scale.name}}</div>
+            <div><strong>{% if lang == "es" %} Localizaci&oacute; {% else %} Location {% endif %}</strong>: {{mitigation_action.location.geographical_site}}</div>
+            <div><strong>{% if lang == "es" %} ¿Informaci&oacute;n GIS anexada? {% else %} GIS information annexed? {% endif %}</strong>: {{mitigation_action.location.is_gis_annexed}}</div>
+            <div><h3>{% if lang == "es" %} Otros {% else %} Other {% endif %}</h3></div>
+            <div><strong>{% if lang == "es" %} Fuente de emisiones {% else %} Emissions source {% endif %}</strong>: {{mitigation_action.emissions_source}}</div>
+            <div><strong>{% if lang == "es" %} Sumideros de carbono {% else %} Carbon Sinks {% endif %}</strong>: {{mitigation_action.carbon_sinks}}</div>
+            <div><strong>{% if lang == "es" %} ¿Cómo se lograr&aacute;n las emisiones de mitigaci&oacute;n? {% else %} How the mitigation emissions will be achieved? {% endif %}</strong>: {{mitigation_action.impact}}</div>
+            <div><strong>{% if lang == "es" %} Impacto de la acci&oacute;n de mitigaci&oacute;n {% else %} Impact of mitigation action {% endif %}</strong>: {{mitigation_action.impact_plan}}</div>
+            <div><strong>{% if lang == "es" %} Fuente bibliogr&aacute;fica {% else %} Bibliographic sources {% endif %}</strong>: {{mitigation_action.bibliographic_sources}}</div>
+            <div><strong>{% if lang == "es" %} Participaci&oacute;n internacional {% else %} International participation {% endif %}</strong>: {{mitigation_action.is_international}}</div>
+            <div><strong>{% if lang == "es" %} Participaci&oacute;n en el mercado internacional {% else %} International market participation{% endif %} </strong>: {{mitigation_action.international_participation}}</div>
+            <div><strong>{% if lang == "es" %} Objetivos de desarrollo sostenible {% else %} Sustainable development objetives {% endif %}</strong>: {{mitigation_action.sustainability}}</div>
+            <div><strong>{% if lang == "es" %} Tipo de registo {% else %} Registration Type {% endif %}</strong>: {{mitigation_action.registration_type.type}}</div>
+            <div><strong>{% if lang == "es" %} Estatus {% else %} Status {% endif %}</strong>: {{mitigation_action.status.status}}</div>
+            <div><strong>{% if lang == "es" %} Recuento de revisiones {% else %} Review count {% endif %}</strong>: {{mitigation_action.review_count}}</div>
+            {% if mitigation_action.comments|length > 0 %}
+                <div><strong>{% if lang == "es" %} Comentarios {% else %} Comments {% endif %}</strong>:</div>
+                <ul>
+                    {% for comments in mitigation_action.comments %}
+                        <li>{{comments}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div><strong>{% if lang == "es" %} Estato {% else %} State {% endif %}</strong>: {{mitigation_action.fsm_state}}</div>
+            <div><strong>{% if lang == "es" %} Siguiente estado {% else %} Next state {% endif %}</strong>: {{mitigation_action.next_state}}</div>
+        </div>
+{% endblock content %}

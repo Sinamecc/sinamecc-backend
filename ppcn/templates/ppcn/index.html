@@ -1,0 +1,47 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Nuevo PPCN {% else %} New PPCN {% endif %}</h2>
+        </div>
+        <div class="content">
+            <h3>{% if lang == "es" %} Informaci&oacute;n Basica {% else %} Basic Info {% endif %}</h3>
+            <div><strong>ID</strong>: {{ppcn.id}}</div>
+            <div><strong>{% if lang == "es" %} A&ntilde;o base {% else %} Base year {% endif %}</strong>: {{ppcn.base_year}}</div>
+            <div><strong>{% if lang == "es" %} Creado {% else %} Created {% endif %}</strong>: {{ppcn.created}}</div>
+            <div><strong>{% if lang == "es" %} Actualizado {% else %} Updated {% endif %}</strong>: {{ppcn.updated}}</div>
+            <div><strong>{% if lang == "es" %} Estado {% else %} State {% endif %}</strong>: {{ppcn.fsm_state}}</div>
+            <div><strong>{% if lang == "es" %} Siguiente estado {% else %} Next state {% endif %}</strong>:</div>
+            <ul>
+            {% for state in ppcn.next_state %}
+                <li>{{state.state}}</li>
+            {% endfor %}
+            </ul>
+            <h3>{% if lang == "es" %} Orgaizac&oacute;n {% else %} Orgaization {% endif %}</h3>
+            <div><strong>{% if lang == "es" %} Nombre {% else %} Name {% endif %}</strong>: {{ppcn.organization.name}}</div>
+            <div><strong>{% if lang == "es" %} Nombre del representante {% else %} Representative name {% endif %}</strong>: {{ppcn.organization.representative_name}}</div>
+            <div><strong>{% if lang == "es" %} Tel&eacute;fono de la organizac&oacute;n {% else %} Phone organization {% endif %}</strong>: {{ppcn.organization.phone_organization}}</div>
+            <div><strong>{% if lang == "es" %} Codigo postal {% else %} Postal code {% endif %}</strong>: {{ppcn.organization.postal_code}}</div>
+            <div><strong>{% if lang == "es" %} Tel&eacute;fono fax {% else %} Fax {% endif %}</strong>: {{ppcn.organization.fax}}</div>
+            <div><strong>{% if lang == "es" %} Direcci&oacute;n {% else %} Address {% endif %}</strong>: {{ppcn.organization.address}}</div>
+            <div><strong>CIIU</strong>: {{ppcn.organization.ciiu}}</div>
+            <h3>{% if lang == "es" %} Informaci&oacute;n de Contacto {% else %} Contact Info {% endif %}</h3>
+            <div><strong>{% if lang == "es" %} Nombre {% else %} Name {% endif %}</strong>: {{ppcn.organization.contact.full_name}}</div>
+            <div><strong>{% if lang == "es" %} T&iacute;tulo profesional {% else %} Job title {% endif %}</strong>: {{ppcn.organization.contact.job_title}}</div>
+            <div><strong>{% if lang == "es" %} Correo electr&oacute;nico {% else %} Email {% endif %}Email</strong>: {{ppcn.organization.contact.email}}</div>
+            <div><strong>{% if lang == "es" %} N&uacute;mero de tel&eacute;fono {% else %} Phone {% endif %}</strong>: {{ppcn.organization.contact.phone}}</div>
+            <h3>{% if lang == "es" %} Otros {% else %} Other {% endif %}</h3>
+            <div><strong>{% if lang == "es" %} Nivel geogr&aacute;fico {% else %} Geographic level {% endif %}</strong>: {{ppcn.geographicLevel.level}}</div>
+            <div><strong>{% if lang == "es" %} Nivel requerido {% else %} Required level {% endif %}</strong>: {{ppcn.requiredLevel.level_type}}</div>
+            <div><strong>Sector</strong>: {{ppcn.sector.sector}}</div>
+            <div><strong>Subsector</strong>: {{ppcn.subsector.name}}</div>
+            <div><strong>{% if lang == "es" %} Tipo de reconocimiento {% else %} Recognition type {% endif %}</strong>: {{ppcn.recognitionType.recognition_type}}</div>
+            <h3>{% if lang == "es" %} Archivos {% else %} Files {% endif %}</h3>
+            <ul>
+                {% for file in ppcn.file %}
+                    <li>
+                        <a href="{{file.file}}">{{file.name}}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+{% endblock content %}

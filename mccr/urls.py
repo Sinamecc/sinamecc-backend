@@ -32,6 +32,16 @@ urlpatterns = [
         views.get_post_mccr,
         name='get_post_mccr'
     ),
+    url(
+        r'^notification/mccr/(?P<mccr_id>[0-9a-zA-Z\-]+)/*$',
+        views.get_notification_template,
+        name='get_notification_template'
+    ),
+    url(
+        r'^notification/mccr/(?P<mccr_id>[0-9a-zA-Z\-]+)/(?P<lang>[0A-Za-z0-9]+)/*$',
+        views.get_notification_template,
+        name='get_notification_template'
+    ),
     url(r'^api/v1/mccr/notification/(?P<mccr_id>[0-9a-fA-F-]+)/*$',
         views.redirect_notification,
         name='redirect_notification'

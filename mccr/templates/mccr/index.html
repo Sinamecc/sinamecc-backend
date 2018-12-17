@@ -1,0 +1,19 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %}  Nuevo MCCR {% else %} New MCCR {% endif %}</h2>
+        </div>
+        <div class="content">
+            <h3>{% if lang == "es" %}  Informaci&oacute;n Basica {% else %} Basic Info {% endif %}</h3>
+            <div><strong>ID</strong>: {{mccr.id}}</div>
+            <div><strong>{% if lang == "es" %}  Estatus {% else %} Status {% endif %}</strong>: {{mccr.status}}</div>
+            <div><strong>{% if lang == "es" %}  Mitigaci&oacute;n {% else %} Mitigation {% endif %}</strong>: {{mccr.mitigation}}</div>
+            <ul>
+                {% for file in mccr.files %}
+                    <li>
+                        <a href="{{file.file}}">{{file.name}}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+{% endblock content %}

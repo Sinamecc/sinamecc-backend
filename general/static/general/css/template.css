@@ -1,0 +1,38 @@
+ html {
+     font-family: Roboto, "Helvetica Neue", sans-serif;
+     background: #F5F5F5;
+ }
+ .content-title{
+     background: #000000;
+     width: 100%;
+     text-align: center;
+     padding-top: 1px;
+     padding-bottom: 1px;
+
+ }
+ .text-title{
+     color: #FFFFFF;
+ }
+ .content{
+     width: 90%;
+     margin: 10px auto;
+     background: #FAFAFA;
+     padding-top: 10px;
+     padding-bottom: 10px;
+ }
+ h3{
+     border-bottom: 3px solid #cccccc;
+     position: relative;
+     padding: 5px;
+     width: 50%;
+ }
+ h3:after{
+     bottom: -3px;
+    content: "";
+    height: 3px;
+    left: 0;
+    position: absolute;
+    width: 50px;
+    background: #2aa7d9;
+    font-size: 18pt;
+ }
