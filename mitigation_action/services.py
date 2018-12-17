@@ -37,10 +37,8 @@ class MitigationActionService():
             mitigations_list = [
                 {
                     'id': m.id,
-                    'strategy_name': m.strategy_name,
                     'name': m.name,
                     'purpose': m.purpose,
-                    'quantitative_purpose': m.quantitative_purpose,
                     'start_date': m.start_date,
                     'end_date': m.end_date,
                     'gas_inventory': m.gas_inventory,
@@ -48,12 +46,10 @@ class MitigationActionService():
                     'carbon_sinks': m.carbon_sinks,
                     'impact_plan': m.impact_plan,
                     'impact': m.impact,
-                    'bibliographic_sources': m.bibliographic_sources,
+                    'calculation_methodology': m.calculation_methodology,
                     'is_international': m.is_international,
                     'international_participation': m.international_participation,
-                    'sustainability': m.sustainability,
-                    'question_ucc': m.question_ucc,
-                    'question_ovv': m.question_ovv,
+                    'strategy_name':m.strategy_name,
                     'user': {
                         'id': m.user.id,
                         'username': m.user.username,
@@ -85,6 +81,7 @@ class MitigationActionService():
 
                         'finance': {
                             'id': m.initiative.finance.id,
+                            'source': m.initiative.finance.source,
                             'finance_source_type': {
                                 'id': m.initiative.finance.finance_source_type.id,
                                 'name': m.initiative.finance.finance_source_type.name_es if language=="es" else m.initiative.finance.finance_source_type.name_en,
@@ -225,6 +222,7 @@ class MitigationActionService():
         finance_data = {
             'status': request.get('finance').get('status'),
             'source': request.get('finance').get('source'),
+
         }
         serializer = FinanceSerializer(data=finance_data)
         return serializer
@@ -241,6 +239,7 @@ class MitigationActionService():
         finance_data = {
             'finance_source_type': request.get('finance').get('finance_source_type'),
             'status': request.get('finance').get('status'),
+            'source': request.get('finance').get('source'),
         }
         serializer = InitiativeFinanceSerializer(data=finance_data)
         return serializer
@@ -249,6 +248,7 @@ class MitigationActionService():
         finance_data =  {
             'finance_source_type': request.get('finance').get('finance_source_type'),
             'status': request.get('finance').get('status'),
+            'source': request.get('finance').get('source'),
         }
         serializer = InitiativeFinanceSerializer(finance, data=finance_data)
         return serializer
@@ -428,6 +428,7 @@ class MitigationActionService():
 
             serialized_contact = self.get_serialized_contact_for_existing(request.get('initiative'), contact)
             serialized_finance = self.get_serialized_initiative_finance_for_existing(request.get('initiative'), finance)
+            print(serialized_finance)
             
             valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
             
@@ -702,10 +703,8 @@ class MitigationActionService():
             mitigation = self.get_one(id)
             content = {
                 'id': mitigation.id,
-                'strategy_name': mitigation.strategy_name,
                 'name': mitigation.name,
                 'purpose': mitigation.purpose,
-                'quantitative_purpose': mitigation.quantitative_purpose,
                 'start_date': mitigation.start_date,
                 'end_date': mitigation.end_date,
                 'gas_inventory': mitigation.gas_inventory,
@@ -713,12 +712,10 @@ class MitigationActionService():
                 'carbon_sinks': mitigation.carbon_sinks,
                 'impact_plan': mitigation.impact_plan,
                 'impact': mitigation.impact,
-                'bibliographic_sources': mitigation.bibliographic_sources,
+                'calculation_methodology': mitigation.calculation_methodology,
                 'is_international': mitigation.is_international,
                 'international_participation': mitigation.international_participation,
-                'sustainability': mitigation.sustainability,
-                'question_ucc': mitigation.question_ucc,
-                'question_ovv': mitigation.question_ovv,
+                'strategy_name':mitigation.strategy_name,
                 'user': {
                     'id': mitigation.user.id,
                     'username': mitigation.user.username,
@@ -750,6 +747,7 @@ class MitigationActionService():
 
                     'finance': {
                         'id': mitigation.initiative.finance.id,
+                        'source': mitigation.initiative.finance.source,
                         'status':{
                                 'id' : mitigation.initiative.finance.status.id,
                                 'name' : mitigation.initiative.finance.status.name_es if language=="es" else mitigation.initiative.finance.status.name_en

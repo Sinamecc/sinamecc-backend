@@ -39,7 +39,7 @@ class FinanceSerializer(serializers.ModelSerializer):
 class InitiativeFinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativeFinance
-        fields = ('status', 'finance_source_type')
+        fields = ('status', 'finance_source_type', 'source')
         
 class IngeiComplianceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -76,7 +76,7 @@ class InitiaveSerializer(serializers.ModelSerializer):
              'contact',
              'budget',
              'finance',
-             'status'
+             'status',
             )
 
 class MitigationSerializer(serializers.ModelSerializer):
@@ -84,10 +84,8 @@ class MitigationSerializer(serializers.ModelSerializer):
         model = Mitigation
         fields = (
             'id',
-            'strategy_name',
             'name',
             'purpose',
-            'quantitative_purpose',
             'start_date',
             'end_date',
             'gas_inventory',
@@ -95,12 +93,10 @@ class MitigationSerializer(serializers.ModelSerializer):
             'carbon_sinks',
             'impact_plan',
             'impact',
-            'bibliographic_sources',
+            'calculation_methodology',
             'is_international',
             'international_participation',
-            'sustainability',
-            'question_ucc',
-            'question_ovv',
+            'strategy_name',
             'user',
             'registration_type',
             'initiative',

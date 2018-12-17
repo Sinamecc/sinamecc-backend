@@ -8,6 +8,7 @@ from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from workflow.models import Comment, ReviewStatus
+from general.storages import PrivateMediaStorage
 from django_fsm import FSMField, transition
 from general.services import EmailServices
 from mitigation_action.email_services import MitigationActionEmailServices
@@ -100,6 +101,7 @@ class InitiativeFinance(models.Model):
 
     status = models.ForeignKey(FinanceStatus, related_name='initiative_finance_status', blank=False, null=False)
     finance_source_type = models.ForeignKey(FinanceSourceType, related_name='initiative_finance_source_type', blank=False, null=False)
+    source = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
         verbose_name = _("InitiativeFinance")
@@ -145,7 +147,6 @@ class GeographicScale(models.Model):
 class Location(models.Model):
     geographical_site = models.CharField(max_length=100, blank=False, null=False)
     is_gis_annexed = models.BooleanField(blank=False, null=False)
-
     class Meta:
         verbose_name = _("Location")
         verbose_name_plural = _("Locations")
@@ -194,7 +195,6 @@ class Mitigation(models.Model):
     strategy_name = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     purpose = models.CharField(max_length=500, blank=True, null=True)
-    quantitative_purpose = models.CharField(max_length=500, blank=True, null=True)
     start_date = models.DateField(blank = True, null=True)
     end_date = models.DateField(blank = True, null=True)
     gas_inventory = models.CharField(max_length=100, blank=True, null=True)
@@ -202,13 +202,9 @@ class Mitigation(models.Model):
     carbon_sinks = models.CharField(max_length=100, blank=True, null=True)
     impact_plan = models.CharField(max_length=500, blank=True, null=True)
     impact = models.CharField(max_length=500, blank=True, null=True)
-    bibliographic_sources = models.CharField(max_length=500, blank=True, null=True)
+    calculation_methodology = models.CharField(max_length=500, blank=True, null=True)
     is_international = models.NullBooleanField(blank=True, null=True)
     international_participation = models.CharField(max_length=100, blank=True, null=True)
-    sustainability = models.CharField(max_length=500, blank=True, null=True)
-    question_ucc = models.CharField(max_length=500, blank=True, null=True)
-    question_ovv = models.CharField(max_length=500, blank=True, null=True)
-
     # Foreign Keys
     user = models.ForeignKey(User, related_name='mitigation_action')
     registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action', blank=True, null=True)
