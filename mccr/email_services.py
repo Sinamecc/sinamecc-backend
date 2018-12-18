@@ -47,3 +47,18 @@ class MCCREmailServices():
                 error = "Unable to send the email to executive  secretary, ERROR: {0}".format(str(result_email))
                 return (result_status, error)
         return (result_status, result_email)
+
+    def sendStatusNotificationUserMccr(self,  mccr):
+        subject = "MCCR #: {0}".format(mccr.id)
+        user = User.objects.get(id=mccr.user_id)
+        user_email = user.email
+        message = self.buil_message(mccr)
+        result_status, result_email = self.sendNotification([user_email], subject, message)
+        print("result_email: ", result_email)
+        if not result_status:
+            #sending again (connection error)
+            result_status, result_email = self.sendNotification([user_email], subject, message)
+            if not result_status:
+                error = "Unable to send the email to MCCR user, ERROR: {0}".format(str(result_email))
+                return (result_status, error)
+        return (result_status, result_email)

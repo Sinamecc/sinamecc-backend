@@ -104,7 +104,9 @@ class MCCRRegistry(models.Model):
     def ovv_accept_reject(self):
         print('The MCCR is transitioning from mccr_ovv_assigned_notification to mccr_ovv_accept_reject')
         # Additional logic goes here.
-        pass
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
+        return result
 
     # --- Transition ---
     # mccr_ovv_accept_reject -> mccr_ovv_accept_assignation
@@ -118,8 +120,10 @@ class MCCRRegistry(models.Model):
     def ovv_accept_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_accept_assignation')
         # Additional logic goes here.
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
+        return result
 
-        pass
 
     # --- Transition ---
     # mccr_ovv_accept_reject -> mccr_ovv_reject_assignation
@@ -133,6 +137,9 @@ class MCCRRegistry(models.Model):
     def reject_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_reject_assignation')
         # Additional logic goes here.
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotificationUserMccr(self)
+        return result
         pass
 
     # --- Transition ---

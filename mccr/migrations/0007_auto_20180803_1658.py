@@ -12,7 +12,7 @@ def insert_ovv_data(apps, schema_editor):
     ovv_data = [
         {
             "name": "Test backend OVV",
-            "email": "myfake@email.com",
+            "email": "sinamec@grupoincocr.com",
             "phone": "(506) 9309-2345"
         }
     ]
