@@ -18,8 +18,8 @@ def insert_form_data(apps, schema_editor):
             'level_en': 'Cantonal'
         },
         {
-            'level_es': 'Nacional',
-            'level_en': 'National'
+            'level_es': 'Organizacional',
+            'level_en': 'Organizational'
         }
     ]
     required_level = [
@@ -127,8 +127,8 @@ def insert_form_data(apps, schema_editor):
             'sector': 1
         },
         {
-            'name_es': 'Productos materiales',
-            'name_en': 'Material products',
+            'name_es': 'Productos Minerales',
+            'name_en': 'Minerals products',
             'sector': 2
         },
         {

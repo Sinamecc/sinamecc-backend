@@ -137,15 +137,19 @@ class SubSector(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name)
 
-
+class GeiActivityType(models.Model):
+    
+    activity_type = models.CharField(max_length=500, blank=False, null=False)
+    sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
+    sector = models.ForeignKey(SubSector, related_name='gei_sector')
+   
 class GeiOrganization(models.Model):
 
-    activity_type = models.CharField(max_length=200, blank=False, null=False)
     ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=False)
-    emission_OVV = models.DateField(blank=False, null=False)
-    report_date_start = models.DateField(null=True, blank=True)
-    report_date_end = models.DateField(null=True, blank=True)
-    base_year = models.DateField(blank=False, null=False)
+    emission_ovv_date = models.DateField(blank=False, null=False)
+    report_year =  models.IntegerField(blank=False, null=False)
+    base_year = models.IntegerField(blank=False, null=False)
+    gei_activity_types = models.ManyToManyField(GeiActivityType)
 
     class Meta:
         verbose_name = _("GeiOrganization")
@@ -154,22 +158,23 @@ class GeiOrganization(models.Model):
     def __unicode__(self):
         return smart_unicode(self.activity_type)
 
-
+ 
 
 class PPCN(models.Model):
     
     user = models.ForeignKey(User, related_name='ppcn', null = False)
-    organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
-    geographicLevel = models.ForeignKey(GeographicLevel, related_name='geographicLevel')
-    requiredLevel = models.ForeignKey(RequiredLevel, related_name='requiredLevel')
-    sector = models.ForeignKey(Sector, null = False, blank = False)
-    subsector = models.ForeignKey(SubSector, related_name='subsector')
-    recognitionType = models.ForeignKey(RecognitionType, related_name='recognization')
-    base_year = models.DateField(null = False)
+    organization = models.ForeignKey(Organization, related_name='organization',null=True, blank=True, on_delete=models.CASCADE )
+
+    geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
+    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
+    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')
+    gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
+
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
-    gei_organization = models.ForeignKey(GeiOrganization, blank=False, null=True)
+   
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

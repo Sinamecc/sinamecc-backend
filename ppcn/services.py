@@ -1,4 +1,4 @@
-from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector, SubSector, PPCN, PPCNFile
+from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 
 from mccr.models import OVV
 from ppcn.views import *
@@ -48,6 +48,10 @@ class PpcnService():
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.PPCN_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
+        self.ASSING_GEI_ACTIVITY_TYPES = "Error assigning gei activity types."
+        self.CREATING_GEI_ORGANIZATION = "Error creating gei organization."
+        self.CONTACT_NOT_MATCH_ERROR = "The contact of the organization doesn't match the one registered."
+        self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
 
 
     # serialized objects
@@ -89,11 +93,9 @@ class PpcnService():
     def get_serialized_gei_organization(self, request, gei_organization = False):
         
         gei_organization_data = { 
-            'activity_type': request.data.get('gei_organization').get('activity_type'),
             'ovv': request.data.get('gei_organization').get('ovv'),
-            'emission_OVV': request.data.get('gei_organization').get('emission_OVV'),
-            'report_date_start': request.data.get('gei_organization').get('report_date_start'),
-            'report_date_end': request.data.get('gei_organization').get('report_date_end'),
+            'emission_ovv_date': request.data.get('gei_organization').get('emission_ovv_date'),
+            'report_year': request.data.get('gei_organization').get('report_year'),
             'base_year': request.data.get('gei_organization').get('base_year')
         }
 
@@ -121,16 +123,13 @@ class PpcnService():
             serializer = OrganizationSerializer(data=organization_data)
         return serializer
 
-    def get_serialized_ppcn(self, request, organization_id, gei_organization_id, ppcn = False):
+    def get_serialized_ppcn(self, request, organization_id = None, gei_organization_id = None, ppcn = False):
         ppcn_data = {
             'organization': organization_id,
-            'geographicLevel': request.data.get('geographicLevel'), 
-            'requiredLevel': request.data.get('requiredLevel'), 
-            'sector': request.data.get('sector'),
-            'subsector': request.data.get('subsector'), 
-            'recognitionType':request.data.get('recognitionType'),
             'gei_organization': gei_organization_id,
-            'base_year':request.data.get('base_year'),
+            'geographic_level': request.data.get('geographic_level'), 
+            'required_level': request.data.get('required_level'), 
+            'recognition_type':request.data.get('recognition_type'),
             'user':request.data.get('user')
         }
         if ppcn:
@@ -150,6 +149,18 @@ class PpcnService():
         else:
             serializer = PPCNFileSeriaizer(data=ppcnFileData)
         return serializer
+
+    def get_serialized_gei_activity_type(self, data):
+        activity_type_data = {
+
+            'activity_type': data.get('activity_type'),
+            'sub_sector': data.get('sub_sector'),
+            'sector':  data.get('sector')
+        }
+        serializer = GeiActivityTypeSerializer(data=activity_type_data)
+        return serializer
+
+
 
     def get_all_geographic_level(self, language):
 
@@ -262,7 +273,7 @@ class PpcnService():
             result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
         return result
 
-    def post_organization(self, request):
+    def create_organization(self, request):
         
         serialized_contact = self.get_serialized_contact( request.data.get('organization') ) 
         if serialized_contact.is_valid():
@@ -270,33 +281,41 @@ class PpcnService():
             serialized_organization = self.get_serialized_organization(request, contact.id)
             if serialized_organization.is_valid():
                 organization = serialized_organization.save()
-                result = (True, OrganizationSerializer(organization).data)
+                result = (True, organization)
             else:
                 errors = serialized_organization.errors
                 result = (False, errors)
         else:
             errors = serialized_contact.errors
             result = (False, errors)
+            
         return result
 
-    def put_organization(self, request, pk):
-        errors = []
-        contact_id = request.data.get('contact').get('id')
-        contact = Contact.objects.get(id=contact_id)
-        contact_serialized = self.get_serialized_contact(request.data.get('organization'), contact)
-        if contact_serialized.is_valid():
-            contact_serialized.save()
-            organization = Organization.objects.get(id=pk)
-            serialized_organization = self.get_serialized_organization(request, contact_id, organization)
-            if serialized_organization.is_valid():
+    def update_organization(self, request, id):
+
+        contact_id = request.data.get('organization').get('contact').get('id')
+        organization = Organization.objects.get(pk=id)
+        result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
+        if organization != None:
+            if not str(organization.contact.id) == str(contact_id):
+                result = (False, self.CONTACT_NOT_MATCH_ERROR)
+                return result
+            
+            contact = Contact.objects.get(id=contact_id)
+            contact_serialized = self.get_serialized_contact(request.data.get('organization'), contact)
+
+            if contact_serialized.is_valid():
+                contact_serialized.save()
+                serialized_organization = self.get_serialized_organization(request, contact_id, organization)
+                if serialized_organization.is_valid():
                     organization = serialized_organization.save()
-                    result = (True, OrganizationSerializer(organization).data)
+                    result = (True, organization)
+                else:
+                    result = (False, serialized_organization.error)
             else:
-                errors.append(serialized_organization.errors)
-                result = (False, errors)
-        else:
-            errors.append(contact_serialized.errors)
-            result = (False, errors)
+
+                result = (False, contact_serialized.errors)
+
         return result
 
     def delete_organization(self, pk):
@@ -331,48 +350,46 @@ class PpcnService():
                             'phone' : pp.organization.contact.phone
                         }
                     },
-                    'geographicLevel':{
-                        'id' : pp.geographicLevel.id,
-                        'level' : pp.geographicLevel.level_es if language == 'es' else pp.geographicLevel.level_en
+                    'geographic_level':{
+                        'id' : pp.geographic_level.id,
+                        'level' : pp.geographic_level.level_es if language == 'es' else pp.geographic_level.level_en
 
                     },
-                    'requiredLevel': {
-                        'id' : pp.requiredLevel.id,
-                        'level_type' :  pp.requiredLevel.level_type_es if language == 'es' else pp.requiredLevel.level_type_en
+                    'required_level': {
+                        'id' : pp.required_level.id,
+                        'level_type' :  pp.required_level.level_type_es if language == 'es' else pp.required_level.level_type_en
                     },
-                    'sector': {
-                        'id': pp.sector.id,
-                        'sector': pp.sector.name_es if language == 'es' else pp.sector.name_en
-                    },
-                    'subsector': {
-                        'id' : pp.subsector.id,
-                        'name' : pp.subsector.name_es if language == 'es' else pp.subsector.name_en
-                    },
-                    'recognitionType': {
-                        'id' : pp.recognitionType.id,
-                        'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
+                    'recognition_type': {
+                        'id' : pp.recognition_type.id,
+                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_es
                     },
                     'gei_organization':{
                         'id': pp.gei_organization.id, 
-                        'activity_type': pp.gei_organization.activity_type, 
                         'ovv': {
                             'id': pp.gei_organization.ovv.id,
                             'name':  pp.gei_organization.ovv.name,
                             'email': pp.gei_organization.ovv.email,
                         },
-                        'emission_OVV': pp.gei_organization.emission_OVV, 
-                        'report_date_start': pp.gei_organization.report_date_start, 
-                        'report_date_end': pp.gei_organization.report_date_end, 
-                        'base_year': pp.gei_organization.base_year
-                    } if pp.gei_organization else None, 
-                    'base_year': pp.base_year,
+                        'emission_ovv_date': pp.gei_organization.emission_ovv_date, 
+                        'report_year': pp.gei_organization.report_year, 
+                        'base_year': pp.gei_organization.base_year, 
+                        'gei_activity_types': [
+                            {
+                                'id': gei_activity_type.id,
+                                'sector': gei_activity_type.sector.name_es if language == 'es' else gei_activity_type.sector.name_en,
+                                'sub_sector': gei_activity_type.sub_sector.name_es if language == 'es' else gei_activity_type.sub_sector.name_en,
+                                'activity_type': gei_activity_type.activity_type
+
+                            } for gei_activity_type in  pp.gei_organization.gei_activity_types.all()
+                        ]
+                    } 
+                    if pp.gei_organization else None, 
                     'comments':[
                         {
                             'id': comment.id,
                             'comment': comment.comment
                         } for comment in pp.comments.all()
                     ],
-
                     'fsm_state': pp.fsm_state,
                     'next_state': self.next_action(pp.fsm_state),
                     'created': pp.created,
@@ -380,7 +397,7 @@ class PpcnService():
                     'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
                     'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
                     'user': pp.user.id
-                }for pp in PPCN.objects.all()
+                } for pp in PPCN.objects.all()
             ]
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
@@ -397,36 +414,103 @@ class PpcnService():
             result = (False, serialized_change_log.errors)
         return result
 
+    def assign_gei_activity_types(self, request, gei_organization):
+        
+        gei_activity_types_list = request.data.get('gei_activity_types')
+        errors = [self.ASSING_GEI_ACTIVITY_TYPES]
+        result_status = True
+        for gei_activity_type in gei_activity_types_list:
+            serialized_gei_activity_type = self.get_serialized_gei_activity_type(gei_activity_type)
+            if serialized_gei_activity_type.is_valid():
+                gei_activity_type = serialized_gei_activity_type.save()
+                gei_organization.gei_activity_types.add(gei_activity_type)
+            else:
+                result_status = False
+                errors.append(serialized_gei_activity_type.errors)
+        
+        if result_status:
+            result = (True, gei_organization)
+
+        else:
+            result = (False, errors)
+
+        return result
+
+    def create_gei_organization(self, request):
+
+        serialized_gei_organization = self.get_serialized_gei_organization(request) 
+        if serialized_gei_organization.is_valid():
+            gei_organization = serialized_gei_organization.save()
+            if request.data.get('gei_activity_types') != None:
+
+                gei_activity_types_status, gei_activity_types_data = self.assign_gei_activity_types(request, gei_organization)
+
+                if gei_activity_types_status:
+                    result = (True, gei_organization)
+                else:
+                    result = (False, gei_activity_types_data)
+            else:
+                result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
+        else:
+            result = (False, serialized_gei_organization.errors)
+            
+        return result
+    
+    def update_gei_organization(self, request, id):
+
+        gei_organization = GeiOrganization.objects.get(pk=id)
+        if gei_organization == None:
+            return (False, self.GEI_ORGANIZATION_DOES_NOT_EXIST)
+
+        serialized_gei_organization = self.get_serialized_gei_organization(request, gei_organization) 
+
+        if serialized_gei_organization.is_valid():
+            gei_organization = serialized_gei_organization.save()
+
+            if request.data.get('gei_activity_types') != None:
+                gei_organization.gei_activity_types.clear()
+                gei_activity_types_status, gei_activity_types_data = self.assign_gei_activity_types(request, gei_organization)
+
+                if gei_activity_types_status:
+                    result = (True, gei_organization)
+                else:
+                    result = (False, gei_activity_types_data)
+            else:
+                result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
+        else:
+            result = (False, serialized_gei_organization.errors)
+            
+        return result
+        
+                
+        
+
     def create(self, request):
 
         errors =[]
-        save_result, result_detail= self.post_organization(request)
-        valid_relations = [save_result]
-        
+        valid_relations = []
+        organization_id, gei_organization_id = None, None
+
+        if request.data.get('organization') != None:
+            organization_status, organization_detail= self.create_organization(request)
+            valid_relations.append(organization_status)
+            if organization_status: organization_id = organization_detail.id
+            else: errors.append(organization_detail)
+
         if request.data.get('gei_organization') != None:
-            serialized_gei_organization = self.get_serialized_gei_organization(request) 
-            valid_relations.append(serialized_gei_organization.is_valid())
-            errors.append(serialized_gei_organization.errors)
+            gei_organization_status, gei_organization_detail = self.create_gei_organization(request)
+            valid_relations.append(gei_organization_status)
+            if gei_organization_status: gei_organization_id = gei_organization_detail.id
+            else: errors.append(gei_organization_detail)
 
+        
         if not valid_relations.count(False):
+            ## Change logic here!!
 
-            organization_id = result_detail.get('id')
-            gei_organization_id = None
-            if request.data.get('gei_organization') != None:
-                gei_organization = serialized_gei_organization.save()
-                gei_organization_id = gei_organization.id
-
-            
-            #change logic here !!
             serialized_ppcn = self.get_serialized_ppcn(request, organization_id, gei_organization_id)
             
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
-
-                url = "http://{0}{1}".format(request.META['HTTP_HOST'], reverse('redirect_notification', kwargs={'id': ppcn.id}))
-                message = self.buil_message_ppcn(ppcn.organization)
-                self.sendStatusNotification( "DCC" , str(ppcn.id), message , url)
-
                 ppcn_previous_status = ppcn.fsm_state
                 if not can_proceed(ppcn.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
@@ -442,6 +526,7 @@ class PpcnService():
         else:
             
             result = (False, errors)
+            
         return result
 
     def next_action(self, current_fsm_state):
@@ -504,41 +589,45 @@ class PpcnService():
                             'phone' : pp.organization.contact.phone
                         }
                     },
-                    'geographicLevel':{
-                        'id' : pp.geographicLevel.id,
-                        'level' : pp.geographicLevel.level_es if language == 'es' else pp.geographicLevel.level_en
+                    'geographic_level':{
+                        'id' : pp.geographic_level.id,
+                        'level' : pp.geographic_level.level_es if language == 'es' else pp.geographic_level.level_en
 
                     },
-                    'requiredLevel': {
-                        'id' : pp.requiredLevel.id,
-                        'level_type' :  pp.requiredLevel.level_type_es if language == 'es' else pp.requiredLevel.level_type_en
+                    'required_level': {
+                        'id' : pp.required_level.id,
+                        'level_type' :  pp.required_level.level_type_es if language == 'es' else pp.required_level.level_type_en
                     },
-                    'sector':{
-                        'id': pp.sector.id,
-                        'sector': pp.sector.name_es if language == 'es' else pp.sector.name_en
-                    },
-                    'subsector': {
-                        'id' : pp.subsector.id,
-                        'name' : pp.subsector.name_es if language == 'es' else pp.subsector.name_en
-                    },
-                    'recognitionType': {
-                        'id' : pp.recognitionType.id,
-                        'recognition_type' : pp.recognitionType.recognition_type_es if language == 'es' else pp.recognitionType.recognition_type_es
+                    'recognition_type': {
+                        'id' : pp.recognition_type.id,
+                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_es
                     },
                     'gei_organization':{
                         'id': pp.gei_organization.id, 
-                        'activity_type': pp.gei_organization.activity_type, 
                         'ovv': {
                             'id': pp.gei_organization.ovv.id,
                             'name':  pp.gei_organization.ovv.name,
                             'email': pp.gei_organization.ovv.email,
                         },
-                        'emission_OVV': pp.gei_organization.emission_OVV, 
-                        'report_date_start': pp.gei_organization.report_date_start, 
-                        'report_date_end': pp.gei_organization.report_date_end, 
-                        'base_year': pp.gei_organization.base_year
+                        'emission_ovv_date': pp.gei_organization.emission_ovv_date, 
+                        'report_year': pp.gei_organization.report_year, 
+                        'base_year': pp.gei_organization.base_year,
+                        'gei_activity_types': [
+                            {
+                                'id': gei_activity_type.id,
+                                'sector': {
+                                    'id': gei_activity_type.sector.id,
+                                    'name' : gei_activity_type.sector.name_es if language == 'es' else gei_activity_type.sector.name_en
+                                },
+                                'sub_sector':{
+                                    'id' : gei_activity_type.sub_sector.id,
+                                    'name': gei_activity_type.sub_sector.name_es if language == 'es' else gei_activity_type.sub_sector.name_en
+                                },
+                                'activity_type': gei_activity_type.activity_type
+
+                            } for gei_activity_type in  pp.gei_organization.gei_activity_types.all()
+                        ]
                     } if pp.gei_organization else None, 
-                    'base_year': pp.base_year,
                     'comments': [
                         {
                             'id': comment.id,
@@ -569,51 +658,50 @@ class PpcnService():
         return result
 
     def update(self, id, request):
-
-        errors = []
-        ppcn = PPCN.objects.get(id=id)
-        organization = Organization.objects.get(id=ppcn.organization.id)
-        contact = Contact.objects.get(id=organization.contact.id)
+        errors =[]
+        valid_relations = []
         
-        if request.data.get('gei_organization') != None and ppcn.gei_organization.id != None:
-            gei_organization = GeiOrganization.objects.get(id=ppcn.gei_organization.id)
-
-        serialized_contact = self.get_serialized_contact(request.data.get('organization'), contact)
-        if serialized_contact.is_valid():
-            serialized_contact.save()
-            serialized_organization = self.get_serialized_organization(request, contact.id, organization)
-            valid_relations = [serialized_organization.is_valid()]
-            if request.data.get('gei_organization') != None:
-                serialized_gei_organization = self.get_serialized_gei_organization(request, gei_organization)
-                valid_relations.append(serialized_gei_organization.is_valid())
-
-            if not valid_relations.count(False):
-                organization = serialized_organization.save()
-                gei_organization_id = None
-                if request.data.get('gei_organization') != None:
-                    gei_organization = serialized_gei_organization.save()
-                    gei_organization_id = gei_organization.id
-
-                serialized_ppcn = self.get_serialized_ppcn(request, organization.id, gei_organization_id, ppcn)
-                if serialized_ppcn.is_valid():
-                    ppcn = serialized_ppcn.save()
-                    ppcn_previous_status = ppcn.fsm_state
-                    if not can_proceed(ppcn.update_by_request_DCC):
-                        errors.append(self.INVALID_STATUS_TRANSITION)
-                    ppcn.update_by_request_DCC()
-                    ppcn.save()
-                    self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
-                
-                    result = (True, PPCNSerializer(ppcn).data)
-                else:
-                    errors = serialized_ppcn.errors
-                    result = (False, errors)
+        ppcn = PPCN.objects.get(pk=id)
+        gei_organization_id, organization_id = None, None
+        
+        if request.data.get('organization') != None:
+            organization_id = request.data.get('organization').get('id')
+            if organization_id != None:
+                organization_status, organization_detail= self.update_organization(request, organization_id)
             else:
-                errors = serialized_organization.errors
+                organization_status, organization_detail= self.create_organization(request)
+            valid_relations.append(organization_status)
+            if organization_status: organization_id = organization_detail.id
+            else: errors.append(organization_detail)
+
+        if request.data.get('gei_organization') != None:
+            gei_organization_id = request.data.get('gei_organization').get('id')
+            if gei_organization_id != None:
+                gei_organization_status, gei_organization_detail = self.update_gei_organization(request, gei_organization_id)
+            else:
+                gei_organization_status, gei_organization_detail = self.create_gei_organization(request)
+            valid_relations.append(gei_organization_status)
+            if gei_organization_status: gei_organization_id = gei_organization_detail.id
+            else: errors.append(gei_organization_detail)
+
+        result = (False, errors)        
+        if not valid_relations.count(False):
+
+            serialized_ppcn = self.get_serialized_ppcn(request, organization_id, gei_organization_id, ppcn)
+            if serialized_ppcn.is_valid():
+                ppcn = serialized_ppcn.save()
+                ppcn_previous_status = ppcn.fsm_state
+                if not can_proceed(ppcn.update_by_request_DCC):
+                    errors.append(self.INVALID_STATUS_TRANSITION)
+                ppcn.update_by_request_DCC()
+                ppcn.save()
+                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
+            
+                result = (True, PPCNSerializer(ppcn).data)
+            else:
+                errors = serialized_ppcn.errors
                 result = (False, errors)
-        else:
-            errors = serialized_contact.errors
-            result = (False, errors)
+           
         return result
 
     def post_PPCNFILE(self, request):
