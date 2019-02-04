@@ -31,6 +31,7 @@ class MitigationActionService():
         self.MITIGATION_ACTION_NOT_INSERTED = "Mitigation action cannot be inserted"
         self.INITIATIVE_RELATIONS = "contact_id or finance_id is not related with initiative"
         self.RELATED_MITIGATION_ACTION = " is not related with MA"
+        self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
 
     def get_all(self, language):
         try:
@@ -151,7 +152,7 @@ class MitigationActionService():
                         } for comment in m.comments.all()
                     ],
                     'fsm_state': m.fsm_state,
-                    'next_state': self.next_action(m.fsm_state),
+                    'next_state': self.next_action(m),
                     'created': m.created,
                     'updated': m.updated 
                 } for m in Mitigation.objects.all()
@@ -626,76 +627,16 @@ class MitigationActionService():
         f_uuid = uuid.UUID(str_uuid)
         return Mitigation.objects.get(pk=f_uuid)
 
-    def next_action(self, current_fsm_state):
-        result = None
-        if current_fsm_state == 'new':
-            result = 'submitted'
-        elif current_fsm_state == 'submitted' or current_fsm_state == 'updating_by_request':
-            result = 'in_evaluation_by_DCC'
-        elif current_fsm_state == 'in_evaluation_by_DCC':
-            # Transitory step (FE input)
-            result = 'decision_step_DCC'
-        elif current_fsm_state == 'decision_step_DCC':
-            result = False
-        elif current_fsm_state == 'changes_requested_by_DCC':
-            result = 'updating_by_request'
-        elif current_fsm_state == 'rejected_by_DCC':
-            result = 'end'
-        elif current_fsm_state == 'registering' or current_fsm_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN':
-            result = 'in_evaluation_INGEI_by_DCC_IMN'
-        elif current_fsm_state == 'in_evaluation_INGEI_by_DCC_IMN':
-            # Transitory step (FE input)
-            result = 'submit_INGEI_harmonization_required'
-        elif current_fsm_state == 'submit_INGEI_harmonization_required':
-            result = False
-        elif current_fsm_state == 'INGEI_harmonization_required':
-            result = False
-        elif current_fsm_state == 'updating_INGEI_changes_proposal':
-            result = 'submitted_INGEI_changes_proposal_evaluation'
-        elif current_fsm_state == 'submitted_INGEI_changes_proposal_evaluation':
-            result = 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN'
-        elif current_fsm_state == 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN':
-            # Transitory step (FE input)
-            result = 'submit_INGEI_changes_proposal_evaluation_result'
-        elif current_fsm_state == 'submit_INGEI_changes_proposal_evaluation_result':
-            result = False
-        elif current_fsm_state == 'INGEI_changes_proposal_changes_requested_by_DCC_IMN':
-            result = 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN'
-        elif current_fsm_state == 'INGEI_changes_proposal_rejected_by_DCC_IMN':
-            result = 'submitted_SINAMECC_conceptual_proposal_integration'
-        elif current_fsm_state == 'INGEI_changes_proposal_accepted_by_DCC_IMN':
-            result = 'implementing_INGEI_changes'  
-        elif current_fsm_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN':
-            result = 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN'
-        elif current_fsm_state == 'implementing_INGEI_changes':
-            result = 'submitted_SINAMECC_conceptual_proposal_integration'
-        elif current_fsm_state == 'submitted_SINAMECC_conceptual_proposal_integration':
-            result = 'in_evaluation_conceptual_proposal_by_DCC'
-        elif current_fsm_state == 'in_evaluation_conceptual_proposal_by_DCC':
-            # Transitory step (FE input)
-            result = 'decision_step_DCC_proposal'
-        elif current_fsm_state == 'decision_step_DCC_proposal':
-            result = False
-        elif current_fsm_state == 'conceptual_proposal_approved':
-            result = 'planning_integration_with_SINAMECC'
-        elif current_fsm_state == 'changes_requested_to_conceptual_proposal':
-            result = 'submitted_conceptual_proposal_changes'
-        elif current_fsm_state == 'submitted_conceptual_proposal_changes':
-            result = 'submitted_SINAMECC_conceptual_proposal_integration'
-        elif current_fsm_state == 'planning_integration_with_SINAMECC':
-            # Transitory step (FE input)
-            result = 'decision_step_SINAMEC'
-        elif current_fsm_state == 'decision_step_SINAMEC':
-            result = False
-        elif current_fsm_state == 'SINAMECC_integration_approved':
-            result = 'implementing_SINAMECC_changes'
-        elif current_fsm_state == 'SINAMECC_integration_changes_requested':
-            result = 'submitted_SINAMECC_integration_changes'
-        elif current_fsm_state == 'submitted_SINAMECC_integration_changes':
-            result = 'planning_integration_with_SINAMECC'
-        elif current_fsm_state == 'implementing_SINAMECC_changes':
-            result = 'end'
-        return result  
+    def next_action(self, mitigation_action):
+        result = {'states': False, 'required_comments': False}
+        transitions = mitigation_action.get_available_fsm_state_transitions()
+        states = []
+        for transition in  transitions:
+            states.append(transition.target)
+        result['states'] = states if len(states) else False
+        result['required_comments'] = True if len(states) > 1 else False
+            
+        return result
 
     def get(self, id, language):
 
@@ -816,7 +757,7 @@ class MitigationActionService():
                     } for comment in mitigation.comments.all()
                 ],
                 'fsm_state': mitigation.fsm_state,
-                'next_state': self.next_action(mitigation.fsm_state),
+                'next_state': self.next_action(mitigation),
                 'files': self._get_files_list([f.workflow_step_file.all() for f in mitigation.workflow_step.all()]),
                 'created': mitigation.created,
                 'updated': mitigation.updated
@@ -883,358 +824,28 @@ class MitigationActionService():
         return result
 
     def update_fsm_state(self, next_state, mitigation_action):
+
+        result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
-        # updating_by_request -> in_evaluation_by_DCC
-        if next_state == 'in_evaluation_by_DCC' and mitigation_action.fsm_state == 'updating_by_request':
-            if not can_proceed(mitigation_action.update_evaluate_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_evaluate_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submitted -> in_evaluation_by_DCC
-        elif next_state == 'in_evaluation_by_DCC':
-            if not can_proceed(mitigation_action.evaluate_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_by_DCC -> decision_step_DCC
-        elif next_state == 'decision_step_DCC':
-            if not can_proceed(mitigation_action.submit_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_DCC -> changes_requested_by_DCC
-        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'decision_step_DCC':
-            if not can_proceed(mitigation_action.request_changes_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.request_changes_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_DCC -> rejected_by_DCC
-        elif next_state == 'rejected_by_DCC':
-            if not can_proceed(mitigation_action.reject_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.reject_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_DCC -> registering
-        elif next_state == 'registering':
-            if not can_proceed(mitigation_action.register):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.register()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_by_DCC -> changes_requested_by_DCC
-        elif next_state == 'changes_requested_by_DCC' and mitigation_action.fsm_state == 'in_evaluation_by_DCC':
-            if not can_proceed(mitigation_action.evaluate_request_changes_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_request_changes_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # changes_requested_by_DCC -> updating_by_request
-        elif next_state == 'updating_by_request':
-            if not can_proceed(mitigation_action.update_by_request):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_by_request()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_by_DCC -> rejected_by_DCC
-        elif next_state == 'rejected_by_DCC':
-            if not can_proceed(mitigation_action.evaluate_reject_by_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_reject_by_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # rejected_by_DCC -> end
-        elif next_state == 'end':
-            if not can_proceed(mitigation_action.end):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.end()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_by_DCC -> registering
-        elif next_state == 'registering':
-            if not can_proceed(mitigation_action.evaluate_register):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_register()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # registering -> in_evaluation_INGEI_by_DCC_IMN
-        elif next_state == 'in_evaluation_INGEI_by_DCC_IMN':
-            if not can_proceed(mitigation_action.evaluate_INGEI):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_INGEI()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_INGEI_by_DCC_IMN -> submit_INGEI_harmonization_required
-        elif next_state == 'submit_INGEI_harmonization_required':
-            if not can_proceed(mitigation_action.submit_INGEI):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_INGEI()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submit_INGEI_harmonization_required -> INGEI_harmonization_required
-        elif next_state == 'INGEI_harmonization_required':
-            if not can_proceed(mitigation_action.require_INGEI_harmonization):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.require_INGEI_harmonization()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submit_INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration' and mitigation_action.fsm_state == 'submit_INGEI_harmonization_required':
-            if not can_proceed(mitigation_action.submit_INGEI_SINAMECC_conceptual_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_INGEI_SINAMECC_conceptual_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_INGEI_by_DCC_IMN -> INGEI_harmonization_required
-        elif next_state == 'INGEI_harmonization_required':
-            if not can_proceed(mitigation_action.evaluate_require_INGEI_harmonization):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_require_INGEI_harmonization()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_harmonization_required -> updating_INGEI_changes_proposal
-        elif next_state == 'updating_INGEI_changes_proposal':
-            if not can_proceed(mitigation_action.update_INGEI_changes_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_INGEI_changes_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_harmonization_required -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration'  and mitigation_action.fsm_state == 'INGEI_harmonization_required':
-            if not can_proceed(mitigation_action.submit_SINAMECC_conceptual_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_SINAMECC_conceptual_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_harmonization_required -> updating_INGEI_changes_proposal
-        elif next_state == 'updating_INGEI_changes_proposal':
-            if not can_proceed(mitigation_action.update_INGEI_changes_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_INGEI_changes_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # updating_INGEI_changes_proposal -> submitted_INGEI_changes_proposal_evaluation
-        elif next_state == 'submitted_INGEI_changes_proposal_evaluation':
-            if not can_proceed(mitigation_action.submit_INGEI_changes_evaluation):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_INGEI_changes_evaluation()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submitted_INGEI_changes_proposal_evaluation -> in_evaluation_INGEI_changes_proposal_by_DCC_IMN
-        elif next_state == 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN':
-            if not can_proceed(mitigation_action.evaluate_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_INGEI_changes_proposal_by_DCC_IMN -> submit_INGEI_changes_proposal_evaluation_result
-        elif next_state == 'submit_INGEI_changes_proposal_evaluation_result':
-            if not can_proceed(mitigation_action.submit_INGEI_changes_proposal_evaluation_result):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_INGEI_changes_proposal_evaluation_result()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_changes_requested_by_DCC_IMN
-        elif next_state == 'INGEI_changes_proposal_changes_requested_by_DCC_IMN':
-            if not can_proceed(mitigation_action.request_changes_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.request_changes_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_rejected_by_DCC_IMN
-        elif next_state == 'INGEI_changes_proposal_rejected_by_DCC_IMN':
-            if not can_proceed(mitigation_action.reject_changes_proposal_by_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.reject_changes_proposal_by_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submit_INGEI_changes_proposal_evaluation_result -> INGEI_changes_proposal_accepted_by_DCC_IMN
-        elif next_state == 'INGEI_changes_proposal_accepted_by_DCC_IMN':
-            if not can_proceed(mitigation_action.accept_changes_proposal_by_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.accept_changes_proposal_by_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_changes_proposal_changes_requested_by_DCC_IMN -> updating_INGEI_changes_proposal_by_request_of_DCC_IMN
-        elif next_state == 'updating_INGEI_changes_proposal_by_request_of_DCC_IMN':
-            if not can_proceed(mitigation_action.update_changes_proposal_by_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_changes_proposal_by_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_changes_proposal_rejected_by_DCC_IMN -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration':
-            if not can_proceed(mitigation_action.submit_SINAMECC_conceptual_proposal_integration):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_SINAMECC_conceptual_proposal_integration()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # INGEI_changes_proposal_accepted_by_DCC_IMN -> implementing_INGEI_changes
-        elif next_state == 'implementing_INGEI_changes':
-            if not can_proceed(mitigation_action.implement_INGEI_changes):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.implement_INGEI_changes()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # updating_INGEI_changes_proposal_by_request_of_DCC_IMN -> in_evaluation_INGEI_changes_proposal_by_DCC_IMN
-        elif next_state == 'in_evaluation_INGEI_changes_proposal_by_DCC_IMN':
-            if not can_proceed(mitigation_action.update_evaluate_DCC_IMN):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.update_evaluate_DCC_IMN()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # implementing_INGEI_changes -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration':
-            if not can_proceed(mitigation_action.implement_submit_SINAMECC_conceptual_proposal_integration):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.implement_submit_SINAMECC_conceptual_proposal_integration()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submitted_SINAMECC_conceptual_proposal_integration -> in_evaluation_conceptual_proposal_by_DCC
-        elif next_state == 'in_evaluation_conceptual_proposal_by_DCC':
-            if not can_proceed(mitigation_action.evaluate_conceptual_proposal_DCC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.evaluate_conceptual_proposal_DCC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_DCC_proposal -> conceptual_proposal_approved
-        elif next_state == 'conceptual_proposal_approved':
-            if not can_proceed(mitigation_action.approve_conceptual_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.approve_conceptual_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_DCC_proposal -> changes_requested_to_conceptual_proposal
-        elif next_state == 'changes_requested_to_conceptual_proposal':
-            if not can_proceed(mitigation_action.request_changes_conceptual_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.request_changes_conceptual_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # conceptual_proposal_approved -> planning_integration_with_SINAMECC
-        elif next_state == 'planning_integration_with_SINAMECC':
-            if not can_proceed(mitigation_action.plan_integration_SINAMECC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.plan_integration_SINAMECC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # changes_requested_to_conceptual_proposal -> submitted_conceptual_proposal_changes
-        elif next_state == 'submitted_conceptual_proposal_changes':
-            if not can_proceed(mitigation_action.submit_conceptual_proposal_changes):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_conceptual_proposal_changes()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submitted_conceptual_proposal_changes -> submitted_SINAMECC_conceptual_proposal_integration
-        elif next_state == 'submitted_SINAMECC_conceptual_proposal_integration':
-            if not can_proceed(mitigation_action.submit_SINAMECC_conceptual_proposal_changes):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_SINAMECC_conceptual_proposal_changes()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_SINAMEC -> SINAMECC_integration_approved
-        elif next_state == 'SINAMECC_integration_approved':
-            if not can_proceed(mitigation_action.approve_SINAMECC_integration):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.approve_SINAMECC_integration()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # decision_step_SINAMEC -> SINAMECC_integration_changes_requested
-        elif next_state == 'SINAMECC_integration_changes_requested':
-            if not can_proceed(mitigation_action.request_changes_SINAMECC_integration):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.request_changes_SINAMECC_integration()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # SINAMECC_integration_approved -> implementing_SINAMECC_changes
-        elif next_state == 'implementing_SINAMECC_changes':
-            if not can_proceed(mitigation_action.implement_SINAMECC_changes):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.implement_SINAMECC_changes()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # SINAMECC_integration_changes_requested -> submitted_SINAMECC_integration_changes
-        elif next_state == 'submitted_SINAMECC_integration_changes':
-            if not can_proceed(mitigation_action.submit_SINAMECC_integration_changes):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_SINAMECC_integration_changes()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # submitted_SINAMECC_integration_changes -> planning_integration_with_SINAMECC
-        elif next_state == 'planning_integration_with_SINAMECC':
-            if not can_proceed(mitigation_action.submit_plan_integration_SINAMECC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.submit_plan_integration_SINAMECC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # in_evaluation_conceptual_proposal_by_DCC -> decision_step_DCC_proposal
-        elif next_state == 'decision_step_DCC_proposal':
-            if not can_proceed(mitigation_action.decide_DCC_proposal):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.decide_DCC_proposal()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # planning_integration_with_SINAMECC -> decision_step_SINAMEC
-        elif next_state == 'decision_step_SINAMEC':
-            if not can_proceed(mitigation_action.decide_SINAMECC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.decide_SINAMECC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
-        # --- Transition ---
-        # implementing_SINAMECC_changes -> end
-        elif next_state == 'end':
-            if not can_proceed(mitigation_action.end_SINAMECC):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mitigation_action.end_SINAMECC()
-            mitigation_action.save()
-            result = (True, MitigationSerializer(mitigation_action).data)
+        # source -> target
+        transitions = mitigation_action.get_available_fsm_state_transitions()
+        states = {}
+        for transition in  transitions:
+            states[transition.target] = transition
+
+        states_keys = states.keys()
+        if len(states_keys) <= 0: result = (False, self.STATE_HAS_NO_AVAILABLE_TRANSITIONS)
+
+        if next_state in states_keys:
+            state_transition= states[next_state]
+            transition_function = getattr(mitigation_action ,state_transition.method.__name__)
+
+            if can_proceed(transition_function):
+                transition_function()
+                mitigation_action.save()
+                result = (True, MitigationSerializer(mitigation_action).data)
+            else: result = (False, self.INVALID_STATUS_TRANSITION)
+            
         return result
             
     def patch(self, id, request):
