@@ -1,6 +1,6 @@
 from general.storages import S3Storage
 from report_data.models import ReportFile, ReportFileVersion
-from report_data.serializers import ReportFileSerializer, ReportFileVersionSerializer
+from report_data.serializers import ReportFileSerializer, ReportFileVersionSerializer,ReportFileMetadataSerializer
 from django.urls import reverse
 import datetime
 import os
@@ -11,6 +11,8 @@ class ReportFileService():
     def __init__(self):
         self.storage = S3Storage()
         self.REPORT_FILE_DOES_NOT_EXIST = "Report File does not exist."
+        self.REPORT_FILE_EMPTY_METADATA = "Report file does not have metadata."
+        self.REPORT_FILE_METADATA_EMPTY_FIELD = "Metadata does have an empty field."
 
     def _get_one(self, id):
         return ReportFile.objects.get(pk=id)
@@ -39,15 +41,53 @@ class ReportFileService():
     def _serialize_and_save_files(self, request, report_file_id):
         pass
 
+    def _get_serialized_report_files_metadata(self, data, report_file):
+        data = {
+            'name':data.get('name'),
+            'value':data.get('value'),
+            'report_file': report_file.id,
+        }
+
+        serializer = ReportFileMetadataSerializer(data=data)
+        return serializer
+
+    def _save_metadata(self,request,report_file):
+        
+        result = (True, report_file)
+
+        if request.data.get('metadata') != None and list(request.data.get('metadata') ):
+
+            metadataList = list(request.data.get('metadata'))
+            for metadata in metadataList:
+                meta_serializer = self._get_serialized_report_files_metadata(metadata, report_file)
+
+                if meta_serializer.is_valid():
+                    meta_serializer.save()
+
+                else:
+                    result = (False, {self.REPORT_FILE_METADATA_EMPTY_FIELD})
+                    
+        
+        return result
+
+
     def create(self, request):
         serialized_report_file = self._get_serialized_report_file(request)
         if serialized_report_file.is_valid():
+
             report_file = serialized_report_file.save()
+            metadata_status , metadata_details=self._save_metadata(request,report_file)
+
+            if metadata_status :
+                return (False, metadata_details)
+
             version_serializer = self._get_serialized_report_file_version(request, report_file)
             if version_serializer.is_valid():
+                
                 version = version_serializer.save()
                 report_file.reportfileversion_set.add(version)
                 return (True, ReportFileSerializer(report_file).data)
+
         return (False, {"error": serialized_report_file.errors})
 
     def get(self, id):

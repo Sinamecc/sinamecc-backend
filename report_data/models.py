@@ -36,3 +36,14 @@ class ReportFileVersion(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.version)
+
+
+class ReportFileMetadata(models.Model):
+    name = models.CharField(max_length=100, blank=False, null=False)
+    value = models.CharField(max_length=100, blank=False, null=False)
+    report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("ReportFileMetadata")
+        verbose_name_plural = _("ReportFileMetadata")
+
