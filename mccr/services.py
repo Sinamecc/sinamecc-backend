@@ -3,6 +3,7 @@ from general.storages import S3Storage
 from mitigation_action.models import Mitigation
 from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile, OVV
 from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer, MCCRRegistryOVVRelationSerializer
+from mccr.workflow_steps.services import MCCRWorkflowStepService
 from rest_framework.parsers import JSONParser
 from django_fsm import can_proceed
 from io import BytesIO
@@ -22,6 +23,8 @@ class MCCRService():
         self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST = "Unknown error retrieving mitigation actions list"
         self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
+        self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.workflow_step_services = MCCRWorkflowStepService()
 
         self.storage = S3Storage()
 
@@ -58,32 +61,18 @@ class MCCRService():
         f_uuid = uuid.UUID(str_uuid)
         return MCCRRegistry.objects.get(pk=f_uuid)
 
-    def next_action(self, current_fsm_state):
+    def next_action(self, mccr_registry):
         result = None
-        if current_fsm_state == 'new':
-            result = 'mccr_submitted'
-        elif current_fsm_state == 'mccr_submitted':
-            result = 'mccr_ovv_assigned_first_review'
-        elif current_fsm_state == 'mccr_ovv_assigned_notification':
-            # Transitory step (FE input)
-            result = 'mccr_ovv_accept_reject'
-        elif current_fsm_state == 'mccr_ovv_accept_reject':
-            result = False
-        elif current_fsm_state == 'mccr_ovv_accept_assignation':
-            # Transitory step (FE input)
-            result = 'mccr_ovv_upload_evaluation'
-        elif current_fsm_state == 'mccr_ovv_upload_evaluation':
-            result = False
-        elif current_fsm_state == 'mccr_ovv_accept_dp':
-            result = 'mccr_secretary_get_information'
-        elif current_fsm_state == 'mccr_secretary_get_information':
-            result = 'mccr_on_evaluation_by_secretary'
-        elif current_fsm_state == 'mccr_on_evaluation_by_secretary':
-            result = 'mccr_secretary_can_proceed'
-        elif current_fsm_state == 'mccr_ovv_reject_assignation':
-            result = 'mccr_ovv_assigned_first_review'
-        elif current_fsm_state == 'mccr_ovv_reject_dp' or current_fsm_state == 'mccr_ovv_request_changes_dp' or 'mccr_ovv_assigned_first_review' or 'mccr_secretary_can_proceed':
-            result = 'mccr_end'
+        result = {'states': False, 'required_comments': False}
+        transitions = mccr_registry.get_available_fsm_state_transitions()
+        states = []
+        for transition in  transitions:
+            states.append(transition.target)
+        result['states'] = states if len(states) else False
+
+        #change here , only some states can have comments
+        result['required_comments'] = True if len(states) > 0 else False
+            
         return result
 
     def serialize_and_save_files(self, request, mccr_id):
@@ -116,7 +105,8 @@ class MCCRService():
             serialized_mccr = MCCRRegistrySerializerView(mccr)
             content = serialized_mccr.data
             content['files'] = self._get_files_list(mccr.files)
-            content['next_state'] = self.next_action(mccr.fsm_state)
+            content['workflow_step_files'] = self.workflow_step_services._get_files_list([f.workflow_step_file.all() for f in mccr.workflow_step.all()])
+            content['next_state'] = self.next_action(mccr)
             result = (True, content)
         except MCCRRegistry.DoesNotExist:
             result = (False, {"error": self.MCCR_ERROR_NOT_EXIST})
@@ -136,7 +126,7 @@ class MCCRService():
                     'user_type': m.user_type.name,
                     'files': MCCRFile.objects.filter(mccr_id=m.id).count(),
                     'fsm_state': m.fsm_state,
-                    'next_state': self.next_action(m.fsm_state)
+                    'next_state': self.next_action(m)
                 } for m in MCCRRegistry.objects.all()
             ]
             result = (True, m_list)
@@ -198,125 +188,28 @@ class MCCRService():
         return result
 
     def update_fsm_state(self, next_state, mccr_registry):
+        result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
-        # new -> mccr_submitted
-        # Must be handled in new method
-        # --- Transition ---
-        # mccr_submitted -> mccr_ovv_assigned_first_review
-        if next_state == 'mccr_ovv_assigned_first_review' and mccr_registry.fsm_state == 'mccr_submitted':
-            if not can_proceed(mccr_registry.assign_ovv_for_first_review):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.assign_ovv_for_first_review()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_assigned_first_review -> mccr_ovv_assigned_notification
-        if next_state == 'mccr_ovv_assigned_notification':
-            if not can_proceed(mccr_registry.assigned_send_notification):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.assigned_send_notification()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_assigned_notification -> mcc_ovv_accept_reject
-        if next_state == 'mccr_ovv_accept_reject':
-            if not can_proceed(mccr_registry.ovv_accept_reject):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_accept_reject()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_accept_reject -> mccr_ovv_accept_assignation
-        if next_state == 'mccr_ovv_accept_assignation':
-            if not can_proceed(mccr_registry.ovv_accept_assignation):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_accept_assignation()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_accept_reject -> mccr_ovv_reject_assignation
-        if next_state == 'mccr_ovv_reject_assignation':
-            if not can_proceed(mccr_registry.reject_assignation):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.reject_assignation()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_accept_assignation -> mccr_ovv_upload_evaluation
-        if next_state == 'mccr_ovv_upload_evaluation':
-            if not can_proceed(mccr_registry.ovv_upload_evaluation):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_upload_evaluation()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_reject_assignation -> mccr_ovv_assigned_first_review
-        if next_state == 'mccr_ovv_assigned_first_review' and mccr_registry.fsm_state == 'mccr_ovv_reject_assignation':
-            if not can_proceed(mccr_registry.ovv_assigned_first_review):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_assigned_first_review()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_upload_evaluation -> mccr_ovv_accept_dp
-        if next_state == 'mccr_ovv_accept_dp':
-            if not can_proceed(mccr_registry.ovv_accept_dp):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_accept_dp()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_upload_evaluation -> mccr_ovv_reject_dp
-        if next_state == 'mccr_ovv_reject_dp':
-            if not can_proceed(mccr_registry.ovv_reject_dp):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_reject_dp()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_upload_evaluation -> mccr_ovv_request_changes_dp
-        if next_state == 'mccr_ovv_request_changes_dp':
-            if not can_proceed(mccr_registry.ovv_request_changes_dp):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.ovv_request_changes_dp()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_accept_dp -> mccr_secretary_get_information
-        if next_state == 'mccr_secretary_get_information':
-            if not can_proceed(mccr_registry.secretary_get_information):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.secretary_get_information()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_secretary_get_information -> mccr_on_evaluation_by_secretary
-        if next_state == 'mccr_on_evaluation_by_secretary':
-            if not can_proceed(mccr_registry.evaluate_by_secretary):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.evaluate_by_secretary()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        if next_state == 'mccr_secretary_can_proceed':
-            if not can_proceed(mccr_registry.secretary_can_proceed):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.secretary_can_proceed()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
-        # --- Transition ---
-        # mccr_ovv_reject_dp -> mccr_end
-        if next_state == 'mccr_end':
-            if not can_proceed(mccr_registry.mccr_end):
-                result = (False, self.INVALID_STATUS_TRANSITION)
-            mccr_registry.mccr_end()
-            mccr_registry.save()
-            result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
+        # source -> target
+        transitions = mccr_registry.get_available_fsm_state_transitions()
+        states = {}
+        for transition in  transitions:
+            states[transition.target] = transition
 
-        # --- Transition ---
-        # mccr_on_evaluation_by_secretary -> mccr_end
+        states_keys = states.keys()
+        if len(states_keys) <= 0: result = (False, self.STATE_HAS_NO_AVAILABLE_TRANSITIONS)
 
-        # --- Transition ---
-        # mccr_secretary_can_proceed -> mccr_end
+        if next_state in states_keys:
+            state_transition= states[next_state]
+            transition_function = getattr(mccr_registry ,state_transition.method.__name__)
+
+            if can_proceed(transition_function):
+                transition_function()
+                mccr_registry.save()
+                result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
+            else: result = (False, self.INVALID_STATUS_TRANSITION)
+            
+        
         return result
 
     def patch(self, id, request):

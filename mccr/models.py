@@ -199,6 +199,20 @@ class MCCRRegistry(models.Model):
         pass
 
     # --- Transition ---
+    # mccr_ovv_reject_dp -> mccr_end
+    def can_ovv_dp_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_reject_dp
+        return self.fsm_state == 'mccr_ovv_reject_dp'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_dp', target = 'mccr_end',conditions=[can_ovv_dp_end], on_error = 'failed', permission = '')
+    def ovv_dp_end(self):
+        print('The MCCR is transitioning from mccr_ovv_reject_dp to mccr_end')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
     # mccr_ovv_upload_evaluation -> mccr_ovv_request_changes_dp
     def can_ovv_request_changes_dp(self):
         # Transition condition logic goes here
@@ -213,61 +227,586 @@ class MCCRRegistry(models.Model):
         pass
 
     # --- Transition ---
-    # mccr_ovv_accept_dp -> mccr_secretary_get_information
-    def can_secretary_get_information(self):
+    # mccr_ovv_request_changes_dp -> mccr_updating_dp_by_ovv_request
+    def can_update_dp_by_ovv_request(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_request_changes_dp
+        return self.fsm_state == 'mccr_ovv_request_changes_dp'
+
+    @transition(field='fsm_state', source='mccr_ovv_request_changes_dp', target='mccr_updating_dp_by_ovv_request', conditions=[can_update_dp_by_ovv_request], on_error='failed', permission='')
+    def updating_dp_by_ovv_request(self):
+        print('The MCCR is transitioning from mccr_ovv_request_changes_dp to mccr_updating_dp_by_ovv_request')
+      
+        # Additional logic goes here.
+        pass
+
+
+    # --- Transition ---
+    # mccr_updating_dp_by_ovv_request -> mccr_ovv_accept_assignation
+    def can_ovv_download_updated_dp(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_updating_dp_by_ovv_request
+        return self.fsm_state == 'mccr_updating_dp_by_ovv_request'
+
+    @transition(field= 'fsm_state', source = 'mccr_updating_dp_by_ovv_request', target = 'mccr_ovv_accept_assignation',conditions=[can_ovv_download_updated_dp], on_error = 'failed', permission = '')
+    def ovv_download_updated_dp(self):
+        print('The MCCR is transitioning from mccr_updating_dp_by_ovv_request to mccr_ovv_accept_assignation')
+        # Additional logic goes here.
+       
+
+    # --- Transition ---
+    # mccr_ovv_accept_dp -> mccr_secretary_get_dp_information
+    def can_secretary_get_dp_information(self):
         # Transition condition logic goes here
         # Verify current state
         # - mccr_ovv_accept_dp
         return self.fsm_state == 'mccr_ovv_accept_dp'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_dp', target = 'mccr_secretary_get_information',conditions=[can_secretary_get_information], on_error = 'failed', permission = '')
-    def secretary_get_information(self):
-        print('The MCCR is transitioning from mccr_ovv_accept_dp to mccr_secretary_get_information')
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_dp', target = 'mccr_secretary_get_dp_information',conditions=[can_secretary_get_dp_information], on_error = 'failed', permission = '')
+    def secretary_get_dp_information(self):
+        print('The MCCR is transitioning from mccr_ovv_accept_dp to mccr_secretary_get_dp_information')
         # Additional logic goes here.
         mccr_services = MCCREmailServices(ses_service)
         result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
         return result
 
     # --- Transition ---
-    # mccr_secretary_get_information -> mccr_on_evaluation_by_secretary
-    def can_evaluate_by_secretary(self):
+    # mccr_secretary_get_dp_information -> mccr_on_dp_evaluation_by_secretary
+    def can_evaluate_dp_by_secretary(self):
         # Transition condition logic goes here
         # Verify current state
-        # - mccr_secretary_get_information
-        return self.fsm_state == 'mccr_secretary_get_information'
+        # - mccr_secretary_get_dp_information
+        return self.fsm_state == 'mccr_secretary_get_dp_information'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_get_information', target = 'mccr_on_evaluation_by_secretary',conditions=[can_evaluate_by_secretary], on_error = 'failed', permission = '')
-    def evaluate_by_secretary(self):
-        print('The MCCR is transitioning from mccr_secretary_get_information to mccr_on_evaluation_by_secretary')
+    @transition(field= 'fsm_state', source = 'mccr_secretary_get_dp_information', target = 'mccr_on_dp_evaluation_by_secretary',conditions=[can_evaluate_dp_by_secretary], on_error = 'failed', permission = '')
+    def evaluate_dp_by_secretary(self):
+        print('The MCCR is transitioning from mccr_secretary_get_dp_information to mccr_on_dp_evaluation_by_secretary')
         # Additional logic goes here.
         pass
 
-    def can_secretary_proceed(self):
+    # --- Transition ---
+    # mccr_on_dp_evaluation_by_secretary -> mccr_secretary_can_proceed_dp
+    def can_secretary_proceed_dp(self):
         # Transition condition logic goes here
         # Verify current state
-        # - mccr_on_evaluation_by_secretary
-        return self.fsm_state == 'mccr_on_evaluation_by_secretary'
+        # - mccr_on_dp_evaluation_by_secretary
+        return self.fsm_state == 'mccr_on_dp_evaluation_by_secretary'
 
-    @transition(field= 'fsm_state', source = 'mccr_on_evaluation_by_secretary', target = 'mccr_secretary_can_proceed',conditions=[can_secretary_proceed], on_error = 'failed', permission = '')
-    def secretary_can_proceed(self):
-        print('The MCCR is transitioning from mccr_on_evaluation_by_secretary to mccr_secretary_can_proceed')
+    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_dp',conditions=[can_secretary_proceed_dp], on_error = 'failed', permission = '')
+    def secretary_can_proceed_dp(self):
+        print('The MCCR is transitioning from mccr_on_dp_evaluation_by_secretary to mccr_secretary_can_proceed_dp')
+        # Additional logic goes here.
+        pass
+
+    
+    # --- Transition ---
+    # mccr_on_dp_evaluation_by_secretary -> mccr_end
+    def can_secretary_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_on_dp_evaluation_by_secretary
+        return self.fsm_state == 'mccr_on_dp_evaluation_by_secretary'
+
+    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_end', conditions=[can_secretary_end], on_error = 'failed', permission = '')
+    def secretary_end(self):
+        print('The MCCR is transitioning from mccr_on_dp_evaluation_by_secretary to mccr_end')
         # Additional logic goes here.
         pass
 
     # --- Transition ---
-    # * -> mccr_end
-    @transition(field= 'fsm_state', source = '*', target = 'mccr_end', on_error = 'failed', permission = '')
-    def mccr_end(self):
-        # to do: narrow down statuses where it can transition
-        print('The MCCR is transitioning from any state to mccr_end')
+    # mccr_secretary_can_proceed_dp -> mccr_secretary_reject_dp_environmental_concerns
+    def can_secretary_reject_dp_environmental_concerns(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_can_proceed_dp
+        return self.fsm_state == 'mccr_secretary_can_proceed_dp'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_secretary_reject_dp_environmental_concerns', conditions=[can_secretary_reject_dp_environmental_concerns], on_error = 'failed', permission = '')
+    def secretary_reject_dp_environmental_concerns(self):
+        print('The MCCR is transitioning from mccr_secretary_can_proceed_dp to mccr_secretary_reject_dp_environmental_concerns')
         # Additional logic goes here.
         pass
 
     # --- Transition ---
-    # mccr_on_evaluation_by_secretary -> mccr_end
+    # mccr_secretary_reject_dp_environmental_concerns -> mccr_end
+    def can_secretary_dp_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_reject_dp_environmental_concerns
+        return self.fsm_state == 'mccr_secretary_reject_dp_environmental_concerns'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_dp_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_dp_end], on_error = 'failed', permission = '')
+    def secretary_dp_end(self):
+        print('The MCCR is transitioning from mccr_secretary_reject_dp_environmental_concerns to mccr_end')
+        # Additional logic goes here.
+        pass
 
     # --- Transition ---
-    # mccr_secretary_can_proceed -> mccr_end
+    # mccr_secretary_can_proceed_dp -> mccr_refer_validation_dp_report
+    def can_refer_validation_dp_report(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_can_proceed_dp
+        return self.fsm_state == 'mccr_secretary_can_proceed_dp'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_refer_validation_dp_report', conditions=[can_refer_validation_dp_report], on_error = 'failed', permission = '')
+    def refer_validation_dp_report(self):
+        print('The MCCR is transitioning from mccr_secretary_can_proceed_dp to mccr_refer_validation_dp_report')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_refer_validation_dp_report -> mccr_in_exec_committee_evaluation
+    def can_exec_committee_evaluate(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_refer_validation_report
+        return self.fsm_state == 'mccr_refer_validation_dp_report'
+
+    @transition(field= 'fsm_state', source = 'mccr_refer_validation_dp_report', target = 'mccr_in_exec_committee_evaluation', conditions=[can_exec_committee_evaluate], on_error = 'failed', permission = '')
+    def exec_committee_evaluate(self):
+        print('The MCCR is transitioning from mccr_refer_validation_dp_report to mccr_in_exec_committee_evaluation')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_in_exec_committee_evaluation -> mccr_communicate_conditions
+    def can_communicate_conditions(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_in_exec_committee_evaluation
+        return self.fsm_state == 'mccr_in_exec_committee_evaluation'
+
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_communicate_conditions', conditions=[can_communicate_conditions], on_error = 'failed', permission = '')
+    def communicate_conditions(self):
+        print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_communicate_conditions')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_in_exec_committee_evaluation -> mccr_exec_committee_reject
+    def can_committee_reject(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_in_exec_committee_evaluation
+        return self.fsm_state == 'mccr_in_exec_committee_evaluation'
+
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_exec_committee_reject', conditions=[can_committee_reject], on_error = 'failed', permission = '')
+    def committee_reject(self):
+        print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_exec_committee_reject')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_in_exec_committee_evaluation -> mccr_project_monitoring
+    def can_monitor_project(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_in_exec_committee_evaluation
+        return self.fsm_state == 'mccr_in_exec_committee_evaluation'
+
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_project_monitoring', conditions=[can_monitor_project], on_error = 'failed', permission = '')
+    def monitor_project(self):
+        print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_project_monitoring')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_exec_committee_reject -> mccr_end
+    def can_committee_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_exec_committee_reject
+        return self.fsm_state == 'mccr_exec_committee_reject'
+
+    @transition(field= 'fsm_state', source = 'mccr_exec_committee_reject', target = 'mccr_end', conditions=[can_committee_end], on_error = 'failed', permission = '')
+    def committee_end(self):
+        print('The MCCR is transitioning from mccr_exec_committee_reject to mccr_end')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_project_monitoring -> mccr_upload_report_sinamecc
+    def can_upload_report_sinamecc(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_project_monitoring
+        return self.fsm_state == 'mccr_project_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_project_monitoring', target = 'mccr_upload_report_sinamecc', conditions=[can_upload_report_sinamecc], on_error = 'failed', permission = '')
+    def upload_report_sinamecc(self):
+        print('The MCCR is transitioning from mccr_project_monitoring to mccr_upload_report_sinamecc')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_upload_report_sinamecc -> mccr_ovv_assigned
+    def can_ovv_assign(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_upload_report_sinamecc
+        return self.fsm_state == 'mccr_upload_report_sinamecc'
+
+    @transition(field= 'fsm_state', source = 'mccr_upload_report_sinamecc', target = 'mccr_ovv_assigned', conditions=[can_ovv_assign], on_error = 'failed', permission = '')
+    def ovv_assign(self):
+        print('The MCCR is transitioning from mccr_upload_report_sinamecc to mccr_ovv_assigned')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_ovv_assigned -> mccr_ovv_accept_reject
+    def can_ovv_accept(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_assigned
+        return self.fsm_state == 'mccr_ovv_assigned'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned', target = 'mccr_ovv_accept_reject_monitoring', conditions=[can_ovv_accept], on_error = 'failed', permission = '')
+    def ovv_accept(self):
+        print('The MCCR is transitioning from mccr_ovv_assigned to mccr_ovv_accept_reject_monitoring')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_ovv_accept_reject -> mccr_ovv_accept_assignation
+    def can_ovv_accept_assignation_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_accept_reject
+        return self.fsm_state == 'mccr_ovv_accept_reject_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject_monitoring', target = 'mccr_ovv_accept_assignation_monitoring', conditions=[can_ovv_accept_assignation_monitoring], on_error = 'failed', permission = '')
+    def ovv_accept_assignation_monitoring(self):
+        print('The MCCR is transitioning from mccr_ovv_accept_reject_monitoring to mccr_ovv_accept_assignation_monitoring')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_ovv_accept_assignation -> mccr_ovv_upload_evaluation
+    def can_ovv_upload_evaluation_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_accept_assignation
+        return self.fsm_state == 'mccr_ovv_accept_assignation_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_assignation_monitoring', target = 'mccr_ovv_upload_evaluation_monitoring', conditions=[can_ovv_upload_evaluation_monitoring], on_error = 'failed', permission = '')
+    def ovv_upload_evaluation_monitoring(self):
+        print('The MCCR is transitioning from mccr_ovv_accept_assignation_monitoring to mccr_ovv_upload_evaluation_monitoring')
+        # Additional logic goes here.
+        pass
+
+    def can_decision_step_ovv_evaluation_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_upload_evaluation_monitoring
+        return self.fsm_state == 'mccr_ovv_upload_evaluation_monitoring'
+
+
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation_monitoring', target = 'mccr_decision_step_ovv_evaluation_monitoring', conditions=[can_decision_step_ovv_evaluation_monitoring], on_error = 'failed', permission = '')
+    def decision_step_ovv_evaluation_monitoring(self):
+        print('The MCCR is transitioning from mccr_ovv_upload_evaluation_monitoring to mccr_decision_step_ovv_evaluation_monitoring')
+        # Additional logic goes here.
+        pass
+
+
+
+
+    # --- Transition ---
+    # mccr_ovv_upload_evaluation -> mccr_ovv_reject_monitoring
+    def can_ovv_reject_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_upload_evaluation
+        return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_reject_monitoring', conditions=[can_ovv_reject_monitoring], on_error = 'failed', permission = '')
+    def ovv_reject_monitoring(self):
+        print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_reject_monitoring')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_ovv_upload_evaluation -> mccr_ovv_request_changes_monitoring
+    def can_ovv_request_changes_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_upload_evaluation
+        return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
+    
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_request_changes_monitoring', conditions=[can_ovv_request_changes_monitoring], on_error = 'failed', permission = '')
+    def ovv_request_changes_monitoring(self):
+        print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_request_changes_monitoring')
+        # Additional logic goes here.
+        pass
+
+    
+
+    # --- Transition ---
+    # mccr_ovv_reject_monitoring -> mccr_end
+    def can_ovv_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_reject_monitoring
+        return self.fsm_state == 'mccr_ovv_reject_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_monitoring', target = 'mccr_end', conditions=[can_ovv_end], on_error = 'failed', permission = '')
+    def ovv_end(self):
+        print('The MCCR is transitioning from mccr_ovv_reject_monitoring to mccr_end')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_ovv_request_changes_monitoring -> mccr_updating_report_by_ovv_request
+    def can_update_report_by_ovv_request(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_request_changes_monitoring
+        return self.fsm_state == 'mccr_ovv_request_changes_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_request_changes_monitoring', target = 'mccr_updating_report_by_ovv_request', conditions=[can_update_report_by_ovv_request], on_error = 'failed', permission = '')
+    def update_report_by_ovv_request(self):
+        print('The MCCR is transitioning from mccr_ovv_request_changes_monitoring to mccr_updating_report_by_ovv_request')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_updating_report_by_ovv_request -> mccr_ovv_accept_assignation_monitoring
+    def can_ovv_download_updated_report(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_updating_report_by_ovv_request
+        return self.fsm_state == 'mccr_updating_report_by_ovv_request'
+
+    @transition(field= 'fsm_state', source = 'mccr_updating_report_by_ovv_request', target = 'mccr_ovv_accept_assignation_monitoring',conditions=[can_ovv_download_updated_report], on_error = 'failed', permission = '')
+    def ovv_download_updated_report(self):
+        print('The MCCR is transitioning from mccr_updating_report_by_ovv_request to mccr_ovv_accept_assignation_monitoring')
+        # Additional logic goes here.
+     
+
+    # --- Transition ---
+    # mccr_ovv_upload_evaluation -> mccr_ovv_accept_monitoring
+    def can_ovv_accept_monitoring(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_upload_evaluation_monitoring
+        return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_accept_monitoring', conditions=[can_ovv_accept_monitoring], on_error = 'failed', permission = '')
+    def ovv_accept_monitoring(self):
+        print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_accept_monitoring')
+        # Additional logic goes here.
+        pass
+    ## evaluation report sinamecc by secretary 
+
+
+
+     # --- Transition ---
+    # mccr_ovv_accept_monitoring -> mccr_secretary_get_report_information
+    def can_secretary_get_report_information(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ovv_accept_monitoring
+        return self.fsm_state == 'mccr_ovv_accept_monitoring'
+
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_monitoring', target = 'mccr_secretary_get_report_information',conditions=[can_secretary_get_report_information], on_error = 'failed', permission = '')
+    def secretary_get_report_information(self):
+        print('The MCCR is transitioning from mccr_ovv_accept_monitoring to mccr_secretary_get_report_information')
+        # Additional logic goes here.
+        mccr_services = MCCREmailServices(ses_service)
+        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
+        return result
+
+
+
+
+
+    # --- Transition ---
+    # mccr_secretary_get_report_information -> mccr_on_report_evaluation_by_secretary
+    def can_evaluate_report_by_secretary(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_get_report_information
+        return self.fsm_state == 'mccr_secretary_get_report_information'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_get_report_information', target = 'mccr_on_report_evaluation_by_secretary',conditions=[can_evaluate_report_by_secretary], on_error = 'failed', permission = '')
+    def evaluate_report_by_secretary(self):
+        print('The MCCR is transitioning from mccr_secretary_get_report_information to mccr_on_report_evaluation_by_secretary')
+        # Additional logic goes here.
+        pass
+
+
+
+    # --- Transition ---
+    # mccr_on_report_evaluation_by_secretary -> mccr_secretary_can_proceed_report
+    def can_secretary_proceed_report(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_on_report_evaluation_by_secretary
+        return self.fsm_state == 'mccr_on_report_evaluation_by_secretary'
+
+    @transition(field= 'fsm_state', source = 'mccr_on_report_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_report',conditions=[can_secretary_proceed_report], on_error = 'failed', permission = '')
+    def secretary_can_proceed_report(self):
+        print('The MCCR is transitioning from mccr_on_report_evaluation_by_secretary to mccr_secretary_can_proceed_report')
+        # Additional logic goes here.
+        pass
+
+
+    # --- Transition ---
+    # mccr_secretary_can_proceed_report -> mccr_secretary_reject_report_environmental_concerns
+    def can_secretary_reject_report_environmental_concerns(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_can_proceed_report
+        return self.fsm_state == 'mccr_secretary_can_proceed_report'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_secretary_reject_report_environmental_concerns', conditions=[can_secretary_reject_report_environmental_concerns], on_error = 'failed', permission = '')
+    def secretary_reject_report_environmental_concerns(self):
+        print('The MCCR is transitioning from mccr_secretary_can_proceed_report to mccr_secretary_reject_report_environmental_concerns')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_secretary_reject_report_environmental_concerns -> mccr_end
+    def can_secretary_report_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_reject_report_environmental_concerns
+        return self.fsm_state == 'mccr_secretary_reject_report_environmental_concerns'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_report_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_report_end], on_error = 'failed', permission = '')
+    def secretary_report_end(self):
+        print('The MCCR is transitioning from mccr_secretary_reject_report_environmental_concerns to mccr_end')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_secretary_can_proceed_report -> mccr_refer_validation_monitoring_report
+    def can_refer_validation_monitoring_report(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_secretary_can_proceed_report
+        return self.fsm_state == 'mccr_secretary_can_proceed_report'
+
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_refer_validation_monitoring_report', conditions=[can_refer_validation_monitoring_report], on_error = 'failed', permission = '')
+    def refer_validation_monitoring_report(self):
+        print('The MCCR is transitioning from mccr_secretary_can_proceed_report to mccr_refer_validation_monitoring_report')
+        # Additional logic goes here.
+        #send notification to executive committee
+        pass
+
+
+    ## UCC decision
+
+    # --- Transition ---
+    # mccr_refer_validation_monitoring_report -> mccr_ucc_in_exec_committee_evaluation
+    def can_ucc_in_exec_committee_evaluation(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_refer_validation_monitoring_report
+        return self.fsm_state == 'mccr_refer_validation_monitoring_report'
+
+    @transition(field= 'fsm_state', source = 'mccr_refer_validation_monitoring_report', target = 'mccr_ucc_in_exec_committee_evaluation', conditions=[can_ucc_in_exec_committee_evaluation], on_error = 'failed', permission = '')
+    def ucc_in_exec_committee_evaluation(self):
+        print('The MCCR is transitioning from mccr_refer_validation_monitoring_report to mccr_ucc_in_exec_committee_evaluation')
+        # Additional logic goes here.
+        pass
+    
+    # --- Transition ---
+    # mccr_ucc_in_exec_committee_evaluation -> mccr_decision_step_emit_ucc
+    def can_decision_step_emit_ucc(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ucc_in_exec_committee_evaluation
+        return self.fsm_state == 'mccr_ucc_in_exec_committee_evaluation'
+
+    @transition(field= 'fsm_state', source = 'mccr_ucc_in_exec_committee_evaluation', target = 'mccr_decision_step_emit_ucc', conditions=[can_decision_step_emit_ucc], on_error = 'failed', permission = '')
+    def decision_step_emit_ucc(self):
+        print('The MCCR is transitioning from mccr_ucc_in_exec_committee_evaluation to mccr_decision_step_emit_ucc')
+        # Additional logic goes here.
+        pass
+
+    # --- Transition ---
+    # mccr_decision_step_emit_ucc -> mccr_ucc_reject
+    def can_ucc_reject(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_decision_step_emit_ucc
+        return self.fsm_state == 'mccr_decision_step_emit_ucc'
+
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_reject', conditions=[can_ucc_reject], on_error = 'failed', permission = '')
+    def ucc_reject(self):
+        print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_ucc_reject')
+        # Additional logic goes here.
+        # send notification to applicant organization
+        pass
+
+
+    # --- Transition ---
+    # mccr_ucc_reject -> mccr_end
+    def can_ucc_reject_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ucc_reject
+        return self.fsm_state == 'mccr_ucc_reject'
+
+    @transition(field= 'fsm_state', source = 'mccr_ucc_reject', target = 'mccr_end', conditions=[can_ucc_reject_end], on_error = 'failed', permission = '')
+    def ucc_reject_end(self):
+        print('The MCCR is transitioning from mccr_ucc_reject to mccr_end')
+        # Additional logic goes here.
+        pass
+
+
+    # --- Transition ---
+    # mccr_decision_step_emit_ucc -> mccr_communicate_ucc_conditions 
+    def can_communicate_ucc_conditions(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_decision_step_emit_ucc
+        return self.fsm_state == 'mccr_decision_step_emit_ucc'
+
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_communicate_ucc_conditions', conditions=[can_communicate_ucc_conditions], on_error = 'failed', permission = '')
+    def communicate_ucc_conditions(self):
+        print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_communicate_ucc_conditions')
+        # Additional logic goes here.
+        # send notification with the conditions
+        pass
+
+    # --- Transition ---
+    # mccr_decision_step_emit_ucc -> mccr_ucc_accept
+    def can_ucc_accept(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_decision_step_emit_ucc
+        return self.fsm_state == 'mccr_decision_step_emit_ucc'
+
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_accept', conditions=[can_ucc_accept], on_error = 'failed', permission = '')
+    def ucc_accept(self):
+        print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_ucc_accept')
+        # Additional logic goes here.
+        # send notification to emit ucc
+        pass
+
+    # --- Transition ---
+    # mccr_ucc_accept -> mccr_end
+    def can_ucc_accept_end(self):
+        # Transition condition logic goes here
+        # Verify current state
+        # - mccr_ucc_accept
+        return self.fsm_state == 'mccr_ucc_accept'
+
+    @transition(field= 'fsm_state', source = 'mccr_ucc_accept', target = 'mccr_end', conditions=[can_ucc_accept_end], on_error = 'failed', permission = '')
+    def ucc_accept_end(self):
+        print('The MCCR is transitioning from mccr_ucc_accept to mccr_end')
+        # Additional logic goes here.
+        pass
+
+
+    
+
+
     
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
