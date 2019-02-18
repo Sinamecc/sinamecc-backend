@@ -1,7 +1,9 @@
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 
+
+
+
 from mccr.models import OVV
-from ppcn.views import *
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer

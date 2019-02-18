@@ -11,6 +11,9 @@ from mitigation_action.models import Contact
 from io import BytesIO
 from general.services import EmailServices
 
+from users.models import CustomUser
+from ppcn.services import PpcnService
+
 import json
 
 import os
@@ -200,3 +203,161 @@ class PPCNTest(TestCase):
         response = emailServices.send_notification(recipient_list, subject, message_body)
         self.assertEqual(response[0], False)
         assert response
+
+class PPCNFSMTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.get_or_create(username='admin')[0]
+        self.ppcn_service = PpcnService()
+
+    #test flow from PPCN_new to PPCN_decision_step_DCC:
+    def test_PPCN_new_to_PPCN_decision_step_DCC(self):
+        flow = ['PPCN_submitted','PPCN_evaluation_by_DCC','PPCN_decision_step_DCC']
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user)
+
+        for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+    #test wrong flow from PPCN_new to PPCN_decision_step_DCC:
+    def test_wrong_PPCN_new_to_PPCN_decision_step_DCC(self):
+
+        points = [
+            ['PPCN_new','PPCN_decision_step_DCC'],
+            ['PPCN_new','PPCN_evaluation_by_DCC'],
+            ['PPCN_submitted','PPCN_decision_step_DCC']
+        ]
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user)
+
+        for point in points:
+            transitions = list(self.model.get_available_fsm_state_transitions())
+            for state in transitions:
+                 self.assertNotEquals(point[1],state)
+            self.ppcn_service.update_fsm_state(point[0], self.model)
+
+
+     # test flow from PPCN_decision_step_DCC to PPCN_evaluation_by_DCC :
+    def test_PPCN_decision_step_DCC_to_PPCN_evaluation_by_DCC(self):
+         flow = ['PPCN_decision_step_DCC','PPCN_changes_requested_by_DCC','PPCN_updating_by_request_DCC','PPCN_evaluation_by_DCC']
+         client.force_login(self.user)
+         self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_DCC')
+
+         for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+
+    # test wrong flow from PPCN_decision_step_DCC to PPCN_evaluation_by_DCC :
+    def test_wrong_PPCN_decision_step_DCC_to_PPCN_evaluation_by_DCC(self):
+        points = [
+            ['PPCN_decision_step_DCC','PPCN_evaluation_by_DCC'],
+            ['PPCN_decision_step_DCC','PPCN_updating_by_request_DCC'],
+            ['PPCN_changes_requested_by_DCC','PPCN_evaluation_by_DCC']
+        ]
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_decision_step_DCC')
+
+        for point in points:
+            transitions = list(self.model.get_available_fsm_state_transitions())
+            for state in transitions:
+                 self.assertNotEquals(point[1],state)
+            self.ppcn_service.update_fsm_state(point[0], self.model)
+
+
+     # Test flow from PPCN_decision_step_DCC to PPCN_decision_step_CA
+    def test_PPCN_decision_step_DCC_to_PPCN_decision_step_CA(self):
+        flow = ['PPCN_decision_step_DCC','PPCN_accepted_request_by_DCC','PPCN_evaluation_by_CA','PPCN_decision_step_CA']
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_DCC')
+
+        for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+    # Test wrong flow from PPCN_decision_step_DCC to PPCN_decision_step_CA
+    def test_wrong_PPCN_decision_step_DCC_to_PPCN_decision_step_CA(self):
+        points = [
+            ['PPCN_decision_step_DCC','PPCN_decision_step_CA'],
+            ['PPCN_decision_step_DCC','PPCN_evaluation_by_CA'],
+            ['PPCN_accepted_request_by_DCC','PPCN_decision_step_CA']
+        ]
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_decision_step_DCC')
+
+        for point in points:
+            transitions = list(self.model.get_available_fsm_state_transitions())
+            for state in transitions:
+                 self.assertNotEquals(point[1],state)
+            self.ppcn_service.update_fsm_state(point[0], self.model)
+
+
+    # test flow from PPCN_decision_step_CA to PPCN_end:
+    def test_PPCN_decision_step_CA_to_PPCN_end(self):
+        flow = ['PPCN_decision_step_CA','PPCN_rejected_request_by_CA','PPCN_end']
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_CA')
+
+        for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+    # test wrong flow from PPCN_decision_step_CA to PPCN_end:
+    def test_wrong_PPCN_decision_step_CA_to_PPCN_end(self):
+        target = 'PPCN_end'
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_decision_step_CA')
+
+        transitions = list(self.model.get_available_fsm_state_transitions())
+        for state in transitions:
+            self.assertNotEquals(target,state)
+
+
+    #test flow from PPCN_decision_step_CA to PPCN_send_recognition_certificate:
+    def test_PPCN_decision_step_CA_to_PPCN_send_recognition_certificate(self):
+        flow = ['PPCN_decision_step_CA','PPCN_accepted_request_by_CA','PPCN_send_recognition_certificate']
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_CA')
+
+        for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+    #test wrong flow from PPCN_decision_step_CA to PPCN_send_recognition_certificate:
+    def test_wrong_PPCN_decision_step_CA_to_PPCN_send_recognition_certificate(self):
+        target = 'PPCN_send_recognition_certificate'
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_decision_step_CA')
+
+        transitions = list(self.model.get_available_fsm_state_transitions())
+        for state in transitions:
+            self.assertNotEquals(target,state)
+    
+    #test flow from PPCN_decision_step_DCC to PPCN_end:
+    def test_PPCN_decision_step_DCC_to_PPCN_end(self):
+        flow = ['PPCN_decision_step_DCC','PPCN_rejected_request_by_DCC','PPCN_end'] 
+
+        self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_DCC')
+
+        for state in flow:
+            self.ppcn_service.update_fsm_state(state, self.model)
+            self.assertEqual(self.model.fsm_state, state)
+
+     #test wrong flow from PPCN_decision_step_DCC to PPCN_end:
+    def test_wrong_PPCN_decision_step_DCC_to_PPCN_end(self):
+        target = 'PPCN_end'
+
+        client.force_login(self.user)
+        self.model = PPCN(user=self.user,fsm_state='PPCN_decision_step_DCC')
+
+        transitions = list(self.model.get_available_fsm_state_transitions())
+        for state in transitions:
+            self.assertNotEquals(target,state)
+
+
