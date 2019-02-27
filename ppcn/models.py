@@ -327,10 +327,16 @@ class PPCN(models.Model):
     # Transitons CA -> Controlaria Ambiental
 
     def can_evaluation_by_CA(self):
-        # Transition condition logic goes here
-        # Verify current state
-        # - PPCN_accepted_request_by_DCC
-        return self.fsm_state == 'PPCN_accepted_request_by_DCC'
+   
+        condition = []
+        condition_state = (self.fsm_state == 'PPCN_accepted_request_by_DCC')
+        condition.append(condition_state)
+
+        condition_geographic_level = (not self.geographic_level.level_en.upper() == "CANTONAL")
+        condition.append(condition_geographic_level)
+        
+        condition_result = (not condition.count(False))
+        return condition_result
     
     @transition(field='fsm_state', source='PPCN_accepted_request_by_DCC', target='PPCN_evaluation_by_CA', conditions=[can_evaluation_by_CA], on_error='failed', permission='')
     def evaluate_by_CA(self):
@@ -340,6 +346,28 @@ class PPCN(models.Model):
         # send notification
 
         pass
+    
+    def can_end_cantonal_DCC(self):
+   
+        condition = []
+        condition_state = (self.fsm_state == 'PPCN_accepted_request_by_DCC')
+        condition.append(condition_state)
+        
+        condition_geographic_level = (self.geographic_level.level_en.upper() == "CANTONAL")
+        condition.append(condition_geographic_level)
+        
+        condition_result = (not condition.count(False))
+        return condition_result
+    
+    @transition(field='fsm_state', source='PPCN_accepted_request_by_DCC', target='PPCN_end', conditions=[can_end_cantonal_DCC], on_error='failed', permission='')
+    def end_cantonal_DCC(self):
+        print("The ppcn is transitioning from accept_request_DCC to PPCN_end")
+        # Transition condition logic goes here
+        # Verify current state
+        # send notification
+
+        pass
+
     
     def can_submit_CA(self):
         # Transition condition logic goes here
