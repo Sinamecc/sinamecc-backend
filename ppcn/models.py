@@ -11,7 +11,11 @@ from django.contrib.auth import get_user_model
 from general.storages import PrivateMediaStorage
 from workflow.models import Comment, ReviewStatus
 from django_fsm import FSMField, transition
+from ppcn.email_services import PPCNEmailServices
+from general.services import EmailServices
+ses_service = EmailServices()
 User = get_user_model()
+
 
 class InventoryMethodology(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
@@ -199,8 +203,9 @@ class PPCN(models.Model):
         print('The ppcn is transitioning from PPCN_new to PPCN_submitted')
         # Notify to DCC placeholder
         # self.notify_submission_DCC()
-        pass
-
+        ppcn_services = PPCNEmailServices(ses_service)
+        result = ppcn_services.sendStatusNotification(self, 'dcc_user')
+        return result
 
     #Transitions DCC
 

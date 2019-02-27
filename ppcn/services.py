@@ -762,41 +762,6 @@ class PpcnService():
             result = (False, self.REQUIRED_LEVEL_ERROR_GET_ALL)
         return result
 
-    def sendNotification(self, recipient_list, subject, message_body):
-
-        result = ses_service.send_notification(recipient_list, subject, message_body)
-
-        return result
-            
-    def sendStatusNotification(self, group, subject, message_body, link):
-
-        """first implementation"""
-        subject = "Request of PPCN #: {0}".format(subject)
-        hyperlink =  "<br>Detalles en <a href={0}>ver ma&#769;s</a>".format(link)
-        recipient_list = self.get_user_by_group(group)
-        result = self.sendNotification(recipient_list, subject, message_body+hyperlink)
-        return result
-
-    def buil_message_ppcn(self, data):
-        organization = "<p><b>Organización, Distrito o Cantón: </b> {0}".format(str(data.name))
-        representative_name = "<p><b>Nombre  del Representante: </b>{0}</p>".format(str(data.representative_name))
-        phone_organization = "<p><b>Teléfono: </b>{0}</p>".format(str(data.phone_organization))
-        fax = postal_code = ""
-        if data.postal_code != None:
-            postal_code = "<p><b>Código Postal: </b>{0}</p>".format(str(data.postal_code))
-        if data.fax != None:
-            fax = "<p><b>Fax </b>{0}</p>".format(str(data.fax))
-        address = "<p><b>Dirección: </b>{0}".format(str(data.address))
-        ciiu = "<p><b>CIIU: </b>{0}</p>".format(str(data.ciiu))
-        message = "<h3>PPCN</h3> {0} {1} {2} {3} {4} {5} {6}".format(organization, representative_name, phone_organization, fax, postal_code, address, ciiu)
-        return message
-
-    def get_user_by_group(self, user_group):
-        list = []
-        for user in User.objects.filter(groups__name=user_group):
-            list.append(user.email)
-        return list
-
     def getReviewStatus(self, id):
         return ReviewStatus.objects.get(pk=id)
 

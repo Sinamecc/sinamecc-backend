@@ -186,9 +186,26 @@
             "groups": [],
             "user_permissions": []
         }
-    }, {
+    },{
         "model": "users.customuser",
         "pk": 12,
+        "fields": {
+            "password": "cambiame",
+            "last_login": null,
+            "is_superuser": true,
+            "username": "dcc_user",
+            "first_name": "",
+            "last_name": "",
+            "email": "sinamec@grupoincocr.com",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2018-11-02T15:07:07.393Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },{
+        "model": "users.customuser",
+        "pk": 13,
         "fields": {
             "password": "cambiame",
             "last_login": null,

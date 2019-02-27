@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.utils import timezone
 from rest_framework import status
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 import datetime
 from datetime import datetime
@@ -10,6 +10,7 @@ from ppcn.serializers import *
 from mitigation_action.models import Contact
 from io import BytesIO
 from general.services import EmailServices
+from ppcn.email_services import PPCNEmailServices
 
 from users.models import CustomUser
 from ppcn.services import PpcnService
@@ -19,11 +20,13 @@ import json
 import os
 # initialize the APIClient app
 client = Client()
-
+User = get_user_model()
+ses_service = EmailServices()
 class PPCNTest(TestCase):
 
     def setUp(self):
         user = User.objects.get_or_create(username='testuser')[0]
+        User.objects.get_or_create(username='dcc_user')
         client.force_login(user)
         self.geographic_level = GeographicLevel.objects.create(level_es = "Nacional" , level_en = "National")
         self.required_level = RequiredLevel.objects.create(level_type_es = "Solicitud inicial", level_type_en = "Initial Request")
@@ -35,12 +38,9 @@ class PPCNTest(TestCase):
         self.ppcn = PPCN.objects.create(
             user = user,
             organization = self.organization,
-            geographicLevel = self.geographic_level,
-            requiredLevel = self.required_level,
-            sector = self.sector ,
-            subsector = self.sub_sector,
-            recognitionType = self.recognition_type,
-            base_year = "2018-04-03",
+            geographic_level = self.geographic_level,
+            required_level = self.required_level,
+            recognition_type = self.recognition_type,
             review_count = 0,
             fsm_state = "sumitted",
             created = timezone.now(),
@@ -69,12 +69,12 @@ class PPCNTest(TestCase):
                         "phone": self.ppcn.organization.contact.phone
                     }
                 },
-            "geographicLevel": self.ppcn.geographicLevel.id,
-            "requiredLevel": self.ppcn.requiredLevel.id,
-            "subsector": self.ppcn.subsector.id,
-            "sector": self.ppcn.sector.id,
-            "base_year": self.ppcn.base_year,
-            "recognitionType": self.ppcn.recognitionType.id
+            "geographicLevel": self.ppcn.geographic_level.id,
+            "requiredLevel": self.ppcn.required_level.id,
+            "subsector": self.sub_sector.id,
+            "sector": self.sector.id,
+            "base_year": "2018-04-03",
+            "recognitionType": self.ppcn.recognition_type.id
         }
 
         self.emailServicesInstance = EmailServices("sinamec@grupoincocr.com")
@@ -104,13 +104,11 @@ class PPCNTest(TestCase):
                 self.assertEqual(str(resp.get('organization')['contact']['email']), str(contact.get('email')))
                 self.assertEqual(str(resp.get('organization')['contact']['phone']), str(contact.get('phone')))
 
-                self.assertEqual(str(resp.get('geographicLevel')['id']), str(serial.get('geographicLevel')))
-                self.assertEqual(str(resp.get('requiredLevel')['id']), str(serial.get('requiredLevel')))
-                self.assertEqual(str(resp.get('sector')['id']), str(serial.get('sector')))
-                self.assertEqual(str(resp.get('subsector')['id']), str(serial.get('subsector')))
-                self.assertEqual(str(resp.get('recognitionType')['id']), str(serial.get('recognitionType')))
+                self.assertEqual(str(resp.get('geographic_level')['id']), str(serial.get('geographic_level')))
+                self.assertEqual(str(resp.get('required_level')['id']), str(serial.get('required_level')))
+
+                self.assertEqual(str(resp.get('recognition_type')['id']), str(serial.get('recognition_type')))
                 self.assertEqual(str(resp.get('base_year')), str(serial.get('base_year')))
-                self.assertEqual(str(resp.get('review_count')), str(serial.get('review_count')))
                 self.assertEqual(str(resp.get('fsm_state')), str(serial.get('fsm_state')))
 
                 datetime_create_response = datetime.strptime(str(resp.get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
@@ -143,13 +141,10 @@ class PPCNTest(TestCase):
         self.assertEqual(str(response.data.get('organization')['contact']['email']), str(contact.get('email')))
         self.assertEqual(str(response.data.get('organization')['contact']['phone']), str(contact.get('phone')))
 
-        self.assertEqual(str(response.data.get('geographicLevel')['id']), str(serial.get('geographicLevel')))
-        self.assertEqual(str(response.data.get('requiredLevel')['id']), str(serial.get('requiredLevel')))
-        self.assertEqual(str(response.data.get('sector')['id']), str(serial.get('sector')))
-        self.assertEqual(str(response.data.get('subsector')['id']), str(serial.get('subsector')))
-        self.assertEqual(str(response.data.get('recognitionType')['id']), str(serial.get('recognitionType')))
+        self.assertEqual(str(response.data.get('geographic_level')['id']), str(serial.get('geographic_level')))
+        self.assertEqual(str(response.data.get('geographic_level')['id']), str(serial.get('geographic_level')))
+        self.assertEqual(str(response.data.get('recognition_type')['id']), str(serial.get('recognition_type')))
         self.assertEqual(str(response.data.get('base_year')), str(serial.get('base_year')))
-        self.assertEqual(str(response.data.get('review_count')), str(serial.get('review_count')))
         self.assertEqual(str(response.data.get('fsm_state')), str(serial.get('fsm_state')))
 
         datetime_create_response = datetime.strptime(str(response.data.get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
@@ -172,7 +167,7 @@ class PPCNTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED )
         assert response
 
-    def get_delete_put_patch_mitigation(self):
+    def get_delete_put_patch_ppcn(self):
         response = client.delete(reverse('put_delete_patch_ppcn', kwargs={'id': self.ppcn.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response
@@ -204,10 +199,18 @@ class PPCNTest(TestCase):
         self.assertEqual(response[0], False)
         assert response
 
+    def test_send_notification_to_dcc_user(self):
+        ppcn_services = PPCNEmailServices(ses_service)
+        response = ppcn_services.sendStatusNotification(self.ppcn, 'dcc_user')
+        self.assertEqual(response[0], False)
+        assert response
+
+
 class PPCNFSMTest(TestCase):
     def setUp(self):
-        self.user = CustomUser.objects.get_or_create(username='admin')[0]
+        self.user = CustomUser.objects.get_or_create(username='dcc_user')[0]
         self.ppcn_service = PpcnService()
+
 
     #test flow from PPCN_new to PPCN_decision_step_DCC:
     def test_PPCN_new_to_PPCN_decision_step_DCC(self):
@@ -338,10 +341,10 @@ class PPCNFSMTest(TestCase):
         transitions = list(self.model.get_available_fsm_state_transitions())
         for state in transitions:
             self.assertNotEquals(target,state)
-    
+
     #test flow from PPCN_decision_step_DCC to PPCN_end:
     def test_PPCN_decision_step_DCC_to_PPCN_end(self):
-        flow = ['PPCN_decision_step_DCC','PPCN_rejected_request_by_DCC','PPCN_end'] 
+        flow = ['PPCN_decision_step_DCC','PPCN_rejected_request_by_DCC','PPCN_end']
 
         self.model = PPCN(user=self.user,fsm_state='PPCN_evaluation_by_DCC')
 
@@ -359,5 +362,3 @@ class PPCNFSMTest(TestCase):
         transitions = list(self.model.get_available_fsm_state_transitions())
         for state in transitions:
             self.assertNotEquals(target,state)
-
-
