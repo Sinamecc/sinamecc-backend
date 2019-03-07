@@ -205,7 +205,7 @@
         }
     },{
         "model": "users.customuser",
-        "pk": 13,
+        "pk": 24,
         "fields": {
             "password": "cambiame",
             "last_login": null,
