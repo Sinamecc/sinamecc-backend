@@ -1,8 +1,4 @@
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
-
-
-
-
 from mccr.models import OVV
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
@@ -13,7 +9,7 @@ from ppcn.workflow_steps.models import PPCNWorkflowStepFile
 from rest_framework.parsers import JSONParser
 import datetime
 import uuid
-from django_fsm import can_proceed
+from django_fsm import can_proceed, has_transition_perm
 from io import BytesIO
 from general.storages import S3Storage
 from django.http import FileResponse
@@ -46,11 +42,11 @@ class PpcnService():
         self.PPCN_DOES_NOT_EXIST = "PPCN does not exist."
         self.PPCN_FILE_DOES_NOT_EXIST = "PPCN file does not exist."
         self.INVALID_STATUS_TRANSITION = "Invalid ppcn state transition."
+        self.INVALID_USER_TRANSITION = "the user doesn´t have permission for this transition"
         self.INVALID_CURRENT_STATUS = "Invalid current ppcn status."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.PPCN_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
-
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
         self.ASSING_GEI_ACTIVITY_TYPES = "Error assigning gei activity types."
         self.CREATING_GEI_ORGANIZATION = "Error creating gei organization."
@@ -420,7 +416,7 @@ class PpcnService():
         return result
 
     def assign_gei_activity_types(self, request, gei_organization):
-        
+
         gei_activity_types_list = request.data.get('gei_activity_types')
         errors = [self.ASSING_GEI_ACTIVITY_TYPES]
         result_status = True
@@ -508,34 +504,31 @@ class PpcnService():
             if gei_organization_status: gei_organization_id = gei_organization_detail.id
             else: errors.append(gei_organization_detail)
 
-        
         if not valid_relations.count(False):
             ## Change logic here!!
-
             serialized_ppcn = self.get_serialized_ppcn(request, organization_id, gei_organization_id)
-            
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
                 ppcn_previous_status = ppcn.fsm_state
-                if not can_proceed(ppcn.submit):
-                    errors.append(self.INVALID_STATUS_TRANSITION)
-                ppcn.submit()
-                ppcn.save()
-                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
-                
-                result = (True, PPCNSerializer(ppcn).data)
+                if not has_transition_perm(ppcn.submit, request.user):
+                    errors.append(self.INVALID_USER_TRANSITION)
+                    result = (False, errors)
+                else:
+                    ppcn.submit()
+                    ppcn.save()
+                    self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
+                    result = (True, PPCNSerializer(ppcn).data)
             else:
                 errors.append(serialized_ppcn.errors)
                 result = (False, errors)
-
         else:
-            
             result = (False, errors)
             
         return result
 
     def next_action(self, ppcn):
         result = {'states': False, 'required_comments': False}
+        # change for transitions method available for users
         transitions = ppcn.get_available_fsm_state_transitions()
         states = []
         for transition in  transitions:
@@ -671,7 +664,7 @@ class PpcnService():
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
                 ppcn_previous_status = ppcn.fsm_state
-                if not can_proceed(ppcn.update_by_request_DCC):
+                if not has_transition_perm(ppcn.update_by_request_DCC):
                     errors.append(self.INVALID_STATUS_TRANSITION)
                 ppcn.update_by_request_DCC()
                 ppcn.save()
@@ -790,7 +783,7 @@ class PpcnService():
             ppcn.comments.add(comment)
         return comment_result_status
 
-    def update_fsm_state(self, next_state, ppcn):
+    def update_fsm_state(self, next_state, ppcn,user):
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
         # source -> target
@@ -806,7 +799,7 @@ class PpcnService():
             state_transition= states[next_state]
             transition_function = getattr(ppcn ,state_transition.method.__name__)
 
-            if can_proceed(transition_function):
+            if has_transition_perm(transition_function,user):
                 transition_function()
                 ppcn.save()
                 result = (True, PPCNSerializer(ppcn).data)
@@ -825,7 +818,7 @@ class PpcnService():
             if serialized_ppcn.is_valid():
                 ppcn_previous_status = ppcn.fsm_state
                 ppcn = serialized_ppcn.save()
-                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), ppcn)
+                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), ppcn,request.user)
                 if update_state_status:
                     self.create_change_log_entry(ppcn,ppcn_previous_status,ppcn.fsm_state,request.data.get('user'))
                     result = (True, update_state_data)
