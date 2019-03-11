@@ -78,7 +78,7 @@ class ReportFileService():
             report_file = serialized_report_file.save()
             metadata_status , metadata_details=self._save_metadata(request,report_file)
 
-            if metadata_status :
+            if not metadata_status :
                 return (False, metadata_details)
 
             version_serializer = self._get_serialized_report_file_version(request, report_file)
@@ -96,6 +96,15 @@ class ReportFileService():
             result = (True, serialized_report_file.data)
         except ReportFile.DoesNotExist:
             result = (False, {"error": "Report file doesnt exists"})
+        return result
+    
+    def delete(self, id):
+        try:
+            rp = ReportFile.objects.get(id=id)
+            rp.delete()
+            result = (True, {"Result":"ReportFile has been delete"})
+        except:
+            result = (False, {"Result":"ReportFile has not been delete"})
         return result
 
     def get_all(self):
@@ -149,6 +158,8 @@ class ReportFileService():
                         result = (True, ReportFileSerializer(saved_report_file).data)
                     else:
                         result = (False, {"error": "Error saving report file or changing previous file version"})
+                else:
+                    result = (False, {"error": "Error saving report file or changing previous file version"})
             else:
                 result = (False, self.REPORT_FILE_DOES_NOT_EXIST)
         except ReportFile.DoesNotExist:

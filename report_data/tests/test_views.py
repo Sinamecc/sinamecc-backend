@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from report_data.models import ReportFile, ReportFileVersion
 from report_data.serializers import ReportFileSerializer
-
+from users.models import CustomUser
 
 # initialize the APIClient app
 client = Client()
@@ -14,7 +14,7 @@ class GetAllReportFilesTest(TestCase):
     """ Test module for GET all puppies API """
 
     def setUp(self):
-        user = User.objects.get_or_create(username='testuser')[0]
+        user = CustomUser.objects.get_or_create(username='admin')[0]
         client.force_login(user)
         self.report1 = ReportFile.objects.create(
             name='file1', user=user)
@@ -44,8 +44,8 @@ class GetAllReportFilesTest(TestCase):
 
 class CreateNewReportFileTest(TestCase):
     def setUp(self):
-        client.force_login(User.objects.get_or_create(username='testuser')[0])
-
+        user = CustomUser.objects.get_or_create(username='admin')[0]
+        client.force_login(user)
         self.invalid_payload = {
             'name': '',
             'file': '/foo/bar/reportX'
@@ -62,8 +62,8 @@ class CreateNewReportFileTest(TestCase):
 class UpdateSingleReportFileTest(TestCase):
 
     def setUp(self):
-        self.user = User.objects.get_or_create(username='testuser')[0]
-        client.force_login(self.user)
+        self.user = CustomUser.objects.get_or_create(username='admin')[0]
+        client.force_login(self.user )
         self.report1 = ReportFile.objects.create(
             name='file1', user=self.user)
         ReportFileVersion.objects.create(user=self.user, version='1', active=True, file='/tmp/foofile', report_file=self.report1)
@@ -102,7 +102,7 @@ class UpdateSingleReportFileTest(TestCase):
 class DeleteSingleReportFileTest(TestCase):
 
     def setUp(self):
-        user = User.objects.get_or_create(username='testuser')[0]
+        user = CustomUser.objects.get_or_create(username='admin')[0]
         client.force_login(user)
         self.report1 = ReportFile.objects.create(
             name='file1', user=user)
@@ -111,10 +111,10 @@ class DeleteSingleReportFileTest(TestCase):
     def test_valid_delete_report_file(self):
         response = client.delete(
             reverse('get_delete_update_report_file', kwargs={'pk': self.report1.pk}))
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invalid_delete_report_file(self):
         response = client.delete(
-            reverse('get_delete_update_report_file', kwargs={'pk': 30}))
+            reverse('get_delete_update_report_file', kwargs={'pk': '0'}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

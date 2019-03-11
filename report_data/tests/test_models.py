@@ -1,13 +1,13 @@
 from django.test import TestCase, Client
 from report_data.models import ReportFile
-from django.contrib.auth.models import User
+from users.models import CustomUser
 
 client = Client()
 
 class ReportFileTest(TestCase):
     def setUp(self):
-        self.user = User.objects.get_or_create(username='testuser')[0]
-        client.force_login(self.user)
+        self.user = CustomUser.objects.get_or_create(username='admin')[0]
+        client.force_login(self.user )
         ReportFile.objects.create(name='file1', user=self.user)
 
 
