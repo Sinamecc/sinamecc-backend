@@ -1,5 +1,7 @@
-from django.conf.urls import url
+from django.conf.urls import url, handler500, handler404
 from general import views
+
+handler500 = views.handler500
 
 urlpatterns = [
     url(
@@ -7,4 +9,5 @@ urlpatterns = [
         views.get_user_info_by_name,
         name='get_user_info_by_name'
     ),
+    url(r'^.*$', views.handler404),
 ]

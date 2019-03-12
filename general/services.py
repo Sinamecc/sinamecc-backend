@@ -55,3 +55,9 @@ class EmailServices():
         result = self.send_notification(recipient_list, subject, message_body)
 
         return result
+
+class HandlerErrors():
+
+    def error_400(self, errors):
+        result_error = {"error_code": 400, "error_message": errors}
+        return (False, result_error)

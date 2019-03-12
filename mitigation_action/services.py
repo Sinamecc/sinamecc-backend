@@ -1,6 +1,6 @@
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, \
 IngeiCompliance, GeographicScale, Location, Mitigation, ChangeLog, Initiative, InitiativeType, FinanceStatus, InitiativeFinance
-from mitigation_action.workflow_steps.models import * 
+from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import InitiaveSerializer, InitiativeFinanceSerializer, FinanceSerializer, LocationSerializer, ProgressIndicatorSerializer, ContactSerializer, MitigationSerializer, ChangeLogSerializer
 from workflow.models import ReviewStatus
 from general.storages import S3Storage
@@ -11,10 +11,10 @@ import uuid
 from io import BytesIO
 from django.urls import reverse
 import os
-
+from general.services import HandlerErrors
 from workflow.services import WorkflowService
 from general.services import EmailServices
-
+handler = HandlerErrors()
 workflow_service = WorkflowService()
 
 
@@ -90,7 +90,7 @@ class MitigationActionService():
                             'status':{
                                 'id' : m.initiative.finance.status.id,
                                 'name' : m.initiative.finance.status.name_es if language=="es" else m.initiative.finance.status.name_en
-                            } 
+                            }
                         },
                     } if m.initiative else {},
                     'registration_type': {
@@ -154,14 +154,15 @@ class MitigationActionService():
                     'fsm_state': m.fsm_state,
                     'next_state': self.next_action(m),
                     'created': m.created,
-                    'updated': m.updated 
+                    'updated': m.updated
                 } for m in Mitigation.objects.all()
             ]
             result = (True, mitigations_list)
-        except Mitigation.DoesNotExist:
-            result (False, self.MITIGATION_ACTION_ERROR_GET_ALL)
+        except Exception as e:
+            result = handler.error_400(e.args)
+        except  Mitigation.DoesNotExist:
+            result = handler.error_400(self.MITIGATION_ACTION_ERROR_GET_ALL)
         return result
-
     def get_serialized_contact(self, request):
         contact_data = {
             'full_name': request.get('contact').get('full_name'),
@@ -169,7 +170,7 @@ class MitigationActionService():
             'email': request.get('contact').get('email'),
             'phone': request.get('contact').get('phone'),
         }
-      
+
         serializer = ContactSerializer(data=contact_data)
         return serializer
 
@@ -259,7 +260,7 @@ class MitigationActionService():
         return review_status_id_data
 
     def get_serialized_initiative(self, request, contact_id, finance_id, initiative = False):
-        
+
         initiative_data = {
             'name': request.get('initiative').get('name'),
             'objective': request.get('initiative').get('objective'),
@@ -272,7 +273,7 @@ class MitigationActionService():
             'finance': finance_id,
             'status': request.get('initiative').get('status'),
         }
-        
+
         if initiative:
             serializer = InitiaveSerializer(initiative, data = initiative_data)
 
@@ -299,12 +300,12 @@ class MitigationActionService():
         for field in MitigationSerializer.Meta.fields:
             if field in request and not field in fk_field:
                 mitigation_data[field] = request.get(field)
-            
-        
+
+
         serializer = MitigationSerializer(data = mitigation_data)
         return serializer
-            
-        
+
+
 
     def get_serialized_mitigation_action_for_existing(self, request, mitigation, contact_id = None, progress_indicator_id = None, location_id = None, finance_id = None, initiative_id = None, review_count = None):
         mitigation_data =  {}
@@ -312,14 +313,14 @@ class MitigationActionService():
         for field in MitigationSerializer.Meta.fields:
             if field in request and not field in fk_field:
                 mitigation_data[field] = request.get(field)
-        
+
         if review_count : mitigation_data['review_count'] = review_count
         if contact_id: mitigation_data['contact'] = contact_id
         if progress_indicator_id: mitigation_data['progress_indicator'] = progress_indicator_id
         if location_id: mitigation_data['location'] = location_id
         if finance_id: mitigation_data['finance'] = finance_id
         if initiative_id: mitigation_data['initiative'] = initiative_id
-        
+
         serializer = MitigationSerializer(mitigation, data=mitigation_data)
         return serializer
 
@@ -330,10 +331,12 @@ class MitigationActionService():
             try:
                 ingei = IngeiCompliance.objects.get(pk=id)
                 mitigation_action.ingei_compliances.add(ingei)
-                
+
                 result = (True, mitigation_action)
+            except Exception as e:
+                result = handler.error_400(e.args)
             except IngeiCompliance.DoesNotExist:
-                result = (False, self.INGEI_COMPLIANCE_DOES_NOT_EXIST)
+                result = handler.error_400(self.INGEI_COMPLIANCE_DOES_NOT_EXIST)
         return result
 
     def assign_comment(self, request, mitigation_action):
@@ -359,7 +362,7 @@ class MitigationActionService():
             serialized_change_log.save()
             result = (True, serialized_change_log.data)
         else:
-            result = (False, serialized_change_log.errors)
+            result = handler.error_400(serialized_change_log.errors)
         return result
 
 
@@ -380,8 +383,10 @@ class MitigationActionService():
                 }
                 change_log_content.append(change_log_data)
             result = (True, change_log_content)
+        except Exception as e:
+            result = handler.error_400(e.args)
         except Mitigation.DoesNotExist:
-            result = (False, self.MITIGATION_ACTION_DOES_NOT_EXIST)
+            result = handler.error_400(self.MITIGATION_ACTION_DOES_NOT_EXIST)
         return result
 
 
@@ -389,77 +394,79 @@ class MitigationActionService():
 
         errors = []
         result = (False, None)
+        try:
+            initiative = request.data.get('initiative')
+            serialized_contact = self.get_serialized_contact(initiative)
+            serialized_finance = self.get_serialized_initiative_finance(initiative)
 
-        initiative = request.data.get('initiative')
-        serialized_contact = self.get_serialized_contact(initiative)
-        serialized_finance = self.get_serialized_initiative_finance(initiative)
-
-        valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
-
-        if not valid_relations.count(False):
-            contact = serialized_contact.save()
-            finance = serialized_finance.save()
-            serialized_initiative = self.get_serialized_initiative(request.data, contact.id, finance.id)
-
-            if serialized_initiative.is_valid():
-                initiative = serialized_initiative.save()
-                result = (True, initiative)
-
-            else:
-                errors.append(serialized_initiative.errors)
-                result = (False, errors)
-
-        else:
-            errors.append(serialized_contact.errors)
-            errors.append(serialized_finance.errors)
-            result = (False, errors)
-
-        return result
-    
-    def update_initiative(self, request, initiative):
-        errors = []
-        result = (False, None)
-        
-        contact_id = request.get('initiative').get('contact').get('id')
-        finance_id = request.get('initiative').get('finance').get('id')
-
-        if initiative.contact.id == int(contact_id) and initiative.finance.id == int(finance_id): 
-            contact = Contact.objects.get(pk = contact_id)
-            finance = InitiativeFinance.objects.get(pk = finance_id)
-
-            serialized_contact = self.get_serialized_contact_for_existing(request.get('initiative'), contact)
-            serialized_finance = self.get_serialized_initiative_finance_for_existing(request.get('initiative'), finance)
-            print(serialized_finance)
-            
             valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
-            
+
             if not valid_relations.count(False):
                 contact = serialized_contact.save()
                 finance = serialized_finance.save()
-                serialized_initiative = self.get_serialized_initiative(request, contact.id, finance.id, initiative)
+                serialized_initiative = self.get_serialized_initiative(request.data, contact.id, finance.id)
 
                 if serialized_initiative.is_valid():
                     initiative = serialized_initiative.save()
                     result = (True, initiative)
-                
+
                 else:
                     errors.append(serialized_initiative.errors)
-                    result = (False, errors)
-            
+                    result = handler.error_400(errors)
+
             else:
                 errors.append(serialized_contact.errors)
                 errors.append(serialized_finance.errors)
-                result = (False, errors)
-        else:
-            result = (False, self.INITIATIVE_RELATIONS)
+                result = handler.error_400(errors)
+        except Exception as e:
+            result = handler.error_400(e.args)
+        return result
 
+    def update_initiative(self, request, initiative):
+        errors = []
+        result = (False, None)
+        try:
+            contact_id = request.get('initiative').get('contact').get('id')
+            finance_id = request.get('initiative').get('finance').get('id')
 
+            if initiative.contact.id == int(contact_id) and initiative.finance.id == int(finance_id):
+                contact = Contact.objects.get(pk = contact_id)
+                finance = InitiativeFinance.objects.get(pk = finance_id)
+
+                serialized_contact = self.get_serialized_contact_for_existing(request.get('initiative'), contact)
+                serialized_finance = self.get_serialized_initiative_finance_for_existing(request.get('initiative'), finance)
+                print(serialized_finance)
+
+                valid_relations = [serialized_contact.is_valid(), serialized_finance.is_valid()]
+
+                if not valid_relations.count(False):
+                    contact = serialized_contact.save()
+                    finance = serialized_finance.save()
+                    serialized_initiative = self.get_serialized_initiative(request, contact.id, finance.id, initiative)
+
+                    if serialized_initiative.is_valid():
+                        initiative = serialized_initiative.save()
+                        result = (True, initiative)
+
+                    else:
+                        errors.append(serialized_initiative.errors)
+                        result = handler.error_400(errors)
+
+                else:
+                    errors.append(serialized_contact.errors)
+                    errors.append(serialized_finance.errors)
+                    result = handler.error_400(errors)
+            else:
+                result = handler.error_400(self.INITIATIVE_RELATIONS)
+        except Exception as e:
+            result = handler.error_400(e.args)
         return result
 
 
     def update_mitigation_action(self, request, mitigation_action):
         errors = []
         valid_relations = []
+
         if "initiative" in request.data:
             if request.data.get('initiative').get('id'):
                 initiative_id = request.data.get('initiative').get('id')
@@ -471,7 +478,7 @@ class MitigationActionService():
 
                 is_valid, initiative = self.create_initiative(request)
 
-            if is_valid: 
+            if is_valid:
                 serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, initiative_id = initiative.id )
                 if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
                 else:
@@ -493,7 +500,7 @@ class MitigationActionService():
                 serialized_contact = self.get_serialized_contact(request.data)
 
             is_valid = serialized_contact.is_valid()
-            if is_valid: 
+            if is_valid:
                 contact = serialized_contact.save()
                 serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, contact_id=contact.id )
                 if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
@@ -503,11 +510,11 @@ class MitigationActionService():
             else:
                 valid_relations.append(is_valid)
                 errors.append(serialized_contact.errors)
-        
+
         if "location" in request.data:
             if request.data.get('location').get('id'):
                 location_id = request.data.get('location').get('id')
-                
+
                 if mitigation_action.location.id != int(location_id):
                     return (False, "location_id" + self.RELATED_MITIGATION_ACTION)
 
@@ -517,7 +524,7 @@ class MitigationActionService():
             else:
                 serialized_location = self.get_serialized_location(request.data)
             is_valid = serialized_location.is_valid()
-            if is_valid: 
+            if is_valid:
                 location = serialized_location.save()
                 serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, location_id=location.id )
                 if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
@@ -527,7 +534,7 @@ class MitigationActionService():
             else:
                 valid_relations.append(is_valid)
                 errors.append(serialized_location.errors)
-        
+
         if "finance" in request.data:
             if request.data.get('finance').get('id'):
                 finance_id = request.data.get('finance').get('id')
@@ -541,7 +548,7 @@ class MitigationActionService():
 
             is_valid = serialized_finance.is_valid()
             if is_valid:
-                finance = serialized_finance.save() 
+                finance = serialized_finance.save()
                 serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, finance_id=finance.id )
                 if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
                 else:
@@ -550,7 +557,7 @@ class MitigationActionService():
             else:
                 valid_relations.append(is_valid)
                 errors.append(serialized_finance.errors)
-        
+
         if "progress_indicator" in request.data:
             if request.data.get('progress_indicator').get('id'):
                 progress_indicator_id = request.data.get('progress_indicator').get('id')
@@ -562,11 +569,11 @@ class MitigationActionService():
 
             is_valid = serialized_progress_indicator.is_valid()
             if is_valid:
-                progress_indicator = serialized_progress_indicator.save() 
+                progress_indicator = serialized_progress_indicator.save()
                 serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data,mitigation_action, progress_indicator_id=progress_indicator.id )
                 if serialized_mitigation_action.is_valid(): mitigation_action = serialized_mitigation_action.save()
                 else:
-                    result = (False, serialized_mitigation_action.errors)
+                    result =  (False, serialized_mitigation_action.errors)
                     return result
             else:
                 valid_relations.append(is_valid)
@@ -579,13 +586,14 @@ class MitigationActionService():
                 errors.append(data_ingei_result)
                 valid_relations.append(get_ingei_result)
 
-        valid_relations = not valid_relations.count(False) 
+        valid_relations = not valid_relations.count(False)
         result = (valid_relations, [ MitigationSerializer(mitigation_action).data ] + errors)
 
         return result
 
     def create(self, request):
         result = (False, None)
+        errors = []
         serialized_mitigation_action = self.get_serialized_mitigation_action(request.data)
 
         if serialized_mitigation_action.is_valid():
@@ -596,26 +604,24 @@ class MitigationActionService():
                 mitigation_previous_status = mitigation_action.fsm_state
                 if not can_proceed(mitigation_action.submit):
                     errors.append(self.INVALID_STATUS_TRANSITION)
-                
+
                 mitigation_action.submit()
                 mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
         else:
-            
-            result = (False, serialized_mitigation_action.errors)
-
+            result = handler.error_400(serialized_mitigation_action.errors)
         return result
-    
+
     def checkAllFieldComplete(self, mitigation_action_data):
 
         result = True
         field_list = dict(mitigation_action_data[0].items())
 
         for field in field_list.keys():
-            if field_list[field] == None and field != "progress_indicator": 
+            if field_list[field] == None and field != "progress_indicator":
 
                 if field != "international_participation":
-                    result = False 
+                    result = False
 
                 # international_participation -> None and is_international -> True ==> not valid
                 elif field_list['is_international']:
@@ -635,7 +641,7 @@ class MitigationActionService():
             states.append(transition.target)
         result['states'] = states if len(states) else False
         result['required_comments'] = True if len(states) > 1 else False
-            
+
         return result
 
     def get(self, id, language):
@@ -671,7 +677,7 @@ class MitigationActionService():
                     'initiative_type': {
                             "id": mitigation.initiative.initiative_type.id,
                             "initiative_type" : mitigation.initiative.initiative_type.initiative_type_es if language=="es" else mitigation.initiative.initiative_type.initiative_type_en,
-                    }, 
+                    },
                     'entity_responsible': mitigation.initiative.entity_responsible,
                     'budget': mitigation.initiative.budget,
                     'status' : {
@@ -763,8 +769,10 @@ class MitigationActionService():
                 'updated': mitigation.updated
             }
             result = (True, content)
+        except Exception as e:
+            result = handler.error_400(e.args)
         except Mitigation.DoesNotExist:
-            result = (False, self.MITIGATION_ACTION_DOES_NOT_EXIST)
+            result = handler.error_400(self.MITIGATION_ACTION_DOES_NOT_EXIST)
         return result
 
     def delete(self, id):
@@ -780,6 +788,7 @@ class MitigationActionService():
     def update(self, id, request, language):
 
         errors = []
+
         mitigation = self.get_one(id)
         serialized_mitigation_action = self.get_serialized_mitigation_action_for_existing(request.data, mitigation)
 
@@ -816,11 +825,9 @@ class MitigationActionService():
 
             else:
                 result = (False, errors)
-        
+
         else:
-
-            result = (False, serialized_mitigation_action.errors)
-
+            result = handler.error_400(serialized_mitigation_action.errors)
         return result
 
     def update_fsm_state(self, next_state, mitigation_action):
@@ -828,6 +835,7 @@ class MitigationActionService():
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
         # source -> target
+
         transitions = mitigation_action.get_available_fsm_state_transitions()
         states = {}
         for transition in  transitions:
@@ -845,33 +853,36 @@ class MitigationActionService():
                 mitigation_action.save()
                 result = (True, MitigationSerializer(mitigation_action).data)
             else: result = (False, self.INVALID_STATUS_TRANSITION)
-            
+
         return result
-            
+
     def patch(self, id, request):
-        mitigation = self.get_one(id)
-        if (request.data.get('fsm_state')):
-            patch_data = {
-                'review_count': mitigation.review_count + 1
-            }
-            serialized_mitigation_action = MitigationSerializer(mitigation, data=patch_data, partial=True)
-            if serialized_mitigation_action.is_valid():
-                mitigation_previous_status = mitigation.fsm_state
-                mitigation_action = serialized_mitigation_action.save()
-                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mitigation_action)
-                if update_state_status:
-                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
-                    result = (True, update_state_data)
-                else:
-                    result = (False, update_state_data)
-            if (request.data.get('comment')):
-                comment_status = self.assign_comment(request, mitigation_action)
-                if comment_status:
-                    result = (True, MitigationSerializer(mitigation_action).data)
-                else:
-                    result = (False, self.COMMENT_NOT_ASSIGNED)
-        else:
-            result = (False, self.NO_PATCH_DATA_PROVIDED)
+        try:
+            mitigation = self.get_one(id)
+            if (request.data.get('fsm_state')):
+                patch_data = {
+                    'review_count': mitigation.review_count + 1
+                }
+                serialized_mitigation_action = MitigationSerializer(mitigation, data=patch_data, partial=True)
+                if serialized_mitigation_action.is_valid():
+                    mitigation_previous_status = mitigation.fsm_state
+                    mitigation_action = serialized_mitigation_action.save()
+                    update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mitigation_action)
+                    if update_state_status:
+                        self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
+                        result = (True, update_state_data)
+                    else:
+                        result = handler.error_400(update_state_data)
+                if (request.data.get('comment')):
+                    comment_status = self.assign_comment(request, mitigation_action)
+                    if comment_status:
+                        result = (True, MitigationSerializer(mitigation_action).data)
+                    else:
+                        result = handler.error_400(self.COMMENT_NOT_ASSIGNED)
+            else:
+                result = handler.error_400(self.NO_PATCH_DATA_PROVIDED)
+        except Exception as e:
+            result = handler.error_400(e.args)
         return result
 
     def get_form_data(self):       
@@ -927,7 +938,9 @@ class MitigationActionService():
             }
             result = (True, form_list)
         except Mitigation.DoesNotExist:
-            result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
+            result = handler.error_400({'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
+        except Exception as e:
+            result = handler.error_400(e.args)
         return result
 
     # TODO Fix this multi-return method
@@ -937,7 +950,7 @@ class MitigationActionService():
         if (option == "new" or option == "update"):
             Registration_Type.append(RegistrationType.objects.filter(type_key=option).get())
         else:
-            return (False, {'error': "Parameter is not valid"})
+            return handler.error_400({'error': "Parameter is not valid"})
 
         try:
             registration_types_list = [
@@ -949,12 +962,12 @@ class MitigationActionService():
             institutions_list = [
                 {
                     'id': i.id,
-                    'name': i.name 
+                    'name': i.name
                 } for i in Institution.objects.all()
             ]
             statuses_list = [
                 {
-                    'id': st.id, 
+                    'id': st.id,
                     'status': st.status_es if language=="es" else st.status_en
                   } for st in Status.objects.all()
             ]
@@ -973,7 +986,7 @@ class MitigationActionService():
             geographic_scales_list = [
                 {
                     'id': g.id,
-                    'name': g.name_es if language=="es" else g.name_en 
+                    'name': g.name_es if language=="es" else g.name_en
                 } for g in GeographicScale.objects.all()
             ]
             initiative_types_list = [
@@ -981,7 +994,7 @@ class MitigationActionService():
                     'id' : i.id,
                     'types' : i.initiative_type_es if language == "es" else i.initiative_type_en
                 } for i in InitiativeType.objects.all()
-                
+
             ]
             finance_status = [
                 {
@@ -1001,11 +1014,13 @@ class MitigationActionService():
             }
             result = (True, form_list)
         except Mitigation.DoesNotExist:
-            result = (False, {'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
+            result = handler.error_400({'error': self.MITIGATION_ACTION_DOES_NOT_EXIST})
+        except Exception as e:
+            result = handler.error_400(e.args)
         return result
 
 
-   
+
 
     def get_file_content(self, file_id):
         
