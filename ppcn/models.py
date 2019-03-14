@@ -15,7 +15,9 @@ from general.permissions import PermissionsHelper
 
 from ppcn.email_services import PPCNEmailServices
 from general.services import EmailServices
+
 ses_service = EmailServices()
+
 User = get_user_model()
 permission = PermissionsHelper()
 
@@ -198,7 +200,6 @@ class PPCN(models.Model):
         return smart_unicode(self.type)
     
 
-
     #first implementation.
     def can_submit(self):
         # Transition condition logic goes here
@@ -208,13 +209,18 @@ class PPCN(models.Model):
 
     @transition(field='fsm_state', source='PPCN_new', target='PPCN_submitted', conditions=[can_submit], on_error='failed', permission=permission.userProvideInformationPermission)
     def submit(self):
+
+        result = "The ppcn is transitioning from PPCN_new to PPCN_submitted"
+        print(result)
+        email_services = PPCNEmailServices(ses_service)
         
-        print('The ppcn is transitioning from PPCN_new to PPCN_submitted')
-        # Notify to DCC placeholder
-        # self.notify_submission_DCC()
-        ppcn_services = PPCNEmailServices(ses_service)
-        result = ppcn_services.sendStatusNotification(self, 'dcc_user')
-        return result
+        result_status, result_data = email_services.notify_submission_DCC(self)
+        if not result_status: return (result_status, result_data)
+        
+        result_status, result_data = email_services.notify_submission_user(self)
+        if not result_status: return (result_status, result_data)
+        
+        return (True, result)
 
     #Transitions DCC
 
