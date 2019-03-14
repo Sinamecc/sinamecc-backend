@@ -7,7 +7,7 @@ class PermissionsHelper():
 
     def userProvideInformationPermission(self, instance, user):
 
-        provide_information_permission_list = ['can_provide_information_ppcn']
+        provide_information_permission_list = ['can_provide_information_ppcn','provide_information_ma']
         instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
 
         return self.checkPermissions(instance_permission_list, user, provide_information_permission_list)
@@ -23,7 +23,7 @@ class PermissionsHelper():
 
     def userDCCPermission(self, instance, user):
 
-        permission_list_dcc= ['user_dcc_permission_ppcn']
+        permission_list_dcc= ['user_dcc_permission_ppcn','user_dcc_permission_ma']
         instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
 
         return self.checkPermissions(instance_permission_list, user, permission_list_dcc)
@@ -31,7 +31,7 @@ class PermissionsHelper():
     
     def userExecutiveSecretaryPermission(self, instance, user):
 
-        permission_list_dcc= ['user_executive_secretary_permission_ppcn']
+        permission_list_dcc= ['user_executive_secretary_permission_ppcn','user_executive_secretary_permission_ma']
         instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
 
         return self.checkPermissions(instance_permission_list, user, permission_list_dcc)

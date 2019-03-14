@@ -5,7 +5,7 @@ from mitigation_action.serializers import InitiaveSerializer, InitiativeFinanceS
 from workflow.models import ReviewStatus
 from general.storages import S3Storage
 from rest_framework.parsers import JSONParser
-from django_fsm import can_proceed
+from django_fsm import can_proceed,has_transition_perm
 import datetime
 import uuid
 from io import BytesIO
@@ -32,6 +32,7 @@ class MitigationActionService():
         self.INITIATIVE_RELATIONS = "contact_id or finance_id is not related with initiative"
         self.RELATED_MITIGATION_ACTION = " is not related with MA"
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.INVALID_USER_TRANSITION = "the user doesn´t have permission for this transition"
 
     def get_all(self, language):
         try:
@@ -602,12 +603,18 @@ class MitigationActionService():
             result = (result_status, mitigation_action_data)
             if result_status and self.checkAllFieldComplete(mitigation_action_data):
                 mitigation_previous_status = mitigation_action.fsm_state
-                if not can_proceed(mitigation_action.submit):
-                    errors.append(self.INVALID_STATUS_TRANSITION)
+                if not has_transition_perm(mitigation_action.submit, request.user):
+                    errors.append(self.INVALID_USER_TRANSITION)
+                    result = (False, errors)
+                else:
+                    mitigation_action.submit()
+                    mitigation_action.save()
+                    self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
+                    result = (True, MitigationSerializer(mitigation_action).data)
 
                 mitigation_action.submit()
                 mitigation_action.save()
-                self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
+                
         else:
             result = handler.error_400(serialized_mitigation_action.errors)
         return result
@@ -802,7 +809,7 @@ class MitigationActionService():
             if update_new :
                 if self.checkAllFieldComplete(mitigation_action_data):
                     mitigation_previous_status = mitigation_action.fsm_state
-                    if not can_proceed(mitigation_action.submit):
+                    if not has_transition_perm(mitigation_action.submit):
                         errors.append(self.INVALID_STATUS_TRANSITION)
                     mitigation_action.submit()
 
@@ -830,7 +837,7 @@ class MitigationActionService():
             result = handler.error_400(serialized_mitigation_action.errors)
         return result
 
-    def update_fsm_state(self, next_state, mitigation_action):
+    def update_fsm_state(self, next_state, mitigation_action,user):
 
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
@@ -848,7 +855,7 @@ class MitigationActionService():
             state_transition= states[next_state]
             transition_function = getattr(mitigation_action ,state_transition.method.__name__)
 
-            if can_proceed(transition_function):
+            if has_transition_perm(transition_function,user):
                 transition_function()
                 mitigation_action.save()
                 result = (True, MitigationSerializer(mitigation_action).data)
@@ -867,7 +874,7 @@ class MitigationActionService():
                 if serialized_mitigation_action.is_valid():
                     mitigation_previous_status = mitigation.fsm_state
                     mitigation_action = serialized_mitigation_action.save()
-                    update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mitigation_action)
+                    update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mitigation_action,request.user)
                     if update_state_status:
                         self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))
                         result = (True, update_state_data)
