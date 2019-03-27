@@ -1,65 +1,94 @@
-from django.contrib.auth.models import Group,Permission
-class PermissionsHelper():
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from rest_framework import permissions
+from django.core.exceptions import PermissionDenied
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
+class PermissionsHelper():
+   
     ## Here permissions logic
     def __init__(self):
-        pass
+        self.request_type = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
 
+    ## End Points Permissions
+
+    def userProviderPermission(self, request, instance_name , raise_exception=False):
+        provider_information_permission = 'can_provide_information'
+        if (request.method in self.request_type) and self.checkPermission(request.user, instance_name, provider_information_permission):
+            return True
+
+        if raise_exception:
+            raise PermissionDenied
+
+        return False
+    
+    def userDCCAdminPermission(self, request, instance_name , raise_exception=False):
+        dcc_permission = 'user_dcc_permission'
+        if (request.method in self.request_type) and self.checkPermission(request.user, instance_name, dcc_permission):
+            return True
+
+        if raise_exception:
+            raise PermissionDenied
+
+        return False
+    
+    
+    def userPatchPermission(self, request, instance_name , raise_exception=False):
+
+        provide_information_permission = 'can_provide_information'
+        dcc_permission = 'user_dcc_permission'
+        permissions_list = [provide_information_permission, dcc_permission]
+        print(self.checkPermission(request.user, instance_name, permissions_list))
+
+        if request.method == 'PATCH' and self.checkPermission(request.user, instance_name, permissions_list):
+            return True
+
+        if raise_exception:
+            raise PermissionDenied
+
+        return False
+
+    ## Transition Permissions
     def userProvideInformationPermission(self, instance, user):
 
-        provide_information_permission_list = ['can_provide_information_ppcn','provide_information_ma']
-        instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
-
-        return self.checkPermissions(instance_permission_list, user, provide_information_permission_list)
-
+        provide_information_permission = 'can_provide_information'
+        instance_name = ContentType.objects.get_for_model(instance).app_label
+        return self.checkPermission(user, instance_name, provide_information_permission)
         
     def userCAPermission(self, instance, user):
 
-        permission_list_CA = ['user_ca_permission_ppcn']
-        instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
-
-        return self.checkPermissions(instance_permission_list, user, permission_list_CA)
+        provide_ca_permission = 'user_ca_permission'
+        instance_name = ContentType.objects.get_for_model(instance).app_label
+        return self.checkPermission(user, instance_name, provide_ca_permission)
        
 
     def userDCCPermission(self, instance, user):
 
-        permission_list_dcc= ['user_dcc_permission_ppcn','user_dcc_permission_ma']
-        instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
+        dcc_permission = 'user_dcc_permission'
+        instance_name = ContentType.objects.get_for_model(instance).app_label
 
-        return self.checkPermissions(instance_permission_list, user, permission_list_dcc)
+        return self.checkPermission(user, instance_name, dcc_permission)
         
     
     def userExecutiveSecretaryPermission(self, instance, user):
 
-        permission_list_dcc= ['user_executive_secretary_permission_ppcn','user_executive_secretary_permission_ma']
-        instance_permission_list = [permission_tuple[0] for permission_tuple in  instance._meta.permissions]
+        executive_secretary_permission = 'user_executive_secretary_permission'
+        instance_name = ContentType.objects.get_for_model(instance).app_label
 
-        return self.checkPermissions(instance_permission_list, user, permission_list_dcc)
+        return self.checkPermission(user, instance_name, executive_secretary_permission) 
         
 
-    def checkPermissions(self, instance_permission_list, user, permission_list):
+    def checkPermission(self, user, instance, permission):
+        if isinstance(permission, list):
+            permission_list = []
+            for p in permission:
+                permission_list.append(user.has_perm( '%s.%s' % (instance, p)))
+                return permission_list.count(True)
 
-        ## the intersection can be only of one element
-        permission = list(set(instance_permission_list).intersection(permission_list))[0]
-
-        if permission and self.generalGroupPermissions(user, permission):
-            print("debbuger: User has permission for this transition - Provide")
-            return True
-        
-        print("debbuger: User has not permission for this transition - Provide")
-        return False
+        return user.has_perm( '%s.%s' % (instance, permission))
 
 
-    def generalGroupPermissions(self,user, transition_permission):
-        
-        for group in user.groups.all():
-            permissions = group.permissions.all()
-
-            for permission in permissions:
-                if permission.codename == transition_permission:
-                    return True
-                    
-        return False
 
 
 

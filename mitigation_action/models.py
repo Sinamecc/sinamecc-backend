@@ -234,9 +234,9 @@ class Mitigation(models.Model):
         verbose_name_plural = _("MitigationAccesses")
         ordering = ('created',)
         permissions = (
-            ("can_provide_information_ma", "Can Provide Information MA"),
-            ("user_dcc_permission_ma", "User DCC Permission MA"),
-            ("user_executive_secretary_permission_ma", "User Executive Secretary Permission MA"),
+            ("can_provide_information", "Can Provide Information MA"),
+            ("user_dcc_permission", "User DCC Permission MA"),
+            ("user_executive_secretary_permission", "User Executive Secretary Permission MA"),
         )
 
     # FSM Annotated Methods (Transitions) and Ordinary Conditions

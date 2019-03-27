@@ -8,10 +8,13 @@ from ppcn.services import PpcnService
 import uuid
 from django.http import HttpResponse
 from django.template import loader
-
+from general.permissions import PermissionsHelper
 from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from general.custom_decorators import request_passes_test
 service = PpcnService()
 view_helper = ViewHelper(service)
+permission = PermissionsHelper()
 
 @api_view(['GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
@@ -49,34 +52,82 @@ def get_sub_sector(request, pk, language = "en"):
         result = view_helper.execute_by_name("get_all_sub_sector", pk, language)
     return result
 
-
 @api_view(['GET','POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_ppcn(request, language = 'en'):
     if request.method == 'GET':
-        result = view_helper.get_all(language)
+        result = get_all_ppcn_by_user(request, language)
 
     elif request.method == 'POST':
-        result = view_helper.post(request)
-
-    return result
-
-@api_view(['GET'])
-@parser_classes((MultiPartParser, FormParser, JSONParser,))
-def get_one_ppcn(request, id , language = 'en'):
-    if request.method == 'GET':
-        result = view_helper.get_one(id, language)
+        result = post_ppcn(request)
     return result
 
 @api_view(['DELETE', 'PUT', 'PATCH'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def put_delete_patch_ppcn(request, id , language = 'en'):
     if request.method == 'PUT':
-        result = view_helper.put(id, request)
+        result = put_ppcn(request, id)
     elif request.method == 'DELETE':
-        result = view_helper.delete(id)
+        result = delete_ppcn(request, id)
     elif request.method == 'PATCH':
+        result = patch_ppcn(request, id)
+    return result
+
+@api_view(['GET'])
+@parser_classes((MultiPartParser,FormParser, JSONParser,))
+@request_passes_test(permission.userProviderPermission,  instance_name='ppcn')
+def get_all_ppcn_by_user(request, language = 'en'):
+    if request.method == 'GET':
+        result = view_helper.get_all(request, language, True)
+    return result
+
+@api_view(['GET'])
+@parser_classes((MultiPartParser,FormParser, JSONParser,))
+@request_passes_test(permission.userDCCAdminPermission,  instance_name='ppcn')
+def get_all_ppcn(request, language = 'en'):
+    if request.method == 'GET':
+        result = view_helper.get_all(request, language)
+    return result
+
+## End point with provider information permissions 
+@api_view(['POST'])
+@parser_classes((MultiPartParser,FormParser, JSONParser,))
+@request_passes_test(permission.userProviderPermission,  instance_name='ppcn')
+def post_ppcn(request):
+    if request.method == 'POST':
+        result = view_helper.post(request)
+    return result
+
+@api_view(['PUT'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@request_passes_test(permission.userProviderPermission,  instance_name='ppcn')
+def put_ppcn(request, id):
+    if request.method == 'PUT':
+        result = view_helper.put(id, request)
+    return result
+
+@api_view(['DELETE'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@request_passes_test(permission.userProviderPermission,  instance_name='ppcn')
+def delete_ppcn(request, id):
+    if request.method == 'DELETE':
+        result = view_helper.delete(id)
+    return result
+
+@api_view(['PATCH'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@request_passes_test(permission.userPatchPermission,  instance_name='ppcn')
+def patch_ppcn(request, id):
+    if request.method == 'PATCH':
         result = view_helper.patch(id, request)
+    return result
+
+@api_view(['GET'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@request_passes_test(permission.userPatchPermission,  instance_name='ppcn')
+def get_one_ppcn(request, id , language = 'en'):
+    if request.method == 'GET':
+        result = view_helper.get_one(id, language)
     return result
 
 

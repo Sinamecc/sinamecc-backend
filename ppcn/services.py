@@ -328,8 +328,10 @@ class PpcnService():
             result = False
         return result
 
-    def get_all(self, language):
+    def get_all(self, request, language, user = False):
         try:
+            print(user)
+            ppcn_registries = PPCN.objects.all() if not user else PPCN.objects.filter(user=request.user).all()
             ppcn_data = [
                 {
                     'id': pp.id,
@@ -398,7 +400,7 @@ class PpcnService():
                     'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
                     'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
                     'user': pp.user.id
-                } for pp in PPCN.objects.all()
+                } for pp in ppcn_registries
             ]
             result = (True, ppcn_data)
         except Sector.DoesNotExist:

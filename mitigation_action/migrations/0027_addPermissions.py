@@ -8,19 +8,19 @@ def createPermissions(apps, schema_editor):
     content_type = ContentType.objects.get_for_model(Mitigation)
 
     Permission.objects.create(
-        codename='can_provide_information_ma',
+        codename='can_provide_information',
         name='Can Provide Information MA',
         content_type=content_type,
     )
 
     Permission.objects.create(
-        codename='user_dcc_permission_ma',
+        codename='user_dcc_permission',
         name='User DCC Permission MA',
         content_type=content_type,
     )
 
     Permission.objects.create(
-        codename='user_executive_secretary_permission_ma',
+        codename='user_executive_secretary_permission',
         name='User Executive Secretary Permission MA',
         content_type=content_type,
     )

@@ -48,7 +48,12 @@ urlpatterns = [
         views.get_all_ovv,
         name='get_all_ovv'
     ),
-   
+    
+    url(r'^api/v1/ppcn/all/*(?P<language>es|en)*/*$',
+        views.get_all_ppcn,
+        name='get_all_ppcn'
+    ), 
+
     url(r'^api/v1/ppcn/*(?P<language>es|en)*/*$',
         views.get_post_ppcn,
         name='get_post_ppcn'

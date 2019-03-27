@@ -190,10 +190,10 @@ class PPCN(models.Model):
         verbose_name = _('PPCN')
         verbose_name_plural = _('PPCNs')
         permissions = (
-            ("can_provide_information_ppcn", "Can provide information ppcn"),
-            ("user_ca_permission_ppcn","user CA permission PPCN"),
-            ("user_dcc_permission_ppcn","user DCC permision PPCN"),
-            ("user_executive_secretary_permission_ppcn","user executive secretary permission PPCN")
+            ("can_provide_information", "Can provide information ppcn"),
+            ("user_ca_permission","user CA permission PPCN"),
+            ("user_dcc_permission","user DCC permision PPCN"),
+            ("user_executive_secretary_permission","user executive secretary permission PPCN")
         )
     
     def __unicode__(self):

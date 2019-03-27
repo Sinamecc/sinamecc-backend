@@ -12,9 +12,9 @@ view_helper = ViewHelper(service)
 @api_view(['GET'])
 def get_user_info_by_name(request, username):
     if request.method == "GET":
-        return view_helper.get_one(username)
+        return view_helper.get_one(request, username)
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH', 'POST', 'DELETE', 'PUT'])
 def handler404(request):
     result = { "error_code": 404, "error_message": "Page not found" }
     raise NotFound(detail=result, code=status.HTTP_404_NOT_FOUND)

@@ -8,25 +8,25 @@ def createPermissions(apps, schema_editor):
     content_type = ContentType.objects.get_for_model(PPCN)
     
     Permission.objects.create(
-        codename='user_executive_secretary_permission_ppcn',
+        codename='user_executive_secretary_permission',
         name='user executive secretary permission PPCN',
         content_type=content_type,
     )
 
     Permission.objects.create(
-        codename='user_dcc_permission_ppcn',
+        codename='user_dcc_permission',
         name='user DCC permision PPCN',
         content_type=content_type,
     )
 
     Permission.objects.create(
-        codename='user_ca_permission_ppcn',
+        codename='user_ca_permission',
         name='user CA permission PPCN',
         content_type=content_type,
     )
 
     Permission.objects.create(
-        codename='can_provide_information_ppcn',
+        codename='can_provide_information',
         name='Can provide information ppcn',
         content_type=content_type,
     )
