@@ -859,7 +859,7 @@ class MitigationActionService():
                 transition_function()
                 mitigation_action.save()
                 result = (True, MitigationSerializer(mitigation_action).data)
-            else: result = (False, self.INVALID_STATUS_TRANSITION)
+            else: result = (False, self.INVALID_USER_TRANSITION)
 
         return result
 

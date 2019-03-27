@@ -250,13 +250,18 @@ class Mitigation(models.Model):
 
     @transition(field='fsm_state', source='new', target='submitted', conditions=[can_submit], on_error='failed', permission=permission.userProvideInformationPermission)
     def submit(self):
-        print('The mitigation action is transitioning from new to submitted')
+        result = 'The mitigation action is transitioning from new to submitted'
         # Notify to DCC placeholder
-        notification_service = MitigationActionEmailServices(ses_service)
-        # self.notify_submission_DCC()
-        result = notification_service.sendStatusNotification("DCC", self)
-
-        return result
+        print(result)
+        email_services = MitigationActionEmailServices(ses_service)
+        
+        result_status, result_data = email_services.notify_submission_DCC(self)
+        if not result_status: return (result_status, result_data)
+        
+        result_status, result_data = email_services.notify_submission_user(self)
+        if not result_status: return (result_status, result_data)
+        
+        return (True, result)
 
 
     # --- Transition ---
@@ -367,14 +372,18 @@ class Mitigation(models.Model):
 
     @transition(field='fsm_state', source='changes_requested_by_DCC', target='updating_by_request', conditions=[can_update_by_request], on_error='failed', permission=permission.userDCCPermission)
     def update_by_request(self):
-        print('The mitigation action is transitioning from changes_requested_by_DCC to updating_by_request')
-        # Notify to DCC placeholder
-        notification_service = MitigationActionEmailServices(ses_service)
-        # self.notify_submission_DCC()
-        result = notification_service.sendStatusNotification("DCC", self)
-
-        return result
-    
+        result = 'The mitigation action is transitioning from changes_requested_by_DCC to updating_by_request'
+        
+        print(result)
+        email_services = MitigationActionEmailServices(ses_service)
+        
+        result_status, result_data = email_services.notify_submission_DCC(self)
+        if not result_status: return (result_status, result_data)
+        
+        result_status, result_data = email_services.notify_submission_user(self)
+        if not result_status: return (result_status, result_data)
+        
+        return (True, result)
     # --- Transition ---
     # in_evaluation_by_DCC -> rejected_by_DCC
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission=permission.userDCCPermission)

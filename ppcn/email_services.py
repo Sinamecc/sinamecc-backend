@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-
 User =  get_user_model()
 class PPCNEmailServices():
 
     def __init__(self, email_services):
+        
         ##  SES_service instance
         self.email_services = email_services
         self.message_subject_ppcn = "Request of PPCN #: {0}"

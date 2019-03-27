@@ -18,7 +18,7 @@ def add_Permissions(apps, schema_editor):
     user_CA_permission = Permission.objects.get(codename='user_ca_permission',content_type=content_type)
     user_CA_permission_ppcn_group.permissions.add(user_CA_permission)
 
-    can_provide_information_ppcn_group = Group.objects.get(name ='ppcn_responsible')
+    can_provide_information_ppcn_group = Group.objects.get(name ='ppcn_provider')
     can_provide_information_permission = Permission.objects.get(codename='can_provide_information',content_type=content_type)
     can_provide_information_ppcn_group.permissions.add(can_provide_information_permission)
 
