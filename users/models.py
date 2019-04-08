@@ -17,3 +17,5 @@ class CustomGroup(models.Model):
     class Meta:
         verbose_name = _("CustomGroup")
         verbose_name_plural = _("CustomGroups")
+
+        

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^', include('mccr.urls')),
     url(r'^', include('ppcn.workflow_steps.urls')),
     url(r'^', include('ppcn.urls')),
+    url(r'^', include('users.urls')),
     url(r'^api/v1/token/', obtain_jwt_token),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('general.urls'))
