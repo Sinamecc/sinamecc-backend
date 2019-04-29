@@ -809,7 +809,7 @@ class MitigationActionService():
             if update_new :
                 if self.checkAllFieldComplete(mitigation_action_data):
                     mitigation_previous_status = mitigation_action.fsm_state
-                    if not has_transition_perm(mitigation_action.submit):
+                    if not has_transition_perm(mitigation_action.submit, request.user):
                         errors.append(self.INVALID_STATUS_TRANSITION)
                     mitigation_action.submit()
 
