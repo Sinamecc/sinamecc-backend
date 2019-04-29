@@ -5,7 +5,7 @@ from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile, OVV
 from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer, MCCRRegistryOVVRelationSerializer
 from mccr.workflow_steps.services import MCCRWorkflowStepService
 from rest_framework.parsers import JSONParser
-from django_fsm import can_proceed
+from django_fsm import can_proceed, has_transition_perm
 from io import BytesIO
 import uuid
 import os
@@ -24,6 +24,7 @@ class MCCRService():
         self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
         self.NO_PATCH_DATA_PROVIDED = "No PATCH data provided."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.INVALID_USER_TRANSITION = "the user doesn't have permission for this transition"
         self.workflow_step_services = MCCRWorkflowStepService()
 
         self.storage = S3Storage()
@@ -91,11 +92,15 @@ class MCCRService():
                 # TODO: check operation to revert
                 self.serialize_and_save_files(request, new_mccr.id)
                 mccr_previous_status = new_mccr.fsm_state
-                if not can_proceed(new_mccr.submit):
-                    errors.append(self.INVALID_STATUS_TRANSITION)
-                new_mccr.submit()
-                new_mccr.save()
-                # self.create_change_log_entry(mitigation_action, mitigation_previous_status, mitigation_action.fsm_state, request.data.get('user'))  
+                if not has_transition_perm(new_mccr.submit, request.user):
+                    errors.append(self.INVALID_USER_TRANSITION)
+                    result = (False, errors)
+                else:
+                    new_mccr.submit()
+                    new_mccr.save()
+                    #self.create_change_log_entry(new_mccr, mccr_previous_status, new_mccr.fsm_state, request.data.get('user'))  
+                    result = (True, serialized_mccr(new_mccr).data)
+
             return (True, MCCRRegistrySerializerCreate(new_mccr).data)
         return (False, serialized_mccr.errors + errors)
 
@@ -187,7 +192,7 @@ class MCCRService():
             result = (False, serialized_mccr.errors)
         return result
 
-    def update_fsm_state(self, next_state, mccr_registry):
+    def update_fsm_state(self, next_state, mccr_registry,user):
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
         # source -> target
@@ -203,7 +208,7 @@ class MCCRService():
             state_transition= states[next_state]
             transition_function = getattr(mccr_registry ,state_transition.method.__name__)
 
-            if can_proceed(transition_function):
+            if has_transition_perm(transition_function,user):
                 transition_function()
                 mccr_registry.save()
                 result = (True, MCCRRegistrySerializerCreate(mccr_registry).data)
@@ -222,7 +227,7 @@ class MCCRService():
             if serialized_mccr_registry.is_valid():
                 mccr_registry_previous_state = mccr.fsm_state
                 mccr_registry = serialized_mccr_registry.save()
-                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mccr_registry)
+                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), mccr_registry,request.user)
                 if update_state_status:
                     # self.create_change_log_entry(mccr_registry, mccr_registry_previous_state, mccr_registry.fsm_state, request.data.get('user'))
                     result = (True, update_state_data)

@@ -330,7 +330,7 @@ class PpcnService():
 
     def get_all(self, request, language, user = False):
         try:
-            print(user)
+
             ppcn_registries = PPCN.objects.all() if not user else PPCN.objects.filter(user=request.user).all()
             ppcn_data = [
                 {
