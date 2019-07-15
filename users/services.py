@@ -75,12 +75,13 @@ class UserService():
 
         return result
     def get_user_groups(self, user):
+       
         user_groups = [
             {
                 "id": g.id,
                 "name": g.name,
                 "label": g.custom_group.label
-            } for g in user.groups.all()
+            } for g in (Group.objects.all() if user.is_superuser else user.groups.all())
         ]
 
         return user_groups
@@ -92,7 +93,7 @@ class UserService():
         permission_user = [p for p in user.user_permissions.all()] 
         for g in user.groups.all():
             permission_groups.extend([p for p in g.permissions.all()])
-        permission = list(set(permission_user) | set(permission_groups)) 
+        permission = Permission.objects.all() if user else list(set(permission_user) | set(permission_groups)) 
 
         available_apps = {}
         for p in permission:
