@@ -149,7 +149,7 @@ class GeiActivityType(models.Model):
     
     activity_type = models.CharField(max_length=500, blank=False, null=False)
     sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
-    sector = models.ForeignKey(SubSector, related_name='gei_sector')
+    sector = models.ForeignKey(Sector, related_name='gei_sector')
    
 class GeiOrganization(models.Model):
 
