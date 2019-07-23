@@ -11,18 +11,33 @@ service = UserService()
 view_helper = ViewHelper(service)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @csrf_exempt
-def get_permissions(request):
+def post_get_permissions(request):
     if request.method == 'GET':
         result = view_helper.execute_by_name('get_permissions', request)
+    elif request.method == 'POST':
+        result = view_helper.execute_by_name('create_permission', request)
     return result
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @csrf_exempt
-def get_groups(request):
+def post_get_groups(request):
     if request.method == 'GET':
-        result = view_helper.execute_by_name('get_groups', request)
+        result = view_helper.execute_by_name('get_all_groups', request)
+    elif request.method == 'POST':
+        result = view_helper.execute_by_name('create_group', request)
+    
+    return result
+
+@api_view(['GET', 'PUT'])
+@csrf_exempt
+def put_get_group(request, group_id):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name('get_group', request, group_id)
+    elif request.method == 'PUT':
+        result = view_helper.execute_by_name('update_group', request, group_id)
+    
     return result
 
 @api_view(['POST', 'GET'])
@@ -35,16 +50,35 @@ def post_get_user(request):
         result = view_helper.post(request)
     return result
 
-@api_view(['POST'])
+    
+@api_view(['POST', 'PUT'])
 @csrf_exempt
 def assign_user_to_group(request, username):
     if request.method == 'POST':
         result = view_helper.execute_by_name('assign_user_to_group', request, username)
+    elif request.method == 'PUT':
+        result = view_helper.execute_by_name('unassign_user_to_group', request, username)
     return result
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @csrf_exempt
 def assign_user_to_permission(request, username):
     if request.method == 'POST':
         result = view_helper.execute_by_name('assign_user_to_permission', request, username)
+    elif request.method == 'PUT':
+        result = view_helper.execute_by_name('unassign_user_to_permission', request, username)
+    return result
+
+@api_view(['PUT'])
+@csrf_exempt
+def put_user(request, user_id):
+    if request.method == 'PUT':
+        result = view_helper.put(request, user_id)
+    return result
+
+@api_view(['PUT'])
+@csrf_exempt
+def put_password(request, user_id):
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name('update_password', request, user_id)
     return result

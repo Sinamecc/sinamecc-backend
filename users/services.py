@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, CustomGroup
-from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, GroupSerializer
+from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
+    GroupSerializer, CustomGroupSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
@@ -24,9 +25,14 @@ class UserService():
     def __init__(self):
         self.UNABLE_CREATE_USER = "Unable to create user"
         self.USER_DOESNT_EXIST = "The user doesn't exist"
+        self.GROUP_DOESNT_EXIST = "The group doesn't exist"
         self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have user associates"
-        self.ERROR_ASSIGN_USER_GROUPS = "Error at the moment of assigning user to groups."
-        self.ERROR_ASSIGN_USER_PERMISSION = "Error at the moment of assigning user to permissions."
+        self.ASSIGN_USER_GROUPS_ERROR = "Error at the moment of assigning user to groups."
+        self.ASSIGN_USER_PERMISSION_ERROR = "Error at the moment of assigning user to permissions."
+        self.UNASSIGN_USER_PERMISSION_ERROR = "Error at the moment of unassigning user to permissions."
+        self.UNASSIGN_USER_GROUP_ERROR = "Error at the moment of unassigning user to groups."
+        self.CREATE_GROUP_ERROR = "Error at the moment of create group."
+        self.CREATE_PERMISSION_ERROR = "Error at the moment of create permissions."
 
 
     def get_serialized_new_user(self, request, user = False):
@@ -40,6 +46,61 @@ class UserService():
         else:
             serializer = NewCustomUserSerializer(data = new_user)
 
+        return serializer
+
+    def get_serialized_permission(self, request, permission = False):
+        new_permission = {}
+        for field in PermissionSerializer.Meta.fields:
+            if field in request.data:
+                new_permission[field] = request.data.get(field)
+
+        if permission:
+            serializer = PermissionSerializer(permission, data = new_permission)
+        else:
+            serializer = PermissionSerializer(data = new_permission)
+
+        return serializer
+
+    def get_serialized_group(self, request, group = False):
+        new_group = {}
+        for field in GroupSerializer.Meta.fields:
+            if field in request.data:
+                new_group[field] = request.data.get(field)
+
+        if group:
+            serializer = GroupSerializer(group, data = new_group)
+        else:
+            serializer = GroupSerializer(data = new_group)
+
+        return serializer
+    
+    def get_serialized_label_group(self, request, group_id = False, label_group = False):
+
+        new_label_group = {}
+        for field in CustomGroupSerializer.Meta.fields:
+            if field in request.data:
+                new_label_group[field] = request.data.get(field)
+
+        if group_id : new_label_group['group'] = group_id
+        print(new_label_group)
+        if label_group: 
+            serializer = CustomGroupSerializer(label_group, data = new_label_group, partial=True)
+        else: 
+            serializer = CustomGroupSerializer(data = new_label_group)
+
+        return serializer
+
+    
+    def get_serialized_existing_user(self, request, user = False):
+        existing_user = {}
+        for field in CustomUserSerializer.Meta.fields:
+            if field in request.data:
+                existing_user[field] = request.data.get(field)
+
+        if user:
+            serializer = CustomUserSerializer(user, data = existing_user)
+        else:
+            serializer = CustomUserSerializer(data = existing_user)
 
         return serializer
 
@@ -59,6 +120,7 @@ class UserService():
         except UserModel.DoesNotExist:
             result = (False, self.USER_DOESNT_EXIST)
         return result
+
 
     def get_all(self, request):
         UserModel = get_user_model()
@@ -133,7 +195,7 @@ class UserService():
 
             result = (True, CustomUserSerializer(user).data)
         else:
-            errors.append(serialized_user.errors)
+            errors.append(serialized_user.errors) 
             result = (False, errors)
 
         return result
@@ -154,7 +216,28 @@ class UserService():
             content_user['permission_app'] = self.get_permission_app(user)
             result = (True, content_user)
         else:
-            result = (False, self.ERROR_ASSIGN_USER_PERMISSION)
+            result = (False, self.ASSIGN_USER_PERMISSION_ERROR)
+            
+        return result
+
+    
+    def unassign_user_to_permission(self, request, username):
+        key = 'permissions'
+        UserModel = get_user_model()
+        result = (False, None)
+        user = UserModel.objects.get(username=username)
+        remove_permission = lambda perm, user = user : user.user_permissions.remove(perm)
+
+        if key in request.data and isinstance(request.data.get(key), list):
+            list(map(remove_permission, request.data.get(key)))
+            serialized_user = CustomUserSerializer(user)
+            content_user = serialized_user.data
+            content_user['groups'] = self.get_user_groups(user)
+            content_user['permission_app'] = self.get_permission_app(user)
+            result = (True, content_user)
+
+        else:
+            result = (False, self.UNASSIGN_USER_PERMISSION_ERROR)
             
         return result
 
@@ -174,7 +257,27 @@ class UserService():
             content_user['permission_app'] = self.get_permission_app(user)
             result = (True, content_user)
         else:
-            result = (False, self.ERROR_ASSIGN_USER_GROUPS)
+            result = (False, self.ASSIGN_USER_GROUPS_ERROR)
+            
+        return result
+    
+    def unassign_user_to_group(self, request, username):
+        key = 'groups'
+        UserModel = get_user_model()
+        result = (False, None)
+        user = UserModel.objects.get(username=username)
+        remove_group = lambda perm, user = user : user.groups.remove(perm)
+
+        if key in request.data and isinstance(request.data.get(key), list):
+            list(map(remove_group, request.data.get(key)))
+            serialized_user = CustomUserSerializer(user)
+            content_user = serialized_user.data
+            content_user['groups'] = self.get_user_groups(user)
+            content_user['permission_app'] = self.get_permission_app(user)
+            result = (True, content_user)
+
+        else:
+            result = (False, self.UNASSIGN_USER_GROUP_ERROR)
             
         return result
 
@@ -187,8 +290,57 @@ class UserService():
             
         return (True, permission_list)
 
+    ## New method 
+    def create_permission(self, request):
+        errors = []
+        result = (False, self.CREATE_PERMISSION_ERROR)
+        serialized_permissioon = self.get_serialized_permission(request)
+        if serialized_permissioon.is_valid():
+            saved_permission = serialized_permissioon.save()
+            result = (True, PermissionSerializer(saved_permission).data)
+        else:
+            errors.append(serialized_permissioon.errors)
+            result = (False, errors)
+
+        return result
     
-    def get_groups(self, request):
+    def get_group(self, request, group_id):
+        errors = []
+        result = (False, self.GROUP_DOESNT_EXIST)
+        group_query = Group.objects.filter(pk=group_id)
+        if group_query.count() > 0:
+            group = group_query.last()
+            serialized_group = GroupSerializer(group).data
+            serialized_group["label"] = group.custom_group.label
+            result = (True, serialized_group)
+
+        return result
+    
+    def update_group(self, request, group_id):
+        errors = []
+        result = (False, self.GROUP_DOESNT_EXIST)
+        group_query = Group.objects.filter(pk=group_id)
+        if group_query.count() > 0:
+            group = group_query.last()
+            label_group = group.custom_group
+
+            serialized_group = self.get_serialized_group(request, group)
+            serialized_label = self.get_serialized_label_group(request, label_group=label_group)
+            validation = [serialized_group.is_valid(), serialized_label.is_valid()]
+            if validation.count(False) == 0:
+                group = serialized_group.save()
+                serialized_label.save()
+                serialized_group = GroupSerializer(group).data
+                serialized_group["label"] =  group.custom_group.label   
+                result = (True, serialized_group)
+            else: 
+                errors.append(serialized_group.errors)
+                errors.append(serialized_label.errors)
+                result = (False, errors)            
+
+        return result
+
+    def get_all_groups(self, request):
 
         group_list = []
         for g in Group.objects.all():
@@ -197,6 +349,44 @@ class UserService():
             group_list.append(group_serialized)
             
         return (True, group_list)
+    
+    def create_label_group(self, request, group_id):
+        errors = []
+        result = (False, self.CREATE_GROUP_ERROR)
+        serialized_label_group = self.get_serialized_label_group(request, group_id=group_id)
+
+        if serialized_label_group.is_valid():
+            serialized_label_group.save()
+            result = (True, CustomGroupSerializer(data = serialized_label_group))
+        else:
+            errors.append(serialized_label_group.errors)
+            result = (False, errors)
+
+        return result
+
+    def create_group(self, request):
+        
+        errors = []
+        result = (False, self.CREATE_GROUP_ERROR)
+
+        serialized_group = self.get_serialized_group(request)
+        if serialized_group.is_valid():
+            saved_group = serialized_group.save()
+            group_id = saved_group.id
+            result_status, result_detail = self.create_label_group(request, group_id)
+            if result_status:
+                group_serialized = GroupSerializer(saved_group).data
+                group_serialized['label'] = saved_group.custom_group.label
+                result = (True, group_serialized)
+            else: 
+                errors.append(result_detail)
+                result = (False, errors)
+        else:
+            errors.append(serialized_group.errors)
+            result = (False, errors)
+
+        return result
+        
     
     def get_group_users(self, group_name):
         UserModel = get_user_model()
@@ -214,8 +404,53 @@ class UserService():
     def get_user_by_id(self, user_id):
         UserModel = get_user_model()
         try:
-            user = UserModel.objects.get(pk= user_id)
+            user = UserModel.objects.get(pk=user_id)
             return (True, user)
         except UserModel.DoesNotExist:
 
             return (False, self.USER_DOESNT_EXIST) 
+
+    def update(self, request, user_id):
+        
+        errors = []
+        UserModel = get_user_model()
+        user_query = UserModel.objects.filter(pk=user_id)
+        if user_query.count() == 0:
+            error = self.USER_DOESNT_EXIST
+            return (False, error)
+        user  = user_query.last()
+        serialized_user = self.get_serialized_existing_user(request, user)
+        if serialized_user.is_valid():
+            user = serialized_user.save()
+            user.save()
+            result = (True, CustomUserSerializer(user).data)
+
+        else:
+            errors.append(serialized_user.errors)
+            result = (False, errors)
+
+        return result
+
+    def update_password(self, request, user_id):
+        errors = []
+        UserModel = get_user_model()
+        user_query = UserModel.objects.filter(pk=user_id)
+        if user_query.count() == 0:
+            error = self.USER_DOESNT_EXIST
+            return (False, error)
+
+        user  = user_query.last()
+        user.set_password(request.data.get('password'))
+        try:
+            user.save()
+            result = (True, CustomUserSerializer(user).data)
+
+        except :
+            errors.append(user.errors)
+            result = (False, errors)
+
+        return result
+        
+
+        
+
