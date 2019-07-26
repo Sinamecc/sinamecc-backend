@@ -67,7 +67,7 @@ class ReportFileService():
                     else:
                         result = (False, self.REPORT_FILE_METADATA_EMPTY_FIELD)
 
-            except Exception as exp:
+            except json.JSONDecodeError as exp:
                 result = (False, exp)
                     
         return result
