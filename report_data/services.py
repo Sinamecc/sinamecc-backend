@@ -4,6 +4,7 @@ from report_data.serializers import ReportFileSerializer, ReportFileVersionSeria
 from django.urls import reverse
 import datetime
 import os
+import json
 from io import BytesIO
 
 # TODO: Add exception handling
@@ -54,20 +55,21 @@ class ReportFileService():
     def _save_metadata(self,request,report_file):
         
         result = (True, report_file)
+        if request.data.get('metadata'):
+            try:
+                metadataList = json.loads(request.data.get('metadata'))
+                for metadata in metadataList:
+                    meta_serializer = self._get_serialized_report_files_metadata(metadata, report_file)
 
-        if request.data.get('metadata') != None and list(request.data.get('metadata') ):
+                    if meta_serializer.is_valid():
+                        meta_serializer.save()
 
-            metadataList = list(request.data.get('metadata'))
-            for metadata in metadataList:
-                meta_serializer = self._get_serialized_report_files_metadata(metadata, report_file)
+                    else:
+                        result = (False, self.REPORT_FILE_METADATA_EMPTY_FIELD)
 
-                if meta_serializer.is_valid():
-                    meta_serializer.save()
-
-                else:
-                    result = (False, {self.REPORT_FILE_METADATA_EMPTY_FIELD})
+            except Exception as exp:
+                result = (False, exp)
                     
-        
         return result
 
 
