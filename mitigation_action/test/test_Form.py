@@ -20,7 +20,6 @@ class MitigationActionFormTest(TestCase):
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         client.force_login(self.superUser)
 
-
         self.registration_type = RegistrationType.objects.create(type_es='registration_type_es', type_en ='registration_type_en', type_key='type_key')
         self.institution = Institution.objects.create(name='SINAMECC')
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
@@ -72,11 +71,6 @@ class MitigationActionFormTest(TestCase):
         self.mitigation_action.ingei_compliances.add(self.ingei_compliance, self.ingei_compliance_2)
     
 
-
-
-
-
-
     def test_registration_type(self):
 
         field_type_es = self.registration_type.type_es
@@ -113,7 +107,6 @@ class MitigationActionFormTest(TestCase):
         self.assertEqual(field_status_es, 'mitigation_action_status_es')
         self.assertEqual(field_status_en, 'mitigation_action_status_en')
 
-
     def test_progress_indicator(self):
 
         field_name = self.progress_indicator.name
@@ -139,7 +132,6 @@ class MitigationActionFormTest(TestCase):
 
         self.assertEqual(field_name_es, 'finance_status_es')
         self.assertEqual(field_name_en, 'finance_status_en')
-
     
     def test_initiative_finance(self):
         field_finance_status = self.initiative_finance.status
@@ -214,6 +206,7 @@ class MitigationActionFormTest(TestCase):
         self.assertEqual(field_status, self.status)
 
     def test_mitigation_action(self):
+
         field_strategy_name= self.mitigation_action.strategy_name
         field_name = self.mitigation_action.name
         field_purpose = self.mitigation_action.purpose
@@ -262,4 +255,3 @@ class MitigationActionFormTest(TestCase):
         self.assertEqual(field_location, self.location)
         self.assertEqual(field_user, self.superUser)
       
-
