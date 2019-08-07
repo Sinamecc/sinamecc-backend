@@ -808,7 +808,7 @@ class MCCRRegistry(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    ppcn = models.ForeignKey(MCCRRegistry, related_name='change_log')
+    mccr = models.ForeignKey(MCCRRegistry, related_name='change_log')
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     
