@@ -155,7 +155,7 @@ class UserService():
         permission_user = [p for p in user.user_permissions.all()] 
         for g in user.groups.all():
             permission_groups.extend([p for p in g.permissions.all()])
-        permission = Permission.objects.all() if user else list(set(permission_user) | set(permission_groups)) 
+        permission = Permission.objects.all() if user.is_superuser else list(set(permission_user) | set(permission_groups)) 
 
         available_apps = {}
         for p in permission:
