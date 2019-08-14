@@ -1,9 +1,7 @@
-FROM python:3
-EXPOSE 8000
+FROM python:3.6
+ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code
-ADD . /code/
-RUN pip install -r requirements.txt 
-ARG setting_file=config.settings.local_sqlite
-ENV DJANGO_SETTINGS_MODULE $setting_file
-ENTRYPOINT ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+COPY requirements.txt /code/
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . /code/
