@@ -58,6 +58,7 @@ class MCCRRegistry(models.Model):
     def can_submit(self):
         # Transition condition logic goes here
         # Verify current state
+        # self.notify_submission_dcc
         # - new
         return self.fsm_state == 'new'
 
@@ -94,13 +95,11 @@ class MCCRRegistry(models.Model):
     def assigned_send_notification(self):
         print('The MCCR is transitioning from mccr_ovv_assigned_first_review to mccr_ovv_assigned_notification')
         # Additional logic goes here.
-        # self.notify()
-        #  get ovv 
+        # We need to identify ovv  
         mccr_ovv = MCCRRegistryOVVRelation.objects.filter(mccr = self.id).latest('id')
-        email_ovv = mccr_ovv.ovv.email
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotification(self, email_ovv)
-
+        ovv = mccr_ovv.ovv
+        email_services = MCCREmailServices(ses_service)
+        result = email_services.notify_submission_ovv(self, ovv)
         return result
         
 
@@ -116,10 +115,7 @@ class MCCRRegistry(models.Model):
     def ovv_accept_reject(self):
         print('The MCCR is transitioning from mccr_ovv_assigned_notification to mccr_ovv_accept_reject')
         # Additional logic goes here.
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
-        return result
-
+        # self.notify()
     # --- Transition ---
     # mccr_ovv_accept_reject -> mccr_ovv_accept_assignation
     def can_ovv_accept_assignation(self):
@@ -132,9 +128,7 @@ class MCCRRegistry(models.Model):
     def ovv_accept_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_accept_assignation')
         # Additional logic goes here.
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
-        return result
+      
 
 
     # --- Transition ---
@@ -149,11 +143,7 @@ class MCCRRegistry(models.Model):
     def reject_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_reject_assignation')
         # Additional logic goes here.
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotificationUserMccr(self)
-        return result
-        pass
-
+       
     # --- Transition ---
     # mccr_ovv_accept_assignation -> mccr_ovv_upload_evaluation
     def can_ovv_upload_evaluation(self):
@@ -280,10 +270,7 @@ class MCCRRegistry(models.Model):
     def secretary_get_dp_information(self):
         print('The MCCR is transitioning from mccr_ovv_accept_dp to mccr_secretary_get_dp_information')
         # Additional logic goes here.
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
-        return result
-
+        
     # --- Transition ---
     # mccr_secretary_get_dp_information -> mccr_on_dp_evaluation_by_secretary
     def can_evaluate_dp_by_secretary(self):
@@ -627,9 +614,7 @@ class MCCRRegistry(models.Model):
     def secretary_get_report_information(self):
         print('The MCCR is transitioning from mccr_ovv_accept_monitoring to mccr_secretary_get_report_information')
         # Additional logic goes here.
-        mccr_services = MCCREmailServices(ses_service)
-        result = mccr_services.sendStatusNotificationToUser(self, 'executive_secretary')
-        return result
+        
 
 
 
@@ -823,7 +808,7 @@ class MCCRRegistry(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    ppcn = models.ForeignKey(MCCRRegistry, related_name='change_log')
+    mccr = models.ForeignKey(MCCRRegistry, related_name='change_log')
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     

@@ -43,10 +43,11 @@ class MitigationActionEmailServices():
 
         user = result_data
         user_email = user.email
+        full_user_name = "{0} {1}".format(user.first_name, user.last_name)
         result_status, result_email = self.send_notification(user_email, subject, message)
 
         if not result_status:
-            error = self.SEND_MAIL_ERROR.format(user.name, result_email)
+            error = self.SEND_MAIL_ERROR.format(full_user_name, result_email)
             return (result_status, error)
 
         return (result_status, result_email)

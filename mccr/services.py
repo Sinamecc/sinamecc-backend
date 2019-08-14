@@ -16,6 +16,7 @@ ses_service = EmailServices(email_sender)
 # TODO: Change is_valid() to exception
 class MCCRService():
     def __init__(self):
+        self.MCCR_ERROR_CREATE = "MCCR couldn't be created"
         self.MCCR_ERROR_NOT_EXIST = "MCCR does not exists"
         self.MCCR_ERROR_GET_ALL = "Error retrieving all MCCR records"
         self.MCCR_ERROR_EMPTY_MITIGATIONS_LIST = "Empty mitigation actions list"
@@ -86,6 +87,7 @@ class MCCRService():
     def create(self, request):
         errors = []
         serialized_mccr = self.get_serialized_mccr(request)
+        result = (False, self.MCCR_ERROR_CREATE)
         if serialized_mccr.is_valid():
             new_mccr = serialized_mccr.save()
             if new_mccr.id:
@@ -99,10 +101,10 @@ class MCCRService():
                     new_mccr.submit()
                     new_mccr.save()
                     #self.create_change_log_entry(new_mccr, mccr_previous_status, new_mccr.fsm_state, request.data.get('user'))  
-                    result = (True, serialized_mccr(new_mccr).data)
+                    result = (True, MCCRRegistrySerializerCreate(new_mccr).data)
 
-            return (True, MCCRRegistrySerializerCreate(new_mccr).data)
-        return (False, serialized_mccr.errors + errors)
+            
+        return result
 
     def get(self, id):
         try:
@@ -246,6 +248,7 @@ class MCCRService():
         if serialized_mccr_ovv_relation.is_valid():
             # TODO: should check if we have a previous registered status for the tuple mccr,ovv
             serialized_mccr_ovv_relation.save()
+            ## we need to pass ovv_id to send notification 
             mccr.assigned_send_notification()
             mccr.save()
             result = (True, serialized_mccr_ovv_relation.data)

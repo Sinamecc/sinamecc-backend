@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from users.models import CustomUser
+from users.models import CustomUser, CustomGroup
 from django.contrib.auth.models import Group, Permission
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'is_active', 'is_provider', 'is_administrador_dcc')
+        fields = ('id', 'username', 'first_name', 'last_name', 'is_staff', 'email', 'is_active', 'is_provider', 'is_administrador_dcc')
 
 class NewCustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,8 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('id', 'name')
+
+class CustomGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomGroup
+        fields = ('id', 'label', 'group')
