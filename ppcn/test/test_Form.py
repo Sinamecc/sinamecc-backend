@@ -7,7 +7,8 @@ from django.contrib.auth.models import Group
 from ppcn.services import PpcnService
 from django.urls import reverse
 from rest_framework import status
-import datetime, json
+import datetime as dt, json
+from datetime import datetime
 
 # initialize the APIClient app
 client = Client() ## create tests with it 
@@ -42,11 +43,11 @@ class PPCNFormTest(TestCase):
         self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
 
         self.ovv = OVV.objects.create(name='name_ovv', email='ovv@fake.com', phone='22332233')
-        self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.date(2007, 1, 1), report_year=2019, base_year=2018)
+        self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
-        self.cantonal_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.date(2007, 1, 1), report_year=2019, base_year=2018)
+        self.cantonal_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
-        self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.date(2007, 1, 1), report_year=2019, base_year=2018)
+        self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
@@ -102,6 +103,49 @@ class PPCNFormTest(TestCase):
         }
 
     ## GET ENDPOITNS
+    def test_get_all_ppcn(self):
+        client.force_login(self.superUser)
+        response = client.get(reverse('get_post_ppcn'), kwargs={'language':'en'})
+        response_data = response.data
+        serialized_ppcn = PPCNSerializer(PPCN.objects.all(), many=True).data
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for i in range(len(serialized_ppcn)):
+            self.assertEquals(serialized_ppcn[i].get('id'), response_data[i].get('id'))
+            ## organization level
+            organization = OrganizationSerializer(Organization.objects.get(id=serialized_ppcn[i].get('organization'))).data
+            self.assertEqual(str(response_data[i].get('organization').get('id')), str(organization.get('id')))
+            self.assertEqual(str(response_data[i].get('organization').get('name')), str(organization.get('name')))
+            self.assertEqual(str(response_data[i].get('organization').get('representative_name')), str(organization.get('representative_name')))
+            self.assertEqual(str(response_data[i].get('organization').get('phone_organization')), str(organization.get('phone_organization')))
+            self.assertEqual(str(response_data[i].get('organization').get('postal_code')), str(organization.get('postal_code')))
+            self.assertEqual(str(response_data[i].get('organization').get('fax')), str(organization.get('fax')))
+            self.assertEqual(str(response_data[i].get('organization').get('address')), str(organization.get('address')))
+            self.assertEqual(str(response_data[i].get('organization').get('ciiu')), str(organization.get('ciiu')))
+
+            contact = ContactSerializer(Contact.objects.get(id=organization.get('contact'))).data
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('id')), str(contact.get('id')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('full_name')), str(contact.get('full_name')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('job_title')), str(contact.get('job_title')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('email')), str(contact.get('email')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('phone')), str(contact.get('phone')))
+
+            self.assertEqual(str(response_data[i].get('geographic_level').get('id')), str(serialized_ppcn[i].get('geographic_level')))
+            self.assertEqual(str(response_data[i].get('required_level').get('id')), str(serialized_ppcn[i].get('required_level')))
+
+            self.assertEqual(str(response_data[i].get('recognition_type').get('id')), str(serialized_ppcn[i].get('recognition_type')))
+            self.assertEqual(str(response_data[i].get('base_year')), str(serialized_ppcn[i].get('base_year')))
+            self.assertEqual(str(response_data[i].get('fsm_state')), str(serialized_ppcn[i].get('fsm_state')))
+
+            datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_create_serializer = datetime.strptime(str(serialized_ppcn[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_create_response, datetime_create_serializer)
+
+            datetime_updated_response = datetime.strptime(str(response_data[i].get('updated')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_updated_serializer = datetime.strptime(str(serialized_ppcn[i].get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_updated_response, datetime_updated_serializer)
+
+
     def test_get_ppcn_organizational(self):
 
         client.force_login(self.superUser)
@@ -146,7 +190,7 @@ class PPCNFormTest(TestCase):
 
         ## gei_organization
         self.assertEquals(gei_organization.get('id'), self.organizational_gei_organization.id)
-        self.assertEquals(gei_organization.get('emission_ovv_date'), datetime.date(2007, 1, 1))
+        self.assertEquals(gei_organization.get('emission_ovv_date'), self.organizational_gei_organization.emission_ovv_date)
         self.assertEquals(gei_organization.get('report_year'), 2019)
         self.assertEquals(gei_organization.get('base_year'), 2018)
 
