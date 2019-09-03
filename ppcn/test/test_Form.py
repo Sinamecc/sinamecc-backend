@@ -6,7 +6,8 @@ from users.models import CustomUser
 from django.contrib.auth.models import Group
 from ppcn.services import PpcnService
 from django.urls import reverse
-import datetime
+from rest_framework import status
+import datetime, json
 
 # initialize the APIClient app
 client = Client() ## create tests with it 
@@ -15,7 +16,7 @@ ses_service = EmailServices()
 class PPCNFormTest(TestCase):
 
     def setUp(self):
-        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True)[0]
+        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True, email='izcar@grupoincocr.com')[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         self.group_list = Group.objects.filter(name__in=['dcc_ppcn_responsible', 'dcc_executive_secretary', 'ppcn_responsible']).all()
         self.ppcn_service = PpcnService()
@@ -54,6 +55,53 @@ class PPCNFormTest(TestCase):
 
         self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
 
+        self.ppcn_data = {
+            "organization" : 
+            {	
+                "name": "test name",
+                "representative_name": "test representative_name",
+                "phone_organization" : "27643606",
+                "postal_code": "40101",
+                "fax": "",
+                "ciiu": "test ciiu",
+                "address": "test address",
+                "contact": 
+                {
+        
+                    "full_name": "test full_name",
+                    "job_title": "test_update job_tiqtle",
+                    "email": "test2@email.com", 
+                    "phone": "27643636"
+                }
+                
+            },
+            
+            "gei_organization":
+            {	
+                "ovv":1,
+                "emission_ovv_date":"2018-04-14",
+                "report_year":"2018",
+                "base_year":"2018"
+            },
+            "gei_activity_types":[
+                {
+                    "activity_type": "activity type test 1",
+                    "sub_sector":self.organizational_sub_sector.id,
+                    "sector":self.organizational_sector.id
+                },
+                {
+                    "activity_type": "activity type test 2",
+                    "sub_sector":self.organizational_sub_sector.id,
+                    "sector":self.organizational_sector.id
+                }
+            ],
+            "geographic_level": self.organizational_geographic_level.id,
+            "required_level":self.required_level.id, 
+            "recognition_type":self.recognition_type.id,
+            "user":self.superUser.id
+        }
+
+    ## GET ENDPOITNS
     def test_get_ppcn_organizational(self):
 
         client.force_login(self.superUser)
@@ -202,3 +250,13 @@ class PPCNFormTest(TestCase):
         self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
         
 
+    ## POST ENDPOINTS
+
+    def test_get_post_ppcn(self):
+        client.force_login(self.superUser)
+        response = client.post(
+            reverse('get_post_ppcn', kwargs={'language': 'en'}),
+            data=json.dumps(self.ppcn_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED )
