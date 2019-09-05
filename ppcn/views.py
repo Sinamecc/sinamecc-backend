@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
@@ -199,3 +200,10 @@ def redirect_notification(request, id):
     path = '/'.join(request.META['HTTP_REFERER'].split('/')[:3])
     url_frontend = '{0}/ppcn/{1}'.format(path, id) #change me in development
     return HttpResponseRedirect(url_frontend)
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def get_ppcn_opendata(request, usermane, password):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_ppcn_opendata", request, usermane, password)
+    return result 

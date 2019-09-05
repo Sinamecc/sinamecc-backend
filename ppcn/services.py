@@ -15,6 +15,7 @@ from general.storages import S3Storage
 from django.http import FileResponse
 from django.urls import reverse
 import os
+from django.contrib.auth import authenticate, login
 import pdb
 from general.services import EmailServices
 email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
@@ -26,6 +27,7 @@ User = get_user_model()
 
 from workflow.services import WorkflowService
 workflow_service = WorkflowService()
+# -*- coding: utf-8 -*-
 
 class PpcnService():
 
@@ -836,4 +838,27 @@ class PpcnService():
         else:
             result = (False, self.NO_PATCH_DATA_PROVIDED)
 
+        return result
+
+    def get_ppcn_opendata(self, request, username, password):
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            header = [
+                "Created",
+                "Updated"
+                "User name",
+                "Email"
+            ]
+            data_set = [
+                {
+                    p.created,
+                    p.updated,
+                    p.user.username,
+                    p.user.email
+                } for p in PPCN.objects.all()
+            ]
+            result = (True, { "titles": header, "dataset": data_set })
+        else:
+            result = (False, { "detail": "Authentication credentials were not provided."} )
         return result

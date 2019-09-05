@@ -11,12 +11,13 @@ import uuid
 from io import BytesIO
 from django.urls import reverse
 import os
+from django.contrib.auth import authenticate, login
 from general.services import HandlerErrors
 from workflow.services import WorkflowService
 from general.services import EmailServices
 handler = HandlerErrors()
 workflow_service = WorkflowService()
-
+# -*- coding: utf-8 -*-
 
 class MitigationActionService():
     def __init__(self):
@@ -1052,10 +1053,31 @@ class MitigationActionService():
         fpath, fname = os.path.split(filename)
         return fname
 
-
-
-
-
-
-
-
+    def get_mitigation_action_opendata(self, request, username,  password):
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            header =[
+                "Name"
+                "Purpose",
+                "Start date",
+                "End date",
+                "Emissions source"
+                "Impact plan",
+                "Impact"
+            ]
+            data_set = [
+                {
+                    m.name,
+                    m.purpose,
+                    m.start_date,
+                    m.end_date,
+                    m.emissions_source,
+                    m.impact_plan,
+                    m.impact
+                } for m in Mitigation.objects.all()
+            ]
+            result = (True, { "titles": header, "dataset": data_set })
+        else:
+            result = handler.error_400("Authentication credentials were not provided.")
+        return result

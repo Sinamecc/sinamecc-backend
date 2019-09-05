@@ -158,3 +158,10 @@ def get_notification_template(request, uuid, lang="en"):
         }
         result = HttpResponse(template_error.render(context, request))
     return  result
+
+@api_view(['GET'])
+@permission_classes((AllowAny, ))
+def get_mitigation_action_opendata(request, usermane, password):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_mitigation_action_opendata", request, usermane, password)
+        return result

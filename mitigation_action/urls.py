@@ -47,4 +47,9 @@ urlpatterns = [
         views.get_notification_template,
         name='get_notification_template'
     ),
+    url(
+        r'^api/v1/mitigations/opendata/(?P<usermane>[a-zA-Z0-9_-]+)/(?P<password>[a-zA-Z0-9\D]+)$',
+        views.get_mitigation_action_opendata,
+        name='get_mitigation_action_opendata'
+    ),
 ]
