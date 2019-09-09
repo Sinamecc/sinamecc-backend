@@ -5,7 +5,10 @@ from mitigation_action.models import Contact
 from users.models import CustomUser
 from django.contrib.auth.models import Group
 from ppcn.services import PpcnService
-import datetime
+from django.urls import reverse
+from rest_framework import status
+import datetime as dt, json
+from datetime import datetime
 
 # initialize the APIClient app
 client = Client() ## create tests with it 
@@ -13,12 +16,10 @@ ses_service = EmailServices()
 
 class PPCNFormTest(TestCase):
 
-
     def setUp(self):
-        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True)[0]
+        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True, email='izcar@grupoincocr.com')[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         self.group_list = Group.objects.filter(name__in=['dcc_ppcn_responsible', 'dcc_executive_secretary', 'ppcn_responsible']).all()
-        client.force_login(self.user)
         self.ppcn_service = PpcnService()
 
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
@@ -42,11 +43,11 @@ class PPCNFormTest(TestCase):
         self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
 
         self.ovv = OVV.objects.create(name='name_ovv', email='ovv@fake.com', phone='22332233')
-        self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.datetime(2007, 1, 1), report_year=2019, base_year=2018)
+        self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
-        self.cantonal_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.datetime(2007, 1, 1), report_year=2019, base_year=2018)
+        self.cantonal_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
-        self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.datetime(2007, 1, 1), report_year=2019, base_year=2018)
+        self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
@@ -55,143 +56,251 @@ class PPCNFormTest(TestCase):
 
         self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
 
+        self.ppcn_data = {
+            "organization" : 
+            {	
+                "name": "test name",
+                "representative_name": "test representative_name",
+                "phone_organization" : "27643606",
+                "postal_code": "40101",
+                "fax": "",
+                "ciiu": "test ciiu",
+                "address": "test address",
+                "contact": 
+                {
         
-    def test_organization(self):
+                    "full_name": "test full_name",
+                    "job_title": "test_update job_tiqtle",
+                    "email": "test2@email.com", 
+                    "phone": "27643636"
+                }
+                
+            },
+            
+            "gei_organization":
+            {	
+                "ovv":1,
+                "emission_ovv_date":"2018-04-14",
+                "report_year":"2018",
+                "base_year":"2018"
+            },
+            "gei_activity_types":[
+                {
+                    "activity_type": "activity type test 1",
+                    "sub_sector":self.organizational_sub_sector.id,
+                    "sector":self.organizational_sector.id
+                },
+                {
+                    "activity_type": "activity type test 2",
+                    "sub_sector":self.organizational_sub_sector.id,
+                    "sector":self.organizational_sector.id
+                }
+            ],
+            "geographic_level": self.organizational_geographic_level.id,
+            "required_level":self.required_level.id, 
+            "recognition_type":self.recognition_type.id,
+            "user":self.superUser.id
+        }
 
-        field_name = self.organization.name
-        field_repr_name = self.organization.representative_name
-        field_phone_org = self.organization.phone_organization
-        field_postal_code = self.organization.postal_code
-        field_fax = self.organization.fax
-        field_address = self.organization.address
-        field_contact = self.organization.contact
-        field_ciiu = self.organization.ciiu
+    ## GET ENDPOITNS
+    def test_get_all_ppcn(self):
+        client.force_login(self.superUser)
+        response = client.get(reverse('get_post_ppcn'), kwargs={'language':'en'})
+        response_data = response.data
+        serialized_ppcn = PPCNSerializer(PPCN.objects.all(), many=True).data
 
-        self.assertEquals(field_name, 'organization-name')
-        self.assertEquals(field_repr_name, 'representative-name')
-        self.assertEquals(field_phone_org, '88888888')
-        self.assertEquals(field_postal_code, '40101')
-        self.assertEquals(field_fax, '88778877')
-        self.assertEquals(field_address, 'address-testing')
-        self.assertEquals(field_contact, self.contact)
-        self.assertEquals(field_ciiu, 'CIIU-CODE')
-    
-    def test_contact(self):
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for i in range(len(serialized_ppcn)):
+            self.assertEquals(serialized_ppcn[i].get('id'), response_data[i].get('id'))
+            ## organization level
+            organization = OrganizationSerializer(Organization.objects.get(id=serialized_ppcn[i].get('organization'))).data
+            self.assertEqual(str(response_data[i].get('organization').get('id')), str(organization.get('id')))
+            self.assertEqual(str(response_data[i].get('organization').get('name')), str(organization.get('name')))
+            self.assertEqual(str(response_data[i].get('organization').get('representative_name')), str(organization.get('representative_name')))
+            self.assertEqual(str(response_data[i].get('organization').get('phone_organization')), str(organization.get('phone_organization')))
+            self.assertEqual(str(response_data[i].get('organization').get('postal_code')), str(organization.get('postal_code')))
+            self.assertEqual(str(response_data[i].get('organization').get('fax')), str(organization.get('fax')))
+            self.assertEqual(str(response_data[i].get('organization').get('address')), str(organization.get('address')))
+            self.assertEqual(str(response_data[i].get('organization').get('ciiu')), str(organization.get('ciiu')))
 
-        field_full_name = self.contact.full_name
-        field_job_title = self.contact.job_title
-        field_email = self.contact.email
-        field_phone = self.contact.phone
+            contact = ContactSerializer(Contact.objects.get(id=organization.get('contact'))).data
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('id')), str(contact.get('id')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('full_name')), str(contact.get('full_name')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('job_title')), str(contact.get('job_title')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('email')), str(contact.get('email')))
+            self.assertEqual(str(response_data[i].get('organization').get('contact').get('phone')), str(contact.get('phone')))
 
-        self.assertEquals(field_full_name, 'Test_full_name')
-        self.assertEquals(field_job_title, 'Secretary')
-        self.assertEquals(field_email, 'test@gmail.com')
-        self.assertEquals(field_phone, '77777777')
+            self.assertEqual(str(response_data[i].get('geographic_level').get('id')), str(serialized_ppcn[i].get('geographic_level')))
+            self.assertEqual(str(response_data[i].get('required_level').get('id')), str(serialized_ppcn[i].get('required_level')))
 
-    def test_geographic_level(self):
-        field_level_es_cantonal = self.cantonal_geographic_level.level_es
-        field_level_en_cantonal = self.cantonal_geographic_level.level_en
-        field_level_es_organizational = self.organizational_geographic_level.level_es
-        field_level_en_organizational = self.organizational_geographic_level.level_en
+            self.assertEqual(str(response_data[i].get('recognition_type').get('id')), str(serialized_ppcn[i].get('recognition_type')))
+            self.assertEqual(str(response_data[i].get('base_year')), str(serialized_ppcn[i].get('base_year')))
+            self.assertEqual(str(response_data[i].get('fsm_state')), str(serialized_ppcn[i].get('fsm_state')))
 
-        self.assertEquals(field_level_es_cantonal, 'Cantonal')
-        self.assertEquals(field_level_en_cantonal, 'Cantonal')
-        self.assertEquals(field_level_es_organizational, 'Organizational')
-        self.assertEquals(field_level_en_organizational, 'Organizacional')
+            datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_create_serializer = datetime.strptime(str(serialized_ppcn[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_create_response, datetime_create_serializer)
 
-    
-    def test_sector(self):
-
-        field_cantonal_sector_en = self.cantonal_sector.name_en
-        field_cantonal_sector_es = self.cantonal_sector.name_es
-        field_cantonal_geo_level = self.cantonal_sector.geographicLevel
-        field_organizational_sector_en = self.organizational_sector.name_en
-        field_organizational_sector_es = self.organizational_sector.name_es
-        field_organizational_geo_level = self.organizational_sector.geographicLevel
-
-        self.assertEquals(field_cantonal_sector_en, 'cantonal_sector_en')
-        self.assertEquals(field_cantonal_sector_es, 'cantonal_sector_es')
-        self.assertEquals(field_cantonal_geo_level, self.cantonal_geographic_level)
-        self.assertEquals(field_organizational_sector_en, 'organizational_sector_en')
-        self.assertEquals(field_organizational_sector_es, 'organizational_sector_es')
-        self.assertEquals(field_organizational_geo_level, self.organizational_geographic_level)
-
-    def test_sub_sector(self):
-        field_cantonal_sub_sector_en = self.cantonal_sub_sector.name_en
-        field_cantonal_sub_sector_es = self.cantonal_sub_sector.name_es
-        field_cantonal_sector = self.cantonal_sub_sector.sector
-        field_organizational_sub_sector_en = self.organizational_sub_sector.name_en
-        field_organizational_sub_sector_es = self.organizational_sub_sector.name_es
-        field_organizational_sector = self.organizational_sub_sector.sector
-
-        self.assertEquals(field_cantonal_sub_sector_en, 'cantonal_sub_sector_en')
-        self.assertEquals(field_cantonal_sub_sector_es, 'cantonal_sub_sector_es')
-        self.assertEquals(field_cantonal_sector, self.cantonal_sector)
-        self.assertEquals(field_organizational_sub_sector_en, 'organizational_sub_sector_en')
-        self.assertEquals(field_organizational_sub_sector_es, 'organizational_sub_sector_es')
-        self.assertEquals(field_organizational_sector, self.organizational_sector)
-    
-    def test_required_level(self):
-
-        field_required_level_es = self.required_level.level_type_es
-        field_required_level_en = self.required_level.level_type_en
-
-        self.assertEquals(field_required_level_es, 'required_level_es')
-        self.assertEquals(field_required_level_en, 'required_level_en')
-
-    def test_recognition_type(self):
-        field_recognition_type_es = self.recognition_type.recognition_type_es
-        field_recognition_type_en = self.recognition_type.recognition_type_en
-
-        self.assertEquals(field_recognition_type_es, 'recognition_type_es')
-        self.assertEquals(field_recognition_type_en, 'recognition_type_en')
+            datetime_updated_response = datetime.strptime(str(response_data[i].get('updated')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_updated_serializer = datetime.strptime(str(serialized_ppcn[i].get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_updated_response, datetime_updated_serializer)
 
 
-    def test_gei_organization(self):
-        field_ovv = self.organizational_gei_organization.ovv
-        field_emission_ovv_date = self.organizational_gei_organization.emission_ovv_date
-        field_base_year = self.organizational_gei_organization.base_year
-        field_report_year = self.organizational_gei_organization.report_year
+    def test_get_ppcn_organizational(self):
 
-        self.assertEquals(field_ovv, self.ovv)
-        self.assertEquals(field_emission_ovv_date, datetime.datetime(2007, 1, 1))
-        self.assertEquals(field_base_year, 2018)
-        self.assertEquals(field_report_year, 2019)
-        gei_activity_test = [self.organizational_gei_activity_type_1 , self.organizational_gei_activity_type_2]
-        count = 0
-        for gei_activity in self.organizational_gei_organization.gei_activity_types.all():
-            self.assertEquals(gei_activity, gei_activity_test[count])
-            count += 1
+        client.force_login(self.superUser)
+        response = client.get(reverse('get_one_ppcn', args=[self.ppcn_organizational.id, 'en']))
+        data = response.data
+        
+        organization_data = data.get('organization')
+        gei_organization = data.get('gei_organization')
+
+        self.assertEquals(data.get('id'), self.ppcn_organizational.id)
+        self.assertEquals(data.get('user'), self.superUser.id)
+        
+        ## organization
+        self.assertEquals(organization_data.get('id'), self.organization.id)
+        self.assertEquals(organization_data.get('name'), self.organization.name)
+        self.assertEquals(organization_data.get('representative_name'), self.organization.representative_name)
+        self.assertEquals(organization_data.get('phone_organization'), self.organization.phone_organization)
+        self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
+        self.assertEquals(organization_data.get('fax'), self.organization.fax)
+        self.assertEquals(organization_data.get('address'), self.organization.address)
+        self.assertEquals(organization_data.get('ciiu'), self.organization.ciiu)
+
+        ## organiztion ->contact
+        self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
+        self.assertEquals(organization_data.get('contact').get('full_name'), self.contact.full_name)
+        self.assertEquals(organization_data.get('contact').get('job_title'), self.contact.job_title)
+        self.assertEquals(organization_data.get('contact').get('email'), self.contact.email)
+        self.assertEquals(organization_data.get('contact').get('phone'), self.contact.phone)
+
+        ## catalogs
+        ## geographic_level
+        self.assertEquals(data.get('geographic_level').get('id'), self.organizational_geographic_level.id)
+        self.assertEquals(data.get('geographic_level').get('level'), self.organizational_geographic_level.level_en) 
+
+        ## required_level
+        self.assertEquals(data.get('required_level').get('id'), self.required_level.id)
+        self.assertEquals(data.get('required_level').get('level_type'), self.required_level.level_type_en)
+
+        ## recognition_type
+        self.assertEquals(data.get('recognition_type').get('id'), self.recognition_type.id)
+        self.assertEquals(data.get('recognition_type').get('recognition_type'), self.recognition_type.recognition_type_en)
+
+        ## gei_organization
+        self.assertEquals(gei_organization.get('id'), self.organizational_gei_organization.id)
+        self.assertEquals(gei_organization.get('emission_ovv_date'), self.organizational_gei_organization.emission_ovv_date)
+        self.assertEquals(gei_organization.get('report_year'), 2019)
+        self.assertEquals(gei_organization.get('base_year'), 2018)
+
+        ## gei_organization - ovv
+        self.assertEquals(gei_organization.get('ovv').get('id'), self.organizational_gei_organization.ovv.id)
+        self.assertEquals(gei_organization.get('ovv').get('name'), self.organizational_gei_organization.ovv.name)
+        self.assertEquals(gei_organization.get('ovv').get('email'), self.organizational_gei_organization.ovv.email)
+        
+        ## gei_organization_ gei_activity_types
+        gei_activity_1 = self.organizational_gei_organization.gei_activity_types.all()[0]
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('id'), gei_activity_1.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('activity_type'), gei_activity_1.activity_type)
+
+        ## gei_organization[0] - sector
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('id'), gei_activity_1.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
+
+        ## gei_organization[0] - subsector
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
         
 
-    def test_ppcn_national(self):
-        field_user = self.ppcn_organizational.user
-        field_organization = self.ppcn_organizational.organization
-        field_geographic_level = self.ppcn_organizational.geographic_level
-        field_required_level = self.ppcn_organizational.required_level
-        field_recognition_type = self.ppcn_organizational.recognition_type
-        field_gei_organization = self.ppcn_organizational.gei_organization
+        ## gei_organization_ gei_activity_types
+        gei_activity_2 = self.organizational_gei_organization.gei_activity_types.all()[1]
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('id'), gei_activity_2.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('activity_type'), gei_activity_2.activity_type)
 
-        self.assertEquals(field_user, self.superUser)
-        self.assertEquals(field_organization, self.organization)
-        self.assertEquals(field_geographic_level, self.organizational_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
-        self.assertEquals(field_gei_organization, self.organizational_gei_organization)
+        ## gei_organization[1] - sector
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sector').get('id'), gei_activity_2.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sector').get('name'), gei_activity_2.sector.name_en)
+
+        ## gei_organization[1] - subsector
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sub_sector').get('id'), gei_activity_2.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sub_sector').get('name'), gei_activity_2.sub_sector.name_en)
+
+
         
+    def test_get_ppcn_cantonal(self):
+        client.force_login(self.superUser)
+        response = client.get(reverse('get_one_ppcn', args=[self.ppcn_cantonal.id, 'en']))
+        data = response.data
         
-    def test_ppcn_cantonal(self):
-        field_user = self.ppcn_cantonal.user
-        field_organization = self.ppcn_cantonal.organization
-        field_geographic_level = self.ppcn_cantonal.geographic_level
-        field_required_level = self.ppcn_cantonal.required_level
-        field_recognition_type = self.ppcn_cantonal.recognition_type
-        field_gei_organization = self.ppcn_cantonal.gei_organization
+        organization_data = data.get('organization')
+        gei_organization = data.get('gei_organization')
 
-        self.assertEquals(field_user, self.superUser)
-        self.assertEquals(field_organization, self.organization)
-        self.assertEquals(field_geographic_level, self.cantonal_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
-        self.assertEquals(field_gei_organization, self.cantonal_gei_organization)
+        self.assertEquals(data.get('id'), self.ppcn_cantonal.id)
+        self.assertEquals(data.get('user'), self.superUser.id)
+        
+        ## organization
+        self.assertEquals(organization_data.get('id'), self.organization.id)
+        self.assertEquals(organization_data.get('name'), self.organization.name)
+        self.assertEquals(organization_data.get('representative_name'), self.organization.representative_name)
+        self.assertEquals(organization_data.get('phone_organization'), self.organization.phone_organization)
+        self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
+        self.assertEquals(organization_data.get('fax'), self.organization.fax)
+        self.assertEquals(organization_data.get('address'), self.organization.address)
+        self.assertEquals(organization_data.get('ciiu'), self.organization.ciiu)
 
+        ## organiztion ->contact
+        self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
+        self.assertEquals(organization_data.get('contact').get('full_name'), self.contact.full_name)
+        self.assertEquals(organization_data.get('contact').get('job_title'), self.contact.job_title)
+        self.assertEquals(organization_data.get('contact').get('email'), self.contact.email)
+        self.assertEquals(organization_data.get('contact').get('phone'), self.contact.phone)
+
+        ## catalogs
+        ## geographic_level
+        self.assertEquals(data.get('geographic_level').get('id'), self.cantonal_geographic_level.id)
+        self.assertEquals(data.get('geographic_level').get('level'), self.cantonal_geographic_level.level_en) 
+
+        ## required_level
+        self.assertEquals(data.get('required_level').get('id'), self.required_level.id)
+        self.assertEquals(data.get('required_level').get('level_type'), self.required_level.level_type_en)
+
+        ## recognition_type
+        self.assertEquals(data.get('recognition_type').get('id'), self.recognition_type.id)
+        self.assertEquals(data.get('recognition_type').get('recognition_type'), self.recognition_type.recognition_type_en)
+
+        ## gei_organization
+        self.assertEquals(gei_organization.get('id'), self.cantonal_gei_organization.id)
+        self.assertEquals(gei_organization.get('emission_ovv_date'), self.cantonal_gei_organization.emission_ovv_date)
+        self.assertEquals(gei_organization.get('report_year'), self.cantonal_gei_organization.report_year)
+        self.assertEquals(gei_organization.get('base_year'), self.cantonal_gei_organization.base_year)
+
+        ## gei_organization - ovv
+        self.assertEquals(gei_organization.get('ovv').get('id'), self.organizational_gei_organization.ovv.id)
+        self.assertEquals(gei_organization.get('ovv').get('name'), self.organizational_gei_organization.ovv.name)
+        self.assertEquals(gei_organization.get('ovv').get('email'), self.organizational_gei_organization.ovv.email)
+        
+        ## gei_organization_ gei_activity_types
+        gei_activity_1 = self.cantonal_gei_organization.gei_activity_types.all()[0]
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('id'), gei_activity_1.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('activity_type'), gei_activity_1.activity_type)
+
+        ## gei_organization[0] - sector
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('id'), gei_activity_1.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
+
+        ## gei_organization[0] - subsector
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
+        
+
+    ## POST ENDPOINTS
+
+    def test_get_post_ppcn(self):
+        client.force_login(self.superUser)
+        response = client.post(
+            reverse('get_post_ppcn', kwargs={'language': 'en'}),
+            data=json.dumps(self.ppcn_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED )
