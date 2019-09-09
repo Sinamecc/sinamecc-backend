@@ -28,4 +28,9 @@ class Migration(migrations.Migration):
             name='group',
             field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='custom_group', to='auth.Group'),
         ),
+        migrations.AddField(
+            model_name='customuser',
+            name='phone',
+            field=models.CharField(max_length=50, null=True),
+        ),
     ]
