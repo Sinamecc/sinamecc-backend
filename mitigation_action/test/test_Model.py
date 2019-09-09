@@ -12,7 +12,7 @@ from mitigation_action.serializers import *
 client = Client()
 
 
-class MitigationActionFormTest(TestCase):
+class MitigationActionModelTest(TestCase):
 
     def setUp(self):
 
