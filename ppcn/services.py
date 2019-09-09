@@ -364,7 +364,7 @@ class PpcnService():
                     },
                     'recognition_type': {
                         'id' : pp.recognition_type.id,
-                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_es
+                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_en
                     },
                     'gei_organization':{
                         'id': pp.gei_organization.id, 
@@ -576,7 +576,7 @@ class PpcnService():
                     },
                     'recognition_type': {
                         'id' : pp.recognition_type.id,
-                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_es
+                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_en
                     },
                     'gei_organization':{
                         'id': pp.gei_organization.id, 
