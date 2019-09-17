@@ -3,7 +3,7 @@ from django.utils import timezone
 from users.models import CustomUser
 from django.contrib.auth.models import Group
 from mitigation_action.services import MitigationActionService
-
+from django.urls import reverse
 from datetime import datetime
 from mitigation_action.models import *
 from mitigation_action.serializers import *
@@ -71,5 +71,127 @@ class MitigationActionFormTest(TestCase):
         self.mitigation_action.ingei_compliances.add(self.ingei_compliance, self.ingei_compliance_2)
 
     
-    def test_get_all_mitigation_action(self):
+
+    def test_get_one_mitigation_action(self):
         pass
+
+
+
+    def test_get_all_mitigations(self):
+        client.force_login(self.superUser)
+        response_data = client.get(reverse('get_mitigation', args=['en'])).data
+        mitigation = Mitigation.objects.all()
+        serialiezed_mitigation = MitigationSerializer(mitigation, many=True).data
+
+        for i in range(mitigation.count()):
+               
+            self.assertEqual(str(response_data[i].get('id')), str(serialiezed_mitigation[i].get('id')))
+            self.assertEqual(str(response_data[i].get('strategy_name')), str(serialiezed_mitigation[i].get('strategy_name')))
+            self.assertEqual(str(response_data[i].get('name')), str(serialiezed_mitigation[i].get('name')))
+            self.assertEqual(str(response_data[i].get('purpose')), str(serialiezed_mitigation[i].get('purpose')))
+            self.assertEqual(str(response_data[i].get('quantitative_purpose')), str(serialiezed_mitigation[i].get('quantitative_purpose')))
+            self.assertEqual(str(response_data[i].get('start_date')), str(serialiezed_mitigation[i].get('start_date')))
+            self.assertEqual(str(response_data[i].get('end_date')), str(serialiezed_mitigation[i].get('end_date')))
+            self.assertEqual(str(response_data[i].get('gas_inventory')), str(serialiezed_mitigation[i].get('gas_inventory')))
+            self.assertEqual(str(response_data[i].get('emissions_source')), str(serialiezed_mitigation[i].get('emissions_source')))
+            self.assertEqual(str(response_data[i].get('carbon_sinks')), str(serialiezed_mitigation[i].get('carbon_sinks')))
+            self.assertEqual(str(response_data[i].get('impact_plan')), str(serialiezed_mitigation[i].get('impact_plan')))
+            self.assertEqual(str(response_data[i].get('impact')), str(serialiezed_mitigation[i].get('impact')))
+            self.assertEqual(str(response_data[i].get('bibliographic_sources')), str(serialiezed_mitigation[i].get('bibliographic_sources')))
+            self.assertEqual(str(response_data[i].get('is_international')), str(serialiezed_mitigation[i].get('is_international')))
+            self.assertEqual(str(response_data[i].get('international_participation')), str(serialiezed_mitigation[i].get('international_participation')))
+            self.assertEqual(str(response_data[i].get('sustainability')), str(serialiezed_mitigation[i].get('sustainability')))
+            self.assertEqual(str(response_data[i].get('question_ucc')), str(serialiezed_mitigation[i].get('question_ucc')))
+            self.assertEqual(str(response_data[i].get('question_ovv')), str(serialiezed_mitigation[i].get('question_ovv')))
+            self.assertEqual(str(response_data[i].get('review_count')), str(serialiezed_mitigation[i].get('review_count')))
+
+            ## registration type level 
+            registration_type = RegistrationTypeSerializer(RegistrationType.objects.get(id=serialiezed_mitigation[i].get('registration_type'))).data
+            self.assertEqual(str(response_data[i].get('registration_type').get('id')), str(registration_type.get('id')))
+            self.assertEqual(str(response_data[i].get('registration_type').get('type')), str(registration_type.get('type_en')))
+            
+            ## institution
+            institution = InstitutionSerializer(Institution.objects.get(id=serialiezed_mitigation[i].get('institution'))).data
+            self.assertEqual(str(response_data[i].get('institution').get('id')), str(institution.get('id')))
+            self.assertEqual(str(response_data[i].get('institution').get('name')), str(institution.get('name')))
+
+            ## contact
+            contact = ContactSerializer(Contact.objects.get(id=serialiezed_mitigation[i].get('contact'))).data
+            self.assertEqual(str(response_data[i].get('contact').get('id')), str(contact.get('id')))
+            self.assertEqual(str(response_data[i].get('contact').get('full_name')), str(contact.get('full_name')))
+            self.assertEqual(str(response_data[i].get('contact').get('job_title')), str(contact.get('job_title')))
+            self.assertEqual(str(response_data[i].get('contact').get('phone')), str(contact.get('phone')))
+            self.assertEqual(str(response_data[i].get('contact').get('email')), str(contact.get('email')))
+
+            ## status
+            status = StatusSerializer(Status.objects.get(id=serialiezed_mitigation[i].get('status'))).data
+            self.assertEqual(str(response_data[i].get('status').get('id')), str(status.get('id')))
+            self.assertEqual(str(response_data[i].get('status').get('status')), str(status.get('status_en')))
+
+            ## progress_indicator
+            progress_indicator = ProgressIndicatorSerializer(ProgressIndicator.objects.get(id=serialiezed_mitigation[i].get('progress_indicator'))).data
+            self.assertEqual(str(response_data[i].get('progress_indicator').get('id')), str(progress_indicator.get('id')))
+            self.assertEqual(str(response_data[i].get('progress_indicator').get('name')), str(progress_indicator.get('name')))
+            self.assertEqual(str(response_data[i].get('progress_indicator').get('type')), str(progress_indicator.get('type')))
+            self.assertEqual(str(response_data[i].get('progress_indicator').get('unit')), str(progress_indicator.get('unit')))
+            self.assertEqual(str(response_data[i].get('progress_indicator').get('start_date')), str(progress_indicator.get('start_date')))
+
+     
+            ## finance
+            finance = FinanceSerializer(Finance.objects.get(id=serialiezed_mitigation[i].get('finance'))).data
+            self.assertEqual(str(response_data[i].get('finance').get('id')), str(finance.get('id')))
+            self.assertEqual(str(response_data[i].get('finance').get('source')), str(finance.get('source')))
+
+            ## finance source type
+            finance_status = FinanceStatusSerializer(FinanceStatus.objects.get(id=finance.get('status'))).data
+            self.assertEqual(str(response_data[i].get('finance').get('status').get('id')), str(finance_status.get('id')))
+            self.assertEqual(str(response_data[i].get('finance').get('status').get('name')), str(finance_status.get('name_en')))
+
+            ## ingei_compliances missing
+
+
+            ## geographic_scale
+            geographic_scale = GeographicScaleSerializer(GeographicScale.objects.get(id=serialiezed_mitigation[i].get('geographic_scale'))).data
+            self.assertEqual(str(response_data[i].get('geographic_scale').get('id')), str(geographic_scale.get('id')))
+            self.assertEqual(str(response_data[i].get('geographic_scale').get('name')), str(geographic_scale.get('name_en')))
+        
+            ## location
+            location = LocationSerializer(Location.objects.get(id=serialiezed_mitigation[i].get('location'))).data
+            self.assertEqual(str(response_data[i].get('location').get('id')), str(location.get('id')))
+            self.assertEqual(str(response_data[i].get('location').get('geographical_site')), str(location.get('geographical_site')))
+            self.assertEqual(str(response_data[i].get('location').get('is_gis_annexed')), str(location.get('is_gis_annexed')))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_create_serializer = datetime.strptime(str(serialiezed_mitigation[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_create_response, datetime_create_serializer)
+
+            datetime_updated_response = datetime.strptime(str(response_data[i].get('updated')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_updated_serializer = datetime.strptime(str(serialiezed_mitigation[i].get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
+            self.assertEqual(datetime_updated_response,datetime_updated_serializer)
+           
+       
+    

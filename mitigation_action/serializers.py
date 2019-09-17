@@ -1,45 +1,50 @@
 from rest_framework import serializers
 from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, \
-GeographicScale, Location, ChangeLog,  Mitigation, Initiative, InitiativeType, InitiativeFinance
+GeographicScale, Location, ChangeLog,  Mitigation, Initiative, InitiativeType, InitiativeFinance, FinanceStatus
 
 class RegistrationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrationType
-        fields = ('type_es','type_en')
+        fields = ('id', 'type_es','type_en')
 
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
-        fields = ('name')
+        fields = ('id', 'name')
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ('full_name', 'job_title', 'email', 'phone')
+        fields = ('id','full_name', 'job_title', 'email', 'phone')
 
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ('status_es','status_en')
+        fields = ('id', 'status_es','status_en')
+
+class FinanceStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinanceStatus
+        fields = ('id', 'name_es','name_en')
 
 class ProgressIndicatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgressIndicator
-        fields = ('name', 'type', 'unit', 'start_date')
+        fields = ('id', 'name', 'type', 'unit', 'start_date')
 
 class FinanceSourceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinanceSourceType
-        fields = ('name_es','name_en')
+        fields = ('id', 'name_es','name_en')
 
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('status', 'source')
+        fields = ('id', 'status', 'source')
 class InitiativeFinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativeFinance
-        fields = ('status', 'finance_source_type', 'source')
+        fields = ('id', 'status', 'finance_source_type', 'source')
         
 class IngeiComplianceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,12 +54,12 @@ class IngeiComplianceSerializer(serializers.ModelSerializer):
 class GeographicScaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeographicScale
-        fields = ('name_es', 'name_en')
+        fields = ('id', 'name_es', 'name_en')
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ('geographical_site', 'is_gis_annexed')
+        fields = ('id', 'geographical_site', 'is_gis_annexed')
 
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
