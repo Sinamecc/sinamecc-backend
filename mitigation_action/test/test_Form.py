@@ -84,7 +84,7 @@ class MitigationActionFormTest(TestCase):
         serialiezed_mitigation = MitigationSerializer(mitigation, many=True).data
 
         for i in range(mitigation.count()):
-               
+            print(response_data[i])
             self.assertEqual(str(response_data[i].get('id')), str(serialiezed_mitigation[i].get('id')))
             self.assertEqual(str(response_data[i].get('strategy_name')), str(serialiezed_mitigation[i].get('strategy_name')))
             self.assertEqual(str(response_data[i].get('name')), str(serialiezed_mitigation[i].get('name')))
@@ -201,6 +201,12 @@ class MitigationActionFormTest(TestCase):
             initiative_finance_status = FinanceStatusSerializer(FinanceStatus.objects.get(id=initiative_finance.get('status'))).data
             self.assertEqual(str(response_data[i].get('initiative').get('finance').get('status').get('id')), str(initiative_finance_status.get('id')))
             self.assertEqual(str(response_data[i].get('initiative').get('finance').get('status').get('name')), str(initiative_finance_status.get('name_en')))
+
+            ## finance_source_type
+            initiative_finance_source_type = FinanceSourceTypeSerializer(FinanceSourceType.objects.get(id=initiative_finance.get('finance_source_type'))).data
+            self.assertEqual(str(response_data[i].get('initiative').get('finance').get('finance_source_type').get('id')), str(initiative_finance_source_type.get('id')))
+            self.assertEqual(str(response_data[i].get('initiative').get('finance').get('finance_source_type').get('finance_source_type')), str(initiative_finance_source_type.get('finance_source_type_en')))
+
 
 
 
