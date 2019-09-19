@@ -66,6 +66,11 @@ class ChangeLogSerializer(serializers.ModelSerializer):
         model = ChangeLog
         fields = ('mitigation_action', 'previous_status', 'current_status', 'user')
 
+class InitiativeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InitiativeType
+        fields = ('id', 'initiative_type_es', 'initiative_type_en')
+
 class InitiaveSerializer(serializers.ModelSerializer):
      
      class Meta:
