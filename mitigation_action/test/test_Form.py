@@ -73,8 +73,132 @@ class MitigationActionFormTest(TestCase):
     
 
     def test_get_one_mitigation_action(self):
-        pass
+        client.force_login(self.superUser)
+        response_data = client.get(reverse('get_delete_put_patch_mitigation', kwargs={'pk': str(self.mitigation_action.id)})).data
+        mitigation = Mitigation.objects.get(id=self.mitigation_action.id)
+        serialiezed_mitigation = MitigationSerializer(mitigation).data
 
+        self.assertEqual(str(response_data.get('id')), str(serialiezed_mitigation.get('id')))
+        self.assertEqual(str(response_data.get('strategy_name')), str(serialiezed_mitigation.get('strategy_name')))
+        self.assertEqual(str(response_data.get('name')), str(serialiezed_mitigation.get('name')))
+        self.assertEqual(str(response_data.get('purpose')), str(serialiezed_mitigation.get('purpose')))
+        self.assertEqual(str(response_data.get('quantitative_purpose')), str(serialiezed_mitigation.get('quantitative_purpose')))
+        self.assertEqual(str(response_data.get('start_date')), str(serialiezed_mitigation.get('start_date')))
+        self.assertEqual(str(response_data.get('end_date')), str(serialiezed_mitigation.get('end_date')))
+        self.assertEqual(str(response_data.get('gas_inventory')), str(serialiezed_mitigation.get('gas_inventory')))
+        self.assertEqual(str(response_data.get('emissions_source')), str(serialiezed_mitigation.get('emissions_source')))
+        self.assertEqual(str(response_data.get('carbon_sinks')), str(serialiezed_mitigation.get('carbon_sinks')))
+        self.assertEqual(str(response_data.get('impact_plan')), str(serialiezed_mitigation.get('impact_plan')))
+        self.assertEqual(str(response_data.get('impact')), str(serialiezed_mitigation.get('impact')))
+        self.assertEqual(str(response_data.get('bibliographic_sources')), str(serialiezed_mitigation.get('bibliographic_sources')))
+        self.assertEqual(str(response_data.get('is_international')), str(serialiezed_mitigation.get('is_international')))
+        self.assertEqual(str(response_data.get('international_participation')), str(serialiezed_mitigation.get('international_participation')))
+        self.assertEqual(str(response_data.get('sustainability')), str(serialiezed_mitigation.get('sustainability')))
+        self.assertEqual(str(response_data.get('question_ucc')), str(serialiezed_mitigation.get('question_ucc')))
+        self.assertEqual(str(response_data.get('question_ovv')), str(serialiezed_mitigation.get('question_ovv')))
+        self.assertEqual(str(response_data.get('review_count')), str(serialiezed_mitigation.get('review_count')))
+
+        ## registration type level 
+        registration_type = RegistrationTypeSerializer(RegistrationType.objects.get(id=serialiezed_mitigation.get('registration_type'))).data
+        self.assertEqual(str(response_data.get('registration_type').get('id')), str(registration_type.get('id')))
+        self.assertEqual(str(response_data.get('registration_type').get('type')), str(registration_type.get('type_en')))
+        
+        ## institution
+        institution = InstitutionSerializer(Institution.objects.get(id=serialiezed_mitigation.get('institution'))).data
+        self.assertEqual(str(response_data.get('institution').get('id')), str(institution.get('id')))
+        self.assertEqual(str(response_data.get('institution').get('name')), str(institution.get('name')))
+
+        ## contact
+        contact = ContactSerializer(Contact.objects.get(id=serialiezed_mitigation.get('contact'))).data
+        self.assertEqual(str(response_data.get('contact').get('id')), str(contact.get('id')))
+        self.assertEqual(str(response_data.get('contact').get('full_name')), str(contact.get('full_name')))
+        self.assertEqual(str(response_data.get('contact').get('job_title')), str(contact.get('job_title')))
+        self.assertEqual(str(response_data.get('contact').get('phone')), str(contact.get('phone')))
+        self.assertEqual(str(response_data.get('contact').get('email')), str(contact.get('email')))
+
+        ## status
+        status = StatusSerializer(Status.objects.get(id=serialiezed_mitigation.get('status'))).data
+        self.assertEqual(str(response_data.get('status').get('id')), str(status.get('id')))
+        self.assertEqual(str(response_data.get('status').get('status')), str(status.get('status_en')))
+
+        ## progress_indicator
+        progress_indicator = ProgressIndicatorSerializer(ProgressIndicator.objects.get(id=serialiezed_mitigation.get('progress_indicator'))).data
+        self.assertEqual(str(response_data.get('progress_indicator').get('id')), str(progress_indicator.get('id')))
+        self.assertEqual(str(response_data.get('progress_indicator').get('name')), str(progress_indicator.get('name')))
+        self.assertEqual(str(response_data.get('progress_indicator').get('type')), str(progress_indicator.get('type')))
+        self.assertEqual(str(response_data.get('progress_indicator').get('unit')), str(progress_indicator.get('unit')))
+        self.assertEqual(str(response_data.get('progress_indicator').get('start_date')), str(progress_indicator.get('start_date')))
+
+    
+        ## finance
+        finance = FinanceSerializer(Finance.objects.get(id=serialiezed_mitigation.get('finance'))).data
+        self.assertEqual(str(response_data.get('finance').get('id')), str(finance.get('id')))
+        self.assertEqual(str(response_data.get('finance').get('source')), str(finance.get('source')))
+
+        ## finance source type
+        finance_status = FinanceStatusSerializer(FinanceStatus.objects.get(id=finance.get('status'))).data
+        self.assertEqual(str(response_data.get('finance').get('status').get('id')), str(finance_status.get('id')))
+        self.assertEqual(str(response_data.get('finance').get('status').get('name')), str(finance_status.get('name_en')))
+
+        ## ingei_compliances missing
+
+
+        ## geographic_scale
+        geographic_scale = GeographicScaleSerializer(GeographicScale.objects.get(id=serialiezed_mitigation.get('geographic_scale'))).data
+        self.assertEqual(str(response_data.get('geographic_scale').get('id')), str(geographic_scale.get('id')))
+        self.assertEqual(str(response_data.get('geographic_scale').get('name')), str(geographic_scale.get('name_en')))
+    
+        ## location
+        location = LocationSerializer(Location.objects.get(id=serialiezed_mitigation.get('location'))).data
+        self.assertEqual(str(response_data.get('location').get('id')), str(location.get('id')))
+        self.assertEqual(str(response_data.get('location').get('geographical_site')), str(location.get('geographical_site')))
+        self.assertEqual(str(response_data.get('location').get('is_gis_annexed')), str(location.get('is_gis_annexed')))
+
+
+        ## initiative
+        initiative = InitiaveSerializer(Initiative.objects.get(id=serialiezed_mitigation.get('initiative'))).data
+        self.assertEqual(str(response_data.get('initiative').get('id')), str(initiative.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('name')), str(initiative.get('name')))
+        self.assertEqual(str(response_data.get('initiative').get('objective')), str(initiative.get('objective')))
+        self.assertEqual(str(response_data.get('initiative').get('description')), str(initiative.get('description')))
+        self.assertEqual(str(response_data.get('initiative').get('goal')), str(initiative.get('goal')))
+        self.assertEqual(str(response_data.get('initiative').get('entity_responsible')), str(initiative.get('entity_responsible')))
+        self.assertEqual(str(response_data.get('initiative').get('budget')), str(initiative.get('budget')))
+        self.assertEqual(str(response_data.get('initiative').get('entity_responsible')), str(initiative.get('entity_responsible')))
+
+        ## initiative_type
+        initiative_type = InitiativeTypeSerializer(InitiativeType.objects.get(id=initiative.get('initiative_type'))).data
+        self.assertEqual(str(response_data.get('initiative').get('initiative_type').get('id')), str(initiative_type.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('initiative_type').get('initiative_type')), str(initiative_type.get('initiative_type_en')))
+
+        ## inittiative status
+        initiative_status = StatusSerializer(Status.objects.get(id=initiative.get('status'))).data
+        self.assertEqual(str(response_data.get('initiative').get('status').get('id')), str(initiative_status.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('status').get('status')), str(initiative_status.get('status_en')))
+
+        ## initiative contact
+        initiative_contact = ContactSerializer(Contact.objects.get(id=initiative.get('contact'))).data
+        self.assertEqual(str(response_data.get('initiative').get('contact').get('id')), str(initiative_contact.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('contact').get('full_name')), str(initiative_contact.get('full_name')))
+        self.assertEqual(str(response_data.get('initiative').get('contact').get('job_title')), str(initiative_contact.get('job_title')))
+        self.assertEqual(str(response_data.get('initiative').get('contact').get('phone')), str(initiative_contact.get('phone')))
+        self.assertEqual(str(response_data.get('initiative').get('contact').get('email')), str(initiative_contact.get('email'))) 
+
+
+        ## initiative finanance 
+        initiative_finance = InitiativeFinanceSerializer(InitiativeFinance.objects.get(id=initiative.get('finance'))).data
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('id')), str(initiative_finance.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('source')), str(initiative_finance.get('source')))
+
+        ## initiative finance source type
+        initiative_finance_status = FinanceStatusSerializer(FinanceStatus.objects.get(id=initiative_finance.get('status'))).data
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('status').get('id')), str(initiative_finance_status.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('status').get('name')), str(initiative_finance_status.get('name_en')))
+
+        ## finance_source_type
+        initiative_finance_source_type = FinanceSourceTypeSerializer(FinanceSourceType.objects.get(id=initiative_finance.get('finance_source_type'))).data
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('finance_source_type').get('id')), str(initiative_finance_source_type.get('id')))
+        self.assertEqual(str(response_data.get('initiative').get('finance').get('finance_source_type').get('finance_source_type')), str(initiative_finance_source_type.get('finance_source_type_en')))
 
 
     def test_get_all_mitigations(self):
@@ -84,7 +208,6 @@ class MitigationActionFormTest(TestCase):
         serialiezed_mitigation = MitigationSerializer(mitigation, many=True).data
 
         for i in range(mitigation.count()):
-            print(response_data[i])
             self.assertEqual(str(response_data[i].get('id')), str(serialiezed_mitigation[i].get('id')))
             self.assertEqual(str(response_data[i].get('strategy_name')), str(serialiezed_mitigation[i].get('strategy_name')))
             self.assertEqual(str(response_data[i].get('name')), str(serialiezed_mitigation[i].get('name')))
