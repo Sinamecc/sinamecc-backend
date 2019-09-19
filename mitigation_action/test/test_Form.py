@@ -200,6 +200,14 @@ class MitigationActionFormTest(TestCase):
         self.assertEqual(str(response_data.get('initiative').get('finance').get('finance_source_type').get('id')), str(initiative_finance_source_type.get('id')))
         self.assertEqual(str(response_data.get('initiative').get('finance').get('finance_source_type').get('finance_source_type')), str(initiative_finance_source_type.get('finance_source_type_en')))
 
+        datetime_create_response = datetime.strptime(str(response_data.get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+        datetime_create_serializer = datetime.strptime(str(serialiezed_mitigation.get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
+        self.assertEqual(datetime_create_response, datetime_create_serializer)
+
+        datetime_updated_response = datetime.strptime(str(response_data.get('updated')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+        datetime_updated_serializer = datetime.strptime(str(serialiezed_mitigation.get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
+        self.assertEqual(datetime_updated_response,datetime_updated_serializer)
+
 
     def test_get_all_mitigations(self):
         client.force_login(self.superUser)
@@ -329,38 +337,6 @@ class MitigationActionFormTest(TestCase):
             initiative_finance_source_type = FinanceSourceTypeSerializer(FinanceSourceType.objects.get(id=initiative_finance.get('finance_source_type'))).data
             self.assertEqual(str(response_data[i].get('initiative').get('finance').get('finance_source_type').get('id')), str(initiative_finance_source_type.get('id')))
             self.assertEqual(str(response_data[i].get('initiative').get('finance').get('finance_source_type').get('finance_source_type')), str(initiative_finance_source_type.get('finance_source_type_en')))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
             datetime_create_serializer = datetime.strptime(str(serialiezed_mitigation[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
