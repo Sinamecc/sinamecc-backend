@@ -7,7 +7,7 @@ from mccr.services import MCCRService
 
 client = Client()
 
-class MCCRFormTest(TestCase):
+class MCCRModelTest(TestCase):
 
     def setUp(self):
         self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True)[0]
