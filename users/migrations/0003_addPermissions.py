@@ -1,35 +1,45 @@
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from ppcn.models import PPCN
 from django.db import migrations, models
+from users.serializers import NewCustomUserSerializer
+from rolepermissions.roles import assign_role
+from users.roles import Admin, Reviewer, InformationProvider
+from django.contrib.auth import get_user_model
 
 
-def add_Permissions(apps, schema_editor):
-    content_type = ContentType.objects.get_for_model(PPCN)
-    executive_secretary_group = Group.objects.get(name ='dcc_executive_secretary')
-    executive_secretary_permission = Permission.objects.get(codename='user_executive_secretary_permission',content_type=content_type)
-    executive_secretary_group.permissions.add(executive_secretary_permission)
+def add_create_user(apps, schema_editor):
+    super_admin = {'username':'admin', 'first_name':'Administrador', 'last_name':'Sinamecc', 'email':'sinamec@grupoincocr.com', 'is_staff':True, 'is_active':True, 'is_provider':True, 'is_administrador_dcc':True}
+    dcc_general_user = {'username':'general_dcc', 'first_name':'DCC', 'last_name':'Sinamecc', 'email':'izcar@grupoincocr.com', 'is_staff':True, 'is_active':True, 'is_provider':False, 'is_administrador_dcc':True}
+    provider_general_user = {'username':'information_provider', 'first_name':'Provider', 'last_name':'Sinamecc', 'email':'carlos@grupoincocr.com', 'is_staff':True, 'is_active':True, 'is_provider':True, 'is_administrador_dcc':False}
 
-    user_DCC_permission_ppcn_group = Group.objects.get(name ='dcc_ppcn_responsible')
-    user_DCC_permission = Permission.objects.get(codename='user_dcc_permission',content_type=content_type)
-    user_DCC_permission_ppcn_group.permissions.add(user_DCC_permission)
+    user_list = [super_admin, dcc_general_user, provider_general_user]
+    created_user = lambda x: NewCustomUserSerializer(data = x)
+    serialized_user_list =  list(map(created_user, user_list))
+    saved_user_list = [user.save() if user.is_valid() else False for user in serialized_user_list ]
+    user_list = [user.set_password('cambiame') if user else False for user in saved_user_list]
+    user_saved_list = list()
+    for user in saved_user_list:
+        if user:
+            if user.username == 'admin':
+                user.is_superuser = True
+            user_saved_list.append(user.save())
 
-    user_CA_permission_ppcn_group = Group.objects.get(name ='dcc_ppcn_responsible')
-    user_CA_permission = Permission.objects.get(codename='user_ca_permission',content_type=content_type)
-    user_CA_permission_ppcn_group.permissions.add(user_CA_permission)
 
-    can_provide_information_ppcn_group = Group.objects.get(name ='ppcn_provider')
-    can_provide_information_permission = Permission.objects.get(codename='can_provide_information',content_type=content_type)
-    can_provide_information_ppcn_group.permissions.add(can_provide_information_permission)
+
+def add_user_to_role(apps, schema_editor):
+    UserModel = get_user_model()
+    
+    assign_role(UserModel.objects.get(username='admin'), Admin)
+    assign_role(UserModel.objects.get(username='general_dcc'), Reviewer)
+    assign_role(UserModel.objects.get(username='information_provider'), InformationProvider)
+
+
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('ppcn', '0017_addPermissions'),
-        ('users', '0002_customgroup')
+        ('users', '0002_auto_20190322_2126')
     ]
     operations = [
-        migrations.RunPython(add_Permissions),
+        migrations.RunPython(add_create_user),
+        migrations.RunPython(add_user_to_role)
     ]
 
-    
