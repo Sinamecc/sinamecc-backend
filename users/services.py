@@ -3,11 +3,11 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, CustomGroup
 from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
     GroupSerializer, CustomGroupSerializer
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
+from rolepermissions import roles
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -82,7 +82,7 @@ class UserService():
                 new_label_group[field] = request.data.get(field)
 
         if group_id : new_label_group['group'] = group_id
-        print(new_label_group)
+ 
         if label_group: 
             serializer = CustomGroupSerializer(label_group, data = new_label_group, partial=True)
         else: 
@@ -111,14 +111,39 @@ class UserService():
             user = UserModel.objects.filter(username=username).get()
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
-            content_user['available_apps'] = self.get_available_app(user)
-            # we need this line for permissions in endpoints
-            login(request, user)
-            result = (True, content_user)
+            available_apps_status, available_apps_data = self.get_user_roles(user)
+            if available_apps_status:
+                content_user['available_apps'] = available_apps_data
+                result = (True, content_user)
+                login(request, user)
+            else:
+                result = (False, self.USER_DOESNT_EXIST)
+            
+            
         except UserModel.DoesNotExist:
             result = (False, self.USER_DOESNT_EXIST)
+        return result
+
+    def get_user_roles(self, user):
+        
+        app_permissions = {}
+        user_roles = roles.get_user_roles(user)
+
+        result = (True, app_permissions)
+        for role in user_roles:
+            if isinstance(role.app, list):
+                for app in role.app:
+                    if not (app in app_permissions):
+                        app_permissions[app] = {'reviewer':False, 'provider':False}
+                    app_permissions.get(app, {})[role.type] = True
+
+            elif role.app in app_permissions:
+                    app_permissions.get(role.app, {})[role.type] = True
+
+            else:
+                app_permissions[role.app] = {'reviewer':False, 'provider':False}
+                app_permissions.get(role.app, {})[role.type] = True
+
         return result
 
 
@@ -136,19 +161,8 @@ class UserService():
         result = (True, serialized_users_list)
 
         return result
-    def get_user_groups(self, user):
-       
-        user_groups = [
-            {
-                "id": g.id,
-                "name": g.name,
-                "label": g.custom_group.label
-            } for g in (Group.objects.all() if user.is_superuser else user.groups.all())
-        ]
 
-        return user_groups
-
-
+    
     def get_available_app(self, user):
         permission_groups = []
 

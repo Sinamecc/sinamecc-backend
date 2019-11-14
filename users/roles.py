@@ -55,6 +55,7 @@ class InformationProviderPPCN(AbstractUserRole):
 
     role = 'Information Provider PPCN'
     app = 'ppcn'
+    type = 'provider'
     available_permissions = {
         **permission_ppcn
     }
