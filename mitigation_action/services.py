@@ -787,9 +787,9 @@ class MitigationActionService():
             mitigation = self.get_one(id)
             mitigation.ingei_compliances.clear()
             mitigation.delete()
-            result = True
+            result = (True, {"Result":"Mitigation Action has been delete"})
         except:
-            result = False
+            result = (False, {"Result":"Mitigation has not been delete"})
         return result
 
     def update(self, id, request, language):

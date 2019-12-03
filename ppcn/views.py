@@ -124,7 +124,7 @@ def patch_ppcn(request, id):
 
 @api_view(['GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
-@request_passes_test(permission.userPatchPermission,  instance_name='ppcn')
+@request_passes_test(permission.userProviderPermission,  instance_name='ppcn')
 def get_one_ppcn(request, id , language = 'en'):
     if request.method == 'GET':
         result = view_helper.get_one(id, language)

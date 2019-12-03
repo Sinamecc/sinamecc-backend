@@ -260,9 +260,9 @@ class MCCRService():
         try:
             mccr = self.get_one(id)
             mccr.delete()
-            result = True
+            result = (True, {"Result":"MCCR has been delete"})
         except MCCRRegistry.DoesNotExist:
-            result = False
+            result = (False, {"Result":"MMCR has been delete"})
         return result
 
     def get_file_content(self, mccr_id, mccr_file_id):

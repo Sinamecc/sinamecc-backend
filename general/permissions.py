@@ -85,7 +85,8 @@ class PermissionsHelper():
             for p in permission:
                 permission_list.append(user.has_perm( '%s.%s' % (instance, p)))
                 return permission_list.count(True)
-
+        
+        
         return user.has_perm( '%s.%s' % (instance, permission))
 
 
