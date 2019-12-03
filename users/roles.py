@@ -2,6 +2,7 @@ from rolepermissions.roles import AbstractUserRole
 from ppcn.permissions.permissions import *
 from mitigation_action.permissions.permissions import *
 from mccr.permissions.permissions import  *
+from users.permissions.permissions import *  
 class Admin(AbstractUserRole):
 
     role = 'Administrator'
@@ -13,7 +14,8 @@ class Admin(AbstractUserRole):
         **permission_mitigation_action,
         **permission_mitigation_action_reviewer, 
         **permission_mccr, 
-        **permission_mccr_reviewer
+        **permission_mccr_reviewer,
+        **permission_users
     }
     
 
