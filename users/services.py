@@ -104,6 +104,7 @@ class UserService():
 
         return serializer
 
+    
     def get(self, request, username):
     
         UserModel = get_user_model()
@@ -154,8 +155,10 @@ class UserService():
         for user in user_list:
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
+            available_apps_status, available_apps_data = self.get_user_roles(user)
+            if available_apps_status:
+                content_user['available_apps'] = available_apps_data
+                
             serialized_users_list.append(content_user)
 
         result = (True, serialized_users_list)
