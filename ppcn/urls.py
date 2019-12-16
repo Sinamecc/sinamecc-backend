@@ -34,20 +34,6 @@ urlpatterns = [
         name='get_post_ppcn'
     ), 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     url(
         r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/ppcn_file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
         views.get_ppcn_file,
@@ -70,7 +56,6 @@ urlpatterns = [
     ), 
 
  
-
     url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>[A-Za-z]*)/*$',
         views.get_one_ppcn,
         name='get_one_ppcn'
