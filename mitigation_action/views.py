@@ -11,11 +11,51 @@ from django.http import HttpResponse
 from django.template import loader
 from django.shortcuts import render
 from django.http import Http404
-
+from rolepermissions.decorators import has_permission_decorator
+from mitigation_action.models import Mitigation
 from django.http import HttpResponseRedirect
 service = MitigationActionService()
 view_helper = ViewHelper(service)
-from mitigation_action.models import Mitigation
+
+@api_view(['GET'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@has_permission_decorator('read_mitigation_action')
+def get_mitigation(request, language='en'):
+    if request.method == 'GET':
+        result = view_helper.get_all(language)
+        return result
+
+@api_view(['POST'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+@has_permission_decorator('create_mitigation_action')
+def post_mitigation(request):
+    if request.method == 'POST':
+        result = view_helper.post(request)
+        return result
+
+@api_view(['GET', 'POST'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+def get_post_mitigation(request, language='en'):
+    if request.method == 'GET':
+        result = get_mitigation(request, language)
+
+    elif request.method == 'POST':
+        result = post_mitigation(request)
+
+    return result
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 def get_delete_put_patch_mitigation(request, pk, language):
@@ -47,19 +87,7 @@ def get_mitigations_form_es_en(request, language, option):
         result = view_helper.execute_by_name( "get_form_data_es_en", language, option)
     return result
 
-@api_view(['GET'])
-@parser_classes((MultiPartParser, FormParser, JSONParser,))
-def get_mitigation(request, language):
-    if request.method == 'GET':
-        result = view_helper.get_all(language)
-        return result
 
-@api_view(['POST'])
-@parser_classes((MultiPartParser, FormParser, JSONParser,))
-def post_mitigations(request):
-    if request.method == 'POST':
-        result = view_helper.post(request)
-        return result
 
 
 @api_view(['GET'])
@@ -72,19 +100,3 @@ def get_mitigation_action_file(request, id, file_id):
         return response
     return view_helper.error_message("Unsupported METHOD for get_mitigation_action_file_version_url view")
 
-def get_notification_template(request, uuid, lang="en"):
-    mitigation_result, mitigation_action = service.get(uuid, lang)
-    template = loader.get_template('mitigation_action/index.html')
-    if mitigation_result:
-        context = {
-            'lang':lang,
-            'mitigation_action': mitigation_action,
-        }
-        result = HttpResponse(template.render(context, request))
-    else:
-        template_error = loader.get_template('general/error.html')
-        context={
-            'error': mitigation_action
-        }
-        result = HttpResponse(template_error.render(context, request))
-    return  result
