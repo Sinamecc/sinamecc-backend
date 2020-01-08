@@ -4,19 +4,9 @@ from ppcn import views
 
 urlpatterns = [
     url(
-        r'^api/v1/ppcn/geographic/level/(?P<language>es|en)/*',
+        r'^api/v1/ppcn/geographic/level/(?P<language>es|en)*/*',
         views.get_geographic_level,
         name='get_geographic_level'
-    ),
-    url(
-        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
-        views.get_ppcn_file_version,
-        name='get_ppcn_file_version'
-    ),
-    url(
-        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/ppcn_file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
-        views.get_ppcn_file,
-        name='get_ppcn_file'
     ),
     url(
         r'^api/v1/ppcn/required/level/(?P<language>es|en)/*',
@@ -28,10 +18,6 @@ urlpatterns = [
         views.get_recognition_type,
         name='get_recognition_type'
     ),
-     url(r'^api/v1/ppcn/file/*$',
-        views.post_ppcn_file,
-        name='post_ppcn_file'
-    ),
     url(
         r'^api/v1/ppcn/(?P<id>[0-9]+)/sector/(?P<language>[A-Za-z]*)/*$',
         views.get_sector,
@@ -41,6 +27,21 @@ urlpatterns = [
         r'^api/v1/ppcn/(?P<pk>[0-9]+)/subsector/(?P<language>[A-Za-z]*)/*$',
         views.get_sub_sector,
         name='get_sub_sector'
+    ),
+
+    url(r'^api/v1/ppcn/(?P<language>es|en)*/*$',
+        views.get_post_ppcn,
+        name='get_post_ppcn'
+    ), 
+
+    url(
+        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/ppcn_file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
+        views.get_ppcn_file,
+        name='get_ppcn_file'
+    ),
+     url(r'^api/v1/ppcn/file/*$',
+        views.post_ppcn_file,
+        name='post_ppcn_file'
     ),
 
     url(
@@ -54,11 +55,7 @@ urlpatterns = [
         name='get_all_ppcn'
     ), 
 
-    url(r'^api/v1/ppcn/*(?P<language>es|en)*/*$',
-        views.get_post_ppcn,
-        name='get_post_ppcn'
-    ), 
-
+ 
     url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>[A-Za-z]*)/*$',
         views.get_one_ppcn,
         name='get_one_ppcn'
@@ -76,14 +73,10 @@ urlpatterns = [
         views.get_ppcn_change_log,
         name='get_mitigation_change_log'
     ),
+
     url(
-        r'^notification/ppcn/(?P<id>[0-9a-zA-Z\-]+)$',
-        views.get_notification_template,
-        name='get_notification_template'
-    ),
-    url(
-        r'^notification/ppcn/(?P<id>[0-9a-zA-Z\-]+)/(?P<lang>[0A-Za-z0-9]+)/*$',
-        views.get_notification_template,
-        name='get_notification_template'
+        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
+        views.get_ppcn_file_version,
+        name='get_ppcn_file_version'
     ),
 ]
