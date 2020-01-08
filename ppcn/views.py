@@ -49,11 +49,13 @@ def put_ppcn(request, id):
         result = view_helper.put(id, request)
     return result
 
+@api_view(['PATCH'])
 @has_permission_decorator('edit_ppcn')
 def patch_ppcn(request, id):
     if request.method == 'PATCH':
         result = view_helper.patch(id, request)
     return result
+
 
 @api_view(['DELETE'])
 @has_permission_decorator('delete_ppcn')
