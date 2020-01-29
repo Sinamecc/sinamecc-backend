@@ -22,7 +22,7 @@ view_helper = ViewHelper(service)
 ## Auxialar Endpoint
 @api_view(['GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
-@has_permission_decorator('read_mitigation_action')
+@has_permission_decorator('read_all_mitigation_action')
 def get_mitigation(request, language='en'):
     if request.method == 'GET':
         result = view_helper.get_all(language)

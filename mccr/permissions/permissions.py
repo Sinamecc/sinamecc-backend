@@ -12,4 +12,5 @@ permission_mccr_reviewer = {
     'read_mccr': True, 
     'edit_mccr': True, 
     'delete_mccr': True, 
+    'read_all_mccr': True
 }

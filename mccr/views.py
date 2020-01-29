@@ -18,7 +18,7 @@ view_helper = ViewHelper(service)
 ##
 
 @api_view(['GET'])
-@has_permission_decorator('read_mccr')
+@has_permission_decorator('read_all_mccr')
 def get_mccr(request):
     if request.method == 'GET':
         result = view_helper.get_all(request)
