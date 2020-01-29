@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser, CustomGroup
+from .models import CustomUser
 from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
-    GroupSerializer, CustomGroupSerializer
+    GroupSerializer
 from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -74,21 +74,6 @@ class UserService():
 
         return serializer
     
-    def get_serialized_label_group(self, request, group_id = False, label_group = False):
-
-        new_label_group = {}
-        for field in CustomGroupSerializer.Meta.fields:
-            if field in request.data:
-                new_label_group[field] = request.data.get(field)
-
-        if group_id : new_label_group['group'] = group_id
- 
-        if label_group: 
-            serializer = CustomGroupSerializer(label_group, data = new_label_group, partial=True)
-        else: 
-            serializer = CustomGroupSerializer(data = new_label_group)
-
-        return serializer
 
     
     def get_serialized_existing_user(self, request, user = False):
@@ -342,7 +327,7 @@ class UserService():
             label_group = group.custom_group
 
             serialized_group = self.get_serialized_group(request, group)
-            serialized_label = self.get_serialized_label_group(request, label_group=label_group)
+            
             validation = [serialized_group.is_valid(), serialized_label.is_valid()]
             if validation.count(False) == 0:
                 group = serialized_group.save()
@@ -367,19 +352,7 @@ class UserService():
             
         return (True, group_list)
     
-    def create_label_group(self, request, group_id):
-        errors = []
-        result = (False, self.CREATE_GROUP_ERROR)
-        serialized_label_group = self.get_serialized_label_group(request, group_id=group_id)
 
-        if serialized_label_group.is_valid():
-            serialized_label_group.save()
-            result = (True, CustomGroupSerializer(data = serialized_label_group))
-        else:
-            errors.append(serialized_label_group.errors)
-            result = (False, errors)
-
-        return result
 
     def create_group(self, request):
         
@@ -390,14 +363,8 @@ class UserService():
         if serialized_group.is_valid():
             saved_group = serialized_group.save()
             group_id = saved_group.id
-            result_status, result_detail = self.create_label_group(request, group_id)
-            if result_status:
-                group_serialized = GroupSerializer(saved_group).data
-                group_serialized['label'] = saved_group.custom_group.label
-                result = (True, group_serialized)
-            else: 
-                errors.append(result_detail)
-                result = (False, errors)
+            group_serialized = GroupSerializer(saved_group).data
+            result = (True, group_serialized)
         else:
             errors.append(serialized_group.errors)
             result = (False, errors)
