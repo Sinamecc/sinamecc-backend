@@ -4,8 +4,8 @@ from mccr import views
 urlpatterns = [
     url(
         r'^api/v1/mccr/(?P<id>[0-9a-fA-F-]+)/*$',
-        views.get_mccr,
-        name='get_mccr'
+        views.get_put_patch_delete_mccr,
+        name='get_put_patch_delete_mccr'
     ),
     url(
         r'^api/v1/mccr/(?P<id>[0-9a-fA-F-]+)/file/(?P<mccr_file_id>[0-9a-fA-F-]+)/*$',
@@ -32,18 +32,4 @@ urlpatterns = [
         views.get_post_mccr,
         name='get_post_mccr'
     ),
-    url(
-        r'^notification/mccr/(?P<mccr_id>[0-9a-zA-Z\-]+)/*$',
-        views.get_notification_template,
-        name='get_notification_template'
-    ),
-    url(
-        r'^notification/mccr/(?P<mccr_id>[0-9a-zA-Z\-]+)/(?P<lang>[0A-Za-z0-9]+)/*$',
-        views.get_notification_template,
-        name='get_notification_template'
-    ),
-    url(r'^api/v1/mccr/notification/(?P<mccr_id>[0-9a-fA-F-]+)/*$',
-        views.redirect_notification,
-        name='redirect_notification'
-    )
 ]
