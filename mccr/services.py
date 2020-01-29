@@ -119,7 +119,7 @@ class MCCRService():
             result = (False, {"error": self.MCCR_ERROR_NOT_EXIST})
         return result
 
-    def get_all(self):
+    def get_all(self, request):
         try:
             m_list = [
                 {
