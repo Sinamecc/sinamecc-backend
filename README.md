@@ -64,7 +64,7 @@ export SINAMECC_PASSWORD=cambiame
 - `docker-compose build` to build an new images set
 - `docker-compose up` to run the stack
 - Be sure to have a dev.env file with the env variables assigned. If you don't, ask them to other devs. Never commit this file with sensitive values.
-- In another tab, `docker-compose run web python3 manage.py migrate` to run all pending migrations
+- If you don't have the sql file `sinamecc_db.sql`, run in another tab, `docker-compose run web python3 manage.py migrate` to have all pending migrations done
 - In another tab, create super user by running `docker-compose run web ./createsuperuser.sh local`
 - `docker-compose stop` to stop the stack
 - To attach a bash you need to get the ContainerId running `docker ps`, and for example if the id was `3a87143669e4` execute `docker exec -i -t 3a87143669e4 /bin/bash`
