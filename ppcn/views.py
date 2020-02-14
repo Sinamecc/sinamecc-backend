@@ -29,7 +29,7 @@ def post_ppcn(request):
     return result
 
 @api_view(['GET'])
-@has_permission_decorator('read_all_ppcn')
+##@has_permission_decorator('read_all_ppcn')
 def get_ppcn(request,  language = 'en'):
     if request.method == 'GET':
         result = view_helper.get_all(request, language)
