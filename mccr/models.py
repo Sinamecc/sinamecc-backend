@@ -62,7 +62,7 @@ class MCCRRegistry(models.Model):
         # - new
         return self.fsm_state == 'new'
 
-    @transition(field='fsm_state', source='new', target='mccr_submitted', conditions=[can_submit], on_error='failed', permission=permission.userProvideInformationPermission)
+    @transition(field='fsm_state', source='new', target='mccr_submitted', conditions=[can_submit], on_error='failed', permission='')
     def submit(self):
         print('The MCCR is transitioning from new to mccr_submitted')
         # Additional logic goes here.
@@ -76,7 +76,7 @@ class MCCRRegistry(models.Model):
         # - mccr_submitted
         return self.fsm_state == 'mccr_submitted' or self.fsm_state == 'ovv_reject_assignation'
 
-    @transition(field= 'fsm_state', source = 'mccr_submitted', target = 'mccr_ovv_assigned_first_review',conditions=[can_assign_ovv_for_first_review], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_submitted', target = 'mccr_ovv_assigned_first_review',conditions=[can_assign_ovv_for_first_review], on_error = 'failed', permission='')
     def assign_ovv_for_first_review(self):
         print('The MCCR is transitioning from mccr_submitted to mccr_ovv_assigned_first_review')
         # Notify to DCC, assign OVV
@@ -91,7 +91,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_assigned_first_review
         return self.fsm_state == 'mccr_ovv_assigned_first_review'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned_first_review', target = 'mccr_ovv_assigned_notification',conditions=[can_ovv_assigned_send_notification],  on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned_first_review', target = 'mccr_ovv_assigned_notification',conditions=[can_ovv_assigned_send_notification],  on_error = 'failed', permission='')
     def assigned_send_notification(self):
         print('The MCCR is transitioning from mccr_ovv_assigned_first_review to mccr_ovv_assigned_notification')
         # Additional logic goes here.
@@ -111,7 +111,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_assigned_notification
         return self.fsm_state == 'mccr_ovv_assigned_notification'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned_notification', target = 'mccr_ovv_accept_reject',conditions=[can_ovv_accept_reject], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned_notification', target = 'mccr_ovv_accept_reject',conditions=[can_ovv_accept_reject], on_error = 'failed', permission='')
     def ovv_accept_reject(self):
         print('The MCCR is transitioning from mccr_ovv_assigned_notification to mccr_ovv_accept_reject')
         # Additional logic goes here.
@@ -124,7 +124,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_reject
         return self.fsm_state == 'mccr_ovv_accept_reject'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject', target = 'mccr_ovv_accept_assignation',conditions=[can_ovv_accept_assignation], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject', target = 'mccr_ovv_accept_assignation',conditions=[can_ovv_accept_assignation], on_error = 'failed', permission='')
     def ovv_accept_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_accept_assignation')
         # Additional logic goes here.
@@ -139,7 +139,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_reject
         return self.fsm_state == 'mccr_ovv_accept_reject'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject', target = 'mccr_ovv_reject_assignation',conditions=[can_ovv_reject_assignation], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject', target = 'mccr_ovv_reject_assignation',conditions=[can_ovv_reject_assignation], on_error = 'failed', permission='')
     def reject_assignation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject to mccr_ovv_reject_assignation')
         # Additional logic goes here.
@@ -152,7 +152,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_assignation
         return self.fsm_state == 'mccr_ovv_accept_assignation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_assignation', target = 'mccr_ovv_upload_evaluation',conditions=[can_ovv_upload_evaluation], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_assignation', target = 'mccr_ovv_upload_evaluation',conditions=[can_ovv_upload_evaluation], on_error = 'failed', permission='')
     def ovv_upload_evaluation(self):
         print('The MCCR is transitioning from mccr_ovv_accept_assignation to mccr_ovv_upload_evaluation')
         # Additional logic goes here.
@@ -166,7 +166,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_reject_assignation
         return self.fsm_state == 'mccr_ovv_reject_assignation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_assignation', target = 'mccr_ovv_assigned_first_review',conditions=[can_ovv_assigned_first_review], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_assignation', target = 'mccr_ovv_assigned_first_review',conditions=[can_ovv_assigned_first_review], on_error = 'failed', permission='')
     def ovv_assigned_first_review(self):
         print('The MCCR is transitioning from mccr_ovv_reject_assignation to mccr_ovv_assigned_first_review')
         # Additional logic goes here.
@@ -180,7 +180,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation
         return self.fsm_state == 'mccr_ovv_upload_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_accept_dp',conditions=[can_ovv_accept_dp], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_accept_dp',conditions=[can_ovv_accept_dp], on_error = 'failed', permission='')
     def ovv_accept_dp(self):
         print('The MCCR is transitioning from mccr_ovv_upload_evaluation to mccr_ovv_accept_dp')
         # Additional logic goes here.
@@ -194,7 +194,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation
         return self.fsm_state == 'mccr_ovv_upload_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_reject_dp',conditions=[can_ovv_reject_dp], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_reject_dp',conditions=[can_ovv_reject_dp], on_error = 'failed', permission='')
     def ovv_reject_dp(self):
         print('The MCCR is transitioning from mccr_ovv_upload_evaluation to mccr_ovv_reject_dp')
         # Additional logic goes here.
@@ -208,7 +208,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_reject_dp
         return self.fsm_state == 'mccr_ovv_reject_dp'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_dp', target = 'mccr_end',conditions=[can_ovv_dp_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_dp', target = 'mccr_end',conditions=[can_ovv_dp_end], on_error = 'failed', permission='')
     def ovv_dp_end(self):
         print('The MCCR is transitioning from mccr_ovv_reject_dp to mccr_end')
         # Additional logic goes here.
@@ -222,7 +222,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation
         return self.fsm_state == 'mccr_ovv_upload_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_request_changes_dp',conditions=[can_ovv_request_changes_dp], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation', target = 'mccr_ovv_request_changes_dp',conditions=[can_ovv_request_changes_dp], on_error = 'failed', permission='')
     def ovv_request_changes_dp(self):
         print('The MCCR is transitioning from mccr_ovv_upload_evaluation to mccr_ovv_request_changes_dp')
         # Additional logic goes here.
@@ -252,7 +252,7 @@ class MCCRRegistry(models.Model):
         # - mccr_updating_dp_by_ovv_request
         return self.fsm_state == 'mccr_updating_dp_by_ovv_request'
 
-    @transition(field= 'fsm_state', source = 'mccr_updating_dp_by_ovv_request', target = 'mccr_ovv_accept_assignation',conditions=[can_ovv_download_updated_dp], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_updating_dp_by_ovv_request', target = 'mccr_ovv_accept_assignation',conditions=[can_ovv_download_updated_dp], on_error = 'failed', permission='')
     def ovv_download_updated_dp(self):
         print('The MCCR is transitioning from mccr_updating_dp_by_ovv_request to mccr_ovv_accept_assignation')
         # Additional logic goes here.
@@ -266,7 +266,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_dp
         return self.fsm_state == 'mccr_ovv_accept_dp'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_dp', target = 'mccr_secretary_get_dp_information',conditions=[can_secretary_get_dp_information], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_dp', target = 'mccr_secretary_get_dp_information',conditions=[can_secretary_get_dp_information], on_error = 'failed', permission='')
     def secretary_get_dp_information(self):
         print('The MCCR is transitioning from mccr_ovv_accept_dp to mccr_secretary_get_dp_information')
         # Additional logic goes here.
@@ -279,7 +279,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_get_dp_information
         return self.fsm_state == 'mccr_secretary_get_dp_information'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_get_dp_information', target = 'mccr_on_dp_evaluation_by_secretary',conditions=[can_evaluate_dp_by_secretary], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_get_dp_information', target = 'mccr_on_dp_evaluation_by_secretary',conditions=[can_evaluate_dp_by_secretary], on_error = 'failed', permission='')
     def evaluate_dp_by_secretary(self):
         print('The MCCR is transitioning from mccr_secretary_get_dp_information to mccr_on_dp_evaluation_by_secretary')
         # Additional logic goes here.
@@ -293,7 +293,7 @@ class MCCRRegistry(models.Model):
         # - mccr_on_dp_evaluation_by_secretary
         return self.fsm_state == 'mccr_on_dp_evaluation_by_secretary'
 
-    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_dp',conditions=[can_secretary_proceed_dp], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_dp',conditions=[can_secretary_proceed_dp], on_error = 'failed', permission='')
     def secretary_can_proceed_dp(self):
         print('The MCCR is transitioning from mccr_on_dp_evaluation_by_secretary to mccr_secretary_can_proceed_dp')
         # Additional logic goes here.
@@ -308,7 +308,7 @@ class MCCRRegistry(models.Model):
         # - mccr_on_dp_evaluation_by_secretary
         return self.fsm_state == 'mccr_on_dp_evaluation_by_secretary'
 
-    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_end', conditions=[can_secretary_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_on_dp_evaluation_by_secretary', target = 'mccr_end', conditions=[can_secretary_end], on_error = 'failed', permission='')
     def secretary_end(self):
         print('The MCCR is transitioning from mccr_on_dp_evaluation_by_secretary to mccr_end')
         # Additional logic goes here.
@@ -322,7 +322,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_can_proceed_dp
         return self.fsm_state == 'mccr_secretary_can_proceed_dp'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_secretary_reject_dp_environmental_concerns', conditions=[can_secretary_reject_dp_environmental_concerns], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_secretary_reject_dp_environmental_concerns', conditions=[can_secretary_reject_dp_environmental_concerns], on_error = 'failed', permission='')
     def secretary_reject_dp_environmental_concerns(self):
         print('The MCCR is transitioning from mccr_secretary_can_proceed_dp to mccr_secretary_reject_dp_environmental_concerns')
         # Additional logic goes here.
@@ -336,7 +336,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_reject_dp_environmental_concerns
         return self.fsm_state == 'mccr_secretary_reject_dp_environmental_concerns'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_dp_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_dp_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_dp_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_dp_end], on_error = 'failed', permission='')
     def secretary_dp_end(self):
         print('The MCCR is transitioning from mccr_secretary_reject_dp_environmental_concerns to mccr_end')
         # Additional logic goes here.
@@ -350,7 +350,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_can_proceed_dp
         return self.fsm_state == 'mccr_secretary_can_proceed_dp'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_refer_validation_dp_report', conditions=[can_refer_validation_dp_report], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_dp', target = 'mccr_refer_validation_dp_report', conditions=[can_refer_validation_dp_report], on_error = 'failed', permission='')
     def refer_validation_dp_report(self):
         print('The MCCR is transitioning from mccr_secretary_can_proceed_dp to mccr_refer_validation_dp_report')
         # Additional logic goes here.
@@ -364,7 +364,7 @@ class MCCRRegistry(models.Model):
         # - mccr_refer_validation_report
         return self.fsm_state == 'mccr_refer_validation_dp_report'
 
-    @transition(field= 'fsm_state', source = 'mccr_refer_validation_dp_report', target = 'mccr_in_exec_committee_evaluation', conditions=[can_exec_committee_evaluate], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_refer_validation_dp_report', target = 'mccr_in_exec_committee_evaluation', conditions=[can_exec_committee_evaluate], on_error = 'failed', permission='')
     def exec_committee_evaluate(self):
         print('The MCCR is transitioning from mccr_refer_validation_dp_report to mccr_in_exec_committee_evaluation')
         # Additional logic goes here.
@@ -378,7 +378,7 @@ class MCCRRegistry(models.Model):
         # - mccr_in_exec_committee_evaluation
         return self.fsm_state == 'mccr_in_exec_committee_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_communicate_conditions', conditions=[can_communicate_conditions], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_communicate_conditions', conditions=[can_communicate_conditions], on_error = 'failed', permission='')
     def communicate_conditions(self):
         print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_communicate_conditions')
         # Additional logic goes here.
@@ -392,7 +392,7 @@ class MCCRRegistry(models.Model):
         # - mccr_in_exec_committee_evaluation
         return self.fsm_state == 'mccr_in_exec_committee_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_exec_committee_reject', conditions=[can_committee_reject], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_exec_committee_reject', conditions=[can_committee_reject], on_error = 'failed', permission='')
     def committee_reject(self):
         print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_exec_committee_reject')
         # Additional logic goes here.
@@ -406,7 +406,7 @@ class MCCRRegistry(models.Model):
         # - mccr_in_exec_committee_evaluation
         return self.fsm_state == 'mccr_in_exec_committee_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_project_monitoring', conditions=[can_monitor_project], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_in_exec_committee_evaluation', target = 'mccr_project_monitoring', conditions=[can_monitor_project], on_error = 'failed', permission='')
     def monitor_project(self):
         print('The MCCR is transitioning from mccr_in_exec_committee_evaluation to mccr_project_monitoring')
         # Additional logic goes here.
@@ -420,7 +420,7 @@ class MCCRRegistry(models.Model):
         # - mccr_exec_committee_reject
         return self.fsm_state == 'mccr_exec_committee_reject'
 
-    @transition(field= 'fsm_state', source = 'mccr_exec_committee_reject', target = 'mccr_end', conditions=[can_committee_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_exec_committee_reject', target = 'mccr_end', conditions=[can_committee_end], on_error = 'failed', permission='')
     def committee_end(self):
         print('The MCCR is transitioning from mccr_exec_committee_reject to mccr_end')
         # Additional logic goes here.
@@ -434,7 +434,7 @@ class MCCRRegistry(models.Model):
         # - mccr_project_monitoring
         return self.fsm_state == 'mccr_project_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_project_monitoring', target = 'mccr_upload_report_sinamecc', conditions=[can_upload_report_sinamecc], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_project_monitoring', target = 'mccr_upload_report_sinamecc', conditions=[can_upload_report_sinamecc], on_error = 'failed', permission='')
     def upload_report_sinamecc(self):
         print('The MCCR is transitioning from mccr_project_monitoring to mccr_upload_report_sinamecc')
         # Additional logic goes here.
@@ -448,7 +448,7 @@ class MCCRRegistry(models.Model):
         # - mccr_upload_report_sinamecc
         return self.fsm_state == 'mccr_upload_report_sinamecc'
 
-    @transition(field= 'fsm_state', source = 'mccr_upload_report_sinamecc', target = 'mccr_ovv_assigned', conditions=[can_ovv_assign], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_upload_report_sinamecc', target = 'mccr_ovv_assigned', conditions=[can_ovv_assign], on_error = 'failed', permission='')
     def ovv_assign(self):
         print('The MCCR is transitioning from mccr_upload_report_sinamecc to mccr_ovv_assigned')
         # Additional logic goes here.
@@ -462,7 +462,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_assigned
         return self.fsm_state == 'mccr_ovv_assigned'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned', target = 'mccr_ovv_accept_reject_monitoring', conditions=[can_ovv_accept], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_assigned', target = 'mccr_ovv_accept_reject_monitoring', conditions=[can_ovv_accept], on_error = 'failed', permission='')
     def ovv_accept(self):
         print('The MCCR is transitioning from mccr_ovv_assigned to mccr_ovv_accept_reject_monitoring')
         # Additional logic goes here.
@@ -476,7 +476,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_reject
         return self.fsm_state == 'mccr_ovv_accept_reject_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject_monitoring', target = 'mccr_ovv_accept_assignation_monitoring', conditions=[can_ovv_accept_assignation_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_reject_monitoring', target = 'mccr_ovv_accept_assignation_monitoring', conditions=[can_ovv_accept_assignation_monitoring], on_error = 'failed', permission='')
     def ovv_accept_assignation_monitoring(self):
         print('The MCCR is transitioning from mccr_ovv_accept_reject_monitoring to mccr_ovv_accept_assignation_monitoring')
         # Additional logic goes here.
@@ -490,7 +490,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_assignation
         return self.fsm_state == 'mccr_ovv_accept_assignation_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_assignation_monitoring', target = 'mccr_ovv_upload_evaluation_monitoring', conditions=[can_ovv_upload_evaluation_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_assignation_monitoring', target = 'mccr_ovv_upload_evaluation_monitoring', conditions=[can_ovv_upload_evaluation_monitoring], on_error = 'failed', permission='')
     def ovv_upload_evaluation_monitoring(self):
         print('The MCCR is transitioning from mccr_ovv_accept_assignation_monitoring to mccr_ovv_upload_evaluation_monitoring')
         # Additional logic goes here.
@@ -504,7 +504,7 @@ class MCCRRegistry(models.Model):
 
 
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation_monitoring', target = 'mccr_decision_step_ovv_evaluation_monitoring', conditions=[can_decision_step_ovv_evaluation_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_upload_evaluation_monitoring', target = 'mccr_decision_step_ovv_evaluation_monitoring', conditions=[can_decision_step_ovv_evaluation_monitoring], on_error = 'failed', permission='')
     def decision_step_ovv_evaluation_monitoring(self):
         print('The MCCR is transitioning from mccr_ovv_upload_evaluation_monitoring to mccr_decision_step_ovv_evaluation_monitoring')
         # Additional logic goes here.
@@ -521,7 +521,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation
         return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_reject_monitoring', conditions=[can_ovv_reject_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_reject_monitoring', conditions=[can_ovv_reject_monitoring], on_error = 'failed', permission='')
     def ovv_reject_monitoring(self):
         print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_reject_monitoring')
         # Additional logic goes here.
@@ -535,7 +535,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation
         return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
     
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_request_changes_monitoring', conditions=[can_ovv_request_changes_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_request_changes_monitoring', conditions=[can_ovv_request_changes_monitoring], on_error = 'failed', permission='')
     def ovv_request_changes_monitoring(self):
         print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_request_changes_monitoring')
         # Additional logic goes here.
@@ -551,7 +551,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_reject_monitoring
         return self.fsm_state == 'mccr_ovv_reject_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_monitoring', target = 'mccr_end', conditions=[can_ovv_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_reject_monitoring', target = 'mccr_end', conditions=[can_ovv_end], on_error = 'failed', permission='')
     def ovv_end(self):
         print('The MCCR is transitioning from mccr_ovv_reject_monitoring to mccr_end')
         # Additional logic goes here.
@@ -565,7 +565,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_request_changes_monitoring
         return self.fsm_state == 'mccr_ovv_request_changes_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_request_changes_monitoring', target = 'mccr_updating_report_by_ovv_request', conditions=[can_update_report_by_ovv_request], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_request_changes_monitoring', target = 'mccr_updating_report_by_ovv_request', conditions=[can_update_report_by_ovv_request], on_error = 'failed', permission='')
     def update_report_by_ovv_request(self):
         print('The MCCR is transitioning from mccr_ovv_request_changes_monitoring to mccr_updating_report_by_ovv_request')
         # Additional logic goes here.
@@ -579,7 +579,7 @@ class MCCRRegistry(models.Model):
         # - mccr_updating_report_by_ovv_request
         return self.fsm_state == 'mccr_updating_report_by_ovv_request'
 
-    @transition(field= 'fsm_state', source = 'mccr_updating_report_by_ovv_request', target = 'mccr_ovv_accept_assignation_monitoring',conditions=[can_ovv_download_updated_report], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_updating_report_by_ovv_request', target = 'mccr_ovv_accept_assignation_monitoring',conditions=[can_ovv_download_updated_report], on_error = 'failed', permission='')
     def ovv_download_updated_report(self):
         print('The MCCR is transitioning from mccr_updating_report_by_ovv_request to mccr_ovv_accept_assignation_monitoring')
         # Additional logic goes here.
@@ -593,7 +593,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_upload_evaluation_monitoring
         return self.fsm_state == 'mccr_decision_step_ovv_evaluation_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_accept_monitoring', conditions=[can_ovv_accept_monitoring], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_ovv_evaluation_monitoring', target = 'mccr_ovv_accept_monitoring', conditions=[can_ovv_accept_monitoring], on_error = 'failed', permission='')
     def ovv_accept_monitoring(self):
         print('The MCCR is transitioning from mccr_decision_step_ovv_evaluation_monitoring to mccr_ovv_accept_monitoring')
         # Additional logic goes here.
@@ -610,7 +610,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ovv_accept_monitoring
         return self.fsm_state == 'mccr_ovv_accept_monitoring'
 
-    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_monitoring', target = 'mccr_secretary_get_report_information',conditions=[can_secretary_get_report_information], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ovv_accept_monitoring', target = 'mccr_secretary_get_report_information',conditions=[can_secretary_get_report_information], on_error = 'failed', permission='')
     def secretary_get_report_information(self):
         print('The MCCR is transitioning from mccr_ovv_accept_monitoring to mccr_secretary_get_report_information')
         # Additional logic goes here.
@@ -628,7 +628,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_get_report_information
         return self.fsm_state == 'mccr_secretary_get_report_information'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_get_report_information', target = 'mccr_on_report_evaluation_by_secretary',conditions=[can_evaluate_report_by_secretary], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_get_report_information', target = 'mccr_on_report_evaluation_by_secretary',conditions=[can_evaluate_report_by_secretary], on_error = 'failed', permission='')
     def evaluate_report_by_secretary(self):
         print('The MCCR is transitioning from mccr_secretary_get_report_information to mccr_on_report_evaluation_by_secretary')
         # Additional logic goes here.
@@ -644,7 +644,7 @@ class MCCRRegistry(models.Model):
         # - mccr_on_report_evaluation_by_secretary
         return self.fsm_state == 'mccr_on_report_evaluation_by_secretary'
 
-    @transition(field= 'fsm_state', source = 'mccr_on_report_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_report',conditions=[can_secretary_proceed_report], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_on_report_evaluation_by_secretary', target = 'mccr_secretary_can_proceed_report',conditions=[can_secretary_proceed_report], on_error = 'failed', permission='')
     def secretary_can_proceed_report(self):
         print('The MCCR is transitioning from mccr_on_report_evaluation_by_secretary to mccr_secretary_can_proceed_report')
         # Additional logic goes here.
@@ -659,7 +659,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_can_proceed_report
         return self.fsm_state == 'mccr_secretary_can_proceed_report'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_secretary_reject_report_environmental_concerns', conditions=[can_secretary_reject_report_environmental_concerns], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_secretary_reject_report_environmental_concerns', conditions=[can_secretary_reject_report_environmental_concerns], on_error = 'failed', permission='')
     def secretary_reject_report_environmental_concerns(self):
         print('The MCCR is transitioning from mccr_secretary_can_proceed_report to mccr_secretary_reject_report_environmental_concerns')
         # Additional logic goes here.
@@ -673,7 +673,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_reject_report_environmental_concerns
         return self.fsm_state == 'mccr_secretary_reject_report_environmental_concerns'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_report_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_report_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_reject_report_environmental_concerns', target = 'mccr_end', conditions=[can_secretary_report_end], on_error = 'failed', permission='')
     def secretary_report_end(self):
         print('The MCCR is transitioning from mccr_secretary_reject_report_environmental_concerns to mccr_end')
         # Additional logic goes here.
@@ -687,7 +687,7 @@ class MCCRRegistry(models.Model):
         # - mccr_secretary_can_proceed_report
         return self.fsm_state == 'mccr_secretary_can_proceed_report'
 
-    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_refer_validation_monitoring_report', conditions=[can_refer_validation_monitoring_report], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_secretary_can_proceed_report', target = 'mccr_refer_validation_monitoring_report', conditions=[can_refer_validation_monitoring_report], on_error = 'failed', permission='')
     def refer_validation_monitoring_report(self):
         print('The MCCR is transitioning from mccr_secretary_can_proceed_report to mccr_refer_validation_monitoring_report')
         # Additional logic goes here.
@@ -705,7 +705,7 @@ class MCCRRegistry(models.Model):
         # - mccr_refer_validation_monitoring_report
         return self.fsm_state == 'mccr_refer_validation_monitoring_report'
 
-    @transition(field= 'fsm_state', source = 'mccr_refer_validation_monitoring_report', target = 'mccr_ucc_in_exec_committee_evaluation', conditions=[can_ucc_in_exec_committee_evaluation], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_refer_validation_monitoring_report', target = 'mccr_ucc_in_exec_committee_evaluation', conditions=[can_ucc_in_exec_committee_evaluation], on_error = 'failed', permission='')
     def ucc_in_exec_committee_evaluation(self):
         print('The MCCR is transitioning from mccr_refer_validation_monitoring_report to mccr_ucc_in_exec_committee_evaluation')
         # Additional logic goes here.
@@ -719,7 +719,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ucc_in_exec_committee_evaluation
         return self.fsm_state == 'mccr_ucc_in_exec_committee_evaluation'
 
-    @transition(field= 'fsm_state', source = 'mccr_ucc_in_exec_committee_evaluation', target = 'mccr_decision_step_emit_ucc', conditions=[can_decision_step_emit_ucc], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ucc_in_exec_committee_evaluation', target = 'mccr_decision_step_emit_ucc', conditions=[can_decision_step_emit_ucc], on_error = 'failed', permission='')
     def decision_step_emit_ucc(self):
         print('The MCCR is transitioning from mccr_ucc_in_exec_committee_evaluation to mccr_decision_step_emit_ucc')
         # Additional logic goes here.
@@ -733,7 +733,7 @@ class MCCRRegistry(models.Model):
         # - mccr_decision_step_emit_ucc
         return self.fsm_state == 'mccr_decision_step_emit_ucc'
 
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_reject', conditions=[can_ucc_reject], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_reject', conditions=[can_ucc_reject], on_error = 'failed', permission='')
     def ucc_reject(self):
         print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_ucc_reject')
         # Additional logic goes here.
@@ -749,7 +749,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ucc_reject
         return self.fsm_state == 'mccr_ucc_reject'
 
-    @transition(field= 'fsm_state', source = 'mccr_ucc_reject', target = 'mccr_end', conditions=[can_ucc_reject_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ucc_reject', target = 'mccr_end', conditions=[can_ucc_reject_end], on_error = 'failed', permission='')
     def ucc_reject_end(self):
         print('The MCCR is transitioning from mccr_ucc_reject to mccr_end')
         # Additional logic goes here.
@@ -764,7 +764,7 @@ class MCCRRegistry(models.Model):
         # - mccr_decision_step_emit_ucc
         return self.fsm_state == 'mccr_decision_step_emit_ucc'
 
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_communicate_ucc_conditions', conditions=[can_communicate_ucc_conditions], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_communicate_ucc_conditions', conditions=[can_communicate_ucc_conditions], on_error = 'failed', permission='')
     def communicate_ucc_conditions(self):
         print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_communicate_ucc_conditions')
         # Additional logic goes here.
@@ -779,7 +779,7 @@ class MCCRRegistry(models.Model):
         # - mccr_decision_step_emit_ucc
         return self.fsm_state == 'mccr_decision_step_emit_ucc'
 
-    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_accept', conditions=[can_ucc_accept], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_decision_step_emit_ucc', target = 'mccr_ucc_accept', conditions=[can_ucc_accept], on_error = 'failed', permission='')
     def ucc_accept(self):
         print('The MCCR is transitioning from mccr_decision_step_emit_ucc to mccr_ucc_accept')
         # Additional logic goes here.
@@ -794,7 +794,7 @@ class MCCRRegistry(models.Model):
         # - mccr_ucc_accept
         return self.fsm_state == 'mccr_ucc_accept'
 
-    @transition(field= 'fsm_state', source = 'mccr_ucc_accept', target = 'mccr_end', conditions=[can_ucc_accept_end], on_error = 'failed', permission = permission.userDCCPermission)
+    @transition(field= 'fsm_state', source = 'mccr_ucc_accept', target = 'mccr_end', conditions=[can_ucc_accept_end], on_error = 'failed', permission='')
     def ucc_accept_end(self):
         print('The MCCR is transitioning from mccr_ucc_accept to mccr_end')
         # Additional logic goes here.

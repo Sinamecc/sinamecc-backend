@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_addPermissions'),
+        ('users', '0001_initial'),
     ]
 
     operations = [
@@ -22,11 +22,6 @@ class Migration(migrations.Migration):
             model_name='customuser',
             name='is_provider',
             field=models.BooleanField(default=False),
-        ),
-        migrations.AlterField(
-            model_name='customgroup',
-            name='group',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='custom_group', to='auth.Group'),
         ),
         migrations.AddField(
             model_name='customuser',

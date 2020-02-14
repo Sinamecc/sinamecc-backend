@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import CustomUser, CustomGroup
+from users.models import CustomUser
 from django.contrib.auth.models import Group, Permission
 
 
@@ -23,7 +23,3 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('id', 'name')
 
-class CustomGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomGroup
-        fields = ('id', 'label', 'group')

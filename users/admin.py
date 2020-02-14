@@ -13,3 +13,4 @@ class CustomUserAdmin(UserAdmin):
     list_display = ['username', 'email','is_superuser','is_staff']
 
 admin.site.register(CustomUser, CustomUserAdmin)
+ROLEPERMISSIONS_REGISTER_ADMIN = True

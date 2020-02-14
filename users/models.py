@@ -10,14 +10,3 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
-
-class CustomGroup(models.Model):
-    
-    group = models.OneToOneField(Group, related_name='custom_group')
-    label = models.CharField(max_length=200, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("CustomGroup")
-        verbose_name_plural = _("CustomGroups")
-
-        

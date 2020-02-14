@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'ppcn',
     'corsheaders',
     'django_fsm',
+    'rolepermissions', 
     'users.apps.UsersConfig',
 ]
 
@@ -138,5 +139,10 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=30),
     'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_RESPONSE_PAYLOAD_HANDLER':'users.utils.jwt_response_payload_handler',
+    'JWT_PAYLOAD_HANDLER': 'users.utils.jwt_payload_handler',
 }
+
+
 AUTH_USER_MODEL = 'users.CustomUser'
+ROLEPERMISSIONS_MODULE = 'users.roles'

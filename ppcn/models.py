@@ -84,7 +84,6 @@ class RecognitionType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.recognition_type)
 
-
 class QuantifiedGas(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
 
@@ -166,8 +165,6 @@ class GeiOrganization(models.Model):
     def __unicode__(self):
         return smart_unicode(self.activity_type)
 
- 
-
 class PPCN(models.Model):
     
     user = models.ForeignKey(User, related_name='ppcn', null = False)
@@ -207,7 +204,7 @@ class PPCN(models.Model):
         # - PPCN_new
         return self.fsm_state == 'PPCN_new'
 
-    @transition(field='fsm_state', source='PPCN_new', target='PPCN_submitted', conditions=[can_submit], on_error='failed', permission=permission.userProvideInformationPermission)
+    @transition(field='fsm_state', source='PPCN_new', target='PPCN_submitted', conditions=[can_submit], on_error='failed', permission='')
     def submit(self):
 
         result = "The ppcn is transitioning from PPCN_new to PPCN_submitted"
@@ -230,7 +227,7 @@ class PPCN(models.Model):
 
         return self.fsm_state == 'PPCN_submitted' 
 
-    @transition(field='fsm_state', source='PPCN_submitted', target='PPCN_evaluation_by_DCC', conditions=[can_evaluate_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_submitted', target='PPCN_evaluation_by_DCC', conditions=[can_evaluate_DCC], on_error='failed', permission='')
     def evaluate_DCC(self):
         print('The ppcn is transitioning from PPCN_submitted to PPCN_evaluation_by_DCC')
         # Additional logic goes here.
@@ -243,7 +240,7 @@ class PPCN(models.Model):
 
         return self.fsm_state == 'PPCN_evaluation_by_DCC' 
 
-    @transition(field='fsm_state', source='PPCN_evaluation_by_DCC', target='PPCN_decision_step_DCC', conditions=[can_submit_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_evaluation_by_DCC', target='PPCN_decision_step_DCC', conditions=[can_submit_DCC], on_error='failed', permission='')
     def submit_DCC(self):
         print('The ppcn is transitioning from PPCN_evaluation_by_DCC to PPCN_decision_step_DCC')
         # Additional logic goes here.
@@ -255,7 +252,7 @@ class PPCN(models.Model):
         # - PPCN_evaluation_by_DCC
         return self.fsm_state == 'PPCN_decision_step_DCC'
     
-    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_rejected_request_by_DCC', conditions=[can_rejected_request_by_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_rejected_request_by_DCC', conditions=[can_rejected_request_by_DCC], on_error='failed', permission='')
     def rejected_request_by_DCC(self):
         print("The ppcn is transitioning from PPCN_decision_step_DCC to PPCN_rejected_request_by_DCC")
         # Transition condition logic goes here
@@ -287,7 +284,7 @@ class PPCN(models.Model):
         # - PPCN_evaluation_by_DCC
         return self.fsm_state == 'PPCN_decision_step_DCC'
     
-    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_accepted_request_by_DCC', conditions=[can_accepted_request_by_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_accepted_request_by_DCC', conditions=[can_accepted_request_by_DCC], on_error='failed', permission='')
     def accept_request_by_DCC(self):
         print("The ppcn is transitioning from PPCN_decision_step_DCC to PPCN_accepted_request_by_DCC")
         # Transition condition logic goes here
@@ -302,7 +299,7 @@ class PPCN(models.Model):
         # - PPCN_evaluation_by_DCC
         return self.fsm_state == 'PPCN_decision_step_DCC'
     
-    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_changes_requested_by_DCC', conditions=[can_changes_requested_by_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_decision_step_DCC', target='PPCN_changes_requested_by_DCC', conditions=[can_changes_requested_by_DCC], on_error='failed', permission='')
     def changes_requested_by_DCC(self):
         print("The ppcn is transitioning from PPCN_decision_step_DCC to PPCN_changes_requested_by_DCC")
         # Transition condition logic goes here
@@ -334,7 +331,7 @@ class PPCN(models.Model):
         return self.fsm_state == 'PPCN_updating_by_request_DCC'
 
 
-    @transition(field='fsm_state', source='PPCN_updating_by_request_DCC', target='PPCN_evaluation_by_DCC', conditions=[can_update_evaluate_DCC], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_updating_by_request_DCC', target='PPCN_evaluation_by_DCC', conditions=[can_update_evaluate_DCC], on_error='failed', permission='')
     def update_evaluate_DCC(self):
         print("The ppcn is transitioning from PPCN_updating_by_request_DCC to PPCN_evaluation_by_DCC")
         # Transition condition logic goes here
@@ -358,7 +355,7 @@ class PPCN(models.Model):
         condition_result = (not condition.count(False))
         return condition_result
     
-    @transition(field='fsm_state', source='PPCN_accepted_request_by_DCC', target='PPCN_evaluation_by_CA', conditions=[can_evaluation_by_CA], on_error='failed', permission=permission.userDCCPermission)
+    @transition(field='fsm_state', source='PPCN_accepted_request_by_DCC', target='PPCN_evaluation_by_CA', conditions=[can_evaluation_by_CA], on_error='failed', permission='')
     def evaluate_by_CA(self):
         print("The ppcn is transitioning from accept_request_DCC to PPCN_evaluation_by_CA")
         # Transition condition logic goes here
@@ -395,7 +392,7 @@ class PPCN(models.Model):
         # - PPCN_evaluation_by_CA
         return self.fsm_state == 'PPCN_evaluation_by_CA'
     
-    @transition(field='fsm_state', source='PPCN_evaluation_by_CA', target='PPCN_decision_step_CA', conditions=[can_submit_CA], on_error='failed', permission=permission.userCAPermission)
+    @transition(field='fsm_state', source='PPCN_evaluation_by_CA', target='PPCN_decision_step_CA', conditions=[can_submit_CA], on_error='failed', permission='')
     def submit_CA(self):
         print("The ppcn is transitioning from PPCN_evaluation_by_CA to PPCN_decision_step_CA")
         # Transition condition logic goes here
@@ -410,7 +407,7 @@ class PPCN(models.Model):
         # - PPCN_evaluation_by_CA
         return self.fsm_state == 'PPCN_decision_step_CA'
     
-    @transition(field='fsm_state', source='PPCN_decision_step_CA', target='PPCN_rejected_request_by_CA', conditions=[can_rejected_request_by_CA], on_error='failed', permission=permission.userCAPermission)
+    @transition(field='fsm_state', source='PPCN_decision_step_CA', target='PPCN_rejected_request_by_CA', conditions=[can_rejected_request_by_CA], on_error='failed', permission='')
     def rejected_request_by_CA(self):
         print("The ppcn is transitioning from PPCN_decision_step_CA to PPCN_rejected_request_by_CA")
         # Transition condition logic goes here
@@ -434,7 +431,7 @@ class PPCN(models.Model):
         # - PPCN_accepted_request_by_CA
         return self.fsm_state == 'PPCN_decision_step_CA'
     
-    @transition(field='fsm_state', source='PPCN_decision_step_CA', target='PPCN_accepted_request_by_CA', conditions=[can_accepted_request_by_CA], on_error='failed', permission=permission.userCAPermission)
+    @transition(field='fsm_state', source='PPCN_decision_step_CA', target='PPCN_accepted_request_by_CA', conditions=[can_accepted_request_by_CA], on_error='failed', permission='')
     def accept_request_by_CA(self):
         print("The ppcn is transitioning from PPCN_decision_step_CA to PPCN_accepted_request_by_CA")
         # Transition condition logic goes here
@@ -451,7 +448,7 @@ class PPCN(models.Model):
         # - PPCN_accepted_request_by_CA
         return self.fsm_state == 'PPCN_accepted_request_by_CA'
     
-    @transition(field='fsm_state', source='PPCN_accepted_request_by_CA', target='PPCN_send_recognition_certificate', conditions=[can_send_recognition_certificate], on_error='failed', permission=permission.userCAPermission)
+    @transition(field='fsm_state', source='PPCN_accepted_request_by_CA', target='PPCN_send_recognition_certificate', conditions=[can_send_recognition_certificate], on_error='failed', permission='')
     def send_recognition_certificate(self):
         print("The ppcn is transitioning from PPCN_accepted_request_by_CA to PPCN_send_recognition_certificate")
         # Transition condition logic goes here
@@ -460,7 +457,6 @@ class PPCN(models.Model):
 
         pass
 
- 
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
@@ -477,6 +473,7 @@ class ChangeLog(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
 class PPCNFile(models.Model):
 
     user = models.ForeignKey(User, related_name='ppcn_file')
