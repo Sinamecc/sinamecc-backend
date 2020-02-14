@@ -159,6 +159,7 @@ def get_post_ppcn(request, language = 'en'):
 @api_view(['DELETE', 'PUT', 'PATCH', 'GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def put_delete_patch_ppcn(request, id , language = 'en'):
+
     if request.method == 'GET':
         result = get_one_ppcn(request, id, language)
 

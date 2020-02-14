@@ -115,6 +115,7 @@ class DeleteSingleReportFileTest(TestCase):
 
     def test_invalid_delete_report_file(self):
         response = client.delete(
-            reverse('get_delete_update_report_file', kwargs={'pk': '0'}))
+            reverse('get_delete_update_report_file', kwargs={'pk': '0000112'}))
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

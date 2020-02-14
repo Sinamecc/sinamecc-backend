@@ -30,7 +30,8 @@ class ViewHelper():
         return self.get_by_name("get_form_data", *args)
 
     def delete(self, id):
-        if self.service.delete(id):
+        result_status, result_data = self.service.delete(id)
+        if result_status:
             result = Response({"id": id}, status=status.HTTP_200_OK)
         else:
             result = Response({"id": id}, status=status.HTTP_404_NOT_FOUND)

@@ -323,9 +323,9 @@ class PpcnService():
         try:
             org = Organization.objects.get(id=pk)
             org.delete()
-            result = True
+            result = (True, {"Result":"Organization has been delete"})
         except:
-            result = False
+            result = (False, {"Result":"Organization has been delete"})
         return result
 
     def get_all(self, request, language, user = False):
