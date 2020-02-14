@@ -2,10 +2,10 @@ from django.conf.urls import url
 from mitigation_action import views
 
 urlpatterns = [
-    url(
-        r'^api/v1/mitigations/$',
-        views.post_mitigations,
-        name='post_mitigations'
+     url(
+        r'^api/v1/mitigations/(?P<language>[A-Za-z0-9]*)/*$',
+        views.get_post_mitigation,
+        name='get_post_mitigation'
     ),
     url(
         r'^api/v1/mitigations/changelog/(?P<pk>[0-9a-f-]+)$',
@@ -22,11 +22,7 @@ urlpatterns = [
         views.get_mitigations_form,
         name='get_mitigations_form'
     ),
-    url(
-        r'^api/v1/mitigations/(?P<language>[A-Za-z0-9]+)$',
-        views.get_mitigation,
-        name='get_mitigation'
-    ),
+   
     url(
         r'^api/v1/mitigations(/(?P<language>[A-Za-z]{2}))?/(?P<pk>[0-9a-zA-Z\-]+)$',
         views.get_delete_put_patch_mitigation,
@@ -37,14 +33,5 @@ urlpatterns = [
         views.get_mitigation_action_file,
         name='get_mitigation_action_file'
     ),
-    url(
-        r'^notification/mitigation/(?P<uuid>[0-9a-zA-Z\-]+)$',
-        views.get_notification_template,
-        name='get_notification_template'
-    ),
-    url(
-        r'^notification/mitigation/(?P<uuid>[0-9a-zA-Z\-]+)/(?P<lang>[A-Za-z0-9]+)/*$',
-        views.get_notification_template,
-        name='get_notification_template'
-    ),
+   
 ]
