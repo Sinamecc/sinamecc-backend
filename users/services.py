@@ -1,14 +1,17 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser
+from .models import CustomUser, ProfilePicture
 from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
-    GroupSerializer
+    GroupSerializer, ProfilePictureSerializer
 from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
 from rolepermissions import roles
-
+from general.storages import S3Storage
+from django.urls import reverse
+import datetime, os
+from io import BytesIO
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm):
@@ -33,7 +36,21 @@ class UserService():
         self.UNASSIGN_USER_GROUP_ERROR = "Error at the moment of unassigning user to groups."
         self.CREATE_GROUP_ERROR = "Error at the moment of create group."
         self.CREATE_PERMISSION_ERROR = "Error at the moment of create permissions."
+        self.PROFILE_PICTURE_ERROR = "Error at the moment to create profile picture"
+        self.storage = S3Storage()
 
+    def get_serialized_profile_picture(self, request):
+        version_str_format = 'report_data_%Y%m%d_%H%M%S'
+        version_str = datetime.datetime.now().strftime(version_str_format)
+        data = {
+            'version': version_str,
+            'image': request.data.get('image'),
+            'current': True,
+            'user': request.data.get('user')
+        }
+        serializer = ProfilePictureSerializer(data=data)
+
+        return serializer
 
     def get_serialized_new_user(self, request, user = False):
         new_user = {}
@@ -60,22 +77,7 @@ class UserService():
             serializer = PermissionSerializer(data = new_permission)
 
         return serializer
-
-    def get_serialized_group(self, request, group = False):
-        new_group = {}
-        for field in GroupSerializer.Meta.fields:
-            if field in request.data:
-                new_group[field] = request.data.get(field)
-
-        if group:
-            serializer = GroupSerializer(group, data = new_group)
-        else:
-            serializer = GroupSerializer(data = new_group)
-
-        return serializer
-    
-
-    
+        
     def get_serialized_existing_user(self, request, user = False):
         existing_user = {}
         for field in CustomUserSerializer.Meta.fields:
@@ -88,8 +90,7 @@ class UserService():
             serializer = CustomUserSerializer(data = existing_user)
 
         return serializer
-
-    
+ 
     def get(self, request, username):
     
         UserModel = get_user_model()
@@ -98,8 +99,10 @@ class UserService():
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
             available_apps_status, available_apps_data = self.get_user_roles(user)
+            profile_picture_status, profile_picture_data = self.get_current_profile_picture(user.id)
             if available_apps_status:
                 content_user['available_apps'] = available_apps_data
+                content_user['profile_picture'] = profile_picture_data if profile_picture_status else []
                 result = (True, content_user)
                 login(request, user)
             else:
@@ -132,7 +135,6 @@ class UserService():
 
         return result
 
-
     def get_all(self, request):
         UserModel = get_user_model()
         user_list = UserModel.objects.all()
@@ -150,42 +152,6 @@ class UserService():
 
         return result
 
-    
-    def get_available_app(self, user):
-        permission_groups = []
-
-        permission_user = [p for p in user.user_permissions.all()] 
-        for g in user.groups.all():
-            permission_groups.extend([p for p in g.permissions.all()])
-        permission = Permission.objects.all() if user.is_superuser else list(set(permission_user) | set(permission_groups)) 
-
-        available_apps = {}
-        for p in permission:
-            app = ContentType.objects.get(id=p.content_type_id).app_label
-            if not (app in available_apps):
-                available_apps[app] = True
-        return available_apps
-        
-
-
-    def get_permission_app(self, user):
-        permission_groups = []
-        permission_user = [p for p in user.user_permissions.all()] 
-        for g in user.groups.all():
-            permission_groups.extend([p for p in g.permissions.all()])
-        permission = list(set(permission_user) | set(permission_groups)) 
-        
-        permission_app = [
-            {
-                'id': p.id,
-                'name': p.name,
-                'codename': p.codename, 
-                'app': ContentType.objects.get(id=p.content_type_id).app_label
-            } for p in permission
-        ]
-
-        return permission_app
-
     def create(self, request):
         errors = []
         result = (False, self.UNABLE_CREATE_USER)
@@ -200,87 +166,6 @@ class UserService():
             errors.append(serialized_user.errors) 
             result = (False, errors)
 
-        return result
-
-
-    def assign_user_to_permission(self, request, username):
-        key = 'permissions'
-        UserModel = get_user_model()
-        result = (False, None)
-        user = UserModel.objects.get(username=username)
-        if key in request.data:
-            for p in request.data.get(key):    
-                user.user_permissions.add(p)
-
-            serialized_user = CustomUserSerializer(user)
-            content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
-            result = (True, content_user)
-        else:
-            result = (False, self.ASSIGN_USER_PERMISSION_ERROR)
-            
-        return result
-
-    
-    def unassign_user_to_permission(self, request, username):
-        key = 'permissions'
-        UserModel = get_user_model()
-        result = (False, None)
-        user = UserModel.objects.get(username=username)
-        remove_permission = lambda perm, user = user : user.user_permissions.remove(perm)
-
-        if key in request.data and isinstance(request.data.get(key), list):
-            list(map(remove_permission, request.data.get(key)))
-            serialized_user = CustomUserSerializer(user)
-            content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
-            result = (True, content_user)
-
-        else:
-            result = (False, self.UNASSIGN_USER_PERMISSION_ERROR)
-            
-        return result
-
-
-    def assign_user_to_group(self, request, username):
-
-        key = 'groups'
-        UserModel = get_user_model()
-        result = (False, None)
-        user = UserModel.objects.get(username=username)
-        if key in request.data:
-            for g in request.data.get(key):
-                user.groups.add(g)
-            serialized_user = CustomUserSerializer(user)
-            content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
-            result = (True, content_user)
-        else:
-            result = (False, self.ASSIGN_USER_GROUPS_ERROR)
-            
-        return result
-    
-    def unassign_user_to_group(self, request, username):
-        key = 'groups'
-        UserModel = get_user_model()
-        result = (False, None)
-        user = UserModel.objects.get(username=username)
-        remove_group = lambda perm, user = user : user.groups.remove(perm)
-
-        if key in request.data and isinstance(request.data.get(key), list):
-            list(map(remove_group, request.data.get(key)))
-            serialized_user = CustomUserSerializer(user)
-            content_user = serialized_user.data
-            content_user['groups'] = self.get_user_groups(user)
-            content_user['permission_app'] = self.get_permission_app(user)
-            result = (True, content_user)
-
-        else:
-            result = (False, self.UNASSIGN_USER_GROUP_ERROR)
-            
         return result
 
     def get_permissions(self, request):
@@ -305,86 +190,7 @@ class UserService():
             result = (False, errors)
 
         return result
-    
-    def get_group(self, request, group_id):
-        errors = []
-        result = (False, self.GROUP_DOESNT_EXIST)
-        group_query = Group.objects.filter(pk=group_id)
-        if group_query.count() > 0:
-            group = group_query.last()
-            serialized_group = GroupSerializer(group).data
-            serialized_group["label"] = group.custom_group.label
-            result = (True, serialized_group)
-
-        return result
-    
-    def update_group(self, request, group_id):
-        errors = []
-        result = (False, self.GROUP_DOESNT_EXIST)
-        group_query = Group.objects.filter(pk=group_id)
-        if group_query.count() > 0:
-            group = group_query.last()
-            label_group = group.custom_group
-
-            serialized_group = self.get_serialized_group(request, group)
-            
-            validation = [serialized_group.is_valid(), serialized_label.is_valid()]
-            if validation.count(False) == 0:
-                group = serialized_group.save()
-                serialized_label.save()
-                serialized_group = GroupSerializer(group).data
-                serialized_group["label"] =  group.custom_group.label   
-                result = (True, serialized_group)
-            else: 
-                errors.append(serialized_group.errors)
-                errors.append(serialized_label.errors)
-                result = (False, errors)            
-
-        return result
-
-    def get_all_groups(self, request):
-
-        group_list = []
-        for g in Group.objects.all():
-            group_serialized = GroupSerializer(g).data
-            group_serialized['label'] = g.custom_group.label
-            group_list.append(group_serialized)
-            
-        return (True, group_list)
-    
-
-
-    def create_group(self, request):
-        
-        errors = []
-        result = (False, self.CREATE_GROUP_ERROR)
-
-        serialized_group = self.get_serialized_group(request)
-        if serialized_group.is_valid():
-            saved_group = serialized_group.save()
-            group_id = saved_group.id
-            group_serialized = GroupSerializer(saved_group).data
-            result = (True, group_serialized)
-        else:
-            errors.append(serialized_group.errors)
-            result = (False, errors)
-
-        return result
-        
-    
-    def get_group_users(self, group_name):
-        UserModel = get_user_model()
-        user_in_group = UserModel.objects.filter(groups__name=group_name)
-        if user_in_group.count() == 0: 
-            error = self.GROUP_DOESNT_HAVE_USERS.format(group_name)
-            return (False, error)
-
-        user_list = []
-        for user in user_in_group.all():
-            user_list.append(user.email)
-
-        return (True, user_list)
-
+  
     def get_user_by_id(self, user_id):
         UserModel = get_user_model()
         try:
@@ -435,13 +241,79 @@ class UserService():
 
         return result
 
-   
-def jwt_response_payload_handler(token, user=None, request=None):
-    return {
-    'token': token,
-    'user': {'username':user.username}
-}
-        
+    def get_all_profile_picture(self, user_id):
 
-        
+        UserModel = get_user_model()
+        user_query = UserModel.objects.filter(pk=user_id)
+        if user_query.count() == 0:
+            error = self.USER_DOESNT_EXIST
+            result = (False, error)
+        else:
+            user = user_query.last()
+            profile_picture = self._get_profile_picture_list(user.profile_picture)
 
+            result = (True, profile_picture)
+
+        return result
+
+
+    def get_current_profile_picture(self, user_id):
+
+        UserModel = get_user_model()
+        user_query = UserModel.objects.filter(pk=user_id)
+        if user_query.count() == 0:
+            error = self.USER_DOESNT_EXIST
+            result = (False, error)
+        else:
+            user = user_query.last()
+            profile_picture = self._get_profile_picture_list(user.profile_picture.filter(current=True))
+
+            result = (True, profile_picture)
+
+        return result
+
+    def download_profile_picture(self, image_id, user_id):
+        return self.get_file_content(image_id, user_id)
+
+    def get_file_content(self,  image_id, user_id):
+        profile_picture = ProfilePicture.objects.get(id=image_id, user__id=user_id)
+        path, filename = os.path.split(profile_picture.image.name)
+        return  (filename, BytesIO(self.storage.get_file(profile_picture.image.name)))
+
+
+    def create_profile_picture(self, request, user_id):
+
+        result = (False, self.PROFILE_PICTURE_ERROR)
+        UserModel = get_user_model()
+        user_query = UserModel.objects.filter(pk=user_id)
+        if user_query.count() == 0:
+            error = self.USER_DOESNT_EXIST
+            result = (False, error)
+        else:
+            serialized_profile_picture = self.get_serialized_profile_picture(request)
+            if serialized_profile_picture.is_valid():
+                
+                profile_picture_query = ProfilePicture.objects.filter(user__id=user_id, current=True)
+                for pp in profile_picture_query: 
+                    pp.current = False
+                    pp.save()
+                
+                profile_picture = serialized_profile_picture.save()
+                result = (True, ProfilePictureSerializer(profile_picture).data)
+
+            else:
+                result = (False, serialized_profile_picture.errors)
+        
+        return result
+
+
+    def _get_profile_picture_list(self, profile_picture_list):
+        return [{'current':profile_picture.current, 'name': self._get_filename(profile_picture.image.name), 'image': self._get_profile_picture_path(str(profile_picture.user.id), str(profile_picture.id))} for profile_picture in profile_picture_list.all()]
+
+    def _get_profile_picture_path(self, user_id, image_id):
+        url = reverse("get_profile_picture_version", kwargs={'user_id': user_id, 'image_id': image_id})
+        return url
+
+    def _get_filename(self, filename):
+        fpath, fname = os.path.split(filename)
+        return fname
