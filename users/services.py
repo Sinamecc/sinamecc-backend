@@ -40,7 +40,7 @@ class UserService():
         self.storage = S3Storage()
 
     def get_serialized_profile_picture(self, request):
-        version_str_format = 'report_data_%Y%m%d_%H%M%S'
+        version_str_format = 'profile_picture_%Y%m%d_%H%M%S'
         version_str = datetime.datetime.now().strftime(version_str_format)
         data = {
             'version': version_str,
@@ -282,7 +282,7 @@ class UserService():
 
 
     def create_profile_picture(self, request, user_id):
-
+    
         result = (False, self.PROFILE_PICTURE_ERROR)
         UserModel = get_user_model()
         user_query = UserModel.objects.filter(pk=user_id)

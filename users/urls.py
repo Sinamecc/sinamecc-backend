@@ -11,19 +11,14 @@ urlpatterns = [
 
     url(
         r'^api/v1/user/(?P<user_id>[0-9]+)/profile_picture/*$',
-        views.get_all_profile_picture,
-        name='get_all_profile_picture',
+        views.post_get_all_profile_picture,
+        name='post_get_all_profile_picture',
     ),
 
     url(
         r'^api/v1/user/permission/*$',
         views.post_get_permissions,
         name='post_get_permissions'
-    ),
-    url(
-        r'^api/v1/user/profile_picture/(?P<user_id>[0-9]+)/*$',
-        views.post_profile_picture,
-        name='post_profile_picture'
     ),
     url(
         r'^api/v1/user/group/*$',

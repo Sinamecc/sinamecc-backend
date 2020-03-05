@@ -31,17 +31,16 @@ def post_get_user(request):
         result = view_helper.post(request)
     return result
 
-@api_view(['POST'])
-def post_profile_picture(request, user_id):
-    if request.method == 'POST':
-        result = view_helper.execute_by_name('create_profile_picture', request, user_id)
 
-    return result
 
-@api_view(['GET'])
-def get_all_profile_picture(request, user_id):
+@api_view(['GET', 'POST'])
+@csrf_exempt
+def post_get_all_profile_picture(request, user_id):
     if request.method == 'GET':
         result = view_helper.execute_by_name('get_all_profile_picture', user_id)
+
+    elif request.method == 'POST':
+        result = view_helper.execute_by_name('create_profile_picture', request, user_id)
 
     return result
 
