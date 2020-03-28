@@ -17,7 +17,6 @@ class PPCNModelTest(TestCase):
     def setUp(self):
         self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True)[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
-        self.group_list = Group.objects.filter(name__in=['dcc_ppcn_responsible', 'dcc_executive_secretary', 'ppcn_responsible']).all()
         client.force_login(self.user)
         self.ppcn_service = PpcnService()
 
