@@ -308,7 +308,18 @@ class UserService():
 
 
     def _get_profile_picture_list(self, profile_picture_list):
-        return [{'current':profile_picture.current, 'name': self._get_filename(profile_picture.image.name), 'image': self._get_profile_picture_path(str(profile_picture.user.id), str(profile_picture.id))} for profile_picture in profile_picture_list.all()]
+
+        profile_picture_list = [
+            {
+                'id': profile_picture.id,
+                'current':profile_picture.current, 
+                'name': self._get_filename(profile_picture.image.name), 
+                'image': self._get_profile_picture_path(str(profile_picture.user.id), str(profile_picture.id))
+
+            } for profile_picture in profile_picture_list.all()
+        ]
+        
+        return profile_picture_list
 
     def _get_profile_picture_path(self, user_id, image_id):
         url = reverse("get_profile_picture_version", kwargs={'user_id': user_id, 'image_id': image_id})
@@ -317,3 +328,5 @@ class UserService():
     def _get_filename(self, filename):
         fpath, fname = os.path.split(filename)
         return fname
+    
+    

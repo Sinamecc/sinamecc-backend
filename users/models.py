@@ -27,6 +27,5 @@ class ProfilePicture(models.Model):
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     image = models.FileField(blank=False, null=False, upload_to=profile_picture_path, storage=PrivateMediaStorage())
     current = models.BooleanField(blank=False, null=False)
-
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
