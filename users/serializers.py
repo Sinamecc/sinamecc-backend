@@ -16,7 +16,7 @@ class NewCustomUserSerializer(serializers.ModelSerializer):
 class ProfilePictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfilePicture
-        fields = ('user', 'image', 'current', 'version')
+        fields = ('id', 'user', 'image', 'current', 'version')
 
 
 
