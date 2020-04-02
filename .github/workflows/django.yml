@@ -1,4 +1,4 @@
-name: Django CI
+name: SINAMEC CI
 
 on:
   push:
