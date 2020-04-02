@@ -28,7 +28,7 @@ class PPCNFSMTest(TestCase):
     def setUp(self):
 
         self.geographic_level_organizational = GeographicLevel.objects.get(level_es="Organizacional")
-        self.superUser = CustomUser.objects.get_or_create(username='test_super_user')[0]
+        self.superUser = CustomUser.objects.get_or_create(username='admin')[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         self.group_list = Group.objects.filter(name__in=['dcc_ppcn_responsible', 'dcc_executive_secretary', 'ppcn_responsible', 'ppcn_provider']).all()
         
