@@ -40,10 +40,10 @@ class UserService():
         self.storage = S3Storage()
 
     def get_serialized_profile_picture(self, request):
-        version_str_format = 'profile_picture_%Y%m%d_%H%M%S'
+        version_str_format = '%Y%m%d_%H%M%S.%f'
         version_str = datetime.datetime.now().strftime(version_str_format)
         data = {
-            'version': version_str,
+            'version': f'pp-{version_str}',
             'image': request.data.get('image'),
             'current': True,
             'user': request.data.get('user')
@@ -299,13 +299,19 @@ class UserService():
                     pp.save()
                 
                 profile_picture = serialized_profile_picture.save()
-                result = (True, ProfilePictureSerializer(profile_picture).data)
+
+                profile_picture_content = ProfilePictureSerializer(profile_picture).data
+                profile_picture_content['name'] = self._get_filename(profile_picture.image.name)
+                profile_picture_content['image'] = self._get_profile_picture_path(str(profile_picture.user.id), str(profile_picture.id))
+
+                result = (True, profile_picture_content)
 
             else:
                 result = (False, serialized_profile_picture.errors)
         
         return result
 
+   
 
     def _get_profile_picture_list(self, profile_picture_list):
 
