@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import CustomUser
+from users.models import CustomUser, ProfilePicture
 from django.contrib.auth.models import Group, Permission
 
 
@@ -13,6 +13,14 @@ class NewCustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_provider', 'is_administrador_dcc', 'phone')
 
+class ProfilePictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfilePicture
+        fields = ('id', 'user', 'image', 'current', 'version')
+
+
+
+## Review This
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
