@@ -2,6 +2,19 @@ from django.conf.urls import url
 from users import views
 
 urlpatterns = [
+
+    url(
+        r'^api/v1/user/(?P<user_id>[0-9]+)/profile_picture/(?P<image_id>[0-9]+)/*$',
+        views.get_profile_picture_version,
+        name='get_profile_picture_version',
+    ),
+
+    url(
+        r'^api/v1/user/(?P<user_id>[0-9]+)/profile_picture/*$',
+        views.post_get_all_profile_picture,
+        name='post_get_all_profile_picture',
+    ),
+
     url(
         r'^api/v1/user/permission/*$',
         views.post_get_permissions,

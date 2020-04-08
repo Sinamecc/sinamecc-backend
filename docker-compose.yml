@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: postgres
+    image: postgres:12.1
     volumes:
     - ./sql/sinamecc_db.sql:/docker-entrypoint-initdb.d/init.sql
   web:
