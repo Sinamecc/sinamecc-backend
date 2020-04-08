@@ -211,7 +211,7 @@ class MitigationActionFormTest(TestCase):
 
     def test_get_all_mitigations(self):
         client.force_login(self.superUser)
-        response_data = client.get(reverse('get_mitigation', args=['en'])).data
+        response_data = client.get(reverse('get_post_mitigation', args=['en'])).data
         mitigation = Mitigation.objects.all()
         serialiezed_mitigation = MitigationSerializer(mitigation, many=True).data
 
