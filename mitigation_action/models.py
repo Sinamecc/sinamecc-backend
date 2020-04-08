@@ -255,8 +255,7 @@ class Mitigation(models.Model):
         print(result)
         email_services = MitigationActionEmailServices(ses_service)
         
-        result_status, result_data = email_services.notify_submission_DCC(self)
-        if not result_status: return (result_status, result_data)
+        ## We need notify DCC group 
         
         result_status, result_data = email_services.notify_submission_user(self)
         if not result_status: return (result_status, result_data)
@@ -377,8 +376,7 @@ class Mitigation(models.Model):
         print(result)
         email_services = MitigationActionEmailServices(ses_service)
         
-        result_status, result_data = email_services.notify_submission_DCC(self)
-        if not result_status: return (result_status, result_data)
+         ## We need notify DCC group 
         
         result_status, result_data = email_services.notify_submission_user(self)
         if not result_status: return (result_status, result_data)
