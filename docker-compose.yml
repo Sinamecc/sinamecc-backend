@@ -2,14 +2,14 @@ version: '3'
 
 services:
   db:
-    image: postgres
+    image: postgres:12.1
     volumes:
     - ./sql/sinamecc_db.sql:/docker-entrypoint-initdb.d/init.sql
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     env_file:
-      - dev.env
+      - .env
     volumes:
       - .:/code
     ports:

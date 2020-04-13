@@ -17,9 +17,8 @@ ses_service = EmailServices()
 class PPCNFormTest(TestCase):
 
     def setUp(self):
-        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True, email='izcar@grupoincocr.com')[0]
+        self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True, email='sinamec@grupoincocr.com')[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
-        self.group_list = Group.objects.filter(name__in=['dcc_ppcn_responsible', 'dcc_executive_secretary', 'ppcn_responsible']).all()
         self.ppcn_service = PpcnService()
 
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
