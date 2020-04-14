@@ -104,23 +104,36 @@ class PlusAction(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
+
+    
 class Organization(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
-    representative_name = models.CharField(max_length=200, blank=False, null=False)
     legal_identification = models.CharField(max_length=12, blank=False, null=False)
+    representative_name = models.CharField(max_length=200, blank=False, null=False)
+    representative_legal_identification = models.CharField(max_length=12, blank=False, null=False)
     phone_organization = models.CharField(max_length=200, blank=False, null=True)
     postal_code = models.CharField(max_length=200, blank=True, null=True)
     fax = models.CharField(max_length=200, blank=True, null=True)
     address = models.CharField(max_length=200, blank=False, null=False)
     contact = models.ForeignKey(Contact, related_name='organization', on_delete=models.CASCADE)
-    ciiu = models.CharField(max_length=200, blank=True, null=True)
 
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
     class Meta:
         verbose_name = _("Organization")
         verbose_name_plural = _("Organizations")
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+class CIIUCode(models.Model):
+
+    ciiu_code = models.CharField(max_length=200, blank=False, null=False)
+    organization = models.ForeignKey(Organization, blank=False, null=False,  related_name='ciiu_code')
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 class Sector(models.Model):
     name_es = models.CharField(max_length=200, blank=False, null=False)
@@ -165,6 +178,7 @@ class GeiOrganization(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.activity_type)
+
 
 class PPCN(models.Model):
     
