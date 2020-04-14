@@ -60,6 +60,7 @@ class PPCNFormTest(TestCase):
             {	
                 "name": "test name",
                 "representative_name": "test representative_name",
+                "legal_identification": "3000300012",
                 "phone_organization" : "27643606",
                 "postal_code": "40101",
                 "fax": "",

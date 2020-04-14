@@ -111,12 +111,14 @@ class PpcnService():
         organization_data = {
             'name': request.data.get('organization').get('name'),
             'representative_name': request.data.get('organization').get('representative_name'),
+            'legal_identification': request.data.get('organization').get('legal_identification'), 
             'phone_organization': request.data.get('organization').get('phone_organization'),
             'postal_code': request.data.get('organization').get('postal_code'),
             'fax': request.data.get('organization').get('fax'),
             'address': request.data.get('organization').get('address'),
             'contact': contact_id,
             'ciiu': request.data.get('organization').get('ciiu'),
+
         }
         if organization:
             serializer = OrganizationSerializer(organization ,data=organization_data)
@@ -276,7 +278,7 @@ class PpcnService():
 
     def create_organization(self, request):
         
-        serialized_contact = self.get_serialized_contact( request.data.get('organization') ) 
+        serialized_contact = self.get_serialized_contact(request.data.get('organization')) 
         if serialized_contact.is_valid():
             contact = serialized_contact.save()
             serialized_organization = self.get_serialized_organization(request, contact.id)
@@ -489,7 +491,6 @@ class PpcnService():
         
 
     def create(self, request):
-
         errors =[]
         valid_relations = []
         organization_id, gei_organization_id = None, None

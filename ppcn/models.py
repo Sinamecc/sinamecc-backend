@@ -107,6 +107,7 @@ class PlusAction(models.Model):
 class Organization(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
     representative_name = models.CharField(max_length=200, blank=False, null=False)
+    legal_identification = models.CharField(max_length=12, blank=False, null=False)
     phone_organization = models.CharField(max_length=200, blank=False, null=True)
     postal_code = models.CharField(max_length=200, blank=True, null=True)
     fax = models.CharField(max_length=200, blank=True, null=True)

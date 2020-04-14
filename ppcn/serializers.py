@@ -9,7 +9,7 @@ class GeographicLevelSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ('id', 'name', 'representative_name','phone_organization', 'postal_code', 'fax', 'address', 'ciiu', 'contact')
+        fields = ('id', 'name', 'legal_identification','representative_name','phone_organization', 'postal_code', 'fax', 'address', 'ciiu', 'contact')
 
 
 class ContactSerializer(serializers.ModelSerializer):
