@@ -26,11 +26,6 @@ class MitigationActionEmailServices():
         return self.send_status_notification_to_user(mitigation_action, user_id)
 
 
-    def notify_submission_DCC(self, mitigation_action):
-
-        group_name = 'dcc_mitigation_action_responsible'
-        return self.send_status_notification_to_group(mitigation_action, group_name)
-
 
     def send_status_notification_to_user(self, mitigation_action, user_id):
 
