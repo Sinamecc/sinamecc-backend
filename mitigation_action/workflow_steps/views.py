@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from general.helpers import ViewHelper
+from general.helpers.views import ViewHelper
 from django.http import FileResponse
 from mitigation_action.workflow_steps.services import MitigationActionWorkflowStepService
 
