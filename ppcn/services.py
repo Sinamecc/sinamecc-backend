@@ -3,35 +3,33 @@ from mccr.models import OVV
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer
-import json
 from ppcn.serializers import *
 from ppcn.workflow_steps.models import PPCNWorkflowStepFile
-from rest_framework.parsers import JSONParser
-import datetime
-import uuid
 from django_fsm import can_proceed, has_transition_perm
 from io import BytesIO
 from general.storages import S3Storage
 from django.http import FileResponse
 from django.urls import reverse
-import os
-import pdb
 from general.services import EmailServices
+from general.helpers.services import ServiceHelper
+from workflow.models import ReviewStatus
+from django.contrib.auth import get_user_model
+from workflow.services import WorkflowService
+import datetime, uuid, json, os, pdb
+
+
 email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
 ses_service = EmailServices(email_sender)
-from workflow.models import ReviewStatus
-
-from django.contrib.auth import get_user_model
 User = get_user_model()
-
-from workflow.services import WorkflowService
 workflow_service = WorkflowService()
 
 class PpcnService():
 
     def __init__(self):
         self.storage = S3Storage()
+        self._service_helper = ServiceHelper()
         self.ORGANIZATION_DOES_NOT_EXIST = "Organization does not exist."
+        self.EMPTY_ORGANIZATION_ERROR = "Request doesn't have organization, contact organization or ciiu code"
         self.ORGANIZATION_ERROR_GET_ALL = "Error retrieving all organizations records."
         self.GEOGRAPHIC_LEVEL_ERROR_GET_ALL = "Error retrieving all geographic level records."
         self.REQUIRED_LEVEL_ERROR_GET_ALL = "Error retrieving all required level records."
@@ -52,10 +50,43 @@ class PpcnService():
         self.CREATING_GEI_ORGANIZATION = "Error creating gei organization."
         self.CONTACT_NOT_MATCH_ERROR = "The contact of the organization doesn't match the one registered."
         self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
+        self.CIIU_CODE_SERIALIZER_ERROR = "Cannot serialize ciiu code because {0}"
+        self.LIST_ERROR = "Was expected a {0} list into data"
 
 
 
     # serialized objects
+    def _get_serialized_contact(self, data, contact = False):
+
+        serializer = self._service_helper.get_serialized_record(ContactSerializer, data, record=contact)
+        return serializer
+        
+    def _get_serialized_organization(self, data, organization = False):
+        
+        serializer = self._service_helper.get_serialized_record(OrganizationSerializer, data, record=organization)
+        return serializer
+
+    def _get_serialized_ciuu_code_list(self, data, organization_id):
+    
+        result = (True, [])
+
+        if isinstance(data, list):
+            data = [{**ciiu_code, 'organization': organization_id}  for ciiu_code in data]
+ 
+            serializer = self._service_helper.get_serialized_record(CIIUCodeSerializer, data, many=True)
+
+            if serializer.is_valid():
+                serializer.save()
+
+            else: 
+                result = (False, self.CIIU_CODE_SERIALIZER_ERROR.format(str(serializer.errors)))
+
+        else:
+            result = (False, self.LIST_ERROR.format('ciiu_code'))
+            
+        return result
+
+
     def get_serialized_geographic_level(self, request):
 
         geographic_level_data = {
@@ -65,21 +96,8 @@ class PpcnService():
         serializer = GeographicLevelSerializer(data=geographic_level_data)
         return serializer
 
-    def get_serialized_contact(self, data, contact = False):
 
-        contact_data = {
-            'full_name': data.get('contact').get('full_name'),
-            'job_title': data.get('contact').get('job_title'),
-            'email': data.get('contact').get('email'),
-            'phone': data.get('contact').get('phone'),
-        }
-       
-        if contact:
-            serializer = ContactSerializer(contact, data=contact_data)
-        else:
-            serializer = ContactSerializer(data = contact_data)
-        return serializer
-
+    
     def get_serialized_change_log(self, ppcn_id, previous_status_id, current_status_id, user):
         change_log_data = {
             'ppcn': ppcn_id,
@@ -107,24 +125,7 @@ class PpcnService():
         return serializer
 
 
-    def get_serialized_organization(self, request ,contact_id, organization = False):
-        organization_data = {
-            'name': request.data.get('organization').get('name'),
-            'representative_name': request.data.get('organization').get('representative_name'),
-            'legal_identification': request.data.get('organization').get('legal_identification'), 
-            'phone_organization': request.data.get('organization').get('phone_organization'),
-            'postal_code': request.data.get('organization').get('postal_code'),
-            'fax': request.data.get('organization').get('fax'),
-            'address': request.data.get('organization').get('address'),
-            'contact': contact_id,
-            'ciiu': request.data.get('organization').get('ciiu'),
-
-        }
-        if organization:
-            serializer = OrganizationSerializer(organization ,data=organization_data)
-        else:
-            serializer = OrganizationSerializer(data=organization_data)
-        return serializer
+    
 
     def get_serialized_ppcn(self, request, organization_id = None, gei_organization_id = None, ppcn = False):
         ppcn_data = {
@@ -277,21 +278,39 @@ class PpcnService():
         return result
 
     def create_organization(self, request):
-        
-        serialized_contact = self.get_serialized_contact(request.data.get('organization')) 
-        if serialized_contact.is_valid():
-            contact = serialized_contact.save()
-            serialized_organization = self.get_serialized_organization(request, contact.id)
-            if serialized_organization.is_valid():
-                organization = serialized_organization.save()
-                result = (True, organization)
+
+        organization_data = request.data.get("organization", False)
+        contact_data = organization_data.get("contact", False)
+        ciiu_code_data = organization_data.get("ciiu_code_list", False)
+        validation_list = [organization_data, contact_data, ciiu_code_data]
+
+        if all(validation_list):
+            serialized_contact = self._get_serialized_contact(contact_data)
+
+            if serialized_contact.is_valid():
+                contact = serialized_contact.save()
+                organization_data['contact'] = contact.id
+                serialized_organization = self._get_serialized_organization(organization_data)
+
+                if serialized_organization.is_valid():
+                    organization = serialized_organization.save()
+                    organization_id =  organization.id
+                    serialized_ciiu_code_status, serialized_ciiu_code_data = self._get_serialized_ciuu_code_list(ciiu_code_data, organization_id)
+
+                    if serialized_ciiu_code_status:
+                        result = (True, organization)
+                    else:
+                        result = (serialized_ciiu_code_status, serialized_ciiu_code_data)
+
+                else:
+                    errors = serialized_organization.errors
+                    result = (False, errors)
             else:
-                errors = serialized_organization.errors
+                errors = serialized_contact.errors
                 result = (False, errors)
         else:
-            errors = serialized_contact.errors
-            result = (False, errors)
-            
+            result = (False, self.EMPTY_ORGANIZATION_ERROR)
+
         return result
 
     def update_organization(self, request, id):
@@ -305,7 +324,7 @@ class PpcnService():
                 return result
             
             contact = Contact.objects.get(id=contact_id)
-            contact_serialized = self.get_serialized_contact(request.data.get('organization'), contact)
+            contact_serialized = self._get_serialized_contact(request.data.get('organization'), contact)
 
             if contact_serialized.is_valid():
                 contact_serialized.save()

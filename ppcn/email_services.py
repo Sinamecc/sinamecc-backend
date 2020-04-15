@@ -99,8 +99,7 @@ class PPCNEmailServices():
             if data.organization.fax != None:
                 fax = "<p><b>Fax </b>{0}</p>".format(str(data.organization.fax))
             address = "<p><b>Direcci&oacute;n: </b>{0}".format(str(data.organization.address))
-            if data.organization.ciiu != None:
-                ciiu = "<p><b>CIIU: </b>{0}</p>".format(str(data.organization.ciiu))
+            
         hyperlink =  "<br>Detalles en <a href={0}/ppcn/{1}>ver ma&#769;s</a>".format(self.email_services.base_dir_notification, data.id)
         result= message.format(organization, representative_name, phone_organization, fax, postal_code, address, ciiu, hyperlink)
         return result

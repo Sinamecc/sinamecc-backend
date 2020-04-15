@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from ppcn.models import Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization, PPCN, PPCNFile, ChangeLog, GeiActivityType
+from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
+                            PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +10,12 @@ class GeographicLevelSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ('id', 'name', 'legal_identification','representative_name','phone_organization', 'postal_code', 'fax', 'address', 'ciiu', 'contact')
+        fields = ('id', 'name', 'legal_identification','representative_name','representative_legal_identification','phone_organization', 'postal_code', 'fax', 'address', 'contact')
+
+class CIIUCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CIIUCode
+        fields = ('id', 'organization', 'ciiu_code')
 
 
 class ContactSerializer(serializers.ModelSerializer):
