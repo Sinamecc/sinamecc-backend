@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from users.services import UserService
 from rest_framework.exceptions import NotFound
-from general.helpers import ViewHelper
+from general.helpers.views import ViewHelper
 
 service = UserService()
 view_helper = ViewHelper(service)

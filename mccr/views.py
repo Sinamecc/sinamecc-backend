@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import FileResponse
 from rest_framework import status
 from mccr.services import MCCRService
-from general.helpers import ViewHelper
+from general.helpers.views import ViewHelper
 from django.http import HttpResponse
 from django.template import loader
 from django.http import HttpResponseRedirect
