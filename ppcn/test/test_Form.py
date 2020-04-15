@@ -20,18 +20,18 @@ class PPCNFormTest(TestCase):
         self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True, email='sinamec@grupoincocr.com')[0]
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         self.ppcn_service = PpcnService()
-
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
-        self.organization = Organization.objects.create(name='organization-name', representative_name='representative-name',
-        phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', 
-        contact = self.contact, ciiu = 'CIIU-CODE')
+        self.organization = Organization.objects.create(name='organization-name', legal_identification='303030303012', representative_legal_identification='404040404021',
+        representative_name='representative-name', phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', contact = self.contact)
+        self.ciiu_code_1 = CIIUCode.objects.create(ciiu_code='CODETEST_1', organization=self.organization)
+        self.ciiu_code_2 = CIIUCode.objects.create(ciiu_code='CODETEST_2', organization=self.organization)
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
 
         self.cantonal_geographic_level = GeographicLevel.objects.create(level_es='Cantonal', level_en='Cantonal')
         self.organizational_geographic_level = GeographicLevel.objects.create(level_es='Organizational', level_en='Organizacional')
-
+    
         self.cantonal_sector = Sector.objects.create(name_en='cantonal_sector_en', name_es='cantonal_sector_es', geographicLevel=self.cantonal_geographic_level)
         self.organizational_sector = Sector.objects.create(name_en='organizational_sector_en', name_es='organizational_sector_es', geographicLevel=self.organizational_geographic_level)
         self.cantonal_sub_sector = SubSector.objects.create(name_es='cantonal_sub_sector_es', name_en='cantonal_sub_sector_en', sector=self.cantonal_sector)
@@ -60,11 +60,15 @@ class PPCNFormTest(TestCase):
             {	
                 "name": "test name",
                 "representative_name": "test representative_name",
+                "representative_legal_identification": "3000300012",
                 "legal_identification": "3000300012",
                 "phone_organization" : "27643606",
                 "postal_code": "40101",
                 "fax": "",
-                "ciiu": "test ciiu",
+                "ciiu_code_list": [
+                    {"ciiu_code":"test ciiu"}, 
+                    {"ciiu_code":"test ciiu 2"}
+                ],
                 "address": "test address",
                 "contact": 
                 {
@@ -116,12 +120,13 @@ class PPCNFormTest(TestCase):
             organization = OrganizationSerializer(Organization.objects.get(id=serialized_ppcn[i].get('organization'))).data
             self.assertEqual(str(response_data[i].get('organization').get('id')), str(organization.get('id')))
             self.assertEqual(str(response_data[i].get('organization').get('name')), str(organization.get('name')))
+            self.assertEqual(str(response_data[i].get('organization').get('legal_identification')), str(organization.get('legal_identification')))
             self.assertEqual(str(response_data[i].get('organization').get('representative_name')), str(organization.get('representative_name')))
+            self.assertEqual(str(response_data[i].get('organization').get('representative_legal_identification')), str(organization.get('representative_legal_identification')))
             self.assertEqual(str(response_data[i].get('organization').get('phone_organization')), str(organization.get('phone_organization')))
             self.assertEqual(str(response_data[i].get('organization').get('postal_code')), str(organization.get('postal_code')))
             self.assertEqual(str(response_data[i].get('organization').get('fax')), str(organization.get('fax')))
             self.assertEqual(str(response_data[i].get('organization').get('address')), str(organization.get('address')))
-            self.assertEqual(str(response_data[i].get('organization').get('ciiu')), str(organization.get('ciiu')))
 
             contact = ContactSerializer(Contact.objects.get(id=organization.get('contact'))).data
             self.assertEqual(str(response_data[i].get('organization').get('contact').get('id')), str(contact.get('id')))
@@ -161,12 +166,13 @@ class PPCNFormTest(TestCase):
         ## organization
         self.assertEquals(organization_data.get('id'), self.organization.id)
         self.assertEquals(organization_data.get('name'), self.organization.name)
+        self.assertEquals(organization_data.get('legal_identification'), self.organization.legal_identification)
         self.assertEquals(organization_data.get('representative_name'), self.organization.representative_name)
+        self.assertEquals(organization_data.get('representative_legal_identification'), self.organization.representative_legal_identification)
         self.assertEquals(organization_data.get('phone_organization'), self.organization.phone_organization)
         self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
         self.assertEquals(organization_data.get('fax'), self.organization.fax)
         self.assertEquals(organization_data.get('address'), self.organization.address)
-        self.assertEquals(organization_data.get('ciiu'), self.organization.ciiu)
 
         ## organiztion ->contact
         self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
@@ -243,12 +249,13 @@ class PPCNFormTest(TestCase):
         ## organization
         self.assertEquals(organization_data.get('id'), self.organization.id)
         self.assertEquals(organization_data.get('name'), self.organization.name)
+        self.assertEquals(organization_data.get('legal_identification'), self.organization.legal_identification)
         self.assertEquals(organization_data.get('representative_name'), self.organization.representative_name)
+        self.assertEquals(organization_data.get('representative_legal_identification'), self.organization.representative_legal_identification)
         self.assertEquals(organization_data.get('phone_organization'), self.organization.phone_organization)
         self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
         self.assertEquals(organization_data.get('fax'), self.organization.fax)
         self.assertEquals(organization_data.get('address'), self.organization.address)
-        self.assertEquals(organization_data.get('ciiu'), self.organization.ciiu)
 
         ## organiztion ->contact
         self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
