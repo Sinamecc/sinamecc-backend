@@ -16,12 +16,12 @@ pipeline {
                     sh 'python manage.py migrate'
 
                     echo "Step: Running Tests"
-                    sh 'python manage.py migrate'
+                    sh 'python manage.py test'
                 }
             }
         }
 
-        stage ("Execute migrations") {
+        stage ("Building docker image") {
             steps {
                 echo "Step: Build and Test"
             }   
