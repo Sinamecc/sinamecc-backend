@@ -12,5 +12,4 @@ COPY . /code/
 EXPOSE 8015
 STOPSIGNAL SIGTERM
 
-#CMD ["gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:8015 config.wsgi:application"]
 ENTRYPOINT exec gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:8015 config.wsgi:application

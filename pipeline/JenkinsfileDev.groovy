@@ -33,7 +33,7 @@ pipeline {
         stage ("Restarting docker container") {
             steps {
                 echo "Step: Stopping current container"
-                sh 'docker stop sinamecc_backend_dev'
+                sh '[[ ! -z `docker ps | grep sinamecc_backend_dev` ]] && (docker stop sinamecc_backend_dev && docker rm sinamecc_backend_dev) || echo "sinamecc_backend_dev does not exists"'
 
                 echo "Step: Running new container"
                 sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.stage_aws" --name sinamecc_backend_dev sinamecc_backend:latest'
