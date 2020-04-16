@@ -253,9 +253,12 @@ class Mitigation(models.Model):
         result = 'The mitigation action is transitioning from new to submitted'
         # Notify to DCC placeholder
         print(result)
+        email_services = MitigationActionEmailServices(ses_service)
+    
+        result_status, result_data = email_services.notify_submission_user(self)
+        if not result_status: return (result_status, result_data)
         
-        ## We need notify DCC group 
-        
+        return (True, result)
 
 
     # --- Transition ---
@@ -369,11 +372,12 @@ class Mitigation(models.Model):
         result = 'The mitigation action is transitioning from changes_requested_by_DCC to updating_by_request'
         
         print(result)
+        email_services = MitigationActionEmailServices(ses_service)
         
-         ## We need notify DCC group 
-         ## notify DCC
+        result_status, result_data = email_services.notify_submission_user(self)
+        if not result_status: return (result_status, result_data)
         
-      
+        return (True, result)
     # --- Transition ---
     # in_evaluation_by_DCC -> rejected_by_DCC
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission='')

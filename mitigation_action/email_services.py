@@ -26,6 +26,11 @@ class MitigationActionEmailServices():
         return self.send_status_notification_to_user(mitigation_action, user_id)
 
 
+    def notify_submission_DCC(self, mitigation_action):
+
+        group_name = 'dcc_mitigation_action_responsible'
+        return self.send_status_notification_to_group(mitigation_action, group_name)
+
 
     def send_status_notification_to_user(self, mitigation_action, user_id):
 
@@ -47,6 +52,26 @@ class MitigationActionEmailServices():
 
         return (result_status, result_email)
 
+
+    def send_status_notification_to_group(self, mitigation_action, group_name):
+
+        subject = self.message_subject.format(mitigation_action.id)
+        message = self.buil_message(mitigation_action)
+        result_status, result_data = True, [mitigation_action.user] 
+        ##result_status, result_data = self.user_services.get_group_users(group_name)
+        ## We need to restore get_group_users method !!!!!
+
+        if not result_status:
+            return (result_status, result_data)
+
+        user_list = result_data
+        result_status, result_email = self.send_notification(user_list, subject, message)
+        
+        if not result_status:
+            error = self.SEND_MAIL_ERROR.format(group_name, result_email)
+            return (result_status, error)
+
+        return (result_status, result_email)
 
 
     def buil_message(self, mitigation_action):
