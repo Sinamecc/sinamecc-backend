@@ -1,28 +1,34 @@
 pipeline {
-	agent any;
-	environment {
-		MY_VARIABLE = "MY_VALUE"
-	}
+    agent any;
+    environment {
+        DJANGO_SETTINGS_MODULE = "config.settings.stage_aws"
+    }
 
-	stages {
-		stage("Build and Test") {
-			steps {
-				withPythonEnv('/usr/bin/python3.6') {
-					echo "Step: Build and Test"
-				}
-			}
-		}
+    stages {
+        withPythonEnv('/usr/bin/python3.6') {
+            stage("Build and Test") {
+                steps {
+                    
+                    echo "Step: Running Migrations"
+                    sh 'python manage.py migrate'
 
-		stage ("Execute migrations") {
-			steps {
-				echo "Step: Build and Test"
-			}	
-		}
+                    echo "Step: Running Tests"
+                    sh 'python manage.py migrate'
 
-		stage ("Restarting service") {
-			steps {
-				echo "Step: Build and Test"
-			}	
-		}
-	}
+                }
+            }
+
+            stage ("Execute migrations") {
+                steps {
+                    echo "Step: Build and Test"
+                }   
+            }
+
+            stage ("Restarting service") {
+                steps {
+                    echo "Step: Build and Test"
+                }   
+            }
+        }
+    }
 }
