@@ -183,7 +183,10 @@ class PPCNFormTest(TestCase):
         self.assertEquals(organization_data.get('address'), self.organization.address)
         self.assertEquals(len(organization_data.get('ciiu_code')), len(self.ciiu_code_list))
 
-        for ciiu_code_request, ciiu_code_test in zip(organization_data.get('ciiu_code'), self.ciiu_code_list):
+        ciiu_code_list_request = sorted(organization_data.get('ciiu_code'), key = lambda i: i['id'])
+        ciiu_code_list_test = sorted(self.ciiu_code_list, key = lambda i: i.id)
+
+        for ciiu_code_request, ciiu_code_test in zip(ciiu_code_list_request, ciiu_code_list_test):
             self.assertEquals(ciiu_code_test.id, ciiu_code_request.get('id'))
             self.assertEquals(ciiu_code_test.ciiu_code, ciiu_code_request.get('ciiu_code'))
             self.assertEquals(ciiu_code_test.organization.id, ciiu_code_request.get('organization'))
@@ -272,7 +275,10 @@ class PPCNFormTest(TestCase):
         self.assertEquals(organization_data.get('address'), self.organization.address)
         self.assertEquals(len(organization_data.get('ciiu_code')), len(self.ciiu_code_list))
 
-        for ciiu_code_request, ciiu_code_test in zip(organization_data.get('ciiu_code'), self.ciiu_code_list):
+        ciiu_code_list_request = sorted(organization_data.get('ciiu_code'), key = lambda i: i['id'])
+        ciiu_code_list_test = sorted(self.ciiu_code_list, key = lambda i: i.id)
+
+        for ciiu_code_request, ciiu_code_test in zip(ciiu_code_list_request, ciiu_code_list_test):
             self.assertEquals(ciiu_code_test.id, ciiu_code_request.get('id'))
             self.assertEquals(ciiu_code_test.ciiu_code, ciiu_code_request.get('ciiu_code'))
             self.assertEquals(ciiu_code_test.organization.id, ciiu_code_request.get('organization'))
