@@ -1,5 +1,6 @@
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 from mccr.models import OVV
+from mccr.serializers import OVVSerializer
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer
@@ -13,6 +14,7 @@ from django.urls import reverse
 from general.services import EmailServices
 from general.helpers.services import ServiceHelper
 from workflow.models import ReviewStatus
+from workflow.serializers import CommentSerializer
 from django.contrib.auth import get_user_model
 from workflow.services import WorkflowService
 import datetime, uuid, json, os, pdb
@@ -350,80 +352,38 @@ class PpcnService():
         return result
 
     def get_all(self, request, language, user = False):
+
+        context = {'language': language}
         try:
-
             ppcn_registries = PPCN.objects.all() if not user else PPCN.objects.filter(user=request.user).all()
-            ppcn_data = [
-                {
-                    'id': pp.id,
-                    'organization': {
-                        'id' : pp.organization.id,
-                        'name' : pp.organization.name,
-                        'representative_name' : pp.organization.representative_name,
-                        'phone_organization' : pp.organization.phone_organization,
-                        'postal_code' : pp.organization.postal_code,
-                        'fax' : pp.organization.fax,
-                        'address' : pp.organization.address,
-                        'ciiu' : pp.organization.ciiu,
-                        'contact' : 
-                        {
-                            'id' : pp.organization.contact.id,
-                            'full_name' : pp.organization.contact.full_name,
-                            'job_title' : pp.organization.contact.job_title,
-                            'email' : pp.organization.contact.email,
-                            'phone' : pp.organization.contact.phone
-                        }
-                    },
-                    'geographic_level':{
-                        'id' : pp.geographic_level.id,
-                        'level' : pp.geographic_level.level_es if language == 'es' else pp.geographic_level.level_en
+            ppcn_data_list = []
+            for ppcn in ppcn_registries:
+                ppcn_data = PPCNSerializer(ppcn).data
+                ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
+                ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
+                ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
+                
+                ppcn_data['next_state'] = self.next_action(ppcn)
+                ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
+                ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
+                ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
+                ppcn_data['recognition_type'] = RecognitionTypeSerializer(ppcn.recognition_type, context=context).data
+                ppcn_data['required_level'] = RequiredLevelSerializer(ppcn.required_level, context=context).data
+                ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
-                    },
-                    'required_level': {
-                        'id' : pp.required_level.id,
-                        'level_type' :  pp.required_level.level_type_es if language == 'es' else pp.required_level.level_type_en
-                    },
-                    'recognition_type': {
-                        'id' : pp.recognition_type.id,
-                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_en
-                    },
-                    'gei_organization':{
-                        'id': pp.gei_organization.id, 
-                        'ovv': {
-                            'id': pp.gei_organization.ovv.id,
-                            'name':  pp.gei_organization.ovv.name,
-                            'email': pp.gei_organization.ovv.email,
-                        },
-                        'emission_ovv_date': pp.gei_organization.emission_ovv_date, 
-                        'report_year': pp.gei_organization.report_year, 
-                        'base_year': pp.gei_organization.base_year, 
-                        'gei_activity_types': [
-                            {
-                                'id': gei_activity_type.id,
-                                'sector': gei_activity_type.sector.name_es if language == 'es' else gei_activity_type.sector.name_en,
-                                'sub_sector': gei_activity_type.sub_sector.name_es if language == 'es' else gei_activity_type.sub_sector.name_en,
-                                'activity_type': gei_activity_type.activity_type
+                ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
+                ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
+                ppcn_data.get('gei_organization')['gei_activity_types'] = []
 
-                            } for gei_activity_type in  pp.gei_organization.gei_activity_types.all()
-                        ]
-                    } 
-                    if pp.gei_organization else None, 
-                    'comments':[
-                        {
-                            'id': comment.id,
-                            'comment': comment.comment
-                        } for comment in pp.comments.all()
-                    ],
-                    'fsm_state': pp.fsm_state,
-                    'next_state': self.next_action(pp),
-                    'created': pp.created,
-                    'updated': pp.updated,
-                    'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
-                    'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
-                    'user': pp.user.id
-                } for pp in ppcn_registries
-            ]
-            result = (True, ppcn_data)
+                for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                    gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
+                    gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
+                    gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
+                    ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+
+                ppcn_data_list.append(ppcn_data)
+            result = (True, ppcn_data_list)
+
         except Sector.DoesNotExist:
             result = (False, self.PPCN_ERROR_GET_ALL)
         return result
@@ -563,81 +523,32 @@ class PpcnService():
 
 
     def get(self, id ,language = 'en'):
+        context = {'language': language}
         try:
-            pp = PPCN.objects.get(id=id)
-            ppcn_data = {
-                    'id': pp.id,
-                    'organization': {
-                        'id' : pp.organization.id,
-                        'name' : pp.organization.name,
-                        'representative_name' : pp.organization.representative_name,
-                        'phone_organization' : pp.organization.phone_organization,
-                        'postal_code' : pp.organization.postal_code,
-                        'fax' : pp.organization.fax,
-                        'address' : pp.organization.address,
-                        'ciiu' : pp.organization.ciiu,
-                        'contact' :
-                        {
-                            'id' : pp.organization.contact.id,
-                            'full_name' : pp.organization.contact.full_name,
-                            'job_title' : pp.organization.contact.job_title,
-                            'email' : pp.organization.contact.email,
-                            'phone' : pp.organization.contact.phone
-                        }
-                    },
-                    'geographic_level':{
-                        'id' : pp.geographic_level.id,
-                        'level' : pp.geographic_level.level_es if language == 'es' else pp.geographic_level.level_en
+            ppcn = PPCN.objects.get(id=id)
+            ppcn_data = PPCNSerializer(ppcn).data
+            ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
+            ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
+            ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
+            
+            ppcn_data['next_state'] = self.next_action(ppcn)
+            ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
+            ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
+            ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
+            ppcn_data['recognition_type'] = RecognitionTypeSerializer(ppcn.recognition_type, context=context).data
+            ppcn_data['required_level'] = RequiredLevelSerializer(ppcn.required_level, context=context).data
+            ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
-                    },
-                    'required_level': {
-                        'id' : pp.required_level.id,
-                        'level_type' :  pp.required_level.level_type_es if language == 'es' else pp.required_level.level_type_en
-                    },
-                    'recognition_type': {
-                        'id' : pp.recognition_type.id,
-                        'recognition_type' : pp.recognition_type.recognition_type_es if language == 'es' else pp.recognition_type.recognition_type_en
-                    },
-                    'gei_organization':{
-                        'id': pp.gei_organization.id, 
-                        'ovv': {
-                            'id': pp.gei_organization.ovv.id,
-                            'name':  pp.gei_organization.ovv.name,
-                            'email': pp.gei_organization.ovv.email,
-                        },
-                        'emission_ovv_date': pp.gei_organization.emission_ovv_date, 
-                        'report_year': pp.gei_organization.report_year, 
-                        'base_year': pp.gei_organization.base_year,
-                        'gei_activity_types': [
-                            {
-                                'id': gei_activity_type.id,
-                                'sector': {
-                                    'id': gei_activity_type.sector.id,
-                                    'name' : gei_activity_type.sector.name_es if language == 'es' else gei_activity_type.sector.name_en
-                                },
-                                'sub_sector':{
-                                    'id' : gei_activity_type.sub_sector.id,
-                                    'name': gei_activity_type.sub_sector.name_es if language == 'es' else gei_activity_type.sub_sector.name_en
-                                },
-                                'activity_type': gei_activity_type.activity_type
+            ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
+            ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
+            ppcn_data.get('gei_organization')['gei_activity_types'] = []
 
-                            } for gei_activity_type in  pp.gei_organization.gei_activity_types.all()
-                        ]
-                    } if pp.gei_organization else None, 
-                    'comments': [
-                        {
-                            'id': comment.id,
-                            'comment': comment.comment
-                        } for comment in pp.comments.all()
-                    ],
-                    'created': pp.created,
-                    'updated': pp.updated,
-                    'ppcn_files': self._get_ppcn_files_list(pp.files.all()),
-                    'file': self._get_files_list([f.files.all() for f in pp.workflow_step.all()]),
-                    'fsm_state': pp.fsm_state,
-                    'next_state': self.next_action(pp),
-                    'user': pp.user.id,
-                }
+            for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
+                gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
+                gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
+                ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+                
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)

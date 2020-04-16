@@ -1,10 +1,16 @@
 from rest_framework import serializers
-from mccr.models import MCCRRegistry, MCCRFile, MCCRRegistryOVVRelation
+from mccr.models import MCCRRegistry, MCCRFile, MCCRRegistryOVVRelation, OVV
 
 class MCCRFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCCRFile
         fields = ('id', 'file', 'user', 'mccr')
+
+class OVVSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OVV
+        fields = ('id', 'email', 'phone', 'name')
 
 
 class MCCRRegistrySerializerView(serializers.ModelSerializer):

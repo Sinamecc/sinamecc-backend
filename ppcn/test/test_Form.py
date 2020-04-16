@@ -23,8 +23,10 @@ class PPCNFormTest(TestCase):
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
         self.organization = Organization.objects.create(name='organization-name', legal_identification='303030303012', representative_legal_identification='404040404021',
         representative_name='representative-name', phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', contact = self.contact)
+        
         self.ciiu_code_1 = CIIUCode.objects.create(ciiu_code='CODETEST_1', organization=self.organization)
         self.ciiu_code_2 = CIIUCode.objects.create(ciiu_code='CODETEST_2', organization=self.organization)
+        self.ciiu_code_list = [self.ciiu_code_1, self.ciiu_code_2]
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
@@ -127,6 +129,13 @@ class PPCNFormTest(TestCase):
             self.assertEqual(str(response_data[i].get('organization').get('postal_code')), str(organization.get('postal_code')))
             self.assertEqual(str(response_data[i].get('organization').get('fax')), str(organization.get('fax')))
             self.assertEqual(str(response_data[i].get('organization').get('address')), str(organization.get('address')))
+            
+            ciiu_code_list = CIIUCodeSerializer(CIIUCode.objects.filter(organization__id=organization.get('id')).all(), many=True).data
+            for ciiu_code_request, ciiu_code_test in zip(response_data[i].get('organization').get('ciiu_code'), ciiu_code_list):
+                self.assertEquals(str(ciiu_code_test.get('id')), str(ciiu_code_request.get('id')))
+                self.assertEquals(str(ciiu_code_test.get('ciiu_code')), str(ciiu_code_request.get('ciiu_code')))
+                self.assertEquals(str(ciiu_code_test.get('organization')), str(ciiu_code_request.get('organization')))
+
 
             contact = ContactSerializer(Contact.objects.get(id=organization.get('contact'))).data
             self.assertEqual(str(response_data[i].get('organization').get('contact').get('id')), str(contact.get('id')))
@@ -142,11 +151,11 @@ class PPCNFormTest(TestCase):
             self.assertEqual(str(response_data[i].get('base_year')), str(serialized_ppcn[i].get('base_year')))
             self.assertEqual(str(response_data[i].get('fsm_state')), str(serialized_ppcn[i].get('fsm_state')))
 
-            datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_create_response = datetime.strptime(str(response_data[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
             datetime_create_serializer = datetime.strptime(str(serialized_ppcn[i].get('created')), '%Y-%m-%dT%H:%M:%S.%fZ')
             self.assertEqual(datetime_create_response, datetime_create_serializer)
 
-            datetime_updated_response = datetime.strptime(str(response_data[i].get('updated')), '%Y-%m-%d %H:%M:%S.%f+00:00')
+            datetime_updated_response = datetime.strptime(str(response_data[i].get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
             datetime_updated_serializer = datetime.strptime(str(serialized_ppcn[i].get('updated')), '%Y-%m-%dT%H:%M:%S.%fZ')
             self.assertEqual(datetime_updated_response, datetime_updated_serializer)
 
@@ -156,7 +165,6 @@ class PPCNFormTest(TestCase):
         client.force_login(self.superUser)
         response = client.get(reverse('get_one_ppcn', args=[self.ppcn_organizational.id, 'en']))
         data = response.data
-        
         organization_data = data.get('organization')
         gei_organization = data.get('gei_organization')
 
@@ -173,6 +181,12 @@ class PPCNFormTest(TestCase):
         self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
         self.assertEquals(organization_data.get('fax'), self.organization.fax)
         self.assertEquals(organization_data.get('address'), self.organization.address)
+        self.assertEquals(len(organization_data.get('ciiu_code')), len(self.ciiu_code_list))
+
+        for ciiu_code_request, ciiu_code_test in zip(organization_data.get('ciiu_code'), self.ciiu_code_list):
+            self.assertEquals(ciiu_code_test.id, ciiu_code_request.get('id'))
+            self.assertEquals(ciiu_code_test.ciiu_code, ciiu_code_request.get('ciiu_code'))
+            self.assertEquals(ciiu_code_test.organization.id, ciiu_code_request.get('organization'))
 
         ## organiztion ->contact
         self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
@@ -196,7 +210,7 @@ class PPCNFormTest(TestCase):
 
         ## gei_organization
         self.assertEquals(gei_organization.get('id'), self.organizational_gei_organization.id)
-        self.assertEquals(gei_organization.get('emission_ovv_date'), self.organizational_gei_organization.emission_ovv_date)
+        self.assertEquals(datetime.strptime(str(gei_organization.get('emission_ovv_date')), '%Y-%m-%d').date(), self.organizational_gei_organization.emission_ovv_date)
         self.assertEquals(gei_organization.get('report_year'), 2019)
         self.assertEquals(gei_organization.get('base_year'), 2018)
 
@@ -239,7 +253,7 @@ class PPCNFormTest(TestCase):
         response = client.get(reverse('get_one_ppcn', args=[self.ppcn_cantonal.id, 'en']))
 
         data = response.data
-        
+       
         organization_data = data.get('organization')
         gei_organization = data.get('gei_organization')
 
@@ -256,6 +270,12 @@ class PPCNFormTest(TestCase):
         self.assertEquals(organization_data.get('postal_code'), self.organization.postal_code)
         self.assertEquals(organization_data.get('fax'), self.organization.fax)
         self.assertEquals(organization_data.get('address'), self.organization.address)
+        self.assertEquals(len(organization_data.get('ciiu_code')), len(self.ciiu_code_list))
+
+        for ciiu_code_request, ciiu_code_test in zip(organization_data.get('ciiu_code'), self.ciiu_code_list):
+            self.assertEquals(ciiu_code_test.id, ciiu_code_request.get('id'))
+            self.assertEquals(ciiu_code_test.ciiu_code, ciiu_code_request.get('ciiu_code'))
+            self.assertEquals(ciiu_code_test.organization.id, ciiu_code_request.get('organization'))
 
         ## organiztion ->contact
         self.assertEquals(organization_data.get('contact').get('id'), self.contact.id)
@@ -279,7 +299,7 @@ class PPCNFormTest(TestCase):
 
         ## gei_organization
         self.assertEquals(gei_organization.get('id'), self.cantonal_gei_organization.id)
-        self.assertEquals(gei_organization.get('emission_ovv_date'), self.cantonal_gei_organization.emission_ovv_date)
+        self.assertEquals(datetime.strptime(str(gei_organization.get('emission_ovv_date')), '%Y-%m-%d').date(), self.organizational_gei_organization.emission_ovv_date)
         self.assertEquals(gei_organization.get('report_year'), self.cantonal_gei_organization.report_year)
         self.assertEquals(gei_organization.get('base_year'), self.cantonal_gei_organization.base_year)
 

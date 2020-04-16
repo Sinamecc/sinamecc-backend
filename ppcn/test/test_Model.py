@@ -21,9 +21,12 @@ class PPCNModelTest(TestCase):
         self.ppcn_service = PpcnService()
 
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
-        self.organization = Organization.objects.create(name='organization-name', representative_name='representative-name',
-        phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', 
-        contact = self.contact, ciiu = 'CIIU-CODE')
+        self.organization = Organization.objects.create(name='organization-name', legal_identification='303030303012', representative_legal_identification='404040404021',
+        representative_name='representative-name', phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', contact = self.contact)
+        
+        self.ciiu_code_1 = CIIUCode.objects.create(ciiu_code='CODETEST_1', organization=self.organization)
+        self.ciiu_code_2 = CIIUCode.objects.create(ciiu_code='CODETEST_2', organization=self.organization)
+        self.ciiu_code_list = [self.ciiu_code_1, self.ciiu_code_2]
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
@@ -58,22 +61,24 @@ class PPCNModelTest(TestCase):
     def test_organization(self):
 
         field_name = self.organization.name
+        field_legal_id = self.organization.legal_identification
+        field_repr_legal_id = self.organization.representative_legal_identification
         field_repr_name = self.organization.representative_name
         field_phone_org = self.organization.phone_organization
         field_postal_code = self.organization.postal_code
         field_fax = self.organization.fax
         field_address = self.organization.address
         field_contact = self.organization.contact
-        field_ciiu = self.organization.ciiu
 
         self.assertEquals(field_name, 'organization-name')
         self.assertEquals(field_repr_name, 'representative-name')
+        self.assertEquals(field_legal_id, '303030303012')
+        self.assertEquals(field_repr_legal_id, '404040404021')
         self.assertEquals(field_phone_org, '88888888')
         self.assertEquals(field_postal_code, '40101')
         self.assertEquals(field_fax, '88778877')
         self.assertEquals(field_address, 'address-testing')
         self.assertEquals(field_contact, self.contact)
-        self.assertEquals(field_ciiu, 'CIIU-CODE')
     
     def test_contact(self):
 
@@ -86,6 +91,16 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_job_title, 'Secretary')
         self.assertEquals(field_email, 'test@gmail.com')
         self.assertEquals(field_phone, '77777777')
+
+    def test_ciiu_code(self):
+        for ciiu_code in self.ciiu_code_list:
+            self.assertEquals(ciiu_code.organization, self.organization) 
+        
+        field_ciiu_code_1 = self.ciiu_code_1.ciiu_code
+        field_ciiu_code_2 = self.ciiu_code_2.ciiu_code
+
+        self.assertEquals(field_ciiu_code_1, 'CODETEST_1')
+        self.assertEquals(field_ciiu_code_2, 'CODETEST_2')
 
     def test_geographic_level(self):
         field_level_es_cantonal = self.cantonal_geographic_level.level_es
