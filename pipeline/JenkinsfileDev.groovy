@@ -5,30 +5,30 @@ pipeline {
     }
 
     stages {
-        withPythonEnv('/usr/bin/python3.6') {
-            stage("Build and Test") {
-                steps {
-                    
+
+        stage("Build and Test") {
+            steps {
+                withPythonEnv('/usr/bin/python3.6') {
                     echo "Step: Running Migrations"
                     sh 'python manage.py migrate'
 
                     echo "Step: Running Tests"
                     sh 'python manage.py migrate'
-
                 }
             }
-
-            stage ("Execute migrations") {
-                steps {
-                    echo "Step: Build and Test"
-                }   
-            }
-
-            stage ("Restarting service") {
-                steps {
-                    echo "Step: Build and Test"
-                }   
-            }
         }
+
+        stage ("Execute migrations") {
+            steps {
+                echo "Step: Build and Test"
+            }   
+        }
+
+        stage ("Restarting service") {
+            steps {
+                echo "Step: Build and Test"
+            }   
+        }
+
     }
 }
