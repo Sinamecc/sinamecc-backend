@@ -7,7 +7,9 @@ pipeline {
 	stages {
 		stage("Build and Test") {
 			steps {
-				echo "Step: Build and Test"
+				withPythonEnv('/usr/bin/python3.6') {
+					echo "Step: Build and Test"
+				}
 			}
 		}
 
