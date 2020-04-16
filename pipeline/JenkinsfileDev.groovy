@@ -13,7 +13,7 @@ pipeline {
                     sh 'pip install -r requirements.txt'
 
                     echo "Step: Running Tests"
-                    sh 'python manage.py test'
+                    #sh 'python manage.py test'
 
                     echo "Step: Running Migrations"
                     sh 'python manage.py migrate'
