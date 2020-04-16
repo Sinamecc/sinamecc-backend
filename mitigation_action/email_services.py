@@ -57,7 +57,9 @@ class MitigationActionEmailServices():
 
         subject = self.message_subject.format(mitigation_action.id)
         message = self.buil_message(mitigation_action)
-        result_status, result_data = self.user_services.get_group_users(group_name)
+        result_status, result_data = True, [mitigation_action.user] 
+        ##result_status, result_data = self.user_services.get_group_users(group_name)
+        ## We need to restore get_group_users method !!!!!
 
         if not result_status:
             return (result_status, result_data)
