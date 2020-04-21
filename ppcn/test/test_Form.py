@@ -53,11 +53,12 @@ class PPCNFormTest(TestCase):
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
 
-        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.cantonal_gei_organization)
+        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= False, organization=self.organization, geographic_level=self.cantonal_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential=True, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
 
         self.ppcn_data = {
+            "confidential": False,
             "organization" : 
             {	
                 "name": "test name",
@@ -118,6 +119,7 @@ class PPCNFormTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for i in range(len(serialized_ppcn)):
             self.assertEquals(serialized_ppcn[i].get('id'), response_data[i].get('id'))
+            self.assertEquals(serialized_ppcn[i].get('confidential'), response_data[i].get('confidential'))
             ## organization level
             organization = OrganizationSerializer(Organization.objects.get(id=serialized_ppcn[i].get('organization'))).data
             self.assertEqual(str(response_data[i].get('organization').get('id')), str(organization.get('id')))
@@ -170,6 +172,8 @@ class PPCNFormTest(TestCase):
 
         self.assertEquals(data.get('id'), self.ppcn_organizational.id)
         self.assertEquals(data.get('user'), self.superUser.id)
+        self.assertEquals(data.get('confidential'), True)
+
         
         ## organization
         self.assertEquals(organization_data.get('id'), self.organization.id)
@@ -262,6 +266,7 @@ class PPCNFormTest(TestCase):
 
         self.assertEquals(data.get('id'), self.ppcn_cantonal.id)
         self.assertEquals(data.get('user'), self.superUser.id)
+        self.assertEquals(data.get('confidential'), False)
         
         ## organization
         self.assertEquals(organization_data.get('id'), self.organization.id)

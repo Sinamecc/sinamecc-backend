@@ -181,10 +181,11 @@ class GeiOrganization(models.Model):
 
 
 class PPCN(models.Model):
-    
+
+
     user = models.ForeignKey(User, related_name='ppcn', null = False)
     organization = models.ForeignKey(Organization, related_name='organization',null=True, blank=True, on_delete=models.CASCADE )
-
+    confidential = models.BooleanField(default=True)
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')

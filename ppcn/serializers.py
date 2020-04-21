@@ -115,7 +115,8 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('id','user','organization', 'gei_organization','geographic_level', 'required_level', 'recognition_type', 'fsm_state' , 'review_count', 'created', 'updated')
+        fields = ('id','user','organization', 'gei_organization','geographic_level', 'required_level', 'recognition_type', 
+                    'confidential', 'fsm_state' , 'review_count', 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):
     class Meta:
