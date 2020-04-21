@@ -53,9 +53,9 @@ class PPCNModelTest(TestCase):
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
 
-        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.cantonal_gei_organization)
+        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         
     def test_organization(self):
@@ -182,15 +182,11 @@ class PPCNModelTest(TestCase):
         field_user = self.ppcn_organizational.user
         field_organization = self.ppcn_organizational.organization
         field_geographic_level = self.ppcn_organizational.geographic_level
-        field_required_level = self.ppcn_organizational.required_level
-        field_recognition_type = self.ppcn_organizational.recognition_type
         field_gei_organization = self.ppcn_organizational.gei_organization
 
         self.assertEquals(field_user, self.superUser)
         self.assertEquals(field_organization, self.organization)
         self.assertEquals(field_geographic_level, self.organizational_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
         self.assertEquals(field_gei_organization, self.organizational_gei_organization)
         
         
@@ -198,14 +194,10 @@ class PPCNModelTest(TestCase):
         field_user = self.ppcn_cantonal.user
         field_organization = self.ppcn_cantonal.organization
         field_geographic_level = self.ppcn_cantonal.geographic_level
-        field_required_level = self.ppcn_cantonal.required_level
-        field_recognition_type = self.ppcn_cantonal.recognition_type
         field_gei_organization = self.ppcn_cantonal.gei_organization
 
         self.assertEquals(field_user, self.superUser)
         self.assertEquals(field_organization, self.organization)
         self.assertEquals(field_geographic_level, self.cantonal_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
         self.assertEquals(field_gei_organization, self.cantonal_gei_organization)
 
