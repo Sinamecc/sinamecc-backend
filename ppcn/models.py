@@ -20,6 +20,8 @@ ses_service = EmailServices()
 
 User = get_user_model()
 permission = PermissionsHelper()
+CURRENCIES = (('CRC', _('Costa Rican colón')), ('USD', _('United States dollar')))
+
 
 class InventoryMethodology(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
@@ -104,8 +106,18 @@ class PlusAction(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
+class Reductions(models.Model):
+    proyect = models.CharField(max_length=200, blank=False, null=False)
+    activity = models.CharField(max_length=200, blank=False, null=False)
+    detail_reduction = models.TextField(blank=False, null=False)
+    emission = models.CharField(max_length=10, blank=False, null=False)
+    total_emission = models.CharField(max_length=10, blank=False, null=False)
+    investment = models.DecimalField(max_digits=10, decimal_places=2)
+    investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+    total_investment = models.DecimalField(max_digits=10, decimal_places=2)
+    total_investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
 
-    
+
 class Organization(models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
     legal_identification = models.CharField(max_length=12, blank=False, null=False)
@@ -179,13 +191,18 @@ class GeiOrganization(models.Model):
     def __unicode__(self):
         return smart_unicode(self.activity_type)
 
-
 class PPCN(models.Model):
 
+    CONFIDENTIAL = (
+        ('confidential', _('Confidential')), 
+        ('no_confidential', _('No Confidential')), 
+        ('partially_confidential', _('Partially Confidential'))
+    )
 
     user = models.ForeignKey(User, related_name='ppcn', null = False)
     organization = models.ForeignKey(Organization, related_name='organization',null=True, blank=True, on_delete=models.CASCADE )
-    confidential = models.BooleanField(default=True)
+    confidential = models.CharField(max_length=50, choices=CONFIDENTIAL, default='confidential')
+    confidential_fields = models.TextField(blank=False, null=True) ## use to partially confidential
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')
