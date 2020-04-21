@@ -106,7 +106,7 @@ class PlusAction(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
-class Reductions(models.Model):
+class Reduction(models.Model):
     proyect = models.CharField(max_length=200, blank=False, null=False)
     activity = models.CharField(max_length=200, blank=False, null=False)
     detail_reduction = models.TextField(blank=False, null=False)
@@ -116,6 +116,29 @@ class Reductions(models.Model):
     investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
     total_investment = models.DecimalField(max_digits=10, decimal_places=2)
     total_investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("Reduction")
+        verbose_name_plural = _("Reductions")
+    
+    def __unicode__(self):
+        return smart_unicode(self.proyect)
+
+
+class OrganizationClassification(models.Model):
+    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    buildings_number = models.IntegerField(blank=False, null=False)
+    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+
+    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
+    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')
+
+    class Meta:
+        verbose_name = _("Organnization Classification")
+        verbose_name_plural = _("Organnization Classification")
+    
+    def __unicode__(self):
+        return smart_unicode("Organnization Classification {}".format(self.id))
 
 
 class Organization(models.Model):
@@ -146,6 +169,13 @@ class CIIUCode(models.Model):
     
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("CIIU Code")
+        verbose_name_plural = _("CIIU Codes")
+
+    def __unicode__(self):
+        return smart_unicode(self.ciiu_code)
 
 class Sector(models.Model):
     name_es = models.CharField(max_length=200, blank=False, null=False)
@@ -204,8 +234,7 @@ class PPCN(models.Model):
     confidential = models.CharField(max_length=50, choices=CONFIDENTIAL, default='confidential')
     confidential_fields = models.TextField(blank=False, null=True) ## use to partially confidential
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
-    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
-    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')
+    
     gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
 
     review_count = models.IntegerField(null=True, blank=True, default=0)
