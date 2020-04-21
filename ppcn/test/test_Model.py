@@ -30,7 +30,8 @@ class PPCNModelTest(TestCase):
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
-
+        self.organization_classification = OrganizationClassification.objects.create(emission_quantity=1234, buildings_number=56789, data_inventory_quantity=10, required_level=self.required_level
+                                                                    ,recognition_type=self.recognition_type)
         self.cantonal_geographic_level = GeographicLevel.objects.create(level_es='Cantonal', level_en='Cantonal')
         self.organizational_geographic_level = GeographicLevel.objects.create(level_es='Organizational', level_en='Organizacional')
 
@@ -55,7 +56,7 @@ class PPCNModelTest(TestCase):
 
         self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, organization_classification = self.organization_classification, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         
     def test_organization(self):
@@ -160,6 +161,19 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_recognition_type_es, 'recognition_type_es')
         self.assertEquals(field_recognition_type_en, 'recognition_type_en')
 
+    def test_organization_classification(self):
+        field_emission_quantity = self.organization_classification.emission_quantity
+        field_buildings_number = self.organization_classification.buildings_number
+        field_data_inventory_quantity = self.organization_classification.data_inventory_quantity
+        field_required_level = self.organization_classification.required_level
+        field_recognition_type = self.organization_classification.recognition_type
+
+        self.assertEqual(field_emission_quantity, 1234)
+        self.assertEqual(field_buildings_number, 56789)
+        self.assertEqual(field_data_inventory_quantity, 10)
+        self.assertEqual(field_required_level, self.required_level)
+        self.assertEqual(field_recognition_type, self.recognition_type)
+
 
     def test_gei_organization(self):
         field_ovv = self.organizational_gei_organization.ovv
@@ -183,9 +197,10 @@ class PPCNModelTest(TestCase):
         field_organization = self.ppcn_organizational.organization
         field_geographic_level = self.ppcn_organizational.geographic_level
         field_gei_organization = self.ppcn_organizational.gei_organization
-
+        field_organization_classification = self.ppcn_organizational.organization_classification
         self.assertEquals(field_user, self.superUser)
         self.assertEquals(field_organization, self.organization)
+        self.assertEquals(field_organization_classification, self.organization_classification)
         self.assertEquals(field_geographic_level, self.organizational_geographic_level)
         self.assertEquals(field_gei_organization, self.organizational_gei_organization)
         

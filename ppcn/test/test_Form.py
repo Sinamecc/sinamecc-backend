@@ -30,6 +30,10 @@ class PPCNFormTest(TestCase):
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
+        self.organization_classification = OrganizationClassification.objects.create(emission_quantity=1000, buildings_number=10000, data_inventory_quantity=1000, required_level=self.required_level
+                                                                    ,recognition_type=self.recognition_type)
+
+
 
         self.cantonal_geographic_level = GeographicLevel.objects.create(level_es='Cantonal', level_en='Cantonal')
         self.organizational_geographic_level = GeographicLevel.objects.create(level_es='Organizational', level_en='Organizacional')
@@ -55,7 +59,7 @@ class PPCNFormTest(TestCase):
 
         self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization,organization_classification= self.organization_classification, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         self.ppcn_data = {
             "confidential": 'no_confidential',
