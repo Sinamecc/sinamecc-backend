@@ -126,12 +126,13 @@ class Reduction(models.Model):
 
 
 class OrganizationClassification(models.Model):
+    
     emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
     buildings_number = models.IntegerField(blank=False, null=False)
     data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2)
 
-    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='required_level')
-    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='recognization')
+    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
+    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
 
     class Meta:
         verbose_name = _("Organnization Classification")
@@ -234,7 +235,7 @@ class PPCN(models.Model):
     confidential = models.CharField(max_length=50, choices=CONFIDENTIAL, default='confidential')
     confidential_fields = models.TextField(blank=False, null=True) ## use to partially confidential
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
-    
+    organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn')
     gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
 
     review_count = models.IntegerField(null=True, blank=True, default=0)

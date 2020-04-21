@@ -53,9 +53,9 @@ class PPCNFormTest(TestCase):
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
 
-        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.cantonal_gei_organization)
+        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         self.ppcn_data = {
             "confidential": 'no_confidential',
@@ -83,7 +83,14 @@ class PPCNFormTest(TestCase):
                 }
                 
             },
-            
+            "organization_classification":
+            {
+                'emission_quantity': 100000,
+                'buildings_number': 10000,
+                'data_inventory_quantity': 1000,
+                'required_level': self.required_level.id,
+                'recognition_type': self.recognition_type.id
+            },
             "gei_organization":
             {	
                 "ovv":1,
@@ -147,10 +154,6 @@ class PPCNFormTest(TestCase):
             self.assertEqual(str(response_data[i].get('organization').get('contact').get('email')), str(contact.get('email')))
             self.assertEqual(str(response_data[i].get('organization').get('contact').get('phone')), str(contact.get('phone')))
 
-            self.assertEqual(str(response_data[i].get('geographic_level').get('id')), str(serialized_ppcn[i].get('geographic_level')))
-            self.assertEqual(str(response_data[i].get('required_level').get('id')), str(serialized_ppcn[i].get('required_level')))
-
-            self.assertEqual(str(response_data[i].get('recognition_type').get('id')), str(serialized_ppcn[i].get('recognition_type')))
             self.assertEqual(str(response_data[i].get('base_year')), str(serialized_ppcn[i].get('base_year')))
             self.assertEqual(str(response_data[i].get('fsm_state')), str(serialized_ppcn[i].get('fsm_state')))
 
@@ -208,13 +211,6 @@ class PPCNFormTest(TestCase):
         self.assertEquals(data.get('geographic_level').get('id'), self.organizational_geographic_level.id)
         self.assertEquals(data.get('geographic_level').get('level'), self.organizational_geographic_level.level_en) 
 
-        ## required_level
-        self.assertEquals(data.get('required_level').get('id'), self.required_level.id)
-        self.assertEquals(data.get('required_level').get('level_type'), self.required_level.level_type_en)
-
-        ## recognition_type
-        self.assertEquals(data.get('recognition_type').get('id'), self.recognition_type.id)
-        self.assertEquals(data.get('recognition_type').get('recognition_type'), self.recognition_type.recognition_type_en)
 
         ## gei_organization
         self.assertEquals(gei_organization.get('id'), self.organizational_gei_organization.id)
@@ -301,13 +297,6 @@ class PPCNFormTest(TestCase):
         self.assertEquals(data.get('geographic_level').get('id'), self.cantonal_geographic_level.id)
         self.assertEquals(data.get('geographic_level').get('level'), self.cantonal_geographic_level.level_en) 
 
-        ## required_level
-        self.assertEquals(data.get('required_level').get('id'), self.required_level.id)
-        self.assertEquals(data.get('required_level').get('level_type'), self.required_level.level_type_en)
-
-        ## recognition_type
-        self.assertEquals(data.get('recognition_type').get('id'), self.recognition_type.id)
-        self.assertEquals(data.get('recognition_type').get('recognition_type'), self.recognition_type.recognition_type_en)
 
         ## gei_organization
         self.assertEquals(gei_organization.get('id'), self.cantonal_gei_organization.id)
@@ -343,4 +332,5 @@ class PPCNFormTest(TestCase):
             data=json.dumps(self.ppcn_data),
             content_type='application/json'
         )
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED )

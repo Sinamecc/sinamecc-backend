@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
-                            PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector
+                            PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, OrganizationClassification
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
 
@@ -79,6 +79,19 @@ class SubSectorSerializer(serializers.ModelSerializer):
     def language(self, obj):
         return  obj.name_en if self.context.get('language', 'en') == 'en' else obj.name_es
 
+class ReductionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reduction
+        fields = ('id', 'proyect', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
+                    'investment_currency', 'total_investment', 'total_investment_currency')
+
+class OrganizationClassificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrganizationClassification
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type')
+
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -115,8 +128,8 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('id','user','organization', 'gei_organization','geographic_level', 'required_level', 'recognition_type', 
-                    'confidential', 'fsm_state' , 'review_count', 'created', 'updated')
+        fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 
+                    'confidential', 'confidential_fields', 'fsm_state' , 'review_count', 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):
     class Meta:

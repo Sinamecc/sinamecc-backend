@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('emission_quantity', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('buildings_number', models.IntegerField()),
                 ('data_inventory_quantity', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('recognition_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='recognization', to='ppcn.RecognitionType')),
-                ('required_level', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='required_level', to='ppcn.RequiredLevel')),
+                ('recognition_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='organization_classification', to='ppcn.RecognitionType')),
+                ('required_level', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='organization_classification', to='ppcn.RequiredLevel')),
             ],
             options={
                 'verbose_name': 'Organnization Classification',
