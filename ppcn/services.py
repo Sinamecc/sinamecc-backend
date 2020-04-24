@@ -82,6 +82,12 @@ class PpcnService():
         serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction)
 
         return serializer
+    
+    def _get_serialized_carbon_offset(self, data, carbon_offset=False):
+        print(data)
+        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset)
+
+        return serializer
 
     def _get_serialized_ciuu_code_list(self, data, organization_id):
     
@@ -264,7 +270,18 @@ class PpcnService():
             result = (False, serialized_reduction.errors)
 
         return result
+    
+    def _create_carbon_offset(self, data):
 
+        serialized_carbon_offset = self._get_serialized_carbon_offset(data)
+        if serialized_carbon_offset.is_valid():
+            print(serialized_carbon_offset.initial_data)
+            carbon_offset = serialized_carbon_offset.save()
+            result = (True, carbon_offset)
+        else:
+            result = (False, serialized_carbon_offset.errors)
+
+        return result
 
     def _create_organization_classification(self, data):
 
@@ -274,7 +291,16 @@ class PpcnService():
             reduction_status, reduction_data = self._create_reduction(data.get('reduction'))
             if reduction_status:
                 data['reduction'] = reduction_data.id
-            validation_dict.setdefault(reduction_status, []).append(reduction_data)
+
+            dict_data = reduction_data if isinstance(reduction_data, list) else [reduction_data]
+            validation_dict.setdefault(reduction_status,[]).extend(dict_data)
+                                    
+        if data.get('carbon_offset', False):
+            carbon_offset_status, carbon_offset_data = self._create_carbon_offset(data.get('carbon_offset'))
+            if carbon_offset_status:
+                data['carbon_offset'] = carbon_offset_data.id
+            dict_data = carbon_offset_data if isinstance(carbon_offset_data, list) else [carbon_offset_data]
+            validation_dict.setdefault(carbon_offset_status,[]).extend(dict_data)
 
         if all(validation_dict):
             serialized_organization_classification = self._get_serialized_organization_classification(data)
@@ -410,7 +436,9 @@ class PpcnService():
                         ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
                     if ppcn.organization_classification.reduction:
                         ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
-               
+                    if ppcn.organization_classification.carbon_offset:
+                        ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
+
                 ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
                 ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
@@ -592,6 +620,8 @@ class PpcnService():
                     ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
                 if ppcn.organization_classification.reduction:
                     ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
+                if ppcn.organization_classification.carbon_offset:
+                    ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
             
             ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())

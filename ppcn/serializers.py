@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
-                            PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, OrganizationClassification
+                            PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, \
+                            OrganizationClassification, CarbonOffset
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
 
@@ -83,14 +84,20 @@ class ReductionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reduction
-        fields = ('id', 'proyect', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
+        fields = ('id', 'project', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
                     'investment_currency', 'total_investment', 'total_investment_currency')
+
+class CarbonOffsetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarbonOffset
+        fields = ('id', 'offset_scheme', 'project_location', 'certificate_identification', 'total_carbon_offset', 
+                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency')
 
 class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction', 'carbon_offset')
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

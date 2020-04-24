@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             name='Reduction',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('proyect', models.CharField(max_length=200)),
+                ('project', models.CharField(max_length=200)),
                 ('activity', models.CharField(max_length=200)),
                 ('detail_reduction', models.TextField()),
                 ('emission', models.CharField(max_length=10)),

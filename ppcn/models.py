@@ -21,6 +21,7 @@ ses_service = EmailServices()
 User = get_user_model()
 permission = PermissionsHelper()
 CURRENCIES = (('CRC', _('Costa Rican colón')), ('USD', _('United States dollar')))
+OFFSET_SCHEME = (('CER', _('CER')), ('VER', _('VER')), ('UCC', _('Unidades de Compesnsacion de Carbono')))
 
 
 class InventoryMethodology(models.Model):
@@ -105,9 +106,31 @@ class PlusAction(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.type)
+        
+class CarbonOffset(models.Model):
+    offset_scheme = models.CharField(choices=OFFSET_SCHEME, max_length=10, blank=False, null=False) 
+    project_location = models.CharField(max_length=200, blank=False, null=False)
+    certificate_identification = models.CharField(max_length=200, blank=False, null=False)
+    total_carbon_offset = models.CharField(max_length=100, blank=False, null=False)
+    offset_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    offset_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+    period = models.CharField(max_length=100, blank=False, null=False)
+    total_offset_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    total_offset_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Carbon Offset")
+        verbose_name_plural = _("Carbon Offsets")
+    
+    def __unicode__(self):
+        return smart_unicode(self.project_location)
+
 
 class Reduction(models.Model):
-    proyect = models.CharField(max_length=200, blank=False, null=False)
+    project = models.CharField(max_length=200, blank=False, null=False)
     activity = models.CharField(max_length=200, blank=False, null=False)
     detail_reduction = models.TextField(blank=False, null=False)
     emission = models.CharField(max_length=10, blank=False, null=False)
@@ -117,12 +140,15 @@ class Reduction(models.Model):
     total_investment = models.DecimalField(max_digits=10, decimal_places=2)
     total_investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
 
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
     class Meta:
         verbose_name = _("Reduction")
         verbose_name_plural = _("Reductions")
     
     def __unicode__(self):
-        return smart_unicode(self.proyect)
+        return smart_unicode(self.project)
 
 
 class OrganizationClassification(models.Model):
@@ -135,7 +161,11 @@ class OrganizationClassification(models.Model):
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
 
     reduction = models.ForeignKey(Reduction, null=True, related_name='organization_classification')
-    
+    carbon_offset = models.ForeignKey(CarbonOffset, null=True, related_name='organization_classification')
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
     class Meta:
         verbose_name = _("Organnization Classification")
         verbose_name_plural = _("Organnization Classification")
