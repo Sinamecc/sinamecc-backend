@@ -373,6 +373,10 @@ class PpcnService():
                 ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
                 ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
                 ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
+
+                ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+                ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
+                ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
                 
                 ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
@@ -545,7 +549,11 @@ class PpcnService():
             ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
             ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
             ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
-            
+
+            ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+            ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
+            ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
+                
             ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
             ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
