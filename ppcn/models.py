@@ -134,6 +134,8 @@ class OrganizationClassification(models.Model):
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
 
+    reduction = models.ForeignKey(Reduction, null=True, related_name='organization_classification')
+    
     class Meta:
         verbose_name = _("Organnization Classification")
         verbose_name_plural = _("Organnization Classification")

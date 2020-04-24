@@ -90,7 +90,7 @@ class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction')
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

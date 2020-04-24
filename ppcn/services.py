@@ -77,7 +77,11 @@ class PpcnService():
         serializer = self._service_helper.get_serialized_record(OrganizationClassificationSerializer, data, record=organization_classification)
 
         return serializer
+    
+    def _get_serialized_reduction(self, data, reduction=False):
+        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction)
 
+        return serializer
 
     def _get_serialized_ciuu_code_list(self, data, organization_id):
     
@@ -250,14 +254,37 @@ class PpcnService():
 
     ## Create objects
 
+    def _create_reduction(self, data):
+
+        serialized_reduction = self._get_serialized_reduction(data)
+        if serialized_reduction.is_valid():
+            reduction = serialized_reduction.save()
+            result = (True, reduction)
+        else:
+            result = (False, serialized_reduction.errors)
+
+        return result
+
+
     def _create_organization_classification(self, data):
 
-        serialized_organization_classification = self._get_serialized_organization_classification(data)
-        if serialized_organization_classification.is_valid():
-            organization_classification = serialized_organization_classification.save()
-            result = (True, organization_classification)
+        validation_dict = {}
+
+        if data.get('reduction', False):
+            reduction_status, reduction_data = self._create_reduction(data.get('reduction'))
+            if reduction_status:
+                data['reduction'] = reduction_data.id
+            validation_dict.setdefault(reduction_status, []).append(reduction_data)
+
+        if all(validation_dict):
+            serialized_organization_classification = self._get_serialized_organization_classification(data)
+            if serialized_organization_classification.is_valid():
+                organization_classification = serialized_organization_classification.save()
+                result = (True, organization_classification)
+            else:
+                result = (False, serialized_organization_classification.errors)
         else:
-            result = (False, serialized_organization_classification.errors)
+            result = (False, validation_dict.get(False))
 
         return result
 
@@ -370,29 +397,38 @@ class PpcnService():
             ppcn_data_list = []
             for ppcn in ppcn_registries:
                 ppcn_data = PPCNSerializer(ppcn).data
-                ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
-                ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
-                ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
-
-                ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
-                ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
-                ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
-                
+                if ppcn.organization:
+                    ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
+                    ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
+                    if ppcn.organization.contact:
+                        ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
+                if ppcn.organization_classification:
+                    ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+                    if ppcn.organization_classification.required_level:
+                        ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
+                    if ppcn.organization_classification.recognition_type:
+                        ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
+                    if ppcn.organization_classification.reduction:
+                        ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
+               
                 ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
                 ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
                 ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
                 ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
-                ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
-                ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
-                ppcn_data.get('gei_organization')['gei_activity_types'] = []
+                if ppcn.gei_organization:
+                    ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
+                    ppcn_data.get('gei_organization')['gei_activity_types'] = []
+                    if ppcn.gei_organization.ovv:
+                        ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
+                        
 
-                for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
-                    gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
-                    gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
-                    gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
-                    ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+                    for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                        gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
+                        gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
+                        gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
+                        ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
 
                 ppcn_data_list.append(ppcn_data)
             result = (True, ppcn_data_list)
@@ -478,9 +514,6 @@ class PpcnService():
             result = (False, serialized_gei_organization.errors)
             
         return result
-        
-                
-        
 
     def create(self, request):
         errors =[]
@@ -546,30 +579,38 @@ class PpcnService():
         try:
             ppcn = PPCN.objects.get(id=id)
             ppcn_data = PPCNSerializer(ppcn).data
-            ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
-            ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
-            ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
-
-            ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
-            ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
-            ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
-                
+            if ppcn.organization:
+                    ppcn_data['organization'] = OrganizationSerializer(ppcn.organization).data
+                    ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
+                    if ppcn.organization.contact:
+                        ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
+            if ppcn.organization_classification:
+                ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+                if ppcn.organization_classification.required_level:
+                    ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
+                if ppcn.organization_classification.recognition_type:
+                    ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
+                if ppcn.organization_classification.reduction:
+                    ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
+            
             ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
             ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
             ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
             ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
-            ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
-            ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
-            ppcn_data.get('gei_organization')['gei_activity_types'] = []
+            if ppcn.gei_organization:
+                ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
+                ppcn_data.get('gei_organization')['gei_activity_types'] = []
+                if ppcn.gei_organization.ovv:
+                    ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
+                    
 
-            for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
-                gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
-                gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
-                gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
-                ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
-                
+                for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                    gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
+                    gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
+                    gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
+                    ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)
