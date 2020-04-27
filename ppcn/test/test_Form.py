@@ -57,9 +57,11 @@ class PPCNFormTest(TestCase):
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
 
-        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization, organization_classification= self.organization_classification)
+        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, 
+                                                    gei_organization=self.cantonal_gei_organization, organization_classification= self.organization_classification)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization,organization_classification= self.organization_classification, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, confidential='partially_confidential', confidential_fields="test - field", organization=self.organization,
+                                                    organization_classification= self.organization_classification, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         self.ppcn_data = {
             "confidential": 'no_confidential',
