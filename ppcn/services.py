@@ -84,7 +84,6 @@ class PpcnService():
         return serializer
     
     def _get_serialized_carbon_offset(self, data, carbon_offset=False):
-        print(data)
         serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset)
 
         return serializer
@@ -275,7 +274,6 @@ class PpcnService():
 
         serialized_carbon_offset = self._get_serialized_carbon_offset(data)
         if serialized_carbon_offset.is_valid():
-            print(serialized_carbon_offset.initial_data)
             carbon_offset = serialized_carbon_offset.save()
             result = (True, carbon_offset)
         else:
