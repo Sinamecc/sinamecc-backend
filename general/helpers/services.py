@@ -2,7 +2,8 @@ class ServiceHelper():
 
     def get_serialized_record(self, Serializer, data, record = False, partial = False, many = False):
 
-        record_data = self._get_serialized_record_list(Serializer, data) if isinstance(data, list) else self._get_serialized_record(Serializer, data)
+        record_data = self._get_serialized_record_list(Serializer, data) if isinstance(data, list) else \
+                        self._get_serialized_record(Serializer, data)
   
         if record:
             serializer = Serializer(record, data = record_data, partial = partial)
