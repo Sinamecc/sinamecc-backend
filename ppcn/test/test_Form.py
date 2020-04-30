@@ -106,11 +106,15 @@ class PPCNFormTest(TestCase):
                 "gas_report":{
                     "other_gases": "test gases test gases",
                     "biogenic_emission": {
-                        
+
                         "total": "3323323",
                         "scope_1": "scope 1",
                         "scope_2": "scope 2"
-                    }
+                    },
+                    "cost_ghg_inventory":3030303,
+                    "cost_ghg_inventory_currency":"CRC",
+                    "cost_ovv_process":3030303,
+                    "cost_ovv_process_currency":"USD"
                 },
                 "gei_activity_types":[
                     {
@@ -348,5 +352,4 @@ class PPCNFormTest(TestCase):
             data=json.dumps(self.ppcn_data),
             content_type='application/json'
         )
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED )
