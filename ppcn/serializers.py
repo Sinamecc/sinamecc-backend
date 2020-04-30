@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
                             PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, \
-                            OrganizationClassification, CarbonOffset
+                            OrganizationClassification, CarbonOffset, BiogenicEmission, GasReport
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
 
@@ -115,11 +115,25 @@ class ContactSerializer(serializers.ModelSerializer):
         model = Contact
         fields = ('id','full_name', 'job_title', 'email', 'phone')
 
+class BiogenicEmissionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model =  BiogenicEmission
+        fields = ('id', 'total', 'scope_1', 'scope_2')
+
+
+class GasReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GasReport
+        fields = ('id', 'biogenic_emission', 'other_gases') 
+
+
 class GeiOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =  GeiOrganization
-        fields = ('id', 'ovv', 'emission_ovv_date', 'report_year', 'base_year')
+        fields = ('id', 'ovv', 'emission_ovv_date', 'report_year', 'base_year', 'gas_report')
 
 class GeiActivityTypeSerializer(serializers.ModelSerializer):
     

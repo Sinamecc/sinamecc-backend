@@ -102,20 +102,30 @@ class PPCNFormTest(TestCase):
                 "ovv":1,
                 "emission_ovv_date":"2018-04-14",
                 "report_year":"2018",
-                "base_year":"2018"
-            },
-            "gei_activity_types":[
-                {
-                    "activity_type": "activity type test 1",
-                    "sub_sector":self.organizational_sub_sector.id,
-                    "sector":self.organizational_sector.id
+                "base_year":"2018",
+                "gas_report":{
+                    "other_gases": "test gases test gases",
+                    "biogenic_emission": {
+                        
+                        "total": "3323323",
+                        "scope_1": "scope 1",
+                        "scope_2": "scope 2"
+                    }
                 },
-                {
-                    "activity_type": "activity type test 2",
-                    "sub_sector":self.organizational_sub_sector.id,
-                    "sector":self.organizational_sector.id
-                }
-            ],
+                "gei_activity_types":[
+                    {
+                        "activity_type": "activity type test 1",
+                        "sub_sector":self.organizational_sub_sector.id,
+                        "sector":self.organizational_sector.id
+                    },
+                    {
+                        "activity_type": "activity type test 2",
+                        "sub_sector":self.organizational_sub_sector.id,
+                        "sector":self.organizational_sector.id
+                    }
+                ],
+            },
+            
             "geographic_level": self.organizational_geographic_level.id,
             "required_level":self.required_level.id, 
             "recognition_type":self.recognition_type.id,
@@ -338,4 +348,5 @@ class PPCNFormTest(TestCase):
             data=json.dumps(self.ppcn_data),
             content_type='application/json'
         )
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED )

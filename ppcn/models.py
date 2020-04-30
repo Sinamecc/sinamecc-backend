@@ -25,6 +25,7 @@ OFFSET_SCHEME = (('CER', _('CER')), ('VER', _('VER')), ('UCC', _('Unidades de Co
 
 
 class InventoryMethodology(models.Model):
+
     name = models.CharField(max_length=200, blank=False, null=False)
 
     class Meta:
@@ -34,7 +35,20 @@ class InventoryMethodology(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
+
+class PlusAction(models.Model):
+
+    name = models.CharField(max_length=200, blank=False, null=False)
+
+    class Meta:
+        verbose_name = _("PlusAction")
+        verbose_name_plural = _("PlusActions")
+    
+    def __unicode__(self):
+        return smart_unicode(self.type)
+
 class PotentialGlobalWarming(models.Model):
+
     name = models.CharField(max_length=200, blank=False, null=False)
 
     class Meta:
@@ -44,7 +58,9 @@ class PotentialGlobalWarming(models.Model):
     def __unicode__(self):
         return smart_unicode(self.type)
 
+
 class EmissionFactor(models.Model):
+
     name = models.CharField(max_length=200, blank=False, null=False)
 
     class Meta:
@@ -55,6 +71,7 @@ class EmissionFactor(models.Model):
         return smart_unicode(self.type)
 
 class GeographicLevel(models.Model):
+
     level_es = models.CharField(max_length=200, blank=False, null=False)
     level_en = models.CharField(max_length=200, blank=False, null=False)
 
@@ -65,7 +82,9 @@ class GeographicLevel(models.Model):
     def __unicode__(self):
         return smart_unicode(self.level)
 
+
 class RequiredLevel(models.Model):
+
     level_type_es = models.CharField(max_length=200, blank=False, null=False)
     level_type_en = models.CharField(max_length=200, blank=False, null=False)
 
@@ -76,7 +95,9 @@ class RequiredLevel(models.Model):
     def __unicode__(self):
         return smart_unicode(self.level)
 
+
 class RecognitionType(models.Model):
+
     recognition_type_es = models.CharField(max_length=200, blank=False, null=False)
     recognition_type_en = models.CharField(max_length=200, blank=False, null=False)
 
@@ -87,27 +108,9 @@ class RecognitionType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.recognition_type)
 
-class QuantifiedGas(models.Model):
-    name = models.CharField(max_length=200, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("QuantifiedGas")
-        verbose_name_plural = _("QuantifiedGases")
-    
-    def __unicode__(self):
-        return smart_unicode(self.type)
-
-class PlusAction(models.Model):
-    name = models.CharField(max_length=200, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("PlusAction")
-        verbose_name_plural = _("PlusActions")
-    
-    def __unicode__(self):
-        return smart_unicode(self.type)
         
 class CarbonOffset(models.Model):
+
     offset_scheme = models.CharField(choices=OFFSET_SCHEME, max_length=10, blank=False, null=False) 
     project_location = models.CharField(max_length=200, blank=False, null=False)
     certificate_identification = models.CharField(max_length=200, blank=False, null=False)
@@ -130,6 +133,7 @@ class CarbonOffset(models.Model):
 
 
 class Reduction(models.Model):
+
     project = models.CharField(max_length=200, blank=False, null=False)
     activity = models.CharField(max_length=200, blank=False, null=False)
     detail_reduction = models.TextField(blank=False, null=False)
@@ -175,6 +179,7 @@ class OrganizationClassification(models.Model):
 
 
 class Organization(models.Model):
+
     name = models.CharField(max_length=200, blank=False, null=False)
     legal_identification = models.CharField(max_length=12, blank=False, null=False)
     representative_name = models.CharField(max_length=200, blank=False, null=False)
@@ -222,7 +227,9 @@ class Sector(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name)
 
+
 class SubSector(models.Model):
+
     name_es = models.CharField(max_length=200, blank=False, null=False)
     name_en = models.CharField(max_length=200, blank=False, null=False)
     sector = models.ForeignKey(Sector, related_name='sector')
@@ -233,18 +240,79 @@ class SubSector(models.Model):
     def __unicode__(self):
         return smart_unicode(self.name)
 
+class BiogenicEmission(models.Model):
+
+    total = models.DecimalField(max_digits=20, decimal_places=5)
+    scope_1 = models.CharField(max_length=100, null=True, blank=True)
+    scope_2 = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Biogenic Emission")
+        verbose_name_plural = _("Biogenic Emissions")
+    
+    def __unicode__(self):
+        return smart_unicode('biogenic emission {}'.format(self.total))
+
+
+class GasReport(models.Model):
+
+    other_gases = models.TextField(null=True, blank=True)
+    biogenic_emission = models.ForeignKey(BiogenicEmission, related_name='gas_report')
+
+    class Meta:
+        verbose_name = _("Gas Report")
+        verbose_name_plural = _("Gas Report")
+    
+    def __unicode__(self):
+        return smart_unicode(self.id)
+
+class GasScope(models.Model):
+
+    name = models.CharField(max_length=100, null=True, blank=True)
+    report_gas = models.ForeignKey(GasReport, related_name='gas_scope', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Gas Scope")
+        verbose_name_plural = _("Gas Scopes")
+    
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class QuantifiedGas(models.Model):
+
+    name = models.CharField(max_length=50, blank=False, null=False)
+    value = models.DecimalField(max_digits=20, decimal_places=5)
+    scope = models.ForeignKey(GasScope, related_name='gases' ,on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = _("Quantified Gas")
+        verbose_name_plural = _("Quantified Gases")
+    
+    def __unicode__(self):
+        return smart_unicode(self.type)  
+    
+
 class GeiActivityType(models.Model):
     
     activity_type = models.CharField(max_length=500, blank=False, null=False)
     sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
     sector = models.ForeignKey(Sector, related_name='gei_sector')
-   
+
+    class Meta:
+        verbose_name = _("Gei Activity Type")
+        verbose_name_plural = _("Gei Activity Types")
+    
+    def __unicode__(self):
+        return smart_unicode(self.id)
+    
+
 class GeiOrganization(models.Model):
 
     ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=False)
     emission_ovv_date = models.DateField(blank=False, null=False)
     report_year =  models.IntegerField(blank=False, null=False)
     base_year = models.IntegerField(blank=False, null=False)
+    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
     gei_activity_types = models.ManyToManyField(GeiActivityType)
 
     class Meta:
@@ -253,6 +321,7 @@ class GeiOrganization(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.activity_type)
+
 
 class PPCN(models.Model):
 
