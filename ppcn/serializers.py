@@ -126,7 +126,8 @@ class GasReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GasReport
-        fields = ('id', 'biogenic_emission', 'other_gases') 
+        fields = ('id', 'biogenic_emission', 'other_gases', 'cost_ghg_inventory', 'cost_ghg_inventory_currency',
+                        'cost_ovv_process', 'cost_ovv_process_currency') 
 
 
 class GeiOrganizationSerializer(serializers.ModelSerializer):

@@ -258,6 +258,10 @@ class GasReport(models.Model):
 
     other_gases = models.TextField(null=True, blank=True)
     biogenic_emission = models.ForeignKey(BiogenicEmission, related_name='gas_report')
+    cost_ghg_inventory = models.DecimalField(max_digits=20, decimal_places=2)
+    cost_ghg_inventory_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+    cost_ovv_process = models.DecimalField(max_digits=20, decimal_places=2)
+    cost_ovv_process_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
 
     class Meta:
         verbose_name = _("Gas Report")
