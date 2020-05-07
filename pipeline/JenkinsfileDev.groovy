@@ -3,9 +3,27 @@ pipeline {
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
     }
+    parameters {
+        gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'BRANCH', type: 'PT_BRANCH'
+    }
 
     stages {
 
+        stage("Build and Test") {
+            steps {
+                git branch: "${params.BRANCH}", url: 'https://github.com/Sinamecc/sinamecc-backend.git'
+                withPythonEnv('/usr/bin/python3.6') {
+                    echo "Step: Updating requirements"
+                    sh 'pip install -r requirements.txt'
+
+                    echo "Step: Running Tests"
+                    //sh 'python manage.py test'
+
+                    echo "Step: Running Migrations"
+                    sh 'python manage.py migrate'
+                }
+            }
+        }
         stage("Build and Test") {
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
