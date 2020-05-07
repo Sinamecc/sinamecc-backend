@@ -167,11 +167,11 @@ class OrganizationClassification(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Organnization Classification")
-        verbose_name_plural = _("Organnization Classification")
+        verbose_name = _("Organization Classification")
+        verbose_name_plural = _("Organization Classification")
     
     def __unicode__(self):
-        return smart_unicode("Organnization Classification {}".format(self.id))
+        return smart_unicode("Organization Classification {}".format(self.id))
 
 
 class Organization(models.Model):

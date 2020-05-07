@@ -60,8 +60,8 @@ class Migration(migrations.Migration):
                 ('recognition_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='organization_classification', to='ppcn.RecognitionType')),
             ],
             options={
-                'verbose_name': 'Organnization Classification',
-                'verbose_name_plural': 'Organnization Classification',
+                'verbose_name': 'Organization Classification',
+                'verbose_name_plural': 'Organization Classification',
             },
         ),
         migrations.CreateModel(
