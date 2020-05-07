@@ -1,7 +1,7 @@
 pipeline {
     agent any;
     environment {
-        DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
+        DJANGO_SETTINGS_MODULE = "config.settings.stage_aws"
     }
 
     stages {
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
                     echo "Step: Building docker image"
-                    sh 'docker build -t sinamecc_backend:dev .'
+                    sh 'docker build -t sinamecc_backend:stage .'
                 }
             }   
         }
@@ -33,10 +33,10 @@ pipeline {
         stage ("Restarting docker container") {
             steps {
                 echo "Step: Stopping current container"
-                sh 'test ! -z "`docker ps | grep sinamecc_backend_dev`" && (docker stop sinamecc_backend_dev && docker rm sinamecc_backend_dev) || echo "sinamecc_backend_dev does not exists"'
+                sh 'test ! -z "`docker ps | grep sinamecc_backend_stage`" && (docker stop sinamecc_backend_stage && docker rm sinamecc_backend_stage) || echo "sinamecc_backend_stage does not exists"'
 
                 echo "Step: Running new container"
-                sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.dev_aws" --name sinamecc_backend_dev -p 8015:8015 sinamecc_backend:dev'
+                sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.stage_aws" --name sinamecc_backend_stage -p 8016:8015 sinamecc_backend:stage'
             }   
         }
     }
