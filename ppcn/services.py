@@ -432,6 +432,8 @@ class PpcnService():
                         result = (True, gas_report)
                     else:
                         result = (True, gas_scope_data)
+                else:
+                    result = (True, gas_report)             
             else:
                 result = (False, serialized_gas_report.errors)
         else:
@@ -610,7 +612,7 @@ class PpcnService():
                                 gas_scope_data = GasScopeSerializer(gas_scope).data
                                 gas_scope_data['quantified_gases'] = QuantifiedGasSerializer(gas_scope.quantified_gases.all(), many=True).data
                                 ppcn_data.get('gei_organization').get('gas_report').get('gas_scopes').append(gas_scope_data)
-                                
+
                     for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
                         gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
                         gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
