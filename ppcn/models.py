@@ -273,7 +273,7 @@ class GasReport(models.Model):
 class GasScope(models.Model):
 
     name = models.CharField(max_length=100, null=True, blank=True)
-    report_gas = models.ForeignKey(GasReport, related_name='gas_scope', on_delete=models.CASCADE)
+    gas_report = models.ForeignKey(GasReport, related_name='gas_scope', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Gas Scope")
@@ -286,7 +286,7 @@ class QuantifiedGas(models.Model):
 
     name = models.CharField(max_length=50, blank=False, null=False)
     value = models.DecimalField(max_digits=20, decimal_places=5)
-    scope = models.ForeignKey(GasScope, related_name='gases' ,on_delete=models.CASCADE)
+    gas_scope = models.ForeignKey(GasScope, related_name='quantified_gases' ,on_delete=models.CASCADE)
     
     class Meta:
         verbose_name = _("Quantified Gas")
