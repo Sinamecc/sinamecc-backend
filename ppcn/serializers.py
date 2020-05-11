@@ -104,7 +104,7 @@ class OrganizationCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationCategory
-        fields = ('id', 'organization_category', 'buildings_number', 'data_inventory_quantity', 'methodologies_complexity')
+        fields = ('id', 'organization_category', 'buildings_number', 'data_inventory_quantity', 'methodologies_complexity', 'emission_quantity')
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:

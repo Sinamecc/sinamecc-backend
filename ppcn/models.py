@@ -162,6 +162,7 @@ class OrganizationCategory(models.Model):
     organization_category = models.CharField(max_length=200, null=True)
     buildings_number = models.IntegerField(blank=False, null=True)
     data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
     methodologies_complexity = models.CharField(max_length=200, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
