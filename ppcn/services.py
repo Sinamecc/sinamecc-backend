@@ -339,6 +339,17 @@ class PpcnService():
             dict_data = gas_report_data if isinstance(gas_report_data, list) else [gas_report_data]
             validation_dict.setdefault(gas_report_status,[]).extend(dict_data)
         
+        ##
+        ##
+        if data.get('organization_category', False):
+            gas_report_status, gas_report_data = self._create_gas_report(data.get('gas_report'))
+            if gas_report_status:
+                data['gas_report'] = gas_report_data.id
+            dict_data = gas_report_data if isinstance(gas_report_data, list) else [gas_report_data]
+            validation_dict.setdefault(gas_report_status,[]).extend(dict_data)
+        ##
+        ##
+        
         if all(validation_dict):
             serialized_gei_organization = self._get_serialized_gei_organization(data) 
             if serialized_gei_organization.is_valid():

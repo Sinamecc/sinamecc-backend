@@ -155,6 +155,18 @@ class Reduction(models.Model):
         return smart_unicode(self.project)
 
 
+
+
+class OrganizationCategory(models.Model):
+
+    organization_category = models.CharField(max_length=200, null=True)
+    buildings_number = models.IntegerField(blank=False, null=True)
+    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    methodologies_complexity = models.CharField(max_length=200, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
 class OrganizationClassification(models.Model):
     
     emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
@@ -317,6 +329,7 @@ class GeiOrganization(models.Model):
     report_year =  models.IntegerField(blank=False, null=False)
     base_year = models.IntegerField(blank=False, null=False)
     gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
+    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', blank=True)
     gei_activity_types = models.ManyToManyField(GeiActivityType)
 
     class Meta:
