@@ -153,7 +153,7 @@ class GeiOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =  GeiOrganization
-        fields = ('id', 'ovv', 'emission_ovv_date', 'report_year', 'base_year', 'gas_report')
+        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'gas_report')
 
 class GeiActivityTypeSerializer(serializers.ModelSerializer):
     

@@ -167,6 +167,13 @@ class OrganizationCategory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = _("Organization Category")
+        verbose_name_plural = _("Organization Categories")
+    
+    def __unicode__(self):
+        return smart_unicode("Organization Category {}".format(self.id))
+
 class OrganizationClassification(models.Model):
     
     emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
@@ -329,7 +336,7 @@ class GeiOrganization(models.Model):
     report_year =  models.IntegerField(blank=False, null=False)
     base_year = models.IntegerField(blank=False, null=False)
     gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
-    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', blank=True)
+    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
     gei_activity_types = models.ManyToManyField(GeiActivityType)
 
     class Meta:
