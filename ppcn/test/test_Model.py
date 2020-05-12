@@ -21,13 +21,17 @@ class PPCNModelTest(TestCase):
         self.ppcn_service = PpcnService()
 
         self.contact = Contact.objects.create(full_name='Test_full_name', job_title='Secretary', email='test@gmail.com', phone='77777777')
-        self.organization = Organization.objects.create(name='organization-name', representative_name='representative-name',
-        phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', 
-        contact = self.contact, ciiu = 'CIIU-CODE')
+        self.organization = Organization.objects.create(name='organization-name', legal_identification='303030303012', representative_legal_identification='404040404021',
+        representative_name='representative-name', phone_organization = '88888888', postal_code='40101', fax='88778877', address='address-testing', contact = self.contact)
+        
+        self.ciiu_code_1 = CIIUCode.objects.create(ciiu_code='CODETEST_1', organization=self.organization)
+        self.ciiu_code_2 = CIIUCode.objects.create(ciiu_code='CODETEST_2', organization=self.organization)
+        self.ciiu_code_list = [self.ciiu_code_1, self.ciiu_code_2]
 
         self.required_level = RequiredLevel.objects.create(level_type_es= 'required_level_es', level_type_en= 'required_level_en')
         self.recognition_type = RecognitionType.objects.create( recognition_type_es='recognition_type_es', recognition_type_en='recognition_type_en')
-
+        self.organization_classification = OrganizationClassification.objects.create(emission_quantity=1234, buildings_number=56789, data_inventory_quantity=10, required_level=self.required_level
+                                                                    ,recognition_type=self.recognition_type)
         self.cantonal_geographic_level = GeographicLevel.objects.create(level_es='Cantonal', level_en='Cantonal')
         self.organizational_geographic_level = GeographicLevel.objects.create(level_es='Organizational', level_en='Organizacional')
 
@@ -50,30 +54,32 @@ class PPCNModelTest(TestCase):
         self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
         self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
 
-        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.cantonal_gei_organization)
+        self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
-        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.organizational_geographic_level, required_level=self.required_level, recognition_type=self.recognition_type, gei_organization=self.organizational_gei_organization)
+        self.ppcn_organizational = PPCN.objects.create(user= self.superUser, organization=self.organization, organization_classification = self.organization_classification, geographic_level=self.organizational_geographic_level, gei_organization=self.organizational_gei_organization)
 
         
     def test_organization(self):
 
         field_name = self.organization.name
+        field_legal_id = self.organization.legal_identification
+        field_repr_legal_id = self.organization.representative_legal_identification
         field_repr_name = self.organization.representative_name
         field_phone_org = self.organization.phone_organization
         field_postal_code = self.organization.postal_code
         field_fax = self.organization.fax
         field_address = self.organization.address
         field_contact = self.organization.contact
-        field_ciiu = self.organization.ciiu
 
         self.assertEquals(field_name, 'organization-name')
         self.assertEquals(field_repr_name, 'representative-name')
+        self.assertEquals(field_legal_id, '303030303012')
+        self.assertEquals(field_repr_legal_id, '404040404021')
         self.assertEquals(field_phone_org, '88888888')
         self.assertEquals(field_postal_code, '40101')
         self.assertEquals(field_fax, '88778877')
         self.assertEquals(field_address, 'address-testing')
         self.assertEquals(field_contact, self.contact)
-        self.assertEquals(field_ciiu, 'CIIU-CODE')
     
     def test_contact(self):
 
@@ -86,6 +92,16 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_job_title, 'Secretary')
         self.assertEquals(field_email, 'test@gmail.com')
         self.assertEquals(field_phone, '77777777')
+
+    def test_ciiu_code(self):
+        for ciiu_code in self.ciiu_code_list:
+            self.assertEquals(ciiu_code.organization, self.organization) 
+        
+        field_ciiu_code_1 = self.ciiu_code_1.ciiu_code
+        field_ciiu_code_2 = self.ciiu_code_2.ciiu_code
+
+        self.assertEquals(field_ciiu_code_1, 'CODETEST_1')
+        self.assertEquals(field_ciiu_code_2, 'CODETEST_2')
 
     def test_geographic_level(self):
         field_level_es_cantonal = self.cantonal_geographic_level.level_es
@@ -145,6 +161,19 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_recognition_type_es, 'recognition_type_es')
         self.assertEquals(field_recognition_type_en, 'recognition_type_en')
 
+    def test_organization_classification(self):
+        field_emission_quantity = self.organization_classification.emission_quantity
+        field_buildings_number = self.organization_classification.buildings_number
+        field_data_inventory_quantity = self.organization_classification.data_inventory_quantity
+        field_required_level = self.organization_classification.required_level
+        field_recognition_type = self.organization_classification.recognition_type
+
+        self.assertEqual(field_emission_quantity, 1234)
+        self.assertEqual(field_buildings_number, 56789)
+        self.assertEqual(field_data_inventory_quantity, 10)
+        self.assertEqual(field_required_level, self.required_level)
+        self.assertEqual(field_recognition_type, self.recognition_type)
+
 
     def test_gei_organization(self):
         field_ovv = self.organizational_gei_organization.ovv
@@ -167,15 +196,12 @@ class PPCNModelTest(TestCase):
         field_user = self.ppcn_organizational.user
         field_organization = self.ppcn_organizational.organization
         field_geographic_level = self.ppcn_organizational.geographic_level
-        field_required_level = self.ppcn_organizational.required_level
-        field_recognition_type = self.ppcn_organizational.recognition_type
         field_gei_organization = self.ppcn_organizational.gei_organization
-
+        field_organization_classification = self.ppcn_organizational.organization_classification
         self.assertEquals(field_user, self.superUser)
         self.assertEquals(field_organization, self.organization)
+        self.assertEquals(field_organization_classification, self.organization_classification)
         self.assertEquals(field_geographic_level, self.organizational_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
         self.assertEquals(field_gei_organization, self.organizational_gei_organization)
         
         
@@ -183,14 +209,10 @@ class PPCNModelTest(TestCase):
         field_user = self.ppcn_cantonal.user
         field_organization = self.ppcn_cantonal.organization
         field_geographic_level = self.ppcn_cantonal.geographic_level
-        field_required_level = self.ppcn_cantonal.required_level
-        field_recognition_type = self.ppcn_cantonal.recognition_type
         field_gei_organization = self.ppcn_cantonal.gei_organization
 
         self.assertEquals(field_user, self.superUser)
         self.assertEquals(field_organization, self.organization)
         self.assertEquals(field_geographic_level, self.cantonal_geographic_level)
-        self.assertEquals(field_required_level, self.required_level)
-        self.assertEquals(field_recognition_type, self.recognition_type)
         self.assertEquals(field_gei_organization, self.cantonal_gei_organization)
 

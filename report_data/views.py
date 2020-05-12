@@ -3,7 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.http import FileResponse
 
-from general.helpers import ViewHelper
+from general.helpers.views import ViewHelper
 from report_data.services import ReportFileService
 
 service = ReportFileService()
