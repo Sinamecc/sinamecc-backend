@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
                             PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, \
-                            OrganizationClassification, CarbonOffset
+                            OrganizationClassification, CarbonOffset, BiogenicEmission, GasReport, GasScope, QuantifiedGas, \
+                            OrganizationCategory
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
 
@@ -99,6 +100,11 @@ class OrganizationClassificationSerializer(serializers.ModelSerializer):
         model = OrganizationClassification
         fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction', 'carbon_offset')
 
+class OrganizationCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrganizationCategory
+        fields = ('id', 'organization_category', 'buildings_number', 'data_inventory_quantity', 'methodologies_complexity', 'emission_quantity')
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -115,11 +121,39 @@ class ContactSerializer(serializers.ModelSerializer):
         model = Contact
         fields = ('id','full_name', 'job_title', 'email', 'phone')
 
+class BiogenicEmissionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model =  BiogenicEmission
+        fields = ('id', 'total', 'scope_1', 'scope_2')
+
+
+class GasReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GasReport
+        fields = ('id', 'biogenic_emission', 'other_gases', 'cost_ghg_inventory', 'cost_ghg_inventory_currency',
+                        'cost_ovv_process', 'cost_ovv_process_currency') 
+
+class GasScopeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GasScope
+        fields = ('id', 'name', 'gas_report') 
+
+
+class QuantifiedGasSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QuantifiedGas
+        fields = ('id', 'name', 'value', 'gas_scope')
+
+
 class GeiOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =  GeiOrganization
-        fields = ('id', 'ovv', 'emission_ovv_date', 'report_year', 'base_year')
+        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'gas_report')
 
 class GeiActivityTypeSerializer(serializers.ModelSerializer):
     
