@@ -24,16 +24,33 @@ CURRENCIES = (('CRC', _('Costa Rican colón')), ('USD', _('United States dollar'
 OFFSET_SCHEME = (('CER', _('CER')), ('VER', _('VER')), ('UCC', _('Unidades de Compesnsacion de Carbono')))
 
 
+##
+## Catalogs
+##
+
+class RemovalProject(models.Model):
+
+    name_es = models.CharField(max_length=100, blank=False, null=True)
+    name_en = models.CharField(max_length=100, blank=False, null=True)
+
+    class Meta:
+        verbose_name = _("Removal Project")
+        verbose_name_plural = _("Removal Projects")
+    
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+
 class InventoryMethodology(models.Model):
 
     name = models.CharField(max_length=200, blank=False, null=False)
-
+    
     class Meta:
         verbose_name = _("InventoryMethodology")
         verbose_name_plural = _("InventoryMethodologies")
     
     def __unicode__(self):
-        return smart_unicode(self.type)
+        return smart_unicode(self.name)
 
 
 class PlusAction(models.Model):
@@ -108,7 +125,11 @@ class RecognitionType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.recognition_type)
 
-        
+
+## 
+## Main models
+##     
+ 
 class CarbonOffset(models.Model):
 
     offset_scheme = models.CharField(choices=OFFSET_SCHEME, max_length=10, blank=False, null=False) 
@@ -258,7 +279,7 @@ class SubSector(models.Model):
         verbose_name_plural = _("SubSectors")
 
     def __unicode__(self):
-        return smart_unicode(self.name)
+        return smart_unicode(self.name_es)
 
 class BiogenicEmission(models.Model):
 
@@ -347,7 +368,21 @@ class GeiOrganization(models.Model):
     def __unicode__(self):
         return smart_unicode(self.activity_type)
 
+class GasRemoval(models.Model):
 
+    removal_cost = models.DecimalField(max_digits=20, decimal_places=2)
+    removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=False)
+    total = models.DecimalField(max_digits=20, decimal_places=5)
+    removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
+
+    class Meta:
+        verbose_name = _("Gas Removal")
+        verbose_name_plural = _("Gas Remals")
+
+    def __unicode__(self):
+        return smart_unicode(self.activity_type)
+
+ 
 class PPCN(models.Model):
 
     CONFIDENTIAL = (
@@ -363,7 +398,7 @@ class PPCN(models.Model):
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
     organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn')
     gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
-
+    gas_removal = models.ForeignKey(GasRemoval, blank=True, null=True, related_name='ppcn')
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
