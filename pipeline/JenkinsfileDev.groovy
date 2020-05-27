@@ -24,20 +24,6 @@ pipeline {
                 }
             }
         }
-        stage("Build and Test") {
-            steps {
-                withPythonEnv('/usr/bin/python3.6') {
-                    echo "Step: Updating requirements"
-                    sh 'pip install -r requirements.txt'
-
-                    echo "Step: Running Tests"
-                    //sh 'python manage.py test'
-
-                    echo "Step: Running Migrations"
-                    sh 'python manage.py migrate'
-                }
-            }
-        }
 
         stage ("Building docker image") {
             steps {
