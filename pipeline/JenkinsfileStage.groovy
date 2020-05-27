@@ -35,7 +35,7 @@ pipeline {
                 sh 'test ! -z "`docker ps | grep sinamecc_backend_stage`" && (docker stop sinamecc_backend_stage && docker rm sinamecc_backend_stage) || echo "sinamecc_backend_stage does not exists"'
 
                 echo "Step: Running new container"
-                sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.stage_aws" --name sinamecc_backend_stage -p 8016:8015 sinamecc_backend:dev'
+                sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.stage_aws" --name sinamecc_backend_stage -p 8025:8015 sinamecc_backend:dev'
             }   
         }
     }
