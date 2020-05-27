@@ -5,7 +5,6 @@ pipeline {
     }
 
     stages {
-
         stage("Build and Test") {
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
