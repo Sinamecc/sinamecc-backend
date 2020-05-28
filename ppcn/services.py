@@ -132,7 +132,7 @@ class PpcnService():
 
     def _get_serialized_gas_removal(self, data, gas_removal=False):
 
-        serializer = self._service_helper.get_serialized_record(GasRemovalSerializer, data, record=gas_scope)
+        serializer = self._service_helper.get_serialized_record(GasRemovalSerializer, data, record=gas_removal)
 
         return serializer
 
@@ -636,6 +636,7 @@ class PpcnService():
                     ppcn_data.get('organization')['ciiu_code'] = CIIUCodeSerializer(ppcn.organization.ciiu_code.all(), many=True).data
                     if ppcn.organization.contact:
                         ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
+                
                 if ppcn.organization_classification:
                     ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
                     if ppcn.organization_classification.required_level:
@@ -646,6 +647,9 @@ class PpcnService():
                         ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
                     if ppcn.organization_classification.carbon_offset:
                         ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
+                
+                if ppcn.gas_removal:
+                    ppcn_data['gas_removal'] = GasRemovalSerializer(ppcn.gas_removal).data
 
                 ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
@@ -810,6 +814,9 @@ class PpcnService():
                 if ppcn.organization_classification.carbon_offset:
                     ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
             
+            if ppcn.gas_removal:
+                    ppcn_data['gas_removal'] = GasRemovalSerializer(ppcn.gas_removal).data
+                    
             ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
             ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
