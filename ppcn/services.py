@@ -64,58 +64,84 @@ class PpcnService():
     def _get_serialized_contact(self, data, contact = False):
 
         serializer = self._service_helper.get_serialized_record(ContactSerializer, data, record=contact)
+
         return serializer
         
+
     def _get_serialized_organization(self, data, organization = False):
-        
+
         serializer = self._service_helper.get_serialized_record(OrganizationSerializer, data, record=organization)
+
         return serializer
+
 
     def _get_serialized_ppcn(self, data, ppcn=False):
 
         serializer = self._service_helper.get_serialized_record(PPCNSerializer, data, record=ppcn)
+
         return serializer
 
+
     def _get_serialized_organization_classification(self, data, organization_classification=False):
+
         serializer = self._service_helper.get_serialized_record(OrganizationClassificationSerializer, data, record=organization_classification)
 
         return serializer
     
+
     def _get_serialized_reduction(self, data, reduction=False):
+
         serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction)
 
         return serializer
     
+
     def _get_serialized_carbon_offset(self, data, carbon_offset=False):
+
         serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset)
 
         return serializer
 
+
     def _get_serialized_gei_organization(self, data, gei_organization = False):
+
         serializer = self._service_helper.get_serialized_record(GeiOrganizationSerializer, data, record=gei_organization)
 
         return serializer
 
+
     def _get_serialized_biogenic_emission(self, data, biogenic_emission=False):
+
         serializer = self._service_helper.get_serialized_record(BiogenicEmissionSerializer, data, record=biogenic_emission)
 
         return serializer
 
+
     def _get_serialized_gas_report(self, data, gas_report=False):
+
         serializer = self._service_helper.get_serialized_record(GasReportSerializer, data, record=gas_report)
 
         return serializer
 
-    def _get_serialized_gas_scope(self, data, gas_scope=False):
 
+    def _get_serialized_gas_scope(self, data, gas_scope=False):
         serializer = self._service_helper.get_serialized_record(GasScopeSerializer, data, record=gas_scope)
 
         return serializer
+
+
+    def _get_serialized_gas_removal(self, data, gas_removal=False):
+
+        serializer = self._service_helper.get_serialized_record(GasRemovalSerializer, data, record=gas_scope)
+
+        return serializer
+
 
     def _get_serialized_organization_category(self, data, organization_category=False):
         serializer = self._service_helper.get_serialized_record(OrganizationCategorySerializer, data, record=organization_category)
 
         return serializer
+
 
     def _get_serialized_quantified_gases_list(self, data, gas_scope_id):
 
@@ -124,7 +150,6 @@ class PpcnService():
         serializer = self._service_helper.get_serialized_record(QuantifiedGasSerializer, data, many=True)
 
         return serializer
-
 
 
     def _get_serialized_ciuu_code_list(self, data, organization_id):
@@ -395,7 +420,20 @@ class PpcnService():
             result = (False, serialized_biogenic_emission.errors)
 
         return result
+    
+
+    def _create_gas_removal(self, data):
+
+        serialized_gas_removal = self._get_serialized_gas_removal(data)
         
+        if serialized_gas_removal.is_valid():
+            gas_removal = serialized_gas_removal.save()
+            result = (True, gas_removal)
+        else:
+            result = (False, serialized_gas_removal.errors)
+
+        return result
+
     def _create_gas_scope(self, data, gas_report_id):
 
         gas_scope_list = []
@@ -513,20 +551,20 @@ class PpcnService():
             result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
         return result
 
-    def create_organization(self, request):
+    def _create_organization(self, data):
 
-        organization_data = request.data.get("organization", False)
-        contact_data = organization_data.get("contact", False)
-        ciiu_code_data = organization_data.get("ciiu_code_list", False)
-        validation_list = [organization_data, contact_data, ciiu_code_data]
+        data = data
+        contact_data = data.get("contact", False)
+        ciiu_code_data = data.get("ciiu_code_list", False)
+        validation_list = [data, contact_data, ciiu_code_data]
 
         if all(validation_list):
             serialized_contact = self._get_serialized_contact(contact_data)
 
             if serialized_contact.is_valid():
                 contact = serialized_contact.save()
-                organization_data['contact'] = contact.id
-                serialized_organization = self._get_serialized_organization(organization_data)
+                data['contact'] = contact.id
+                serialized_organization = self._get_serialized_organization(data)
 
                 if serialized_organization.is_valid():
                     organization = serialized_organization.save()
@@ -692,7 +730,7 @@ class PpcnService():
         data = request.data
 
         if request.data.get('organization', False):
-            organization_status, organization_detail= self.create_organization(request)
+            organization_status, organization_detail= self._create_organization(data.get('organization'))
             valid_relations.append(organization_status)
             if organization_status: data['organization'] = organization_detail.id
             else: errors.append(organization_detail)
@@ -707,6 +745,12 @@ class PpcnService():
             organization_classification_status, organization_classificatio_data = self._create_organization_classification(data.get('organization_classification'))
             valid_relations.append(organization_classification_status)
             if organization_classification_status: data['organization_classification'] = organization_classificatio_data.id
+            else: errors.append(organization_classificatio_data)
+
+        if request.data.get('gas_removal', False):
+            gas_removal_status, gas_removal_data = self._create_gas_removal(data.get('gas_removal'))
+            valid_relations.append(gas_removal_status)
+            if gas_removal_status: data['gas_removal'] = gas_removal_data.id
             else: errors.append(organization_classificatio_data)
 
         if all(valid_relations):
