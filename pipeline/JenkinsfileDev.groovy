@@ -4,15 +4,12 @@ pipeline {
         DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
         DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
         DATABASE_NAME = "sinamecc_dev_2020"
+        DATABASE_CREDS  = credentials('sinamecc-dev-dba')
+        DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
     }
 
     stages {
         stage("Build and Test") {
-            environment {
-                DATABASE_CREDS  = credentials('sinamecc-dev-dba')
-                DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
-
-            }
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
@@ -42,11 +39,14 @@ pipeline {
 
         stage ("Restarting docker container") {
             steps {
-                echo "Step: Stopping current container"
-                sh 'test ! -z "`docker ps | grep sinamecc_backend_dev`" && (docker stop sinamecc_backend_dev && docker rm sinamecc_backend_dev) || echo "sinamecc_backend_dev does not exists"'
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
+                {
+                    echo "Step: Stopping current container"
+                    sh 'test ! -z "`docker ps | grep sinamecc_backend_dev`" && (docker stop sinamecc_backend_dev && docker rm sinamecc_backend_dev) || echo "sinamecc_backend_dev does not exists"'
 
-                echo "Step: Running new container"
-                sh 'docker run -d -e "DJANGO_SETTINGS_MODULE=config.settings.dev_aws" --name sinamecc_backend_dev -p 8015:8015 sinamecc_backend:dev'
+                    echo "Step: Running new container"
+                    sh "docker run -d -e \"DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}\" -e \"DATABASE_URL=${DATABASE_URL}\" -e \"AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\" -e \"AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\" --name sinamecc_backend_dev -p 8015:8015 sinamecc_backend:dev"
+                }
             }   
         }
     }
