@@ -4,7 +4,8 @@ import environ
 env = environ.Env()
 env.read_env() ## load variable env config/settings/.env
 
-DATABASES = env.db('DATABASE_URL')
+DATABASES = {'default': env.db('DATABASE_URL')}
+
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
