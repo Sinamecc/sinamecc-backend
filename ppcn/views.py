@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from django.http import FileResponse
-from general.helpers import ViewHelper
+from general.helpers.views import ViewHelper
 from ppcn.services import PpcnService
 import uuid
 from django.http import HttpResponse

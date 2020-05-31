@@ -13,7 +13,7 @@ def insert_initiative_type_data(apps, schema_editor):
     initiative_type_data = [
         {
             'initiative_type_es':'Proyecto',
-            'initiative_type_en':'Proyect'
+            'initiative_type_en':'Project'
         },
         {
             'initiative_type_es':'Política',
