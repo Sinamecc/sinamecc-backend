@@ -13,6 +13,7 @@ pipeline {
                         usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
                         ) 
                     {
+                        echo "DATABASE credentials: username = $DATABASE_USER - password = $DATABASE_PASSWORD"
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
 
