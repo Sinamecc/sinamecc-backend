@@ -8,10 +8,6 @@ pipeline {
 
     stages {
         stage("Build and Test") {
-
-            environment {
-                DATABASE_URL="postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
-            }
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([
@@ -19,15 +15,17 @@ pipeline {
                         usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
                         ) 
                     {
-                        echo "DATABASE URL: ${DATABASE_URL}"
-                        echo "Step: Updating requirements"
-                        sh 'pip install -r requirements.txt'
+                        withEnv(['DATABASE_URL="postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"']) {
+                            echo "DATABASE URL: ${DATABASE_URL}"
+                            echo "Step: Updating requirements"
+                            sh 'pip install -r requirements.txt'
 
-                        echo "Step: Running Tests"
-                        sh 'python manage.py test'
+                            echo "Step: Running Tests"
+                            sh 'python manage.py test'
 
-                        echo "Step: Running Migrations"
-                        sh 'python manage.py migrate'                    
+                            echo "Step: Running Migrations"
+                            sh 'python manage.py migrate'                                                
+                        }
                     }
                 }
             }
