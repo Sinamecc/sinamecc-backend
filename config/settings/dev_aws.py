@@ -1,19 +1,10 @@
 from .base import *
 import environ
 
-env = environ.Env(DEBUG=(bool, False))
+env = environ.Env()
 env.read_env() ## load variable env config/settings/.env
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env.str('DATABASE_NAME', default='sinamecc_dev_2020'),
-        'USER': env.str('DATABASE_USER'),
-        'PASSWORD': env.str('DATABASE_PASSWORD')
-        'HOST': env.str('DATABASE_NAME', default='sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com'),
-        'PORT': 5432,
-    }
-}
+DATABASES = env.db('DATABASE_URL')
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']

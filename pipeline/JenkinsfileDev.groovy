@@ -2,6 +2,8 @@ pipeline {
     agent any;
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
+        DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
+        DATABASE_NAME = "sinamecc_dev_2020"
     }
 
     stages {
@@ -13,7 +15,10 @@ pipeline {
                         usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
                         ) 
                     {
-                        echo "DATABASE credentials: username = $DATABASE_USER - password = $DATABASE_PASSWORD"
+                        environment {
+                            DATABASE_URL="postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
+                        }
+                        echo "DATABASE URL: ${DATABASE_URL}"
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
 
