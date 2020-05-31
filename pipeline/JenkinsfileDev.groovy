@@ -8,14 +8,20 @@ pipeline {
         stage("Build and Test") {
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
-                    echo "Step: Updating requirements"
-                    sh 'pip install -r requirements.txt'
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'], 
+                        usernamePassword(credentialsId: '', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
+                        ) 
+                    {
+                        echo "Step: Updating requirements"
+                        sh 'pip install -r requirements.txt'
 
-                    echo "Step: Running Tests"
-                    //sh 'python manage.py test'
+                        echo "Step: Running Tests"
+                        sh 'python manage.py test'
 
-                    echo "Step: Running Migrations"
-                    sh 'python manage.py migrate'
+                        echo "Step: Running Migrations"
+                        sh 'python manage.py migrate'    
+                    }
                 }
             }
         }
