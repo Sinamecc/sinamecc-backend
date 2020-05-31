@@ -8,16 +8,17 @@ pipeline {
 
     stages {
         stage("Build and Test") {
-            withCredentials([
-                [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'], 
-                usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
-                ) 
-            {
-                environment {
-                    DATABASE_URL="postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
-                }
-                steps {
-                    withPythonEnv('/usr/bin/python3.6') {
+
+            environment {
+                DATABASE_URL="postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
+            }
+            steps {
+                withPythonEnv('/usr/bin/python3.6') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'], 
+                        usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
+                        ) 
+                    {
                         echo "DATABASE URL: ${DATABASE_URL}"
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
@@ -26,7 +27,7 @@ pipeline {
                         sh 'python manage.py test'
 
                         echo "Step: Running Migrations"
-                        sh 'python manage.py migrate'    
+                        sh 'python manage.py migrate'                    
                     }
                 }
             }
