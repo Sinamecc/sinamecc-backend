@@ -3,7 +3,7 @@ pipeline {
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.stage_aws"
         DATABASE_NAME = "sinamecc_stage_2020"
-        DATABASE_CREDS  = credentials('sinamecc-stage-dba')
+        DATABASE_CREDS  = credentials('sinamecc-dev-dba')
         DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
     }
 
@@ -13,7 +13,6 @@ pipeline {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
                     {
-                        echo "DATABASE URL: ${DATABASE_URL}"
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
 

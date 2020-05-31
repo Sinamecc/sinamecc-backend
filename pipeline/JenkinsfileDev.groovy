@@ -14,7 +14,6 @@ pipeline {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
                     {
-                        echo "DATABASE URL: ${DATABASE_URL}"
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
 
