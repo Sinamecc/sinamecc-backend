@@ -9,8 +9,8 @@ pipeline {
             steps {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'], 
-                        usernamePassword(credentialsId: '', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
+                        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'], 
+                        usernamePassword(credentialsId: 'sinamecc-dev-dba', passwordVariable: 'DATABASE_PASSWORD', usernameVariable: 'DATABASE_USER')]
                         ) 
                     {
                         echo "Step: Updating requirements"
