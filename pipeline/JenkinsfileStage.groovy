@@ -2,8 +2,9 @@ pipeline {
     agent any;
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.stage_aws"
+        DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
         DATABASE_NAME = "sinamecc_stage_2020"
-        DATABASE_CREDS  = credentials('sinamecc-dev-dba')
+        DATABASE_CREDS  = credentials('sinamecc-stage-dba')
         DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
     }
 
