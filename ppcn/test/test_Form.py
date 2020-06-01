@@ -95,7 +95,30 @@ class PPCNFormTest(TestCase):
                 'buildings_number': 10000,
                 'data_inventory_quantity': 1000,
                 'required_level': self.required_level.id,
-                'recognition_type': self.recognition_type.id
+                'recognition_type': self.recognition_type.id,
+                "reduction" :{
+                    "proyect": "test",
+                    "activity": "Test activity",
+                    "detail_reduction": "test reduction detail", 
+                    "emission": "10000", 
+                    "total_emission": "10000", 
+                    "investment": "1000000", 
+                    "investment_currency": "USD", 
+                    "total_investment": "10000", 
+                    "total_investment_currency": "CRC"
+                },
+                "carbon_offset":
+                {
+                    "offset_scheme" : "UCC", 
+                    "project_location" : "Project Location", 
+                    "certificate_identification" : "CRSD-123214", 
+                    "total_carbon_offset" : "80000 carbon OFFSET", 
+                    "offset_cost" : "5000", 
+                    "offset_cost_currency" : "USD", 
+                    "period" : "May period", 
+                    "total_offset_cost" : "5000", 
+                    "total_offset_cost_currency":"CRC"
+                }
             },
             "gei_organization":
             {	

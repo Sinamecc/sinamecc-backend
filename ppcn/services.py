@@ -56,8 +56,30 @@ class PpcnService():
         self.CIIU_CODE_SERIALIZER_ERROR = "Cannot serialize ciiu code because {0}"
         self.LIST_ERROR = "Was expected a {0} list into data"
         self.MISSING_FIELD = "Missing {} field into request"
+        self.ATTRIBUTE_INSTANCE_ERROR = 'PPCNService does not have {0} function'
     
 
+    # data checker 
+    def _check_all_field_complete(self, ppcn_data):
+
+        ## we need to validate which fields should be verified
+
+        pass 
+    
+    # auxiliar functions
+    def _create_sub_record(self, data, name_sub_record):
+        
+        create_function = f'_create_{name_sub_record}'
+
+        if hasattr(self, create_function):
+            function = getattr(self, create_function)
+            record_status, record_detail = function(data)
+            result = (record_status, record_detail)
+        
+        else:
+            raise Exception(self.ATTRIBUTE_INSTANCE_ERROR.format(create_function))
+
+        return result
 
 
     # serialized objects
@@ -733,44 +755,21 @@ class PpcnService():
         valid_relations = []
         data = request.data
 
-        if request.data.get('organization', False):
-            organization_status, organization_detail= self._create_organization(data.get('organization'))
-            valid_relations.append(organization_status)
-            if organization_status: data['organization'] = organization_detail.id
-            else: errors.append(organization_detail)
-
-        if request.data.get('gei_organization', False):
-            gei_organization_status, gei_organization_detail = self._create_gei_organization(data.get('gei_organization'))
-            valid_relations.append(gei_organization_status)
-            if gei_organization_status: data['gei_organization'] = gei_organization_detail.id
-            else: errors.append(gei_organization_detail)
+        # fk's of object ppcn that have nested fields
+        field_list = ['organization', 'gei_organization', 'organization_classification', 'gas_removal'] 
         
-        if request.data.get('organization_classification', False):
-            organization_classification_status, organization_classificatio_data = self._create_organization_classification(data.get('organization_classification'))
-            valid_relations.append(organization_classification_status)
-            if organization_classification_status: data['organization_classification'] = organization_classificatio_data.id
-            else: errors.append(organization_classificatio_data)
-
-        if request.data.get('gas_removal', False):
-            gas_removal_status, gas_removal_data = self._create_gas_removal(data.get('gas_removal'))
-            valid_relations.append(gas_removal_status)
-            if gas_removal_status: data['gas_removal'] = gas_removal_data.id
-            else: errors.append(organization_classificatio_data)
+        for field in field_list:
+            if data.get(field, False):
+                record_status, record_detail = self._create_sub_record(data.get(field), field)
+                valid_relations.append(record_status)
+                if record_status: data[field] = record_detail.id
+                else: errors.append(record_detail)
 
         if all(valid_relations):
-
             serialized_ppcn = self._get_serialized_ppcn(data)
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
-                ppcn_previous_status = ppcn.fsm_state
-                if not has_transition_perm(ppcn.submit, request.user):
-                    errors.append(self.INVALID_USER_TRANSITION)
-                    result = (False, errors)
-                else:
-                    ppcn.submit()
-                    ppcn.save()
-                    self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
-                    result = (True, PPCNSerializer(ppcn).data)
+                result = (True, PPCNSerializer(ppcn).data)
             else:
                 errors.append(serialized_ppcn.errors)
                 result = (False, errors)
