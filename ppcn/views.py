@@ -23,6 +23,14 @@ permission = PermissionsHelper()
 
 @api_view(['POST'])
 @has_permission_decorator('create_ppcn')
+def send_to_review(request, id):
+    if request.method == 'POST':
+        result = view_helper.execute_by_name("send_to_review", request, id)
+    return result
+
+
+@api_view(['POST'])
+@has_permission_decorator('create_ppcn')
 def post_ppcn(request):
     if request.method == 'POST':
         result = view_helper.post(request)
@@ -173,9 +181,6 @@ def put_delete_patch_ppcn(request, id , language = 'en'):
         result = patch_ppcn(request, id)
 
     return result
-
-
-
 
 
 ## Review these endpoints ******

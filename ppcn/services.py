@@ -57,6 +57,7 @@ class PpcnService():
         self.LIST_ERROR = "Was expected a {0} list into data"
         self.MISSING_FIELD = "Missing {} field into request"
         self.ATTRIBUTE_INSTANCE_ERROR = 'PPCNService does not have {0} function'
+        self.SEND_TO_REVIEW_ERROR = 'Error at the moment to send to review the ppcn form'
     
 
     # data checker 
@@ -778,6 +779,39 @@ class PpcnService():
             
         return result
 
+
+    def send_to_review(self, request, ppcn_id):
+        ## TO DO: call _check_all_field_complete
+
+        f = lambda x: x.method.__name__ == 'submit'
+
+        try:
+            ppcn = PPCN.objects.get(id=ppcn_id)
+            transition_list = ppcn.get_available_fsm_state_transitions()
+            transition_list = list(filter(f, transition_list))
+
+            if len(transition_list) == 1:
+                transition = transition_list[0]
+                submit_function = getattr(ppcn, transition.method.__name__)
+                submit_function()
+                ppcn.save()
+                result = (True, 'PPCN request has been submitted')
+            
+            else:
+                result = (False, self.SEND_TO_REVIEW_ERROR)
+                
+        except PPCN.DoesNotExist:
+            result = (False, self.PPCN_DOES_NOT_EXIST)
+
+        except Exception as exp:
+            result = (False, exp)
+
+        return result
+
+
+
+
+
     def next_action(self, ppcn):
         result = {'states': False, 'required_comments': False}
         # change for transitions method available for users
@@ -851,7 +885,7 @@ class PpcnService():
                     ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
 
             result = (True, ppcn_data)
-        except Sector.DoesNotExist:
+        except PPCN.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)
         return result
     

@@ -54,8 +54,10 @@ urlpatterns = [
         views.get_all_ppcn,
         name='get_all_ppcn'
     ), 
-
- 
+    url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/send/*$',
+        views.send_to_review,
+        name='send_to_review'
+    ), 
     url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>[A-Za-z]*)/*$',
         views.get_one_ppcn,
         name='get_one_ppcn'
