@@ -128,7 +128,8 @@ class OrganizationCategorySerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ('id', 'name', 'legal_identification','representative_name','representative_legal_identification','phone_organization', 'postal_code', 'fax', 'address', 'contact')
+        fields = ('id', 'name', 'legal_identification','representative_name','representative_legal_identification', 'email_representative_legal',
+        'phone_organization', 'postal_code', 'fax', 'address', 'contact')
 
 class CIIUCodeSerializer(serializers.ModelSerializer):
     class Meta:

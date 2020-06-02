@@ -224,6 +224,7 @@ class Organization(models.Model):
     legal_identification = models.CharField(max_length=12, blank=False, null=True)
     representative_name = models.CharField(max_length=200, blank=False, null=True)
     representative_legal_identification = models.CharField(max_length=12, blank=False, null=True)
+    email_representative_legal = models.EmailField(max_length=254, blank=False, null=True)
     phone_organization = models.CharField(max_length=200, blank=False, null=True)
     postal_code = models.CharField(max_length=200, blank=True, null=True)
     fax = models.CharField(max_length=200, blank=True, null=True)
