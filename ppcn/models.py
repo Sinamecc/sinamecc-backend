@@ -197,9 +197,9 @@ class OrganizationCategory(models.Model):
 
 class OrganizationClassification(models.Model):
     
-    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     buildings_number = models.IntegerField(blank=False, null=True)
-    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
