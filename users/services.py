@@ -181,12 +181,12 @@ class UserService():
     def create_permission(self, request):
         errors = []
         result = (False, self.CREATE_PERMISSION_ERROR)
-        serialized_permissioon = self.get_serialized_permission(request)
-        if serialized_permissioon.is_valid():
-            saved_permission = serialized_permissioon.save()
+        serialized_permission = self.get_serialized_permission(request)
+        if serialized_permission.is_valid():
+            saved_permission = serialized_permission.save()
             result = (True, PermissionSerializer(saved_permission).data)
         else:
-            errors.append(serialized_permissioon.errors)
+            errors.append(serialized_permission.errors)
             result = (False, errors)
 
         return result
@@ -310,6 +310,59 @@ class UserService():
                 result = (False, serialized_profile_picture.errors)
         
         return result
+
+
+    ## Refactor user module for get all attr
+    
+    def assign_role_to_user(self, request, user_id):
+
+        UserModel = get_user_model()
+        try:
+            user = UserModel.objects.filter(pk=user_id).get()
+            roles_list = request.data.get('roles')
+            roles.clear_roles(user)
+            for role in roles_list:
+                roles.assign_role(user, role)
+
+            serialized_user = CustomUserSerializer(user)
+            content_user = serialized_user.data
+
+            available_apps_status, available_apps_data = self.get_user_roles(user)
+            if available_apps_status:
+                content_user['available_apps'] = available_apps_data
+
+            result =  (True, content_user)
+                
+        except UserModel.DoesNotExist:
+            result = (False, self.USER_DOESNT_EXIST)
+
+        return result
+        
+
+
+    def get_roles(self, request):
+        
+        result = (True, {})
+        roles_registered = roles.registered_roles.items()
+        serialized_roles_lists = []
+        for k, v in roles_registered:
+            serialized_role = {}
+            serialized_role['role'] = k
+            serialized_role['role_name'] = v.role
+            ## roles.get_or_create_permission(permission_codename) returns a tuple with the folllowing structure 
+            ## (<Permission: users | user | Create Ppcn>, False), so for this reason we get the 0 index.
+
+            serialized_role['available_permissions'] = [
+                {kp: roles.get_or_create_permission(kp)[0].name} for kp, pv in v.available_permissions.items() if pv
+            ] 
+            serialized_role['app'] = v.app
+
+            serialized_roles_lists.append(serialized_role)
+
+        result = (True, serialized_roles_lists)
+        return result
+
+
 
    
 
