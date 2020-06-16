@@ -7,6 +7,7 @@ from users.services import UserService
 from general.helpers.views import ViewHelper
 from django.http import FileResponse
 # Create your views here.
+from rolepermissions.decorators import has_permission_decorator
 
 service = UserService()
 view_helper = ViewHelper(service)
@@ -23,6 +24,7 @@ def post_get_permissions(request):
 
 @api_view(['GET'])
 @csrf_exempt
+@has_permission_decorator('read_user')
 def get_roles(request):
     if request.method == 'GET':
         result = view_helper.execute_by_name('get_roles',request)
@@ -31,6 +33,7 @@ def get_roles(request):
 
 @api_view(['POST'])
 @csrf_exempt
+@has_permission_decorator('edit_user')
 def assign_role_to_user(request, user_id):
     if request.method == 'POST':
         result = view_helper.execute_by_name('assign_role_to_user',request, user_id)
