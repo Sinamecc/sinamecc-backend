@@ -20,16 +20,7 @@ urlpatterns = [
         views.post_get_permissions,
         name='post_get_permissions'
     ),
-    url(
-        r'^api/v1/user/group/*$',
-        views.post_get_groups,
-        name='post_get_groups'
-    ),
-    url(
-        r'^api/v1/user/group/(?P<group_id>[0-9]+)/*$',
-        views.put_get_group,
-        name='put_get_group'
-    ),
+
     url(
         r'^api/v1/user/*$',
         views.post_get_user,
@@ -52,10 +43,16 @@ urlpatterns = [
     ),
 
     url(
-        r'^api/v1/user/(?P<username>[A-Za-z0-9\._-]+)/group/*$',
-        views.assign_user_to_group,
-        name='assign_user_to_group'
-    )
+        r'^api/v1/user/roles/*$',
+        views.get_roles,
+        name='get_roles'
+    ),
+    
+    url(
+        r'^api/v1/user/(?P<user_id>[0-9]+)/roles/*$',
+        views.assign_role_to_user,
+        name='assign_role_to_user'
+    ),
 
     
 ]
