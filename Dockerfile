@@ -1,7 +1,6 @@
 FROM python:3.6
 
 ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE config.settings.stage_aws
 
 RUN mkdir /code
 WORKDIR /code

@@ -30,6 +30,7 @@ class PpcnService():
     def __init__(self):
         self.storage = S3Storage()
         self._service_helper = ServiceHelper()
+        self.GENERIC_CREATE_ERROR = "Error at the moment to create {}"
         self.ORGANIZATION_DOES_NOT_EXIST = "Organization does not exist."
         self.EMPTY_ORGANIZATION_ERROR = "Request doesn't have organization, contact organization or ciiu code"
         self.ORGANIZATION_ERROR_GET_ALL = "Error retrieving all organizations records."
@@ -54,6 +55,8 @@ class PpcnService():
         self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
         self.CIIU_CODE_SERIALIZER_ERROR = "Cannot serialize ciiu code because {0}"
         self.LIST_ERROR = "Was expected a {0} list into data"
+        self.MISSING_FIELD = "Missing {} field into request"
+    
 
 
 
@@ -87,6 +90,42 @@ class PpcnService():
         serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset)
 
         return serializer
+
+    def _get_serialized_gei_organization(self, data, gei_organization = False):
+        serializer = self._service_helper.get_serialized_record(GeiOrganizationSerializer, data, record=gei_organization)
+
+        return serializer
+
+    def _get_serialized_biogenic_emission(self, data, biogenic_emission=False):
+        serializer = self._service_helper.get_serialized_record(BiogenicEmissionSerializer, data, record=biogenic_emission)
+
+        return serializer
+
+    def _get_serialized_gas_report(self, data, gas_report=False):
+        serializer = self._service_helper.get_serialized_record(GasReportSerializer, data, record=gas_report)
+
+        return serializer
+
+    def _get_serialized_gas_scope(self, data, gas_scope=False):
+
+        serializer = self._service_helper.get_serialized_record(GasScopeSerializer, data, record=gas_scope)
+
+        return serializer
+
+    def _get_serialized_organization_category(self, data, organization_category=False):
+        serializer = self._service_helper.get_serialized_record(OrganizationCategorySerializer, data, record=organization_category)
+
+        return serializer
+
+    def _get_serialized_quantified_gases_list(self, data, gas_scope_id):
+
+        data = [{**quantified_gas, 'gas_scope': gas_scope_id}  for quantified_gas in data]
+
+        serializer = self._service_helper.get_serialized_record(QuantifiedGasSerializer, data, many=True)
+
+        return serializer
+
+
 
     def _get_serialized_ciuu_code_list(self, data, organization_id):
     
@@ -129,24 +168,6 @@ class PpcnService():
         }
         serializer = ChangeLogSerializer(data=change_log_data)
         return serializer
-
-
-    def get_serialized_gei_organization(self, request, gei_organization = False):
-        
-        gei_organization_data = { 
-            'ovv': request.data.get('gei_organization').get('ovv'),
-            'emission_ovv_date': request.data.get('gei_organization').get('emission_ovv_date'),
-            'report_year': request.data.get('gei_organization').get('report_year'),
-            'base_year': request.data.get('gei_organization').get('base_year')
-        }
-
-        if gei_organization:
-            serializer = GeiOrganizationSerializer(gei_organization ,data=gei_organization_data)
-        else:
-            serializer = GeiOrganizationSerializer(data=gei_organization_data)
-        return serializer
-
-
 
 
     def get_serialized_PPCCFile(self, file, request, ppcnFile = False):
@@ -270,6 +291,18 @@ class PpcnService():
 
         return result
     
+
+    def _create_organization_category(self, data):
+
+        serialized_organization_category = self._get_serialized_organization_category(data)
+        if serialized_organization_category.is_valid():
+            organization_category = serialized_organization_category.save()
+            result = (True, organization_category)
+        else:
+            result = (False, serialized_organization_category.errors)
+
+        return result
+
     def _create_carbon_offset(self, data):
 
         serialized_carbon_offset = self._get_serialized_carbon_offset(data)
@@ -309,6 +342,145 @@ class PpcnService():
                 result = (False, serialized_organization_classification.errors)
         else:
             result = (False, validation_dict.get(False))
+
+        return result
+
+
+    def _create_gei_organization(self, data):
+        validation_dict = {}
+
+        if data.get('gas_report', False):
+            gas_report_status, gas_report_data = self._create_gas_report(data.get('gas_report'))
+            if gas_report_status:
+                data['gas_report'] = gas_report_data.id
+            dict_data = gas_report_data if isinstance(gas_report_data, list) else [gas_report_data]
+            validation_dict.setdefault(gas_report_status,[]).extend(dict_data)
+        
+
+        if data.get('organization_category', False):
+            organization_category_status, organization_category_data = self._create_organization_category(data.get('organization_category'))
+            if organization_category_status:
+                data['organization_category'] = organization_category_data.id
+            dict_data = organization_category_data if isinstance(organization_category_data, list) else [organization_category_data]
+            validation_dict.setdefault(organization_category_status,[]).extend(dict_data)
+    
+        if all(validation_dict):
+            serialized_gei_organization = self._get_serialized_gei_organization(data) 
+            if serialized_gei_organization.is_valid():
+                gei_organization = serialized_gei_organization.save()
+                if data.get('gei_activity_types', False):
+
+                    gei_activity_types_status, gei_activity_types_data = self._assign_gei_activity_types(data, gei_organization)
+
+                    if gei_activity_types_status:
+                        result = (True, gei_organization)
+                    else:
+                        result = (False, gei_activity_types_data)
+                else:
+                    result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
+            else:
+                result = (False, serialized_gei_organization.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
+        return result
+
+    def _create_biogenic_emsission(self, data):
+
+        serialized_biogenic_emission = self._get_serialized_biogenic_emission(data)
+        if serialized_biogenic_emission.is_valid():
+            biogenic_emission = serialized_biogenic_emission.save()
+            result = (True, biogenic_emission)
+        else:
+            result = (False, serialized_biogenic_emission.errors)
+
+        return result
+        
+    def _create_gas_scope(self, data, gas_report_id):
+
+        gas_scope_list = []
+        result = (True, gas_scope_list)
+        for gas_scope in data:
+            gas_scope['gas_report'] = gas_report_id
+            quantified_gases_list = gas_scope.get('quantified_gases')
+
+            if isinstance(quantified_gases_list, list):
+                serialized_gas_scope = self._get_serialized_gas_scope(gas_scope)
+
+                if serialized_gas_scope.is_valid():
+                    gas_scope = serialized_gas_scope.save()
+                    serialized_quantified_gases = self._get_serialized_quantified_gases_list(quantified_gases_list, gas_scope.id)
+
+                    if serialized_quantified_gases.is_valid():
+                        quantified_gases = serialized_quantified_gases.save()
+                        
+                    else:
+                        result = (False, serialized_quantified_gases.errors)
+                        break
+                else:
+                    result = (False, serialized_gas_scope.errors)
+                    break
+            else:
+                result = (False, self.MISSING_FIELD.format('gas_scopes'))
+                break
+
+            gas_scope_list.append(gas_scope)
+
+        return  result
+
+
+
+    def _create_gas_report(self, data):
+
+        validation_dict = {}
+        
+        if data.get('biogenic_emission', False):
+            biogenic_emission_status, biogenic_emission_data = self._create_biogenic_emsission(data.get('biogenic_emission'))
+            if biogenic_emission_status:
+                data['biogenic_emission'] = biogenic_emission_data.id
+
+            dict_data = biogenic_emission_data if isinstance(biogenic_emission_data, list) else [biogenic_emission_data]
+            validation_dict.setdefault(biogenic_emission_status,[]).extend(dict_data)
+
+        if all(validation_dict):
+            serialized_gas_report = self._get_serialized_gas_report(data)
+            if serialized_gas_report.is_valid():
+                gas_report = serialized_gas_report.save()
+                if data.get('gas_scopes', False):
+                    gas_scope_status, gas_scope_data = self._create_gas_scope(data.get('gas_scopes'), gas_report.id)
+                    if gas_scope_status:
+                        result = (True, gas_report)
+                    else:
+                        result = (True, gas_scope_data)
+                else:
+                    result = (True, gas_report)             
+            else:
+                result = (False, serialized_gas_report.errors)
+        else:
+            result = (False, validation_dict.get(False))
+
+        return result
+
+
+    def _assign_gei_activity_types(self, data, gei_organization):
+
+        gei_activity_types_list = data.get('gei_activity_types')
+        errors = [self.ASSING_GEI_ACTIVITY_TYPES]
+        result_status = True
+        for gei_activity_type in gei_activity_types_list:
+            serialized_gei_activity_type = self.get_serialized_gei_activity_type(gei_activity_type)
+            if serialized_gei_activity_type.is_valid():
+                gei_activity_type = serialized_gei_activity_type.save()
+                gei_organization.gei_activity_types.add(gei_activity_type)
+            else:
+                result_status = False
+                errors.append(serialized_gei_activity_type.errors)
+        
+        if result_status:
+            result = (True, gei_organization)
+
+        else:
+            result = (False, errors)
 
         return result
 
@@ -449,7 +621,21 @@ class PpcnService():
                     if ppcn.gei_organization.ovv:
                         ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
                         
-
+                    if ppcn.gei_organization.gas_report:
+                        ppcn_data.get('gei_organization')['gas_report'] = GasReportSerializer(ppcn.gei_organization.gas_report).data
+                        if ppcn.gei_organization.gas_report.biogenic_emission:
+                            ppcn_data.get('gei_organization').get('gas_report')['biogenic_emission'] = BiogenicEmissionSerializer(ppcn.gei_organization.gas_report.biogenic_emission).data
+                        
+                        if ppcn.gei_organization.gas_report.gas_scope:
+                            ppcn_data.get('gei_organization').get('gas_report')['gas_scopes'] = []
+                            for gas_scope in ppcn.gei_organization.gas_report.gas_scope.all():
+                                gas_scope_data = GasScopeSerializer(gas_scope).data
+                                gas_scope_data['quantified_gases'] = QuantifiedGasSerializer(gas_scope.quantified_gases.all(), many=True).data
+                                ppcn_data.get('gei_organization').get('gas_report').get('gas_scopes').append(gas_scope_data)
+                    
+                    if ppcn.gei_organization.organization_category:
+                        ppcn_data.get('gei_organization')['organization_category'] = OrganizationCategorySerializer(ppcn.gei_organization.organization_category).data
+                    
                     for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
                         gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
                         gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
@@ -473,48 +659,7 @@ class PpcnService():
             result = (False, serialized_change_log.errors)
         return result
 
-    def assign_gei_activity_types(self, request, gei_organization):
-
-        gei_activity_types_list = request.data.get('gei_activity_types')
-        errors = [self.ASSING_GEI_ACTIVITY_TYPES]
-        result_status = True
-        for gei_activity_type in gei_activity_types_list:
-            serialized_gei_activity_type = self.get_serialized_gei_activity_type(gei_activity_type)
-            if serialized_gei_activity_type.is_valid():
-                gei_activity_type = serialized_gei_activity_type.save()
-                gei_organization.gei_activity_types.add(gei_activity_type)
-            else:
-                result_status = False
-                errors.append(serialized_gei_activity_type.errors)
-        
-        if result_status:
-            result = (True, gei_organization)
-
-        else:
-            result = (False, errors)
-
-        return result
-
-    def create_gei_organization(self, request):
-
-        serialized_gei_organization = self.get_serialized_gei_organization(request) 
-        if serialized_gei_organization.is_valid():
-            gei_organization = serialized_gei_organization.save()
-            if request.data.get('gei_activity_types') != None:
-
-                gei_activity_types_status, gei_activity_types_data = self.assign_gei_activity_types(request, gei_organization)
-
-                if gei_activity_types_status:
-                    result = (True, gei_organization)
-                else:
-                    result = (False, gei_activity_types_data)
-            else:
-                result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
-        else:
-            result = (False, serialized_gei_organization.errors)
-            
-        return result
-    
+    ## Change this !!!!
     def update_gei_organization(self, request, id):
 
         gei_organization = GeiOrganization.objects.get(pk=id)
@@ -553,7 +698,7 @@ class PpcnService():
             else: errors.append(organization_detail)
 
         if request.data.get('gei_organization', False):
-            gei_organization_status, gei_organization_detail = self.create_gei_organization(request)
+            gei_organization_status, gei_organization_detail = self._create_gei_organization(data.get('gei_organization'))
             valid_relations.append(gei_organization_status)
             if gei_organization_status: data['gei_organization'] = gei_organization_detail.id
             else: errors.append(gei_organization_detail)
@@ -629,16 +774,32 @@ class PpcnService():
 
             if ppcn.gei_organization:
                 ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
+                
                 ppcn_data.get('gei_organization')['gei_activity_types'] = []
                 if ppcn.gei_organization.ovv:
                     ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
+                
+                if ppcn.gei_organization.organization_category:
+                    ppcn_data.get('gei_organization')['organization_category'] = OrganizationCategorySerializer(ppcn.gei_organization.organization_category).data
                     
+                if  ppcn.gei_organization.gas_report:
+                    ppcn_data.get('gei_organization')['gas_report'] = GasReportSerializer(ppcn.gei_organization.gas_report).data
+                    if ppcn.gei_organization.gas_report.biogenic_emission:
+                        ppcn_data.get('gei_organization').get('gas_report')['biogenic_emission'] = BiogenicEmissionSerializer(ppcn.gei_organization.gas_report.biogenic_emission).data
+                    
+                    if ppcn.gei_organization.gas_report.gas_scope:
+                        ppcn_data.get('gei_organization').get('gas_report')['gas_scopes'] = []
+                        for gas_scope in ppcn.gei_organization.gas_report.gas_scope.all():
+                            gas_scope_data = GasScopeSerializer(gas_scope).data
+                            gas_scope_data['quantified_gases'] = QuantifiedGasSerializer(gas_scope.quantified_gases.all(), many=True).data
+                            ppcn_data.get('gei_organization').get('gas_report').get('gas_scopes').append(gas_scope_data)
 
                 for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
                     gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
                     gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
                     gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
                     ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+
             result = (True, ppcn_data)
         except Sector.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)
@@ -675,7 +836,7 @@ class PpcnService():
             if gei_organization_id != None:
                 gei_organization_status, gei_organization_detail = self.update_gei_organization(request, gei_organization_id)
             else:
-                gei_organization_status, gei_organization_detail = self.create_gei_organization(request)
+                gei_organization_status, gei_organization_detail = self._create_gei_organization(request)
             valid_relations.append(gei_organization_status)
             if gei_organization_status: gei_organization_id = gei_organization_detail.id
             else: errors.append(gei_organization_detail)
