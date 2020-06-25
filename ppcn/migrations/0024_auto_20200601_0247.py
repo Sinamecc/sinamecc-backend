@@ -134,18 +134,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='organization',
-            name='legal_identification',
-            field=models.CharField(max_length=12, null=True),
-        ),
-        migrations.AlterField(
-            model_name='organization',
             name='name',
             field=models.CharField(max_length=200, null=True),
-        ),
-        migrations.AlterField(
-            model_name='organization',
-            name='representative_legal_identification',
-            field=models.CharField(max_length=12, null=True),
         ),
         migrations.AlterField(
             model_name='organization',

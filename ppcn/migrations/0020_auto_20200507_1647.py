@@ -105,12 +105,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='legal_identification',
-            field=models.CharField(max_length=12)
+            field=models.CharField(max_length=12, null=True)
         ),
         migrations.AddField(
             model_name='organization',
             name='representative_legal_identification',
-            field=models.CharField(max_length=12),
+            field=models.CharField(max_length=12, null=True),
         ),
         migrations.AddField(
             model_name='organization',
