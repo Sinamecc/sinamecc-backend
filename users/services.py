@@ -98,10 +98,18 @@ class UserService():
             user = UserModel.objects.filter(username=username).get()
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
-            available_apps_status, available_apps_data = self.get_user_roles(user)
+            validation_list  = []
+            available_apps_status, available_apps_data = self.get_user_app_roles(user)
+            validation_list.append(available_apps_status)
+
+            roles_status, roles_data = self.get_user_roles(user)
+            validation_list.append(roles_status)
+
             profile_picture_status, profile_picture_data = self.get_current_profile_picture(user.id)
-            if available_apps_status:
+            validation_list.append(profile_picture_status)
+            if all(validation_list):
                 content_user['available_apps'] = available_apps_data
+                content_user['roles'] = roles_data
                 content_user['profile_picture'] = profile_picture_data if profile_picture_status else []
                 result = (True, content_user)
                 login(request, user)
@@ -114,6 +122,27 @@ class UserService():
         return result
 
     def get_user_roles(self, user):
+
+        user_roles = roles.get_user_roles(user)
+        serialized_roles_lists = []
+        for role in user_roles:
+            serialized_role = {}
+            serialized_role['role'] = role.get_name()
+            serialized_role['role_name'] = role.role
+            ## roles.get_or_create_permission(permission_codename) returns a tuple with the folllowing structure 
+            ## (<Permission: users | user | Create Ppcn>, False), so for this reason we get the 0 index.
+            serialized_role['available_permissions'] = [
+                {kp: roles.get_or_create_permission(kp)[0].name} for kp, pv in role.available_permissions.items() if pv
+            ] 
+            serialized_role['app'] = role.app
+
+            serialized_roles_lists.append(serialized_role)
+
+        result = (True, serialized_roles_lists)
+
+        return result
+
+    def get_user_app_roles(self, user):
         
         app_permissions = {}
         user_roles = roles.get_user_roles(user)
@@ -142,7 +171,7 @@ class UserService():
         for user in user_list:
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
-            available_apps_status, available_apps_data = self.get_user_roles(user)
+            available_apps_status, available_apps_data = self.get_user_app_roles(user)
             if available_apps_status:
                 content_user['available_apps'] = available_apps_data
                 
@@ -327,9 +356,11 @@ class UserService():
             serialized_user = CustomUserSerializer(user)
             content_user = serialized_user.data
 
-            available_apps_status, available_apps_data = self.get_user_roles(user)
-            if available_apps_status:
+            available_apps_status, available_apps_data = self.get_user_app_roles(user)
+            roles_status, roles_data = self.get_user_roles(user)
+            if available_apps_status and roles_status:
                 content_user['available_apps'] = available_apps_data
+                content_user['roles'] = roles_data
 
             result =  (True, content_user)
                 
