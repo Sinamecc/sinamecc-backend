@@ -1,4 +1,3 @@
-import json
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, ProfilePicture
@@ -14,11 +13,7 @@ from django.urls import reverse
 import datetime
 import os
 from io import BytesIO
-<< << << < HEAD
-== == == =
-
-
->>>>>> > 07b952f... assign_roles: minor fixes for post and get
+import json
 
 
 class CustomUserCreationForm(UserCreationForm):
