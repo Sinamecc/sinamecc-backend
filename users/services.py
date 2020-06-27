@@ -13,6 +13,7 @@ from django.urls import reverse
 import datetime
 import os
 from io import BytesIO
+import json
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -182,9 +183,11 @@ class UserService():
             content_user = serialized_user.data
             available_apps_status, available_apps_data = self.get_user_app_roles(
                 user)
-            if available_apps_status:
-                content_user['available_apps'] = available_apps_data
+            roles_status, roles_data = self.get_user_roles(user)
 
+            if available_apps_status and roles_status:
+                content_user['available_apps'] = available_apps_data
+                content_user['roles'] = roles_data
             serialized_users_list.append(content_user)
 
         result = (True, serialized_users_list)
@@ -364,7 +367,7 @@ class UserService():
         UserModel = get_user_model()
         try:
             user = UserModel.objects.filter(pk=user_id).get()
-            roles_list = request.data.get('roles')
+            roles_list = json.loads(request.data.get('roles'))
             roles.clear_roles(user)
             for role in roles_list:
                 roles.assign_role(user, role)
