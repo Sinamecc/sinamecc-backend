@@ -56,7 +56,8 @@ class PpcnService():
         self.CIIU_CODE_SERIALIZER_ERROR = "Cannot serialize ciiu code because {0}"
         self.LIST_ERROR = "Was expected a {0} list into data"
         self.MISSING_FIELD = "Missing {} field into request"
-        self.ATTRIBUTE_INSTANCE_ERROR = 'PPCNService does not have {0} function'
+        self.FUNCTION_INSTANCE_ERROR = 'PPCNService does not have {0} function'
+        self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.SEND_TO_REVIEW_ERROR = 'Error at the moment to send to review the ppcn form'
     
 
@@ -67,10 +68,10 @@ class PpcnService():
 
         pass 
     
-    # auxiliar functions
-    def _create_sub_record(self, data, name_sub_record):
+    # auxiliary functions
+    def _create_sub_record(self, data, sub_record_name):
         
-        create_function = f'_create_{name_sub_record}'
+        create_function = f'_create_{sub_record_name}'
 
         if hasattr(self, create_function):
             function = getattr(self, create_function)
@@ -78,14 +79,14 @@ class PpcnService():
             result = (record_status, record_detail)
         
         else:
-            raise Exception(self.ATTRIBUTE_INSTANCE_ERROR.format(create_function))
+            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
         return result
 
 
-    def _update_sub_record(self, data, name_sub_record):
+    def _update_sub_record(self, data, sub_record_name):
         
-        update_function = f'_update_{name_sub_record}'
+        update_function = f'_update_{sub_record_name}'
 
         if hasattr(self, update_function):
             function = getattr(self, update_function)
@@ -93,9 +94,27 @@ class PpcnService():
             result = (record_status, record_detail)
         
         else:
-            raise Exception(self.ATTRIBUTE_INSTANCE_ERROR.format(create_function))
+            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
         return result
+
+
+    def _create_or_update_record(self, instance, field, data)
+
+        result = (False, [])
+        if hasattr(instance, field):
+            if getattr(instance, field) == None:
+                record_status, record_data = self._create_sub_record(data, field) ## field = sub_record_name
+
+            else:
+                record_status, record_data = self._update_sub_record(data, field)
+
+            result = (record_status, record_status)
+        else:
+
+            result = (False, self.ATTRIBUTE_INSTANCE_ERROR)
+
+        return 
 
 
     # serialized objects
@@ -636,7 +655,7 @@ class PpcnService():
             result = (False, self.EMPTY_ORGANIZATION_ERROR)
 
         return result
-
+    
     def update_organization(self, request, id):
 
         contact_id = request.data.get('organization').get('contact').get('id')
@@ -929,14 +948,29 @@ class PpcnService():
             result = (False, {"Result":"PPCN has not been delete"})
         return result
 
+    
+
+       
+
     def update(self, id, request):
         errors =[]
-        valid_relations = []
+        validation_dict = {}
+        data = request.data
         
         field_list = ['organization', 'gei_organization', 'organization_classification', 'gas_removal'] 
 
         try:
             ppcn = PPCN.objects.get(id=id)
+             # fk's of object ppcn that have nested fields
+
+            for field in field_list:
+                if data.get(field, False):
+                    record_status, record_data = self._create_sub_record(data.get(field), field)
+                    
+                    if record_status:
+                        data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
 
 
         except PPCN.DoesNotExist:
