@@ -84,22 +84,25 @@ class PpcnService():
         return result
 
 
-    def _update_sub_record(self, data, sub_record_name):
+    def _update_sub_record(self, sub_record_name, record_for_updating, data):
         
         update_function = f'_update_{sub_record_name}'
-
+        
         if hasattr(self, update_function):
+          
             function = getattr(self, update_function)
-            record_status, record_detail = function(data)
+        
+            record_status, record_detail = function(record_for_updating, data)
+          
             result = (record_status, record_detail)
         
         else:
-            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
+            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(update_function))
 
         return result
 
 
-    def _create_or_update_record(self, instance, field, data)
+    def _create_or_update_record(self, instance, field, data):
 
         result = (False, [])
         if hasattr(instance, field):
@@ -107,14 +110,16 @@ class PpcnService():
                 record_status, record_data = self._create_sub_record(data, field) ## field = sub_record_name
 
             else:
-                record_status, record_data = self._update_sub_record(data, field)
-
-            result = (record_status, record_status)
+                ## change field(string) to object(model instance)
+                record_for_updating = getattr(instance, field) 
+                record_status, record_data = self._update_sub_record(field, record_for_updating, data)
+            
+            result = (record_status, record_data)
         else:
 
             result = (False, self.ATTRIBUTE_INSTANCE_ERROR)
 
-        return 
+        return result
 
 
     # serialized objects
@@ -208,28 +213,15 @@ class PpcnService():
 
         return serializer
 
-
-    def _get_serialized_ciuu_code_list(self, data, organization_id):
-    
-        result = (True, [])
-
-        if isinstance(data, list):
-            data = [{**ciiu_code, 'organization': organization_id}  for ciiu_code in data]
+    def _get_serialized_ciiu_code_list(self, data, organization_id):
+        
+        data = [{**ciiu_code, 'organization': organization_id}  for ciiu_code in data]
  
-            serializer = self._service_helper.get_serialized_record(CIIUCodeSerializer, data, many=True)
+        serializer = self._service_helper.get_serialized_record(CIIUCodeSerializer, data, many=True)
 
-            if serializer.is_valid():
-                serializer.save()
+        return serializer
 
-            else: 
-                result = (False, self.CIIU_CODE_SERIALIZER_ERROR.format(str(serializer.errors)))
-
-        else:
-            result = (False, self.LIST_ERROR.format('ciiu_code'))
-            
-        return result
-    
-
+  
     def get_serialized_geographic_level(self, request):
 
         geographic_level_data = {
@@ -530,7 +522,7 @@ class PpcnService():
 
         return  result
 
-
+    
     def _create_gas_report(self, data):
 
         validation_dict = {}
@@ -566,6 +558,69 @@ class PpcnService():
         return result
 
 
+    def _create_ciiu_code(self, data, organization_id):
+ 
+        result = (True, [])
+
+        if isinstance(data, list): 
+            serializer = self._get_serialized_ciiu_code_list(data, organization_id)
+
+            if serializer.is_valid():
+
+                ciiu_code_list = serializer.save()
+
+                result = (True, ciiu_code_list)
+
+            else: 
+                result = (False, self.CIIU_CODE_SERIALIZER_ERROR.format(str(serializer.errors)))
+
+        else:
+            result = (False, self.LIST_ERROR.format('ciiu_code'))
+            
+        return result
+
+    def _create_organization(self, data):
+        
+        validation_dict = {}
+   
+        # fk's of object organization that have nested fields
+        field_list = ['contact'] 
+        
+        for field in field_list:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+
+        if all(validation_dict):
+
+            serialized_organization = self._get_serialized_organization(data)
+            if serialized_organization.is_valid():
+                organization = serialized_organization.save()
+
+                organization_id =  organization.id
+
+                ciiu_code_data = data.get("ciiu_code_list", [])
+
+                serialized_ciiu_code_status, serialized_ciiu_code_data = self._create_ciiu_code(ciiu_code_data, organization_id)
+
+                if serialized_ciiu_code_status:
+                    result = (True, organization)
+                else:
+                    result = (serialized_ciiu_code_status, serialized_ciiu_code_data)
+
+            else:
+                errors = serialized_organization.errors
+                result = (False, errors)
+  
+        else:
+            result = (False, self.EMPTY_ORGANIZATION_ERROR)
+
+        return result
+
+    ## update funtion
+
     def _assign_gei_activity_types(self, data, gei_organization):
 
         gei_activity_types_list = data.get('gei_activity_types')
@@ -589,36 +644,42 @@ class PpcnService():
         return result
 
 
+    def _update_contact(self, contact, data):
+        
+        serialized_contact = self._get_serialized_contact(data, contact)
+        
+        if serialized_contact.is_valid():
+            contact = serialized_contact.save()
+            result = (True, contact)
 
-    def get_one_organization(self, pk, language):
-        try:
-            org = Organization.objects.get(id=pk)
-            organization_data = [
-                {
-                    'id': org.id,
-                    'name': org.name,
-                    'representative_name': org.representative_name,
-                    'postal_code': org.postal_code,
-                    'fax': org.fax,
-                    'address': org.address,
-                    'ciiu': org.ciiu,
-                    'contact':{
+        else:
+            result = (False, serialized_contact.errors)
 
-                        'id' : org.contact.id,
-                        'full_name': org.contact.full_name,
-                        'job_title': org.contact.job_title,
-                        'phone': org.contact.phone,
-                        'email': org.contact.email
-                    }
-                }
-            ]
-            result = (True, organization_data)
-        except Organization.DoesNotExist:
-            result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
         return result
 
-    def _create_organization(self, data):
-        
+    def _update_ciiu_code(self, data, organization):
+ 
+        result = (True, [])
+        organization.ciiu_code.all().delete()
+        if isinstance(data, list): 
+            serializer = self._get_serialized_ciiu_code_list(data, organization.id)
+
+            if serializer.is_valid():
+
+                ciiu_code_list = serializer.save()
+
+                result = (True, ciiu_code_list)
+
+            else: 
+                result = (False, self.CIIU_CODE_SERIALIZER_ERROR.format(str(serializer.errors)))
+
+        else:
+            result = (False, self.LIST_ERROR.format('ciiu_code'))
+            
+        return result
+
+    def _update_organization(self, organization, data):
+
         validation_dict = {}
    
         # fk's of object organization that have nested fields
@@ -626,27 +687,26 @@ class PpcnService():
         
         for field in field_list:
             if data.get(field, False):
-                record_status, record_data = self._create_sub_record(data.get(field), field)
+                record_status, record_data = self._create_or_update_record(organization, field,  data.get(field))
+                
                 if record_status:
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
-
+        
         if all(validation_dict):
 
-            serialized_organization = self._get_serialized_organization(data)
+            serialized_organization = self._get_serialized_organization(data, organization)
             if serialized_organization.is_valid():
                 organization = serialized_organization.save()
-                organization_id =  organization.id
 
                 ciiu_code_data = data.get("ciiu_code_list", False)
-
-                serialized_ciiu_code_status, serialized_ciiu_code_data = self._get_serialized_ciuu_code_list(ciiu_code_data, organization_id)
+                
+                serialized_ciiu_code_status, serialized_ciiu_code_data = self._update_ciiu_code(ciiu_code_data, organization)
 
                 if serialized_ciiu_code_status:
                     result = (True, organization)
                 else:
                     result = (serialized_ciiu_code_status, serialized_ciiu_code_data)
-
             else:
                 errors = serialized_organization.errors
                 result = (False, errors)
@@ -655,10 +715,10 @@ class PpcnService():
             result = (False, self.EMPTY_ORGANIZATION_ERROR)
 
         return result
-    
-    def update_organization(self, request, id):
 
-        contact_id = request.data.get('organization').get('contact').get('id')
+        return (True, organization)
+        ## delete this 
+        """contact_id = request.data.get('organization').get('contact').get('id')
         organization = Organization.objects.get(pk=id)
         result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
         if organization != None:
@@ -681,7 +741,7 @@ class PpcnService():
 
                 result = (False, contact_serialized.errors)
 
-        return result
+        return result"""
 
     def delete_organization(self, pk):
         try:
@@ -953,28 +1013,39 @@ class PpcnService():
        
 
     def update(self, id, request):
-        errors =[]
+
         validation_dict = {}
         data = request.data
         
         field_list = ['organization', 'gei_organization', 'organization_classification', 'gas_removal'] 
 
         try:
+
             ppcn = PPCN.objects.get(id=id)
              # fk's of object ppcn that have nested fields
-
             for field in field_list:
                 if data.get(field, False):
-                    record_status, record_data = self._create_sub_record(data.get(field), field)
+                    record_status, record_data = self._create_or_update_record(ppcn, field, data.get(field))
                     
                     if record_status:
                         data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
 
+            if all(validation_dict):
+                serialized_ppcn = self._get_serialized_ppcn(data, ppcn)
+                if serialized_ppcn.is_valid():
+                    ppcn = serialized_ppcn.save()
+                    result = (True, PPCNSerializer(ppcn).data)
+                else:
+
+                    result = (False, serialized_ppcn.errors)
+            else:
+                result = (False, validation_dict.get(False))
 
         except PPCN.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)
+
         return result
     
         """
