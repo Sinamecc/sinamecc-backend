@@ -643,7 +643,6 @@ class PpcnService():
 
         return result
 
-
     def _update_contact(self, contact, data):
         
         serialized_contact = self._get_serialized_contact(data, contact)
@@ -678,10 +677,32 @@ class PpcnService():
             
         return result
 
+    def _update_reduction(self, reduction, data):
+
+        serialized_reduction = self._get_serialized_reduction(data, reduction)
+        if serialized_reduction.is_valid():
+            reduction = serialized_reduction.save()
+            result = (True, reduction)
+        else:
+            result = (False, serialized_reduction.errors)
+
+        return result
+
+    def _update_carbon_offset(self, carbon_offset, data):
+
+        serialized_carbon_offset = self._get_serialized_carbon_offset(data, carbon_offset)
+        if serialized_carbon_offset.is_valid():
+            carbon_offset = serialized_carbon_offset.save()
+            result = (True, carbon_offset)
+        else:
+            result = (False, serialized_carbon_offset.errors)
+
+        return result
+
+
     def _update_organization(self, organization, data):
 
         validation_dict = {}
-   
         # fk's of object organization that have nested fields
         field_list = ['contact'] 
         
@@ -692,19 +713,20 @@ class PpcnService():
                 if record_status:
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
         
         if all(validation_dict):
-
             serialized_organization = self._get_serialized_organization(data, organization)
+
             if serialized_organization.is_valid():
                 organization = serialized_organization.save()
 
                 ciiu_code_data = data.get("ciiu_code_list", False)
-                
                 serialized_ciiu_code_status, serialized_ciiu_code_data = self._update_ciiu_code(ciiu_code_data, organization)
 
                 if serialized_ciiu_code_status:
                     result = (True, organization)
+
                 else:
                     result = (serialized_ciiu_code_status, serialized_ciiu_code_data)
             else:
@@ -716,32 +738,54 @@ class PpcnService():
 
         return result
 
-        return (True, organization)
-        ## delete this 
-        """contact_id = request.data.get('organization').get('contact').get('id')
-        organization = Organization.objects.get(pk=id)
-        result = (False, self.ORGANIZATION_DOES_NOT_EXIST)
-        if organization != None:
-            if not str(organization.contact.id) == str(contact_id):
-                result = (False, self.CONTACT_NOT_MATCH_ERROR)
-                return result
-            
-            contact = Contact.objects.get(id=contact_id)
-            contact_serialized = self._get_serialized_contact(request.data.get('organization'), contact)
 
-            if contact_serialized.is_valid():
-                contact_serialized.save()
-                serialized_organization = self.get_serialized_organization(request, contact_id, organization)
-                if serialized_organization.is_valid():
-                    organization = serialized_organization.save()
-                    result = (True, organization)
-                else:
-                    result = (False, serialized_organization.error)
+    def _update_organization_classification(self, organization_classification, data):
+
+        validation_dict = {}
+        # fk's of object organization_classification that have nested fields
+        field_list = ['reduction', 'carbon_offset'] 
+        
+        for field in field_list:
+            if data.get(field, False):
+                record_status, record_data = self._create_or_update_record(organization_classification, field, data.get(field))
+
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+        if all(validation_dict):
+            serialized_organization_classification = self._get_serialized_organization_classification(data, organization_classification)
+            if serialized_organization_classification.is_valid():
+                organization_classification = serialized_organization_classification.save()
+                result = (True, organization_classification)
             else:
+                result = (False, serialized_organization_classification.errors)
+        else:
+            result = (False, validation_dict.get(False))
 
-                result = (False, contact_serialized.errors)
+        return result
 
-        return result"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def delete_organization(self, pk):
         try:

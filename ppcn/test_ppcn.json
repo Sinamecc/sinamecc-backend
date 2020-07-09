@@ -1,0 +1,35 @@
+//PPCN example
+
+{
+    "confidential": "no_confidential",
+    
+    "organization" : 
+    {	
+        "name": "test name",
+        "representative_name": "test representative_name",
+        "representative_legal_identification": "3000300012",
+        "legal_identification": "3000300012",
+        "phone_organization" : "27643606",
+        "postal_code": "40101",
+        "fax": "",
+        "ciiu_code_list": [ {"ciiu_code":"test 4"}
+        ],
+        "address": "test address",
+        "contact": 
+        {
+
+            "full_name": "e",
+            "job_title": "munoz",
+            "email": "q@email.com", 
+            "phone": "27643636"
+        }
+        
+    },
+
+    "geographic_level":1,
+    "required_level":1, 
+    "recognition_type":1,
+
+    "user": 1
+    
+}
