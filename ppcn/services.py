@@ -643,6 +643,18 @@ class PpcnService():
 
         return result
 
+    def _update_gas_removal(self, gas_removal, data):
+
+        serialized_gas_removal = self._get_serialized_gas_removal(data, gas_removal)
+        
+        if serialized_gas_removal.is_valid():
+            gas_removal = serialized_gas_removal.save()
+            result = (True, gas_removal)
+        else:
+            result = (False, serialized_gas_removal.errors)
+
+        return result
+
     def _update_contact(self, contact, data):
         
         serialized_contact = self._get_serialized_contact(data, contact)
