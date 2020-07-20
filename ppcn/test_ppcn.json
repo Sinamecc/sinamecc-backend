@@ -25,6 +25,44 @@
         }
         
     },
+    "organization_classification":
+    {
+        "emission_quantity": 100000,
+        "buildings_number": 10000,
+        "data_inventory_quantity": 1000,
+        "required_level": 1,
+        "recognition_type": 1,
+        "reduction" :{
+            "proyect": "test",
+            "activity": "Test activity",
+            "detail_reduction": "test reduction detail", 
+            "emission": "10000", 
+            "total_emission": "10000", 
+            "investment": "1000000", 
+            "investment_currency": "USD", 
+            "total_investment": "10000", 
+            "total_investment_currency": "CRC"
+        },
+        "carbon_offset":
+        {
+            "offset_scheme" : "UCC", 
+            "project_location" : "Project Location", 
+            "certificate_identification" : "CRSD-123214", 
+            "total_carbon_offset" : "80000 carbon OFFSET", 
+            "offset_cost" : "5000", 
+            "offset_cost_currency" : "USD", 
+            "period" : "May period", 
+            "total_offset_cost" : "5000", 
+            "total_offset_cost_currency":"CRC"
+        }
+    },
+
+    "gas_removal":{
+    	"removal_cost": 30000,
+		"removal_cost_currency": "USD",
+		"total": 333333,
+		"removal_descriptions": "test "
+    },
 
     "geographic_level":1,
     "required_level":1, 
