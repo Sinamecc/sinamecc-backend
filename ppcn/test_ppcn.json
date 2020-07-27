@@ -63,7 +63,26 @@
 		"total": 333333,
 		"removal_descriptions": "test "
     },
-
+    "gei_organization":
+    {	
+        "ovv":1,
+        "emission_ovv_date":"2018-04-14",
+        "report_year":"2018",
+        "base_year":"2018",
+        
+        "gei_activity_types":[
+            {
+                "activity_type": "activity type test 1",
+                "sub_sector":1,
+                "sector":1
+            },
+            {
+                "activity_type": "activity type test 2",
+                "sub_sector":1,
+                "sector":1
+            }
+        ]
+    },
     "geographic_level":1,
     "required_level":1, 
     "recognition_type":1,

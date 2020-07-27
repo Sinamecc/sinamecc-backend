@@ -49,7 +49,7 @@ class PpcnService():
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.PPCN_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
-        self.ASSING_GEI_ACTIVITY_TYPES = "Error assigning gei activity types."
+        self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR = "Cannot serialize gei activity types because {0}"
         self.CREATING_GEI_ORGANIZATION = "Error creating gei organization."
         self.CONTACT_NOT_MATCH_ERROR = "The contact of the organization doesn't match the one registered."
         self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
@@ -221,6 +221,13 @@ class PpcnService():
 
         return serializer
 
+    def _get_serialized_gei_activity_type(self, data, gei_organization_id):
+
+        data = [{**gei_actitvity_type, 'gei_organization': gei_organization_id}  for gei_actitvity_type in data]
+
+        serializer = self._service_helper.get_serialized_record(GeiActivityTypeSerializer, data, many=True)
+
+        return serializer 
   
     def get_serialized_geographic_level(self, request):
 
@@ -256,15 +263,7 @@ class PpcnService():
             serializer = PPCNFileSeriaizer(data=ppcnFileData)
         return serializer
 
-    def get_serialized_gei_activity_type(self, data):
-        activity_type_data = {
-
-            'activity_type': data.get('activity_type'),
-            'sub_sector': data.get('sub_sector'),
-            'sector':  data.get('sector')
-        }
-        serializer = GeiActivityTypeSerializer(data=activity_type_data)
-        return serializer
+    
 
 
 
@@ -415,12 +414,30 @@ class PpcnService():
 
         return result
 
+    def _create_gei_activity_types(self, data, gei_organization):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+            serialized_gei_activity_types = self._get_serialized_gei_activity_type(data, gei_organization)
+            
+            if  serialized_gei_activity_types.is_valid():
+                gei_activity_types = serialized_gei_activity_types.save()
+
+                result = (True, gei_activity_types)
+            else:
+                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(str(serialized_gei_activity_types.errors)))
+        
+        else:
+            result = (False, self.LIST_ERROR.format('gei activity types'))
+
+        return result
 
     def _create_gei_organization(self, data):
         validation_dict = {}
 
         # fk's of object organization_classification that have nested fields
-        field_list = ['gas_report', 'organization_category'] 
+        """field_list = ['gas_report', 'organization_category'] 
         
         for field in field_list:
             if data.get(field, False):
@@ -431,21 +448,23 @@ class PpcnService():
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
 
-    
+        """
         if all(validation_dict):
+
             serialized_gei_organization = self._get_serialized_gei_organization(data) 
             if serialized_gei_organization.is_valid():
                 gei_organization = serialized_gei_organization.save()
-                if data.get('gei_activity_types', False):
 
-                    gei_activity_types_status, gei_activity_types_data = self._assign_gei_activity_types(data, gei_organization)
+                gei_organization_id = gei_organization.id
 
-                    if gei_activity_types_status:
-                        result = (True, gei_organization)
-                    else:
-                        result = (False, gei_activity_types_data)
+                gei_activity_types = data.get('gei_activity_types', [])
+
+                gei_activity_types_status, gei_activity_types_data = self._create_gei_activity_types(gei_activity_types, gei_organization_id)
+
+                if gei_activity_types_status:
+                    result = (True, gei_organization)
                 else:
-                    result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
+                    result = (gei_activity_types_status, gei_activity_types_data)
             else:
                 result = (False, serialized_gei_organization.errors)
         else:
@@ -621,28 +640,6 @@ class PpcnService():
 
     ## update funtion
 
-    def _assign_gei_activity_types(self, data, gei_organization):
-
-        gei_activity_types_list = data.get('gei_activity_types')
-        errors = [self.ASSING_GEI_ACTIVITY_TYPES]
-        result_status = True
-        for gei_activity_type in gei_activity_types_list:
-            serialized_gei_activity_type = self.get_serialized_gei_activity_type(gei_activity_type)
-            if serialized_gei_activity_type.is_valid():
-                gei_activity_type = serialized_gei_activity_type.save()
-                gei_organization.gei_activity_types.add(gei_activity_type)
-            else:
-                result_status = False
-                errors.append(serialized_gei_activity_type.errors)
-        
-        if result_status:
-            result = (True, gei_organization)
-
-        else:
-            result = (False, errors)
-
-        return result
-
     def _update_gas_removal(self, gas_removal, data):
 
         serialized_gas_removal = self._get_serialized_gas_removal(data, gas_removal)
@@ -671,15 +668,16 @@ class PpcnService():
     def _update_ciiu_code(self, data, organization):
  
         result = (True, [])
-        organization.ciiu_code.all().delete()
+        
         if isinstance(data, list): 
             serializer = self._get_serialized_ciiu_code_list(data, organization.id)
 
             if serializer.is_valid():
 
-                ciiu_code_list = serializer.save()
+                organization.ciiu_code.all().delete()
+                new_ciiu_code_list = serializer.save()
 
-                result = (True, ciiu_code_list)
+                result = (True, new_ciiu_code_list)
 
             else: 
                 result = (False, self.CIIU_CODE_SERIALIZER_ERROR.format(str(serializer.errors)))
@@ -688,6 +686,31 @@ class PpcnService():
             result = (False, self.LIST_ERROR.format('ciiu_code'))
             
         return result
+
+
+    def _update_gei_activity_types(self, data, gei_organization):
+
+        result = (True, [])
+        
+
+        if isinstance(data, list):
+            serialized_gei_activity_types = self._get_serialized_gei_activity_type(data, gei_organization.id)
+            
+            if  serialized_gei_activity_types.is_valid():
+
+                gei_organization.gei_activity_types.all().delete()
+    
+                new_gei_activity_types = serialized_gei_activity_types.save()
+
+                result = (True, new_gei_activity_types)
+            else:
+                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(str(serialized_gei_activity_types.errors)))
+        
+        else:
+            result = (False, self.LIST_ERROR.format('gei activity types'))
+
+        return result
+
 
     def _update_reduction(self, reduction, data):
 
@@ -778,25 +801,42 @@ class PpcnService():
 
         return result
 
+    def _update_gei_organization(self, gei_organization, data):
 
+        validation_dict = {}
 
+        # fk's of object organization_classification that have nested fields
+        """field_list = ['gas_report', 'organization_category'] 
+        
+        for field in field_list:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
 
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
 
+        """
+        if all(validation_dict):
 
+            serialized_gei_organization = self._get_serialized_gei_organization(data, gei_organization) 
+            if serialized_gei_organization.is_valid():
+                gei_organization = serialized_gei_organization.save()
 
+                gei_activity_types = data.get('gei_activity_types', [])
 
-
-
-
-
-
-
-
-
-
-
-
-
+                gei_activity_types_status, gei_activity_types_data = self._update_gei_activity_types(gei_activity_types, gei_organization)
+                if gei_activity_types_status:
+                    result = (True, gei_organization)
+                else:
+                    result = (gei_activity_types_status, gei_activity_types_data)
+            else:
+                result = (False, serialized_gei_organization.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
+        return result
 
 
     def delete_organization(self, pk):
@@ -886,32 +926,7 @@ class PpcnService():
             result = (False, serialized_change_log.errors)
         return result
 
-    ## Change this !!!!
-    def update_gei_organization(self, request, id):
-
-        gei_organization = GeiOrganization.objects.get(pk=id)
-        if gei_organization == None:
-            return (False, self.GEI_ORGANIZATION_DOES_NOT_EXIST)
-
-        serialized_gei_organization = self.get_serialized_gei_organization(request, gei_organization) 
-
-        if serialized_gei_organization.is_valid():
-            gei_organization = serialized_gei_organization.save()
-
-            if request.data.get('gei_activity_types') != None:
-                gei_organization.gei_activity_types.clear()
-                gei_activity_types_status, gei_activity_types_data = self.assign_gei_activity_types(request, gei_organization)
-
-                if gei_activity_types_status:
-                    result = (True, gei_organization)
-                else:
-                    result = (False, gei_activity_types_data)
-            else:
-                result = (False, self.ASSING_GEI_ACTIVITY_TYPES)
-        else:
-            result = (False, serialized_gei_organization.errors)
-            
-        return result
+   
 
  
     def create(self, request):

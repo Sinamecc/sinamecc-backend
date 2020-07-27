@@ -185,7 +185,7 @@ class GeiActivityTypeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model =  GeiActivityType
-        fields = ('id', 'activity_type', 'sub_sector', 'sector')
+        fields = ('id', 'gei_organization', 'activity_type', 'sub_sector', 'sector')
 
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:

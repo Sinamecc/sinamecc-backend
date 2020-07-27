@@ -335,10 +335,28 @@ class QuantifiedGas(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.type)  
-    
+      
+
+class GeiOrganization(models.Model):
+
+    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True)
+    emission_ovv_date = models.DateField(blank=False, null=True)
+    report_year =  models.IntegerField(blank=False, null=True)
+    base_year = models.IntegerField(blank=False, null=True)
+    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
+    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
+
+    class Meta:
+        verbose_name = _("GeiOrganization")
+        verbose_name_plural = _("GeiOrganization")
+
+    def __unicode__(self):
+        return smart_unicode(self.activity_type)
+
 
 class GeiActivityType(models.Model):
     
+    gei_organization = models.ForeignKey(GeiOrganization, related_name='gei_activity_types')
     activity_type = models.CharField(max_length=500, blank=False, null=True)
     sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
     sector = models.ForeignKey(Sector, related_name='gei_sector')
@@ -349,24 +367,8 @@ class GeiActivityType(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.id)
+
     
-
-class GeiOrganization(models.Model):
-
-    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True)
-    emission_ovv_date = models.DateField(blank=False, null=True)
-    report_year =  models.IntegerField(blank=False, null=True)
-    base_year = models.IntegerField(blank=False, null=True)
-    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
-    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
-    gei_activity_types = models.ManyToManyField(GeiActivityType)
-
-    class Meta:
-        verbose_name = _("GeiOrganization")
-        verbose_name_plural = _("GeiOrganization")
-
-    def __unicode__(self):
-        return smart_unicode(self.activity_type)
 
 class GasRemoval(models.Model):
 
