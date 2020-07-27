@@ -16,6 +16,7 @@ from io import BytesIO
 import json
 
 
+
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm):
@@ -43,6 +44,7 @@ class UserService():
         self.CREATE_GROUP_ERROR = "Error at the moment of create group."
         self.CREATE_PERMISSION_ERROR = "Error at the moment of create permissions."
         self.PROFILE_PICTURE_ERROR = "Error at the moment to create profile picture"
+        self.SUCCESSFUL_REQUEST = "successful request"
         self.storage = S3Storage()
 
     def get_serialized_profile_picture(self, request):
@@ -283,6 +285,38 @@ class UserService():
             result = (False, errors)
 
         return result
+
+
+    def change_password_user(self, request):
+
+        data = request.data
+        UserModel = get_user_model()
+        user_email = data.get('email', False)
+        result = (True, self.SUCCESSFUL_REQUEST)
+        if user_email:
+            try:
+                user = UserModel.objects.get(email=user_email)
+                return self.send_notification_to_change_password(user)
+
+            except User.DoesNotExist:
+                result = (True, self.SUCCESSFUL_REQUEST)
+
+        else:
+            
+            result = (False, self.MISSING_EMAIL_ERROR)
+
+
+
+
+    def send_notification_to_change_password(self, user):
+
+        token = client.get(reverse('obtain_jwt_token', kwargs={'username': user.username, 'password':user.password}))
+
+        return True, token
+
+
+
+
 
     def get_all_profile_picture(self, user_id):
 
