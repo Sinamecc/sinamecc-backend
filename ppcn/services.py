@@ -1,6 +1,6 @@
-from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 from mccr.models import OVV
 from mccr.serializers import OVVSerializer
+from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 from django.contrib.auth.models import *
 from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer
@@ -187,6 +187,7 @@ class PpcnService():
 
 
     def _get_serialized_gas_scope(self, data, gas_scope=False):
+
         serializer = self._service_helper.get_serialized_record(GasScopeSerializer, data, record=gas_scope)
 
         return serializer
@@ -201,6 +202,13 @@ class PpcnService():
 
     def _get_serialized_organization_category(self, data, organization_category=False):
         serializer = self._service_helper.get_serialized_record(OrganizationCategorySerializer, data, record=organization_category)
+
+        return serializer
+
+
+    def _get_serialized_gei_activity_type(self, data , gei_actitvity_type=False):
+
+        serializer = self._service_helper.get_serialized_record(GeiActivityTypeSerializer, data, record=gei_actitvity_type, partial=True)
 
         return serializer
 
@@ -221,7 +229,7 @@ class PpcnService():
 
         return serializer
 
-    def _get_serialized_gei_activity_type(self, data, gei_organization_id):
+    def _get_serialized_gei_activity_type_list(self, data, gei_organization_id):
 
         data = [{**gei_actitvity_type, 'gei_organization': gei_organization_id}  for gei_actitvity_type in data]
 
@@ -414,12 +422,12 @@ class PpcnService():
 
         return result
 
-    def _create_gei_activity_types(self, data, gei_organization):
+    def _create_gei_activity_types_list(self, data, gei_organization):
 
         result = (True, [])
         
         if isinstance(data, list):
-            serialized_gei_activity_types = self._get_serialized_gei_activity_type(data, gei_organization)
+            serialized_gei_activity_types = self._get_serialized_gei_activity_type_list(data, gei_organization)
             
             if  serialized_gei_activity_types.is_valid():
                 gei_activity_types = serialized_gei_activity_types.save()
@@ -459,7 +467,7 @@ class PpcnService():
 
                 gei_activity_types = data.get('gei_activity_types', [])
 
-                gei_activity_types_status, gei_activity_types_data = self._create_gei_activity_types(gei_activity_types, gei_organization_id)
+                gei_activity_types_status, gei_activity_types_data = self._create_gei_activity_types_list(gei_activity_types, gei_organization_id)
 
                 if gei_activity_types_status:
                     result = (True, gei_organization)
@@ -687,25 +695,56 @@ class PpcnService():
             
         return result
 
+    def _update_gei_activity_type(self, gei_actitvity_type, data):
 
-    def _update_gei_activity_types(self, data, gei_organization):
+        serialized_gei_activity_type = self._get_serialized_gei_activity_type(data, gei_actitvity_type)
+        if serialized_gei_activity_type.is_valid():
+            gei_activity_type = serialized_gei_activity_type.save()
+            result = (True, gei_activity_type)
+        else:
+            result = (False, serialized_gei_activity_type.errors)
+
+        return result
+
+    def _update_gei_activity_type_list(self, data, gei_organization):
 
         result = (True, [])
         
-
         if isinstance(data, list):
-            serialized_gei_activity_types = self._get_serialized_gei_activity_type(data, gei_organization.id)
-            
-            if  serialized_gei_activity_types.is_valid():
 
-                gei_organization.gei_activity_types.all().delete()
-    
+            gei_actitvity_type_list = gei_organization.gei_activity_types.all()
+
+            ## [{ id: json object }, {} , ...] data for updating gei activity record
+            gei_activity_type_data_list =  { gei_act.get('id'): gei_act for gei_act in  data if gei_act.get('id', False) }
+            gei_activity_type_list_for_updating = gei_actitvity_type_list.filter(id__in = list(gei_activity_type_data_list.keys()))
+
+            gei_activity_type_list_updated = {}
+            for gei_activity_type in gei_activity_type_list_for_updating:
+
+                record_status, record_data = self._update_gei_activity_type(gei_activity_type, gei_activity_type_data_list.get(gei_activity_type.id, {}))
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+
+                gei_activity_type_list_updated.setdefault(record_status,[]).extend(dict_data) 
+
+            ## updating data - exclude  updated records
+            data = [gei_act for gei_act in data if not gei_act.get('id', False)]
+            serialized_gei_activity_types = self._get_serialized_gei_activity_type_list(data, gei_organization.id)
+
+            if  serialized_gei_activity_types.is_valid() and all(gei_activity_type_list_updated):
                 new_gei_activity_types = serialized_gei_activity_types.save()
+                gei_activity_type_list_for_deleting = gei_actitvity_type_list.exclude(
+                    id__in = list(gei_activity_type_data_list.keys())
+                ).exclude(
+                    id__in=[gei_act.id for gei_act in new_gei_activity_types]
+                )
+                gei_activity_type_list_for_deleting.delete()
 
-                result = (True, new_gei_activity_types)
+                result = (True, gei_actitvity_type_list)
+
             else:
-                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(str(serialized_gei_activity_types.errors)))
-        
+                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(
+                    str(serialized_gei_activity_types.errors) if all(gei_activity_type_list_updated) else gei_activity_type_list_updated.get(False, [])))
+                    
         else:
             result = (False, self.LIST_ERROR.format('gei activity types'))
 
@@ -826,7 +865,7 @@ class PpcnService():
 
                 gei_activity_types = data.get('gei_activity_types', [])
 
-                gei_activity_types_status, gei_activity_types_data = self._update_gei_activity_types(gei_activity_types, gei_organization)
+                gei_activity_types_status, gei_activity_types_data = self._update_gei_activity_type_list(gei_activity_types, gei_organization)
                 if gei_activity_types_status:
                     result = (True, gei_organization)
                 else:
