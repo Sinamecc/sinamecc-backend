@@ -17,6 +17,7 @@ from workflow.models import ReviewStatus
 from workflow.serializers import CommentSerializer
 from django.contrib.auth import get_user_model
 from workflow.services import WorkflowService
+from django.db import transaction, DatabaseError
 import datetime, uuid, json, os, pdb
 
 
@@ -570,7 +571,7 @@ class PpcnService():
         validation_dict = {}
 
         # fk's of object organization_classification that have nested fields
-        """field_list = ['gas_report', 'organization_category'] 
+        field_list = ['gas_report', 'organization_category'] 
         
         for field in field_list:
             if data.get(field, False):
@@ -581,7 +582,6 @@ class PpcnService():
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
 
-        """
         if all(validation_dict):
 
             serialized_gei_organization = self._get_serialized_gei_organization(data) 
@@ -713,6 +713,7 @@ class PpcnService():
             result = (False, validation_dict.get(False))
 
         return result
+    
 
 
     def _create_ciiu_code(self, data, organization_id):
@@ -777,6 +778,30 @@ class PpcnService():
         return result
 
     ## update funtion
+
+    def _update_organization_category(self, organization_category, data):
+
+        serialized_organization_category = self._get_serialized_organization_category(data, organization_category)
+        if serialized_organization_category.is_valid():
+            organization_category = serialized_organization_category.save()
+            result = (True, organization_category)
+        else:
+            result = (False, serialized_organization_category.errors)
+
+        return result
+
+
+    def _update_biogenic_emission(self, biogenic_emission, data):
+
+        serialized_biogenic_emission = self._get_serialized_biogenic_emission(data, biogenic_emission)
+        if serialized_biogenic_emission.is_valid():
+            biogenic_emission = serialized_biogenic_emission.save()
+            result = (True, biogenic_emission)
+        else:
+            result = (False, serialized_biogenic_emission.errors)
+
+        return result
+
 
     def _update_gas_removal(self, gas_removal, data):
 
@@ -1074,23 +1099,99 @@ class PpcnService():
 
         return result
 
+    def _update_gas_scope(self, data, gas_report):
+
+        gas_scope_list = []
+        result = (True, gas_scope_list)
+        try:
+            with transaction.atomic():
+                for gas_scope in data:
+                    gas_scope['gas_report'] = gas_report.id
+                    quantified_gases_list = gas_scope.get('quantified_gases')
+
+                    if isinstance(quantified_gases_list, list):
+                        serialized_gas_scope = self._get_serialized_gas_scope(gas_scope)
+
+                        if serialized_gas_scope.is_valid():
+                            gas_scope = serialized_gas_scope.save()
+                            serialized_quantified_gases = self._get_serialized_quantified_gases_list(quantified_gases_list, gas_scope.id)
+
+                            if serialized_quantified_gases.is_valid():
+                                quantified_gases = serialized_quantified_gases.save()
+                                
+                            else:
+                                raise Exception(str(serialized_quantified_gases.errors))
+                        else:
+                            
+                            raise Exception(str(serialized_gas_scope.errors))
+                    else:
+
+                        raise Exception(self.MISSING_FIELD.format('gas_scopes'))
+
+                    gas_scope_list.append(gas_scope.id)
+                
+                gas_scopes_for_deleting = gas_report.gas_scope.all().exclude(id__in=gas_scope_list)
+                gas_scopes_for_deleting.delete()
+
+
+        except Exception as exc:
+            result = (False, exc)
+
+        return  result
+
+    def _update_gas_report(self, gas_report, data):
+
+        validation_dict = {}
+        # fk's of object organization_classification that have nested fields
+        field_list = ['biogenic_emission'] 
+        
+        for field in field_list:
+            if data.get(field, False):
+                record_status, record_data = self._create_or_update_record(gas_report, field, data.get(field))
+
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+        
+        if all(validation_dict):
+            serialized_gas_report = self._get_serialized_gas_report(data)
+            if serialized_gas_report.is_valid():
+                gas_report = serialized_gas_report.save()
+                if data.get('gas_scopes', False):
+                    gas_scope_status, gas_scope_data = self._update_gas_scope(data.get('gas_scopes'), gas_report)
+                    if gas_scope_status:
+                        result = (True, gas_report)
+                    else:
+                        result = (True, gas_scope_data)
+                else:
+                    result = (True, gas_report)             
+            else:
+                result = (False, serialized_gas_report.errors)
+        else:
+            result = (False, validation_dict.get(False))
+
+        return result
+
+
+
+
     def _update_gei_organization(self, gei_organization, data):
 
         validation_dict = {}
 
         # fk's of object organization_classification that have nested fields
-        """field_list = ['gas_report', 'organization_category'] 
+        field_list = ['gas_report', 'organization_category'] 
         
         for field in field_list:
             if data.get(field, False):
-                record_status, record_data = self._create_sub_record(data.get(field), field)
+                record_status, record_data = self._create_or_update_record(gei_organization, field, data.get(field))
 
                 if record_status:
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
 
-        """
         if all(validation_dict):
 
             serialized_gei_organization = self._get_serialized_gei_organization(data, gei_organization) 
@@ -1409,48 +1510,6 @@ class PpcnService():
             result = (False, self.PPCN_DOES_NOT_EXIST)
 
         return result
-    
-        """
-        ppcn = PPCN.objects.get(pk=id)
-        gei_organization_id, organization_id = None, None
-        
-        if request.data.get('organization') != None:
-            organization_id = request.data.get('organization').get('id')
-            if organization_id != None:
-                organization_status, organization_detail= self.update_organization(request, organization_id)
-            else:
-                organization_status, organization_detail= self.create_organization(request)
-            valid_relations.append(organization_status)
-            if organization_status: organization_id = organization_detail.id
-            else: errors.append(organization_detail)
-
-        if request.data.get('gei_organization') != None:
-            gei_organization_id = request.data.get('gei_organization').get('id')
-            if gei_organization_id != None:
-                gei_organization_status, gei_organization_detail = self.update_gei_organization(request, gei_organization_id)
-            else:
-                gei_organization_status, gei_organization_detail = self._create_gei_organization(request)
-            valid_relations.append(gei_organization_status)
-            if gei_organization_status: gei_organization_id = gei_organization_detail.id
-            else: errors.append(gei_organization_detail)
-
-        """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
