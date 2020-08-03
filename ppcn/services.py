@@ -49,7 +49,7 @@ class PpcnService():
         self.COMMENT_NOT_ASSIGNED = "The provided comment could not be assigned correctly."
         self.PPCN_ERROR_EMPTY_OVV_LIST = "Empty OVV list"
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
-        self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR = "Cannot serialize gei activity types because {0}"
+        self.SERIALIZER_ERROR = "Cannot serialize {0}  because {1}"
         self.CREATING_GEI_ORGANIZATION = "Error creating gei organization."
         self.CONTACT_NOT_MATCH_ERROR = "The contact of the organization doesn't match the one registered."
         self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
@@ -81,6 +81,38 @@ class PpcnService():
         else:
             raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
+        return result
+
+    
+    def _create_related_record_list(self, data, related_record_name, related_instance):
+        
+        create_function = f'_create_{related_record_name}_list'
+
+        if hasattr(self, create_function):
+            
+            function = getattr(self, create_function)
+            record_status, record_detail = function(data, related_instance)
+            result = (record_status, record_detail)
+        
+        else:
+            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
+        
+        return result
+    
+
+    def _update_related_record_list(self, data, related_record_name, related_instance):
+        
+        update_function = f'_update_{related_record_name}_list'
+        
+        if hasattr(self, update_function):
+            
+            function = getattr(self, update_function)
+            record_status, record_detail = function(data, related_instance)
+            result = (record_status, record_detail)
+        
+        else:
+            raise Exception(self.FUNCTION_INSTANCE_ERROR.format(update_function))
+        
         return result
 
 
@@ -121,6 +153,27 @@ class PpcnService():
 
         return result
 
+    def _create_or_update_record_list(self, data, related_field, related_instance):
+        
+        result = (False, [])
+        if hasattr(related_instance, related_field):
+
+            if getattr(related_instance, related_field).all().count() == 0:
+                record_status, record_data = self._create_related_record_list(data, related_field, related_instance)## field = sub_record_name
+
+            else:
+                ## change field(string) to object(model instance) 
+                record_status, record_data = self._update_related_record_list(data, related_field, related_instance)
+
+            result = (record_status, record_data)
+
+        else:
+            result = (True, self.ATTRIBUTE_INSTANCE_ERROR)
+
+        return result
+
+
+
 
     # serialized objects
     def _get_serialized_contact(self, data, contact = False):
@@ -153,14 +206,14 @@ class PpcnService():
 
     def _get_serialized_reduction(self, data, reduction=False):
 
-        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction)
+        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction, partial=True)
 
         return serializer
     
 
     def _get_serialized_carbon_offset(self, data, carbon_offset=False):
 
-        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset)
+        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset, partial=True)
 
         return serializer
 
@@ -234,6 +287,22 @@ class PpcnService():
         data = [{**gei_actitvity_type, 'gei_organization': gei_organization_id}  for gei_actitvity_type in data]
 
         serializer = self._service_helper.get_serialized_record(GeiActivityTypeSerializer, data, many=True)
+
+        return serializer 
+    
+    def _get_serialized_reduction_list(self, data, organization_classification_id):
+
+        data = [{**reduction, 'organization_classification': organization_classification_id}  for reduction in data]
+
+        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, many=True)
+
+        return serializer 
+    
+    def _get_serialized_carbon_offset_list(self, data, organization_classification_id):
+
+        data = [{**carbon_offset, 'organization_classification': organization_classification_id}  for carbon_offset in data]
+
+        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, many=True)
 
         return serializer 
   
@@ -395,11 +464,52 @@ class PpcnService():
 
         return result
 
+    
+    def _create_reduction_list(self, data, organization_classification):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+            serialized_reduction_list = self._get_serialized_reduction_list(data, organization_classification.id)
+            
+            if  serialized_reduction_list.is_valid():
+                reduction_list = serialized_reduction_list.save()
+                result = (True, reduction_list)
+            else:
+                result = (False, self.SERIALIZER_ERROR.format('reductions',str(serialized_reduction_list.errors)))
+        
+        else:
+            result = (False, self.LIST_ERROR.format('reductions'))
+
+        
+        return result
+
+    
+    def _create_carbon_offset_list(self, data, organization_classification):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+            serialized_carbon_offset_list = self._get_serialized_carbon_offset_list(data, organization_classification.id)
+            
+            if  serialized_carbon_offset_list.is_valid():
+                carbon_offset_list = serialized_carbon_offset_list.save()
+                result = (True, carbon_offset_list)
+            else:
+                result = (False, self.SERIALIZER_ERROR.format('carbon offset',str(serialized_carbon_offset_list.errors)))
+        
+        else:
+            result = (False, self.LIST_ERROR.format('carbon offset'))
+
+        
+        return result
+
+
     def _create_organization_classification(self, data):
 
         validation_dict = {}
         # fk's of object organization_classification that have nested fields
-        field_list = ['reduction', 'carbon_offset'] 
+        field_list = [] 
         
         for field in field_list:
             if data.get(field, False):
@@ -414,7 +524,22 @@ class PpcnService():
             serialized_organization_classification = self._get_serialized_organization_classification(data)
             if serialized_organization_classification.is_valid():
                 organization_classification = serialized_organization_classification.save()
-                result = (True, organization_classification)
+
+                field_related_list = ['reduction', 'carbon_offset']
+                validation_dict.clear()
+
+                for field_related in field_related_list:
+                    if data.get(field_related, False):
+                        record_status, record_data = self._create_related_record_list(data.get(field_related), field_related, organization_classification)
+
+                        dict_data = record_data if isinstance(record_data, list) else [record_data]
+                        validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+                if all(validation_dict):
+                    result = (True, organization_classification)
+                else:
+                    result = (False, validation_dict.get(False))
+
             else:
                 result = (False, serialized_organization_classification.errors)
         else:
@@ -422,19 +547,19 @@ class PpcnService():
 
         return result
 
-    def _create_gei_activity_types_list(self, data, gei_organization):
+    def _create_gei_activity_type_list(self, data, gei_organization):
 
         result = (True, [])
         
         if isinstance(data, list):
-            serialized_gei_activity_types = self._get_serialized_gei_activity_type_list(data, gei_organization)
+            serialized_gei_activity_type = self._get_serialized_gei_activity_type_list(data, gei_organization.id)
             
-            if  serialized_gei_activity_types.is_valid():
-                gei_activity_types = serialized_gei_activity_types.save()
+            if  serialized_gei_activity_type.is_valid():
+                gei_activity_type = serialized_gei_activity_type.save()
 
-                result = (True, gei_activity_types)
+                result = (True, gei_activity_type)
             else:
-                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(str(serialized_gei_activity_types.errors)))
+                result = (False, self.SERIALIZER_ERROR.format('gei activity types',str(serialized_gei_activity_type.errors)))
         
         else:
             result = (False, self.LIST_ERROR.format('gei activity types'))
@@ -463,16 +588,21 @@ class PpcnService():
             if serialized_gei_organization.is_valid():
                 gei_organization = serialized_gei_organization.save()
 
-                gei_organization_id = gei_organization.id
+                field_related_list = ['gei_activity_type']
+                validation_dict.clear()
 
-                gei_activity_types = data.get('gei_activity_types', [])
+                for field_related in field_related_list:
+                    if data.get(field_related, False):
+                        record_status, record_data = self._create_related_record_list(data.get(field_related), field_related, gei_organization)
 
-                gei_activity_types_status, gei_activity_types_data = self._create_gei_activity_types_list(gei_activity_types, gei_organization_id)
+                        dict_data = record_data if isinstance(record_data, list) else [record_data]
+                        validation_dict.setdefault(record_status,[]).extend(dict_data)
 
-                if gei_activity_types_status:
+                if all(validation_dict):
                     result = (True, gei_organization)
                 else:
-                    result = (gei_activity_types_status, gei_activity_types_data)
+                    result = (False, validation_dict.get(False))
+
             else:
                 result = (False, serialized_gei_organization.errors)
         else:
@@ -712,7 +842,7 @@ class PpcnService():
         
         if isinstance(data, list):
 
-            gei_actitvity_type_list = gei_organization.gei_activity_types.all()
+            gei_actitvity_type_list = gei_organization.gei_activity_type.all()
 
             ## [{ id: json object }, {} , ...] data for updating gei activity record
             gei_activity_type_data_list =  { gei_act.get('id'): gei_act for gei_act in  data if gei_act.get('id', False) }
@@ -728,22 +858,22 @@ class PpcnService():
 
             ## updating data - exclude  updated records
             data = [gei_act for gei_act in data if not gei_act.get('id', False)]
-            serialized_gei_activity_types = self._get_serialized_gei_activity_type_list(data, gei_organization.id)
+            serialized_gei_activity_type = self._get_serialized_gei_activity_type_list(data, gei_organization.id)
 
-            if  serialized_gei_activity_types.is_valid() and all(gei_activity_type_list_updated):
-                new_gei_activity_types = serialized_gei_activity_types.save()
+            if  serialized_gei_activity_type.is_valid() and all(gei_activity_type_list_updated):
+                new_gei_activity_type = serialized_gei_activity_type.save()
                 gei_activity_type_list_for_deleting = gei_actitvity_type_list.exclude(
                     id__in = list(gei_activity_type_data_list.keys())
                 ).exclude(
-                    id__in=[gei_act.id for gei_act in new_gei_activity_types]
+                    id__in=[gei_act.id for gei_act in new_gei_activity_type]
                 )
                 gei_activity_type_list_for_deleting.delete()
 
                 result = (True, gei_actitvity_type_list)
 
             else:
-                result = (False, self.GEI_ACTIVITY_TYPES_SERIALIZER_ERROR.format(
-                    str(serialized_gei_activity_types.errors) if all(gei_activity_type_list_updated) else gei_activity_type_list_updated.get(False, [])))
+                result = (False, self.SERIALIZER_ERROR.format("gei activity type",
+                    str(serialized_gei_activity_type.errors) if all(gei_activity_type_list_updated) else gei_activity_type_list_updated.get(False, [])))
                     
         else:
             result = (False, self.LIST_ERROR.format('gei activity types'))
@@ -762,6 +892,51 @@ class PpcnService():
 
         return result
 
+    
+    def _update_reduction_list(self, data, organization_classification):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+
+            reduction_list = organization_classification.reduction.all()
+
+            ## [{ id: json object }, {} , ...] data for updating reduction record
+            reduction_data_list =  { rd.get('id'): rd for rd in  data if rd.get('id', False) }
+            reduction_list_for_updating = reduction_list.filter(id__in = list(reduction_data_list.keys()))
+
+            reduction_list_updated = {}
+            for reduction in reduction_list_for_updating:
+
+                record_status, record_data = self._update_reduction(reduction, reduction_data_list.get(reduction.id, {}))
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+
+                reduction_list_updated.setdefault(record_status,[]).extend(dict_data) 
+
+            ## updating data - exclude  updated records
+            data = [rd for rd in data if not rd.get('id', False)]
+            serialized_reduction = self._get_serialized_reduction_list(data, organization_classification.id)
+
+            if  serialized_reduction.is_valid() and all(reduction_list_updated):
+                new_reduction = serialized_reduction.save()
+                reduction_list_for_deleting = reduction_list.exclude(
+                    id__in = list(reduction_data_list.keys())
+                ).exclude(
+                    id__in=[rd.id for rd in new_reduction]
+                )
+                reduction_list_for_deleting.delete()
+
+                result = (True, reduction_list)
+
+            else:
+                result = (False, self.SERIALIZER_ERROR.format("reduction",
+                    str(serialized_reduction.errors) if all(reduction_list_updated) else reduction_list_updated.get(False, [])))
+                    
+        else:
+            result = (False, self.LIST_ERROR.format('reduction'))
+
+        return result
+
     def _update_carbon_offset(self, carbon_offset, data):
 
         serialized_carbon_offset = self._get_serialized_carbon_offset(data, carbon_offset)
@@ -770,6 +945,50 @@ class PpcnService():
             result = (True, carbon_offset)
         else:
             result = (False, serialized_carbon_offset.errors)
+
+        return result
+    
+    def _update_carbon_offset_list(self, data, organization_classification):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+
+            carbon_offset_list = organization_classification.carbon_offset.all()
+
+            ## [{ id: json object }, {} , ...] data for updating carbon_offset record
+            carbon_offset_data_list =  { c_offset.get('id'): c_offset for c_offset in  data if c_offset.get('id', False) }
+            carbon_offset_list_for_updating = carbon_offset_list.filter(id__in = list(carbon_offset_data_list.keys()))
+
+            carbon_offset_list_updated = {}
+            for carbon_offset in carbon_offset_list_for_updating:
+
+                record_status, record_data = self._update_carbon_offset(carbon_offset, carbon_offset_data_list.get(carbon_offset.id, {}))
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+
+                carbon_offset_list_updated.setdefault(record_status,[]).extend(dict_data) 
+
+            ## updating data - exclude  updated records
+            data = [c_offset for c_offset in data if not c_offset.get('id', False)]
+            serialized_carbon_offset = self._get_serialized_carbon_offset_list(data, organization_classification.id)
+
+            if  serialized_carbon_offset.is_valid() and all(carbon_offset_list_updated):
+                new_carbon_offset = serialized_carbon_offset.save()
+                carbon_offset_list_for_deleting = carbon_offset_list.exclude(
+                    id__in = list(carbon_offset_data_list.keys())
+                ).exclude(
+                    id__in=[c_offset.id for c_offset in new_carbon_offset]
+                )
+                carbon_offset_list_for_deleting.delete()
+
+                result = (True, carbon_offset_list)
+
+            else:
+                result = (False, self.carbon_offset_SERIALIZER_ERROR.format(
+                    str(serialized_carbon_offset.errors) if all(carbon_offset_list_updated) else carbon_offset_list_updated.get(False, [])))
+                    
+        else:
+            result = (False, self.LIST_ERROR.format('carbon_offset'))
 
         return result
 
@@ -817,7 +1036,7 @@ class PpcnService():
 
         validation_dict = {}
         # fk's of object organization_classification that have nested fields
-        field_list = ['reduction', 'carbon_offset'] 
+        field_list = [] 
         
         for field in field_list:
             if data.get(field, False):
@@ -832,7 +1051,22 @@ class PpcnService():
             serialized_organization_classification = self._get_serialized_organization_classification(data, organization_classification)
             if serialized_organization_classification.is_valid():
                 organization_classification = serialized_organization_classification.save()
-                result = (True, organization_classification)
+
+                field_related_list = ['reduction', 'carbon_offset']
+                validation_dict.clear()
+
+                for field_related in field_related_list:
+                    if data.get(field_related, False):
+                        record_status, record_data = self._create_or_update_record_list(data.get(field_related), field_related, organization_classification)
+
+                        dict_data = record_data if isinstance(record_data, list) else [record_data]
+                        validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+                if all(validation_dict):
+                    result = (True, organization_classification)
+                else:
+                    result = (False, validation_dict.get(False))
+
             else:
                 result = (False, serialized_organization_classification.errors)
         else:
@@ -863,13 +1097,21 @@ class PpcnService():
             if serialized_gei_organization.is_valid():
                 gei_organization = serialized_gei_organization.save()
 
-                gei_activity_types = data.get('gei_activity_types', [])
+                field_related_list = ['gei_activity_type']
+                validation_dict.clear()
 
-                gei_activity_types_status, gei_activity_types_data = self._update_gei_activity_type_list(gei_activity_types, gei_organization)
-                if gei_activity_types_status:
+                for field_related in field_related_list:
+                    if data.get(field_related, False):
+                        record_status, record_data = self._create_or_update_record_list(data.get(field_related), field_related, gei_organization,)
+
+                        dict_data = record_data if isinstance(record_data, list) else [record_data]
+                        validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+                if all(validation_dict):
                     result = (True, gei_organization)
                 else:
-                    result = (gei_activity_types_status, gei_activity_types_data)
+                    result = (False, validation_dict.get(False))
+
             else:
                 result = (False, serialized_gei_organization.errors)
         else:
@@ -903,14 +1145,19 @@ class PpcnService():
                 
                 if ppcn.organization_classification:
                     ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+                    ppcn_data.get('organization_classification')['reduction'] = []
+                    ppcn_data.get('organization_classification')['carbon_offset'] = []
+
                     if ppcn.organization_classification.required_level:
                         ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
                     if ppcn.organization_classification.recognition_type:
                         ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
-                    if ppcn.organization_classification.reduction:
-                        ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
-                    if ppcn.organization_classification.carbon_offset:
-                        ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
+                    
+                    for reduction in ppcn.organization_classification.reduction.all():
+                        ppcn_data.get('organization_classification').get('reduction').append(ReductionSerializer(reduction).data)
+
+                    for carbon_offset in ppcn.organization_classification.carbon_offset.all():
+                        ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
                 
                 if ppcn.gas_removal:
                     ppcn_data['gas_removal'] = GasRemovalSerializer(ppcn.gas_removal).data
@@ -923,7 +1170,7 @@ class PpcnService():
 
                 if ppcn.gei_organization:
                     ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
-                    ppcn_data.get('gei_organization')['gei_activity_types'] = []
+                    ppcn_data.get('gei_organization')['gei_activity_type'] = []
                     if ppcn.gei_organization.ovv:
                         ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
                         
@@ -942,16 +1189,16 @@ class PpcnService():
                     if ppcn.gei_organization.organization_category:
                         ppcn_data.get('gei_organization')['organization_category'] = OrganizationCategorySerializer(ppcn.gei_organization.organization_category).data
                     
-                    for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                    for gei_activity_type in ppcn.gei_organization.gei_activity_type.all():
                         gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
                         gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
                         gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
-                        ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+                        ppcn_data.get('gei_organization').get('gei_activity_type').append(gei_activity_type_data)
 
                 ppcn_data_list.append(ppcn_data)
             result = (True, ppcn_data_list)
 
-        except Sector.DoesNotExist:
+        except PPCN.DoesNotExist:
             result = (False, self.PPCN_ERROR_GET_ALL)
         return result
 
@@ -1058,14 +1305,19 @@ class PpcnService():
                         ppcn_data.get('organization')['contact'] = ContactSerializer(ppcn.organization.contact).data
             if ppcn.organization_classification:
                 ppcn_data['organization_classification'] = OrganizationClassificationSerializer(ppcn.organization_classification).data
+                ppcn_data.get('organization_classification')['reduction'] = []
+                ppcn_data.get('organization_classification')['carbon_offset'] = []
+
                 if ppcn.organization_classification.required_level:
                     ppcn_data.get('organization_classification')['required_level'] = RequiredLevelSerializer(ppcn.organization_classification.required_level, context=context).data
                 if ppcn.organization_classification.recognition_type:
                     ppcn_data.get('organization_classification')['recognition_type'] = RecognitionTypeSerializer(ppcn.organization_classification.recognition_type, context=context).data
-                if ppcn.organization_classification.reduction:
-                    ppcn_data.get('organization_classification')['reduction'] = ReductionSerializer(ppcn.organization_classification.reduction).data
-                if ppcn.organization_classification.carbon_offset:
-                    ppcn_data.get('organization_classification')['carbon_offset'] = CarbonOffsetSerializer(ppcn.organization_classification.carbon_offset).data
+                
+                for reduction in ppcn.organization_classification.reduction.all():
+                    ppcn_data.get('organization_classification').get('reduction').append(ReductionSerializer(reduction).data)
+
+                for carbon_offset in ppcn.organization_classification.carbon_offset.all():
+                    ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
             
             if ppcn.gas_removal:
                     ppcn_data['gas_removal'] = GasRemovalSerializer(ppcn.gas_removal).data
@@ -1079,7 +1331,7 @@ class PpcnService():
             if ppcn.gei_organization:
                 ppcn_data['gei_organization'] = GeiOrganizationSerializer(ppcn.gei_organization).data
                 
-                ppcn_data.get('gei_organization')['gei_activity_types'] = []
+                ppcn_data.get('gei_organization')['gei_activity_type'] = []
                 if ppcn.gei_organization.ovv:
                     ppcn_data.get('gei_organization')['ovv'] = OVVSerializer(ppcn.gei_organization.ovv).data
                 
@@ -1098,11 +1350,11 @@ class PpcnService():
                             gas_scope_data['quantified_gases'] = QuantifiedGasSerializer(gas_scope.quantified_gases.all(), many=True).data
                             ppcn_data.get('gei_organization').get('gas_report').get('gas_scopes').append(gas_scope_data)
 
-                for gei_activity_type in ppcn.gei_organization.gei_activity_types.all():
+                for gei_activity_type in ppcn.gei_organization.gei_activity_type.all():
                     gei_activity_type_data = GeiActivityTypeSerializer(gei_activity_type).data
                     gei_activity_type_data['sector'] = SectorSerializer(gei_activity_type.sector, context=context).data
                     gei_activity_type_data['sub_sector'] = SubSectorSerializer(gei_activity_type.sub_sector, context=context).data
-                    ppcn_data.get('gei_organization').get('gei_activity_types').append(gei_activity_type_data)
+                    ppcn_data.get('gei_organization').get('gei_activity_type').append(gei_activity_type_data)
 
             result = (True, ppcn_data)
         except PPCN.DoesNotExist:

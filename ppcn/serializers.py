@@ -105,19 +105,19 @@ class ReductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reduction
         fields = ('id', 'project', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
-                'investment_currency', 'total_investment', 'total_investment_currency')
+                'investment_currency', 'total_investment', 'total_investment_currency', 'organization_classification')
 
 class CarbonOffsetSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarbonOffset
         fields = ('id', 'offset_scheme', 'project_location', 'certificate_identification', 'total_carbon_offset', 
-                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency')
+                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency', 'organization_classification')
 
 class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction', 'carbon_offset')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type')
 
 class OrganizationCategorySerializer(serializers.ModelSerializer):
 

@@ -32,7 +32,7 @@
         "data_inventory_quantity": 1000,
         "required_level": 1,
         "recognition_type": 1,
-        "reduction" :{
+        "reduction" : {
             "proyect": "test",
             "activity": "Test activity",
             "detail_reduction": "test reduction detail", 
