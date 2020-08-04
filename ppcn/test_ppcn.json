@@ -32,8 +32,8 @@
         "data_inventory_quantity": 1000,
         "required_level": 1,
         "recognition_type": 1,
-        "reduction" : {
-            "proyect": "test",
+        "reduction" : [{
+            "project": "test",
             "activity": "Test activity",
             "detail_reduction": "test reduction detail", 
             "emission": "10000", 
@@ -42,9 +42,9 @@
             "investment_currency": "USD", 
             "total_investment": "10000", 
             "total_investment_currency": "CRC"
-        },
+        }],
         "carbon_offset":
-        {
+        [{
             "offset_scheme" : "UCC", 
             "project_location" : "Project Location", 
             "certificate_identification" : "CRSD-123214", 
@@ -54,8 +54,9 @@
             "period" : "May period", 
             "total_offset_cost" : "5000", 
             "total_offset_cost_currency":"CRC"
-        }
+        }]
     },
+
 
     "gas_removal":{
     	"removal_cost": 30000,
@@ -69,7 +70,13 @@
         "emission_ovv_date":"2018-04-14",
         "report_year":"2018",
         "base_year":"2018",
-        
+        "organization_category":{
+            "organization_category":"test",
+            "buildings_number":10,
+            "data_inventory_quantity":"10000",
+            "methodologies_complexity":"test methodologies complexity",
+            "emission_quantity": "100000"
+        },
         "gei_activity_types":[
             {
                 "activity_type": "activity type test 1",
@@ -81,7 +88,133 @@
                 "sub_sector":1,
                 "sector":1
             }
-        ]
+        ],
+        "gas_report":{
+            "other_gases": "test gases test gases",
+            "biogenic_emission": {
+    
+                "total": "3323323",
+                "scope_1": "scope 1",
+                "scope_2": "scope 2"
+            },
+            "cost_ghg_inventory":3030303,
+            "cost_ghg_inventory_currency":"CRC",
+            "cost_ovv_process":3030303,
+            "cost_ovv_process_currency":"USD",
+            "gas_scopes":[
+                {
+                    "name": "scope_1",
+                    "quantified_gases": [
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000
+                        },
+                        {
+                            "name": "TC5",
+                            "value": 10000
+                        }
+                    ]
+                },
+                {
+                    "name": "scope_2",
+                    "quantified_gases": [
+                        {
+                            "name": "TC12",
+                            "value": 100
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 1000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 100007568
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000675
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 1000067
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000567
+                        },
+                        {
+                            "name": "TC5",
+                            "value": 1000056
+                        }
+                    ]
+                },
+                {
+                    "name": "scope_3",
+                    "quantified_gases": [
+                        {
+                            "name": "TC12",
+                            "value": 100
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 1000
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 100007568
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000675
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 1000067
+                        },
+                        {
+                            "name": "TC2",
+                            "value": 10000567
+                        },
+                        {
+                            "name": "TC5",
+                            "value": 1000056
+                        }
+                    ]
+                }
+            ]
+        }
     },
     "geographic_level":1,
     "required_level":1, 

@@ -1355,6 +1355,7 @@ class PpcnService():
 
         try:
             ppcn = PPCN.objects.get(id=ppcn_id)
+            ppcn_previous_status = ppcn.fsm_state
             transition_list = ppcn.get_available_fsm_state_transitions()
             transition_list = list(filter(f, transition_list))
 
@@ -1363,6 +1364,7 @@ class PpcnService():
                 submit_function = getattr(ppcn, transition.method.__name__)
                 submit_function()
                 ppcn.save()
+                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
                 result = (True, 'PPCN request has been submitted')
             
             else:
@@ -1471,9 +1473,6 @@ class PpcnService():
             result = (False, {"Result":"PPCN has not been delete"})
         return result
 
-    
-
-       
 
     def update(self, id, request):
 
@@ -1509,28 +1508,6 @@ class PpcnService():
         except PPCN.DoesNotExist:
             result = (False, self.PPCN_DOES_NOT_EXIST)
 
-        return result
-
-
-
-        result = (False, errors)        
-        if not valid_relations.count(False):
-
-            serialized_ppcn = self.get_serialized_ppcn(request, organization_id, gei_organization_id, ppcn)
-            if serialized_ppcn.is_valid():
-                ppcn = serialized_ppcn.save()
-                ppcn_previous_status = ppcn.fsm_state
-                if not has_transition_perm(ppcn.update_by_request_DCC):
-                    errors.append(self.INVALID_STATUS_TRANSITION)
-                ppcn.update_by_request_DCC()
-                ppcn.save()
-                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
-            
-                result = (True, PPCNSerializer(ppcn).data)
-            else:
-                errors = serialized_ppcn.errors
-                result = (False, errors)
-           
         return result
 
     def post_PPCNFILE(self, request):
