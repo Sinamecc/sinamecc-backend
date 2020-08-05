@@ -152,7 +152,7 @@ class GasRemovalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GasRemoval
-        fields = ('id', 'removal_cost', 'removal_cost_currency', 'total', 'removal_descriptions')
+        fields = ('id', 'removal_cost', 'removal_cost_currency', 'total', 'removal_descriptions', 'ppcn')
         
 class GasReportSerializer(serializers.ModelSerializer):
 
@@ -195,7 +195,7 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 'gas_removal', 
+        fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 
                     'confidential', 'confidential_fields', 'fsm_state' , 'review_count', 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):

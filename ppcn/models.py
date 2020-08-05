@@ -367,22 +367,6 @@ class GeiActivityType(models.Model):
     def __unicode__(self):
         return smart_unicode(self.id)
 
-    
-
-class GasRemoval(models.Model):
-
-    removal_cost = models.DecimalField(max_digits=20, decimal_places=2, null=True)
-    removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
-    total = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-    removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
-
-    class Meta:
-        verbose_name = _("Gas Removal")
-        verbose_name_plural = _("Gas Remals")
-
-    def __unicode__(self):
-        return smart_unicode(self.activity_type)
-
 
 class RequestsPerYear(models.Model):
 
@@ -417,7 +401,6 @@ class PPCN(models.Model):
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
     organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn')
     gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
-    gas_removal = models.ForeignKey(GasRemoval, blank=True, null=True, related_name='ppcn')
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
@@ -731,3 +714,22 @@ class PPCNFile(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+
+class GasRemoval(models.Model):
+
+    removal_cost = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    total = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
+    ppcn = models.ForeignKey(PPCN, related_name='gas_removal', on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Gas Removal")
+        verbose_name_plural = _("Gas Remals")
+
+    def __unicode__(self):
+        return smart_unicode(self.id)
