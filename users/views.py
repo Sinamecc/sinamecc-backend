@@ -88,9 +88,9 @@ def put_password(request, user_id):
     return result
 
 @api_view(['POST'])
-def request_to_change_password(request, user_id):
+def request_to_change_password(request):
     if request.method == 'POST':
-        result = view_helper.execute_by_name('request_to_change_password', request, user_id)
+        result = view_helper.execute_by_name('request_to_change_password', request)
     return result
 
 

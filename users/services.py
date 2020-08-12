@@ -7,6 +7,7 @@ from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.tokens import default_token_generator
 from rolepermissions import roles
 from general.storages import S3Storage
 from django.urls import reverse
@@ -14,8 +15,13 @@ import datetime
 import os
 from io import BytesIO
 import json
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from general.services import EmailServices
+from users.email_services import UserEmailServices
+from django.utils.crypto import get_random_string
 
-
+ses_service = EmailServices()
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -45,7 +51,9 @@ class UserService():
         self.CREATE_PERMISSION_ERROR = "Error at the moment of create permissions."
         self.PROFILE_PICTURE_ERROR = "Error at the moment to create profile picture"
         self.SUCCESSFUL_REQUEST = "successful request"
+        self.MISSING_EMAIL_ERROR = "missing email"
         self.storage = S3Storage()
+        self.email_services = UserEmailServices(ses_service)
 
     def get_serialized_profile_picture(self, request):
         version_str_format = '%Y%m%d_%H%M%S.%f'
@@ -287,7 +295,7 @@ class UserService():
         return result
 
 
-    def change_password_user(self, request):
+    def request_to_change_password(self, request):
 
         data = request.data
         UserModel = get_user_model()
@@ -296,26 +304,19 @@ class UserService():
         if user_email:
             try:
                 user = UserModel.objects.get(email=user_email)
-                return self.send_notification_to_change_password(user)
-
-            except User.DoesNotExist:
+                encode_b64_user_id = self.encode_b64_user_id(user.pk)
+                email_status, email_data = self.email_services.notify_for_requesting_password_change(user, encode_b64_user_id[1])
+                if not email_status:
+                    result = (email_status, self.decode_b64_user_id(email_data))
+                
+            except UserModel.DoesNotExist:
                 result = (True, self.SUCCESSFUL_REQUEST)
 
         else:
             
             result = (False, self.MISSING_EMAIL_ERROR)
 
-
-
-
-    def send_notification_to_change_password(self, user):
-
-        token = client.get(reverse('obtain_jwt_token', kwargs={'username': user.username, 'password':user.password}))
-
-        return True, token
-
-
-
+        return result
 
 
     def get_all_profile_picture(self, user_id):
@@ -467,3 +468,19 @@ class UserService():
     def _get_filename(self, filename):
         fpath, fname = os.path.split(filename)
         return fname
+
+    def encode_b64_user_id(self, user_id):
+        rand_len =  int(get_random_string(1, "3456789"))
+        list_to_encode_id = ["{0}{1}".format(x, y) for x, y in zip((list(get_random_string(rand_len - 1)) + [str(hex(user_id + rand_len)[2:])]) , [str(rand_len)] + list(get_random_string(rand_len-1)))]
+        user_b64 = urlsafe_base64_encode(force_bytes("".join(list_to_encode_id)))
+
+        return True , user_b64
+
+    def decode_b64_user_id(self, encoded_user_id):
+        encoding = 'utf-8'
+        decoded_user_id = str(urlsafe_base64_decode(encoded_user_id), encoding)
+        rand_len = int(decoded_user_id[1])
+        user_id = int(decoded_user_id[((rand_len -1 ) * 2) : -1]) - rand_len
+
+        return True, user_id
+        
