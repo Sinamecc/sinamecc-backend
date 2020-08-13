@@ -14,7 +14,7 @@ User = get_user_model()
 class EmailServicesTest(TestCase):
 
     def setUp(self):
-        self.email_services_instance = EmailServices("sinamecc@grupoincocr.com")
+        self.email_services_instance = EmailServices("sinamec@grupoincocr.com")
         self.recipient_list =["izcar@grupoincocr.com", "izcar@grupoincocr.com"] 
         self.subject = "UNIT-TEST, AWS - SES"
         self.message_body = "Test, send to notification"
