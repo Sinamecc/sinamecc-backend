@@ -3,7 +3,7 @@ from botocore.exceptions import ClientError
 from django.conf import settings
 class EmailServices():
 
-    def __init__(self, sender = "sinamec@grupoincocr.com", base_dir_notification =  settings.BASE_DIR_VIEW ):
+    def __init__(self, sender = "sinamec@grupoincocr.com", base_dir_notification =  settings.BASE_DIR_FRONTEND ):
         self.sender = sender
         self.base_dir_notification = base_dir_notification
         self.AWS_REGION = "us-east-1"

@@ -60,6 +60,12 @@ urlpatterns = [
         name='request_to_change_password'
     ),
 
+    url(
+        r'^api/v1/user/change_password/(?P<code>[A-Za-z0-9\._-]+)/(?P<token>[A-Za-z0-9\._-]+)/*$',
+        views.update_password_by_request,
+        name='update_password_by_request'
+    ),
+
 
 
     
