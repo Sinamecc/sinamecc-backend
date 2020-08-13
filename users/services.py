@@ -45,7 +45,7 @@ class UserService():
         self.UNABLE_CREATE_USER = "Unable to create user"
         self.USER_DOESNT_EXIST = "The user doesn't exist"
         self.GROUP_DOESNT_EXIST = "The group doesn't exist"
-        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have user associates"
+        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have associated users"
         self.ASSIGN_USER_GROUPS_ERROR = "Error at the moment of assigning user to groups."
         self.ASSIGN_USER_PERMISSION_ERROR = "Error at the moment of assigning user to permissions."
         self.UNASSIGN_USER_PERMISSION_ERROR = "Error at the moment of unassigning user to permissions."
