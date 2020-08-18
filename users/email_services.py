@@ -33,7 +33,7 @@ class UserEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         redirect_url = f"{self.email_services.base_dir_notification}/changePassword?code={encoded_user_id}&token={token}"
-        context = {"url": redirect_url}
+        context = {"url": redirect_url, 'lang': 'es'} ## at the moment
 
         message_body = template.render(context)
 
