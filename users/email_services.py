@@ -14,7 +14,7 @@ class UserEmailServices():
         self.email_services = email_services
         self.message_subject_ppcn = "Request of PPCN #: {0}"
         self.USER_DOESNT_EXIST = "The user doesn't exist"
-        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have user associates"
+        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have associated users"
         self.SEND_MAIL_ERROR = "Unable to send the email to {0}, ERROR: {1}"
         self.template_path = "{module}/{template}.html"
         self.token_generator = PasswordResetTokenGenerator()
