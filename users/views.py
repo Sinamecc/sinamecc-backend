@@ -8,9 +8,11 @@ from general.helpers.views import ViewHelper
 from django.http import FileResponse
 # Create your views here.
 from rolepermissions.decorators import has_permission_decorator
-
+from rest_framework.decorators import authentication_classes, permission_classes
+from django.conf import settings
 service = UserService()
 view_helper = ViewHelper(service)
+
 
 
 @api_view(['GET', 'POST'])
@@ -87,7 +89,10 @@ def put_password(request, user_id):
         result = view_helper.execute_by_name('update_password', request, user_id)
     return result
 
+
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def request_to_change_password(request):
     if request.method == 'POST':
         result = view_helper.execute_by_name('request_to_change_password', request)
