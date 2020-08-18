@@ -99,6 +99,8 @@ def request_to_change_password(request):
     return result
 
 @api_view(['PUT'])
+@authentication_classes([])
+@permission_classes([])
 def update_password_by_request(request, token, code):
     if request.method == 'PUT':
         result = view_helper.execute_by_name('update_password_by_request', request, token, code)

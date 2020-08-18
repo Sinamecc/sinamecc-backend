@@ -332,7 +332,6 @@ class UserService():
             user_query = UserModel.objects.filter(pk=user_id_data).last()
             if user_query:
                 if self.token_generator.check_token(user_query, token):
-                    print(request.data.get('password'))
                     user_query.set_password(request.data.get('password'))
                     user_query.save()
                     result = (True, CustomUserSerializer(user_query).data)
