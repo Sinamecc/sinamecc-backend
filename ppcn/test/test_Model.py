@@ -185,7 +185,7 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_report_year, 2019)
         gei_activity_test = [self.organizational_gei_activity_type_1 , self.organizational_gei_activity_type_2]
         count = 0
-        for gei_activity in self.organizational_gei_organization.gei_activity_type.all():
+        for gei_activity in self.organizational_gei_organization.gei_activity_type.all().order_by('id'):
             self.assertEquals(gei_activity, gei_activity_test[count])
             count += 1
         
