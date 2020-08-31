@@ -7,6 +7,7 @@ from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.tokens import default_token_generator
 from rolepermissions import roles
 from general.storages import S3Storage
 from django.urls import reverse
@@ -14,7 +15,16 @@ import datetime
 import os
 from io import BytesIO
 import json
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from general.services import EmailServices
+from users.email_services import UserEmailServices
+from django.utils.crypto import get_random_string
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
+
+
+ses_service = EmailServices()
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -35,7 +45,7 @@ class UserService():
         self.UNABLE_CREATE_USER = "Unable to create user"
         self.USER_DOESNT_EXIST = "The user doesn't exist"
         self.GROUP_DOESNT_EXIST = "The group doesn't exist"
-        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have user associates"
+        self.GROUP_DOESNT_HAVE_USERS = "The group {0} doesn't have associated users"
         self.ASSIGN_USER_GROUPS_ERROR = "Error at the moment of assigning user to groups."
         self.ASSIGN_USER_PERMISSION_ERROR = "Error at the moment of assigning user to permissions."
         self.UNASSIGN_USER_PERMISSION_ERROR = "Error at the moment of unassigning user to permissions."
@@ -43,7 +53,12 @@ class UserService():
         self.CREATE_GROUP_ERROR = "Error at the moment of create group."
         self.CREATE_PERMISSION_ERROR = "Error at the moment of create permissions."
         self.PROFILE_PICTURE_ERROR = "Error at the moment to create profile picture"
+        self.SUCCESSFUL_REQUEST = "successful request"
+        self.MISSING_EMAIL_ERROR = "missing email"
+        self.RESET_PASSWORD_ERROR = "Error at the moment to reset password"
         self.storage = S3Storage()
+        self.email_services = UserEmailServices(ses_service)
+        self.token_generator = PasswordResetTokenGenerator()
 
     def get_serialized_profile_picture(self, request):
         version_str_format = '%Y%m%d_%H%M%S.%f'
@@ -284,6 +299,56 @@ class UserService():
 
         return result
 
+
+    def request_to_change_password(self, request):
+
+        data = request.data
+        UserModel = get_user_model()
+        user_email = data.get('email', False)
+        result = (True, self.SUCCESSFUL_REQUEST)
+        if user_email:
+            try:
+                user = UserModel.objects.get(email=user_email)
+                encode_b64_user_id_status, encode_b64_user_id_data = self.encode_b64_user_id(user.pk)
+                if encode_b64_user_id_status:
+                    email_status, email_data = self.email_services.notify_for_requesting_password_change(user, encode_b64_user_id_data)
+                    
+            except UserModel.DoesNotExist:
+                result = (True, self.SUCCESSFUL_REQUEST)
+
+        else:
+            
+            result = (False, self.MISSING_EMAIL_ERROR)
+
+        return result
+
+    
+
+    def update_password_by_request(self, request, token, code):
+
+        user_id_status, user_id_data = self.decode_b64_user_id(code)
+        if user_id_status:
+            UserModel = get_user_model()
+            user_query = UserModel.objects.filter(pk=user_id_data).last()
+            if user_query:
+                if self.token_generator.check_token(user_query, token):
+                    user_query.set_password(request.data.get('password'))
+                    user_query.save()
+                    result = (True, CustomUserSerializer(user_query).data)
+
+                else:
+                    result = (False, self.RESET_PASSWORD_ERROR)
+
+            else:
+                result = (False, self.RESET_PASSWORD_ERROR)
+        else:
+            result = (user_id_status, user_id_data)
+
+        return result
+
+        errors = []
+
+
     def get_all_profile_picture(self, user_id):
 
         UserModel = get_user_model()
@@ -433,3 +498,26 @@ class UserService():
     def _get_filename(self, filename):
         fpath, fname = os.path.split(filename)
         return fname
+
+
+    def encode_b64_user_id(self, user_id):
+        encoding = 'utf-8'
+        rand_len =  int(get_random_string(1, "3456789"))
+        list_to_encode_id = ["{0}{1}".format(x, y) for x, y in zip((list(get_random_string(rand_len - 1)) + [str(hex(user_id + rand_len)[2:])]) , \
+                                                                    [str(rand_len)] + list(get_random_string(rand_len-1)))]
+        user_b64 = str(urlsafe_base64_encode(force_bytes("".join(list_to_encode_id))), encoding)
+
+        return True , user_b64
+
+    def decode_b64_user_id(self, encoded_user_id):
+        encoding = 'utf-8'
+        try:
+            decoded_user_id = str(urlsafe_base64_decode(encoded_user_id), encoding)
+            rand_len = int(decoded_user_id[1])
+            user_id = int(decoded_user_id[((rand_len -1 ) * 2) : -1], 16) - rand_len
+            result =  (True, user_id)
+        except Exception as exc:
+            result = (False, self.RESET_PASSWORD_ERROR)
+
+        return result
+        

@@ -54,5 +54,21 @@ urlpatterns = [
         name='assign_role_to_user'
     ),
 
+    url(
+        r'^api/v1/user/change_password/*$',
+        views.request_to_change_password,
+        name='request_to_change_password'
+    ),
+
+    url(
+        r'^api/v1/user/change_password/(?P<code>[A-Za-z0-9\._-]+)/(?P<token>[A-Za-z0-9\._-]+)/*$',
+        views.update_password_by_request,
+        name='update_password_by_request'
+    ),
+
+
+
+    
+
     
 ]
