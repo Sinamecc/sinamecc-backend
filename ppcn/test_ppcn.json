@@ -57,13 +57,21 @@
         }]
     },
 
-
-    "gas_removal":{
-    	"removal_cost": 30000,
-		"removal_cost_currency": "USD",
-		"total": 333333,
-		"removal_descriptions": "test "
-    },
+    "gas_removal":[
+        {
+            "id":7,
+            "removal_cost": 31000,
+            "removal_cost_currency": "USD",
+            "total": 333333,
+            "removal_descriptions": "mas  jejeje"
+        },
+        {
+            "removal_cost": 310,
+            "removal_cost_currency": "USD",
+            "total": 333333,
+            "removal_descriptions": "cambio por ac;a"
+        }
+    ],
     "gei_organization":
     {	
         "ovv":1,

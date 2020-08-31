@@ -7,7 +7,8 @@ from django.contrib.auth import get_user_model
 import json
 from rest_framework import status
 from general.services import EmailServices
-
+from moto import mock_ses
+import boto3
 client = Client()
 User = get_user_model()
 
@@ -18,9 +19,12 @@ class EmailServicesTest(TestCase):
         self.recipient_list =["izcar@grupoincocr.com", "izcar@grupoincocr.com"] 
         self.subject = "UNIT-TEST, AWS - SES"
         self.message_body = "Test, send to notification"
+        self.AWS_REGION_SES = "us-east-1"
 
+    @mock_ses
     def test_send_notification_to_multiple_contacts(self):
         
+        connection = boto3.client('ses', region_name=self.AWS_REGION_SES)
         recipient_list = self.recipient_list
         subject = self.subject
         message_body = self.message_body
@@ -30,9 +34,10 @@ class EmailServicesTest(TestCase):
         response = emailServices.send_notification(recipient_list, subject, message_body)
 
         self.assertEqual(response[0], True)
-    
+
+    @mock_ses
     def test_send_notification_to_a_contact(self):
-        
+        connection = boto3.client('ses', region_name=self.AWS_REGION_SES)
         recipient_list = self.recipient_list[:1]
         subject = self.subject
         message_body = self.message_body
@@ -43,9 +48,9 @@ class EmailServicesTest(TestCase):
         
         self.assertEqual(response[0], True)
 
-
+    @mock_ses
     def test_send_notification_contact_empty(self):
-
+        connection = boto3.client('ses', region_name=self.AWS_REGION_SES)
         recipient_list = []
         subject = self.subject
         message_body = self.message_body
@@ -53,5 +58,5 @@ class EmailServicesTest(TestCase):
         emailServices = self.email_services_instance
 
         response = emailServices.send_notification(recipient_list, subject, message_body)
-        
+        print(response)
         self.assertEqual(response[0], False)

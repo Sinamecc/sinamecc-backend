@@ -1408,8 +1408,6 @@ class PpcnService():
             serialized_ppcn = self._get_serialized_ppcn(data)
             if serialized_ppcn.is_valid():
                 ppcn = serialized_ppcn.save()
-                ## Debugger
-                print("Estoy acá:", validation_dict)
                 field_related_list = ['gas_removal']
                 validation_dict.clear()
                 for field_related in field_related_list:
