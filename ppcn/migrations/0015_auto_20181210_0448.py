@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
             name='GeiActivityType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('gei_organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gei_activity_types', to='ppcn.GeiOrganization')),
                 ('activity_type', models.CharField(max_length=500)),
                 ('sector', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gei_sector', to='ppcn.SubSector')),
                 ('sub_sector', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='gei_sub_sector', to='ppcn.SubSector')),
@@ -101,10 +102,5 @@ class Migration(migrations.Migration):
             model_name='ppcn',
             name='organization',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='organization', to='ppcn.Organization'),
-        ),
-        migrations.AddField(
-            model_name='geiorganization',
-            name='gei_activity_types',
-            field=models.ManyToManyField(to='ppcn.GeiActivityType'),
-        ),
+        )
     ]

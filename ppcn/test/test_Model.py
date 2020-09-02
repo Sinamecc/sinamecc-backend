@@ -40,10 +40,6 @@ class PPCNModelTest(TestCase):
         self.cantonal_sub_sector = SubSector.objects.create(name_es='cantonal_sub_sector_es', name_en='cantonal_sub_sector_en', sector=self.cantonal_sector)
         self.organizational_sub_sector = SubSector.objects.create(name_es='organizational_sub_sector_es', name_en='organizational_sub_sector_en', sector=self.organizational_sector)
 
-        self.cantonal_gei_activity_type = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.cantonal_sub_sector, sector=self.cantonal_sector)
-        self.organizational_gei_activity_type_1 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
-        self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
-
         self.ovv = OVV.objects.create(name='name_ovv', email='ovv@fake.com', phone='22332233')
         self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.datetime(2007, 1, 1), report_year=2019, base_year=2018)
 
@@ -51,8 +47,10 @@ class PPCNModelTest(TestCase):
 
         self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=datetime.datetime(2007, 1, 1), report_year=2019, base_year=2018)
 
-        self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
-        self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
+
+        self.cantonal_gei_activity_type = GeiActivityType.objects.create(gei_organization=self.cantonal_gei_organization, activity_type='activity_type', sub_sector=self.cantonal_sub_sector, sector=self.cantonal_sector)
+        self.organizational_gei_activity_type_1 = GeiActivityType.objects.create(gei_organization=self.organizational_gei_organization, activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
+        self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(gei_organization=self.organizational_gei_organization, activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
 
         self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, organization=self.organization, geographic_level=self.cantonal_geographic_level, gei_organization=self.cantonal_gei_organization)
 
@@ -187,7 +185,7 @@ class PPCNModelTest(TestCase):
         self.assertEquals(field_report_year, 2019)
         gei_activity_test = [self.organizational_gei_activity_type_1 , self.organizational_gei_activity_type_2]
         count = 0
-        for gei_activity in self.organizational_gei_organization.gei_activity_types.all():
+        for gei_activity in self.organizational_gei_organization.gei_activity_type.all().order_by('id'):
             self.assertEquals(gei_activity, gei_activity_test[count])
             count += 1
         

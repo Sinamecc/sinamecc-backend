@@ -128,7 +128,26 @@ class RecognitionType(models.Model):
 ## 
 ## Main models
 ##     
- 
+class OrganizationClassification(models.Model):
+    
+    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    buildings_number = models.IntegerField(blank=False, null=True)
+    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+
+    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
+    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Organization Classification")
+        verbose_name_plural = _("Organization Classification")
+    
+    def __unicode__(self):
+        return smart_unicode("Organization Classification {}".format(self.id))
+
+
 class CarbonOffset(models.Model):
 
     offset_scheme = models.CharField(choices=OFFSET_SCHEME, max_length=10, blank=False, null=True) 
@@ -140,6 +159,7 @@ class CarbonOffset(models.Model):
     period = models.CharField(max_length=100, blank=False, null=True)
     total_offset_cost = models.DecimalField(max_digits=10, decimal_places=2)
     total_offset_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    organization_classification = models.ForeignKey(OrganizationClassification, related_name='carbon_offset', on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -163,6 +183,7 @@ class Reduction(models.Model):
     investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     total_investment = models.DecimalField(max_digits=10, decimal_places=2)
     total_investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    organization_classification = models.ForeignKey(OrganizationClassification, related_name='reduction', on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -194,28 +215,6 @@ class OrganizationCategory(models.Model):
     
     def __unicode__(self):
         return smart_unicode("Organization Category {}".format(self.id))
-
-class OrganizationClassification(models.Model):
-    
-    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    buildings_number = models.IntegerField(blank=False, null=True)
-    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-
-    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
-    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
-
-    reduction = models.ForeignKey(Reduction, null=True, related_name='organization_classification')
-    carbon_offset = models.ForeignKey(CarbonOffset, null=True, related_name='organization_classification')
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Organization Classification")
-        verbose_name_plural = _("Organization Classification")
-    
-    def __unicode__(self):
-        return smart_unicode("Organization Classification {}".format(self.id))
 
 
 class Organization(models.Model):
@@ -335,10 +334,28 @@ class QuantifiedGas(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.type)  
-    
+      
+
+class GeiOrganization(models.Model):
+
+    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True)
+    emission_ovv_date = models.DateField(blank=False, null=True)
+    report_year =  models.IntegerField(blank=False, null=True)
+    base_year = models.IntegerField(blank=False, null=True)
+    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
+    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
+
+    class Meta:
+        verbose_name = _("GeiOrganization")
+        verbose_name_plural = _("GeiOrganization")
+
+    def __unicode__(self):
+        return smart_unicode(self.activity_type)
+
 
 class GeiActivityType(models.Model):
     
+    gei_organization = models.ForeignKey(GeiOrganization, related_name='gei_activity_type')
     activity_type = models.CharField(max_length=500, blank=False, null=True)
     sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
     sector = models.ForeignKey(Sector, related_name='gei_sector')
@@ -349,38 +366,6 @@ class GeiActivityType(models.Model):
     
     def __unicode__(self):
         return smart_unicode(self.id)
-    
-
-class GeiOrganization(models.Model):
-
-    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True)
-    emission_ovv_date = models.DateField(blank=False, null=True)
-    report_year =  models.IntegerField(blank=False, null=True)
-    base_year = models.IntegerField(blank=False, null=True)
-    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
-    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
-    gei_activity_types = models.ManyToManyField(GeiActivityType)
-
-    class Meta:
-        verbose_name = _("GeiOrganization")
-        verbose_name_plural = _("GeiOrganization")
-
-    def __unicode__(self):
-        return smart_unicode(self.activity_type)
-
-class GasRemoval(models.Model):
-
-    removal_cost = models.DecimalField(max_digits=20, decimal_places=2, null=True)
-    removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
-    total = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-    removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
-
-    class Meta:
-        verbose_name = _("Gas Removal")
-        verbose_name_plural = _("Gas Remals")
-
-    def __unicode__(self):
-        return smart_unicode(self.activity_type)
 
 
 class RequestsPerYear(models.Model):
@@ -416,7 +401,6 @@ class PPCN(models.Model):
     geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
     organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn')
     gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
-    gas_removal = models.ForeignKey(GasRemoval, blank=True, null=True, related_name='ppcn')
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
@@ -730,3 +714,22 @@ class PPCNFile(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
+
+
+class GasRemoval(models.Model):
+
+    removal_cost = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    total = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
+    ppcn = models.ForeignKey(PPCN, related_name='gas_removal', on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Gas Removal")
+        verbose_name_plural = _("Gas Remals")
+
+    def __unicode__(self):
+        return smart_unicode(self.id)

@@ -105,19 +105,19 @@ class ReductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reduction
         fields = ('id', 'project', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
-                'investment_currency', 'total_investment', 'total_investment_currency')
+                'investment_currency', 'total_investment', 'total_investment_currency', 'organization_classification')
 
 class CarbonOffsetSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarbonOffset
         fields = ('id', 'offset_scheme', 'project_location', 'certificate_identification', 'total_carbon_offset', 
-                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency')
+                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency', 'organization_classification')
 
 class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction', 'carbon_offset')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type')
 
 class OrganizationCategorySerializer(serializers.ModelSerializer):
 
@@ -152,7 +152,7 @@ class GasRemovalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GasRemoval
-        fields = ('id', 'removal_cost', 'removal_cost_currency', 'total', 'removal_descriptions')
+        fields = ('id', 'removal_cost', 'removal_cost_currency', 'total', 'removal_descriptions', 'ppcn')
         
 class GasReportSerializer(serializers.ModelSerializer):
 
@@ -185,7 +185,7 @@ class GeiActivityTypeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model =  GeiActivityType
-        fields = ('id', 'activity_type', 'sub_sector', 'sector')
+        fields = ('id', 'gei_organization', 'activity_type', 'sub_sector', 'sector')
 
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
@@ -195,7 +195,7 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
-        fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 'gas_removal', 
+        fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 
                     'confidential', 'confidential_fields', 'fsm_state' , 'review_count', 'created', 'updated')
 
 class PPCNFileSeriaizer (serializers.ModelSerializer):

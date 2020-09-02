@@ -23,14 +23,15 @@ class ServiceHelper():
         return record_data
     
     def _get_serialized_record_list(self, Serializer, data):
-
         record_data = {}
         record_data_list = []
         for record in data:
+            
             for field in Serializer.Meta.fields:
                 if field in record:
                     record_data[field] = record.get(field)
-            record_data_list.append(record_data)
-        
+            record_data_list.append(record_data.copy())
+            record_data.clear()
+
         return record_data_list
     
