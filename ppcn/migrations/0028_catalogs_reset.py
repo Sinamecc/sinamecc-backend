@@ -154,7 +154,7 @@ organizational_sector = [
             },
             {
                 'name_es': 'Industria de dispositivos médicos',
-                'name_en': '',
+                'name_en': 'Medical device industry',
             },
             {
                 'name_es': 'Industria farmacéutica',
@@ -269,18 +269,22 @@ def reset_catalogs_data(apps, schema_editor):
     sub_sector_list_serialized = []
     for sector in organizational_sector:
         sub_sector_list = sector.pop('sub_sector')
-        sector['geographicLevel'] = geograohic_level
+        sector['geographicLevel'] = geograohic_level.id
         serialized_sector = SectorSerializer(data=sector)
         
         if serialized_sector.is_valid():
             saved_sector = serialized_sector.save()
             
             for sub_sector in sub_sector_list:
-                 sub_sector_list_serialized.append({**sub_sector, 'sector':saved_sector.id})
-
+                sub_sector_list_serialized.append({**sub_sector, 'sector':saved_sector.id})
+        else:
+            print(serialized_sector.errors)
+            
     sub_sector_serialized_list = SubSectorSerializer(data=sub_sector_list_serialized, many=True)
-    sub_sector_serialized_list.is_valid()
-    sub_sector_serialized_list.save()
+    if sub_sector_serialized_list.is_valid():
+        sub_sector_serialized_list.save()
+    else:
+        print(sub_sector_serialized_list.errors)
 
 
 
