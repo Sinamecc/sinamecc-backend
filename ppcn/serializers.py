@@ -56,7 +56,7 @@ class SectorSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField('language')
     class Meta:
         model = Sector
-        fields = ('id','name_es', 'name_en', 'name')
+        fields = ('id','name_es', 'name_en', 'name', 'geographicLevel')
         extra_kwargs = {
             'name_es': {'write_only': True},
             'name_en': {'write_only': True},
