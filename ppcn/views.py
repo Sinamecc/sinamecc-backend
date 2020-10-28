@@ -61,7 +61,7 @@ def put_ppcn(request, id):
 @has_permission_decorator('edit_ppcn')
 def patch_ppcn(request, id):
     if request.method == 'PATCH':
-        result = view_helper.patch(id, request)
+        result = view_helper.patch(request, id)
     return result
 
 
@@ -70,6 +70,18 @@ def patch_ppcn(request, id):
 def delete_ppcn(request, id):
     if request.method == 'DELETE':
         result = view_helper.delete(id)
+    return result
+
+
+@api_view(['GET'])
+@has_permission_decorator('read_ppcn')
+def get_current_comments(request, ppcn_id, fsm_state=False, review_number=False):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, ppcn_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, ppcn_id, fsm_state, review_number)
+
     return result
 
 ##
@@ -150,6 +162,16 @@ def get_all_ovv(request):
 ##
 ## Endpoints with aux views
 ##
+@api_view(['GET'])
+@has_permission_decorator('read_ppcn')
+def get_comments(request, ppcn_id, fsm_state=False, review_number=False):
+    if request.method == 'GET':
+        result = get_current_comments(request, ppcn_id, fsm_state, review_number)
+    
+    return result
+
+
+
 
 @api_view(['GET','POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
