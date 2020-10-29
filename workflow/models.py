@@ -15,6 +15,7 @@ STATUS = (('resolved', _('Resolved')), ('pending', _('Pending'), ))
 class Comment(models.Model):
 
     form_section = models.CharField(max_length=3000, blank=False, null=True)
+    field = models.CharField(max_length=1048, blank=False, null=True)
     comment = models.TextField(max_length=2048, blank=False, null=False)
     status = models.CharField(choices=STATUS, default='pending', max_length=10, blank=False, null=False)
     review_number = models.IntegerField()

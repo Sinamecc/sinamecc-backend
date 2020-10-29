@@ -27,6 +27,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='comment',
+            name='field',
+            field=models.CharField(max_length=1048, null=True),
+        ),
+        migrations.AddField(
+            model_name='comment',
             name='fsm_state',
             field=models.CharField(default=1, max_length=50),
             preserve_default=False,
