@@ -1835,7 +1835,7 @@ class PpcnService():
         if ppcn_status and next_state:
   
             update_state_status, update_state_data = self.update_fsm_state(next_state, ppcn_data, user)
-            if True:
+            if update_state_status:
                 comment_list = request_data.get('comments')
                 increase_review_counter_status, increase_review_counter_data = self._increase_review_counter(ppcn_data)
                 if increase_review_counter_status:
