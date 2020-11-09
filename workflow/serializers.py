@@ -4,7 +4,7 @@ from workflow.models import Comment, ReviewStatus
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('id', 'comment')
+        fields = ('id', 'comment', 'form_section', 'field', 'status','fsm_state', 'review_number', 'user')
 
 class ReviewStatusSerializer(serializers.ModelSerializer):
     class Meta:

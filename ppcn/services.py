@@ -1,3 +1,4 @@
+from rest_framework.fields import MISSING_ERROR_MESSAGE
 from mccr.models import OVV
 from mccr.serializers import OVVSerializer
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
@@ -56,7 +57,7 @@ class PpcnService():
         self.GEI_ORGANIZATION_DOES_NOT_EXIST = "Gei Organization doesn't exist"
         self.CIIU_CODE_SERIALIZER_ERROR = "Cannot serialize ciiu code because {0}"
         self.LIST_ERROR = "Was expected a {0} list into data"
-        self.MISSING_FIELD = "Missing {} field into request"
+        self.MISSING_FIELD = "Missing {0} field into request"
         self.FUNCTION_INSTANCE_ERROR = 'PPCNService does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.SEND_TO_REVIEW_ERROR = 'Error at the moment to send to review the ppcn form'
@@ -174,6 +175,14 @@ class PpcnService():
         return result
 
 
+    def _increase_review_counter(self, ppcn):
+
+        ppcn.review_count += 1;
+        ppcn.save()
+
+        result = (True, ppcn)
+
+        return result 
 
 
     # serialized objects
@@ -326,12 +335,12 @@ class PpcnService():
 
 
     
-    def get_serialized_change_log(self, ppcn_id, previous_status_id, current_status_id, user):
+    def get_serialized_change_log(self, ppcn_id, previous_status_id, current_status_id, user_id):
         change_log_data = {
             'ppcn': ppcn_id,
             'previous_status': previous_status_id,
             'current_status': current_status_id,
-            'user': user
+            'user': user_id
         }
         serializer = ChangeLogSerializer(data=change_log_data)
         return serializer
@@ -349,7 +358,6 @@ class PpcnService():
             serializer = PPCNFileSeriaizer(data=ppcnFileData)
         return serializer
 
-    
 
 
 
@@ -1292,6 +1300,24 @@ class PpcnService():
         return result
 
 
+    ## Aux Get Objects
+    # 
+
+    def _get_one(self, ppcn_id):
+        
+        try:
+            ppcn = PPCN.objects.get(id=ppcn_id)
+
+            result = (True, ppcn) 
+            
+        except PPCN.DoesNotExist as exc:
+
+            result = (False, self.PPCN_DOES_NOT_EXIST)
+
+        return result 
+
+
+
     def delete_organization(self, pk):
         try:
             org = Organization.objects.get(id=pk)
@@ -1377,7 +1403,7 @@ class PpcnService():
 
 
     def create_change_log_entry(self, ppcn, previous_status, current_status, user):
-        serialized_change_log = self.get_serialized_change_log(ppcn.id, previous_status, current_status, user)
+        serialized_change_log = self.get_serialized_change_log(ppcn.id, previous_status, current_status, user.id)
         if serialized_change_log.is_valid():
             serialized_change_log.save()
             result = (True, serialized_change_log.data)
@@ -1437,6 +1463,7 @@ class PpcnService():
 
         try:
             ppcn = PPCN.objects.get(id=ppcn_id)
+            user = request.user 
             ppcn_previous_status = ppcn.fsm_state
             transition_list = ppcn.get_available_fsm_state_transitions()
             transition_list = list(filter(f, transition_list))
@@ -1446,8 +1473,12 @@ class PpcnService():
                 submit_function = getattr(ppcn, transition.method.__name__)
                 submit_function()
                 ppcn.save()
-                self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, request.data.get('user'))
-                result = (True, 'PPCN request has been submitted')
+                change_log_status, change_log_data = self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, user)
+                if change_log_status:
+                    result = (True, 'PPCN request has been submitted')
+
+                else:
+                    result = (False, change_log_data)
             
             else:
                 result = (False, self.SEND_TO_REVIEW_ERROR)
@@ -1706,14 +1737,22 @@ class PpcnService():
             result = (False, self.PPCN_DOES_NOT_EXIST)
         return result
 
-    def assign_comment(self, request, ppcn):
-        comment_result_status, comment_result_data = workflow_service.create_comment(request)
-        if comment_result_status:
-            comment = comment_result_data
-            ppcn.comments.add(comment)
-        return comment_result_status
+    def assign_comment(self, comment_list, ppcn, user):
 
-    def update_fsm_state(self, next_state, ppcn,user):
+        data = [{**comment, 'fsm_state': ppcn.fsm_state, 'user': user.id, 'review_number': ppcn.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            ppcn.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+        
+        else:
+            result = (False, comment_list_data)
+
+        return result
+
+
+    def update_fsm_state(self, next_state, ppcn, user):
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
         # source -> target
@@ -1730,38 +1769,88 @@ class PpcnService():
             transition_function = getattr(ppcn ,state_transition.method.__name__)
 
             if has_transition_perm(transition_function,user):
+                ppcn_previous_status = ppcn.fsm_state
                 transition_function()
                 ppcn.save()
-                result = (True, PPCNSerializer(ppcn).data)
+                change_log_status, change_log_data = self.create_change_log_entry(ppcn, ppcn_previous_status, ppcn.fsm_state, user)
+
+                if change_log_status:
+                    result = (True, PPCNSerializer(ppcn).data)
+                
+                else:
+                    result = (False, change_log_data)
+
             else: result = (False, self.INVALID_STATUS_TRANSITION)
             
         
         return result
 
-    def patch(self, id, request):
-        ppcn =  PPCN.objects.get(id=id)
-        if(request.data.get('fsm_state')):
-            patch_data = {
-                'review_count': ppcn.review_count + 1
-            }
-            serialized_ppcn = PPCNSerializer(ppcn, data=patch_data, partial=True)
-            if serialized_ppcn.is_valid():
-                ppcn_previous_status = ppcn.fsm_state
-                ppcn = serialized_ppcn.save()
-                update_state_status, update_state_data = self.update_fsm_state(request.data.get('fsm_state'), ppcn,request.user)
-                if update_state_status:
-                    self.create_change_log_entry(ppcn,ppcn_previous_status,ppcn.fsm_state,request.data.get('user'))
-                    result = (True, update_state_data)
-                else:
-                    result = (False, update_state_data)
-                    return result
-            if request.data.get('comment'):
-                comment_status = self.assign_comment(request, ppcn)
-                if comment_status:
-                    result = (True, PPCNSerializer(ppcn).data)
-                else:
-                    result = (False, self.COMMENT_NOT_ASSIGNED)
+
+    def get_current_comments(self, request, ppcn_id):
+
+        ppcn_status, ppcn_data = self._get_one(ppcn_id)
+
+        if ppcn_status:
+            review_number = ppcn_data.review_count
+            fsm_state = ppcn_data.fsm_state
+            commet_list = ppcn_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
         else:
-            result = (False, self.NO_PATCH_DATA_PROVIDED)
+            result = (False, ppcn_data)
 
         return result
+    
+    def get_comments_by_fsm_state_or_review_number(self, request, ppcn_id, fsm_state=False, review_number=False):
+        ppcn_status, ppcn_data = self._get_one(ppcn_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if ppcn_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = ppcn_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, ppcn_data)
+
+        return result
+
+
+
+
+
+    def patch(self, request, ppcn_id):
+
+        request_data = request.data.copy()
+        next_state = request_data.pop('fsm_state', False)
+        user = request.user
+        ppcn_status, ppcn_data = self._get_one(ppcn_id)
+
+        if ppcn_status and next_state:
+  
+            update_state_status, update_state_data = self.update_fsm_state(next_state, ppcn_data, user)
+            if update_state_status:
+                comment_list = request_data.get('comments')
+                increase_review_counter_status, increase_review_counter_data = self._increase_review_counter(ppcn_data)
+                if increase_review_counter_status:
+                    assign_status, assign_data = self.assign_comment(comment_list, ppcn_data, user)
+                    result = (assign_status, assign_data if not assign_status else PPCNSerializer(ppcn_data).data)
+                
+                else: 
+                    result = (False, increase_review_counter_data)
+                
+            else:
+                result = (False, update_state_data)
+
+        else:
+            result = (False, ppcn_data if next_state else self.MISSING_FIELD.format('fsm_state'))
+        
+
+        return result
+
