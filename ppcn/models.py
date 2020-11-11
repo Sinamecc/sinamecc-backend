@@ -133,7 +133,7 @@ class OrganizationClassification(models.Model):
     emission_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     buildings_number = models.IntegerField(blank=False, null=True)
     data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-
+    methodologies_complexity = models.CharField(max_length=200, null=True)
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
 
@@ -343,6 +343,7 @@ class GeiOrganization(models.Model):
     report_year =  models.IntegerField(blank=False, null=True)
     base_year = models.IntegerField(blank=False, null=True)
     gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
+    scope = models.CharField(max_length=200, null=True)
     organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
 
     class Meta:

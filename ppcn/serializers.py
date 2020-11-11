@@ -117,7 +117,7 @@ class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'methodologies_complexity','required_level', 'recognition_type')
 
 class OrganizationCategorySerializer(serializers.ModelSerializer):
 
@@ -179,7 +179,7 @@ class GeiOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =  GeiOrganization
-        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'gas_report')
+        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'scope','gas_report')
 
 class GeiActivityTypeSerializer(serializers.ModelSerializer):
     
