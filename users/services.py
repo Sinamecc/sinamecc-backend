@@ -334,6 +334,8 @@ class UserService():
                 if self.token_generator.check_token(user_query, token):
                     user_query.set_password(request.data.get('password'))
                     user_query.save()
+                    email_status, email_data = self.email_services.notify_password_change_done(user_query)
+
                     result = (True, CustomUserSerializer(user_query).data)
 
                 else:

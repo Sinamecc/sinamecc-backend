@@ -41,4 +41,21 @@ class UserEmailServices():
         subject = 'Reestablecer Contraseña'
 
         return self.send_notification(user.email, subject, message_body)
+    
+
+    def notify_password_change_done(self, user):
+        
+        template_path_data = {'module': 'email', 'template': 'reset_password_done'}
+
+        template = loader.get_template(self.template_path.format(**template_path_data))
+
+        full_name = f"{user.first_name} {user.last_name}"
+
+        context = {'lang': 'es', 'full_name': full_name, 'username': user.username} ## at the moment
+
+        message_body = template.render(context)
+
+        subject = 'Contraseña Reestablecida'
+
+        return self.send_notification(user.email, subject, message_body)
 
