@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from rolepermissions.decorators import has_permission_decorator
 from django.utils.decorators import method_decorator
+from rolepermissions.checkers import has_permission
 service = PpcnService()
 view_helper = ViewHelper(service)
 permission = PermissionsHelper()
@@ -37,10 +38,11 @@ def post_ppcn(request):
     return result
 
 @api_view(['GET'])
-##@has_permission_decorator('read_all_ppcn')
+@has_permission_decorator('read_all_ppcn', 'read_ppcn')
 def get_ppcn(request,  language = 'en'):
     if request.method == 'GET':
-        result = view_helper.get_all(request, language)
+        user = request.user if has_permission(request.user, 'read_all') else False
+        result = view_helper.get_all(request, language, user)
     return result
 
 @api_view(['GET'])
