@@ -41,7 +41,7 @@ def post_ppcn(request):
 @has_permission_decorator('read_all_ppcn', 'read_ppcn')
 def get_ppcn(request,  language = 'en'):
     if request.method == 'GET':
-        user = request.user if has_permission(request.user, 'read_all') else False
+        user = request.user if not has_permission(request.user, 'read_all') else False
         result = view_helper.get_all(request, language, user)
     return result
 
