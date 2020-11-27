@@ -33,10 +33,47 @@ class UserEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         redirect_url = f"{self.email_services.base_dir_notification}/changePassword?code={encoded_user_id}&token={token}"
-        context = {"url": redirect_url, 'lang': 'es'} ## at the moment
+        full_name = f"{user.first_name} {user.last_name}"
+        context = {"url": redirect_url, 'lang': 'es', 'full_name': full_name} ## at the moment
 
         message_body = template.render(context)
 
+        subject = 'Reestablecer Contraseña'
 
-        return self.send_notification(user.email, 'Resert Password', message_body)
+        return self.send_notification(user.email, subject, message_body)
+    
+
+    def notify_new_user_creation_to_password_change(self, user, encoded_user_id):
+        
+        token = self.token_generator.make_token(user)
+
+        template_path_data = {'module': 'email', 'template': 'reset_password_to_new_user'}
+        template = loader.get_template(self.template_path.format(**template_path_data))
+
+        redirect_url = f"{self.email_services.base_dir_notification}/changePassword?code={encoded_user_id}&token={token}"
+        full_name = f"{user.first_name} {user.last_name}"
+        context = {"url": redirect_url, 'lang': 'es', 'full_name': full_name, 'username': user.username, 'email': user.email} ## at the moment
+
+        message_body = template.render(context)
+
+        subject = 'Notificación de creación de usuario'
+
+        return self.send_notification(user.email, subject, message_body)
+    
+
+    def notify_password_change_done(self, user):
+        
+        template_path_data = {'module': 'email', 'template': 'reset_password_done'}
+
+        template = loader.get_template(self.template_path.format(**template_path_data))
+
+        full_name = f"{user.first_name} {user.last_name}"
+
+        context = {'lang': 'es', 'full_name': full_name, 'username': user.username} ## at the moment
+
+        message_body = template.render(context)
+
+        subject = 'Contraseña Reestablecida'
+
+        return self.send_notification(user.email, subject, message_body)
 
