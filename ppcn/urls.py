@@ -58,7 +58,7 @@ urlpatterns = [
         views.send_to_review,
         name='send_to_review'
     ), 
-    url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>[A-Za-z]*)/*$',
+    url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>es|en)*/*$',
         views.get_one_ppcn,
         name='get_one_ppcn'
     ), 
@@ -73,12 +73,32 @@ urlpatterns = [
     url(
         r'^api/v1/ppcn/changelog/(?P<id>[0-9a-f-]+)$',
         views.get_ppcn_change_log,
-        name='get_mitigation_change_log'
+        name='get_ppcn_change_log'
     ),
-
     url(
-        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/file/(?P<ppcn_file_id>[0-9a-fA-F-]+)/*$',
+        r'^api/v1/ppcn/(?P<id>[0-9a-fA-F-]+)/file/(?P<ppcn_file_id>[0-9a-zA-Z-]+)/*$',
         views.get_ppcn_file_version,
         name='get_ppcn_file_version'
+    ),
+
+    url(r'^api/v1/ppcn/(?P<ppcn_id>[0-9a-f-]+)/comments/*$',
+        views.get_comments,
+        name='get_comments'
+    ),
+    url(r'^api/v1/ppcn/(?P<ppcn_id>[0-9a-f-]+)/(?P<fsm_state>[A-Za-z0-9\._-]+)/comments/*$',
+        views.get_comments,
+        name='get_comments'
+    ),
+    url(r'^api/v1/ppcn/(?P<ppcn_id>[0-9a-f-]+)/(?P<fsm_state>[A-Za-z0-9\._-]+)/review/(?P<review_number>[0-9]+)/comments/*$',
+        views.get_comments,
+        name='get_comments'
+    ),
+    url(r'^api/v1/ppcn/(?P<ppcn_id>[0-9a-f-]+)/review/(?P<review_number>[0-9]+)/comments/*$',
+        views.get_comments,
+        name='get_comments'
+    ),
+    url(r'^api/v1/ppcn/(?P<ppcn_id>[0-9a-f-]+)/comments/*$',
+        views.get_comments,
+        name='get_comments'
     ),
 ]
