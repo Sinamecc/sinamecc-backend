@@ -217,6 +217,9 @@ class UserService():
             user = serialized_user.save()
             user.set_password(request.data.get('password'))
             user.save()
+            encode_b64_user_id_status, encode_b64_user_id_data = self.encode_b64_user_id(user.pk)
+            if encode_b64_user_id_status:
+                email_status, email_data = self.email_services.notify_new_user_creation_to_password_change(user, encode_b64_user_id_data)
 
             result = (True, CustomUserSerializer(user).data)
         else:
