@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.db.models.deletion
-from ppcn.models import RequiredLevel, RecognitionType, Sector, SubSector, GeographicLevel
 from ppcn.serializers import RequiredLevel, RecognitionTypeSerializer, RequiredLevelSerializer, SectorSerializer, SubSector, SubSectorSerializer
 
 required_level = [
@@ -250,7 +249,11 @@ organizational_sector = [
 
 
 def reset_catalogs_data(apps, schema_editor):
-
+    RequiredLevel = apps.get_model("ppcn", "RequiredLevel")
+    RecognitionType = apps.get_model("ppcn", "RecognitionType")
+    Sector = apps.get_model("ppcn", "Sector")
+    GeographicLevel = apps.get_model("ppcn", "GeographicLevel") 
+    
     RequiredLevel.objects.all().delete()
     RecognitionType.objects.all().delete()
     sector_list = Sector.objects.filter(geographicLevel__level_es='Organizacional').all()
@@ -299,7 +302,7 @@ class Migration(migrations.Migration):
     ]
     operations = [
        
-        migrations.RunPython(reset_catalogs_data)
+        migrations.RunPython(reset_catalogs_data, reverse_code=migrations.RunPython.noop)
     ]
 
     
