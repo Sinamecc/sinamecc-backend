@@ -283,8 +283,8 @@ class SubSector(models.Model):
 class BiogenicEmission(models.Model):
 
     total = models.DecimalField(max_digits=20, decimal_places=5)
-    scope_1 = models.CharField(max_length=100, null=True, blank=True)
-    scope_2 = models.CharField(max_length=100, null=True, blank=True)
+    scope_1 = models.TextField(null=True, blank=True)
+    scope_2 = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("Biogenic Emission")
@@ -343,7 +343,7 @@ class GeiOrganization(models.Model):
     report_year =  models.IntegerField(blank=False, null=True)
     base_year = models.IntegerField(blank=False, null=True)
     gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
-    scope = models.CharField(max_length=200, null=True)
+    scope = models.TextField(null=True)
     organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
 
     class Meta:
