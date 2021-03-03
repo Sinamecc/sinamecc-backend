@@ -14,6 +14,9 @@ pipeline {
                 withPythonEnv('/usr/bin/python3.6') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
                     {
+                        echo "Step: Upgrading pip"
+                        sh 'pip install --upgrade pip'
+
                         echo "Step: Updating requirements"
                         sh 'pip install -r requirements.txt'
 
@@ -35,7 +38,7 @@ pipeline {
                 }
             }   
         }
-
+p9i
         stage ("Restarting docker container") {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
