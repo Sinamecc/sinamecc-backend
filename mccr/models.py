@@ -28,10 +28,10 @@ class MCCRUserType(models.Model):
 class MCCRRegistry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     status = models.CharField(max_length=50, blank=False, null=False)
-    user = models.ForeignKey(User, related_name='mccr')
-    mitigation = models.ForeignKey(Mitigation, related_name='mccr')
+    user = models.ForeignKey(User, related_name='mccr', on_delete=models.CASCADE)
+    mitigation = models.ForeignKey(Mitigation, related_name='mccr', on_delete=models.CASCADE)
     fsm_state = FSMField(default='new', protected=True)
-    user_type = models.ForeignKey(MCCRUserType, related_name='mccr')
+    user_type = models.ForeignKey(MCCRUserType, related_name='mccr', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -808,11 +808,11 @@ class MCCRRegistry(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    mccr = models.ForeignKey(MCCRRegistry, related_name='change_log')
+    mccr = models.ForeignKey(MCCRRegistry, related_name='change_log', on_delete=models.CASCADE)
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     
-    user = models.ForeignKey(User, related_name='change_log_mccr')
+    user = models.ForeignKey(User, related_name='change_log_mccr', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("ChangeLog")

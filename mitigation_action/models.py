@@ -101,8 +101,8 @@ class FinanceStatus(models.Model):
 
 class InitiativeFinance(models.Model):
 
-    status = models.ForeignKey(FinanceStatus, related_name='initiative_finance_status', blank=False, null=False)
-    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='initiative_finance_source_type', blank=False, null=False)
+    status = models.ForeignKey(FinanceStatus, related_name='initiative_finance_status', blank=False, null=False, on_delete=models.CASCADE)
+    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='initiative_finance_source_type', blank=False, null=False, on_delete=models.CASCADE)
     source = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
@@ -114,7 +114,7 @@ class InitiativeFinance(models.Model):
 
 class Finance(models.Model):
 
-    status = models.ForeignKey(FinanceStatus, related_name='finance_status', blank=False, null=False)
+    status = models.ForeignKey(FinanceStatus, related_name='finance_status', blank=False, null=False, on_delete=models.CASCADE)
     source = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
@@ -178,12 +178,12 @@ class Initiative(models.Model):
     description = models.CharField(max_length=400, blank=False, null=False)
     goal = models.CharField(max_length=400, blank=False, null=False)
 
-    initiative_type  = models.ForeignKey(InitiativeType, related_name = "initiative_type")
+    initiative_type  = models.ForeignKey(InitiativeType, related_name = "initiative_type", on_delete=models.CASCADE)
     entity_responsible = models.CharField(max_length=100, blank=False, null=False)
-    contact =  models.ForeignKey(Contact, related_name='contact')
+    contact =  models.ForeignKey(Contact, related_name='contact', on_delete=models.CASCADE)
     budget = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
-    finance = models.ForeignKey(InitiativeFinance, related_name='finance')
-    status = models.ForeignKey(Status, related_name = 'status')
+    finance = models.ForeignKey(InitiativeFinance, related_name='finance', on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, related_name = 'status', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Initiative")
@@ -208,17 +208,17 @@ class Mitigation(models.Model):
     is_international = models.NullBooleanField(blank=True, null=True)
     international_participation = models.CharField(max_length=100, blank=True, null=True)
     # Foreign Keys
-    user = models.ForeignKey(User, related_name='mitigation_action')
-    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action', blank=True, null=True)
-    initiative = models.ForeignKey(Initiative, related_name='mitigation_action', blank=True, null=True)
-    institution = models.ForeignKey(Institution, related_name='mitigation_action', blank=True, null=True)
-    contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True)
-    status = models.ForeignKey(Status, related_name='mitigation_action', blank=True, null=True)
-    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action', blank=True, null=True)
-    finance = models.ForeignKey(Finance, related_name='mitigation_action', blank=True, null=True)
+    user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
+    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    initiative = models.ForeignKey(Initiative, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    institution = models.ForeignKey(Institution, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    status = models.ForeignKey(Status, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    finance = models.ForeignKey(Finance, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
     ingei_compliances = models.ManyToManyField(IngeiCompliance)
-    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action', blank=True, null=True)
-    location = models.ForeignKey(Location, related_name='mitigation_action', blank=True, null=True)
+    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
 
     # Workflow
     review_count = models.IntegerField(null=True, blank=True, default=0)
@@ -864,11 +864,11 @@ class Mitigation(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    mitigation_action = models.ForeignKey(Mitigation, related_name='change_log')
+    mitigation_action = models.ForeignKey(Mitigation, related_name='change_log', on_delete=models.CASCADE)
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     
-    user = models.ForeignKey(User, related_name='change_log')
+    user = models.ForeignKey(User, related_name='change_log', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("ChangeLog")

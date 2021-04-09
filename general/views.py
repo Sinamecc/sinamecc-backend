@@ -18,9 +18,3 @@ def get_user_info_by_name(request, username):
 def handler404(request):
     result = { "error_code": 404, "error_message": "Page not found" }
     raise NotFound(detail=result, code=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-def handler500(request):
-    result = { "error_code": 500, "error_message": "Internal Server Error" }
-    raise NotFound(detail=result, code=status.HTTP_500_INTERNAL_SERVER_ERROR)

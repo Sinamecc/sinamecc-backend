@@ -10,7 +10,7 @@ from general.storages import PrivateMediaStorage
 User =  get_user_model()
 
 class ReportFile(models.Model):
-    user = models.ForeignKey(User, related_name='report_file')
+    user = models.ForeignKey(User, related_name='report_file', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=False, null=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -24,7 +24,7 @@ class ReportFile(models.Model):
         return smart_unicode(self.name)
 
 class ReportFileVersion(models.Model):
-    user = models.ForeignKey(User, related_name='report_file_version')
+    user = models.ForeignKey(User, related_name='report_file_version', on_delete=models.CASCADE)
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     active = models.BooleanField(blank=False, null=False)
     file = models.FileField(blank=False, null=False, upload_to='report_data/%Y%m%d/%H%M%S', storage=PrivateMediaStorage())

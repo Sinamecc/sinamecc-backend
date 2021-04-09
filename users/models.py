@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
 
 class ProfilePicture(models.Model):
 
-    user = models.ForeignKey(CustomUser, related_name='profile_picture')
+    user = models.ForeignKey(CustomUser, related_name='profile_picture', on_delete=models.CASCADE)
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     image = models.FileField(blank=False, null=False, upload_to=profile_picture_path, storage=PrivateMediaStorage())
     current = models.BooleanField(blank=False, null=False)
