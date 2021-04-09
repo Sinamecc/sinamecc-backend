@@ -130,9 +130,9 @@ class RecognitionType(models.Model):
 ##     
 class OrganizationClassification(models.Model):
     
-    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    emission_quantity = models.DecimalField(max_digits=40, decimal_places=20, null=True)
     buildings_number = models.IntegerField(blank=False, null=True)
-    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    data_inventory_quantity = models.DecimalField(max_digits=40, decimal_places=20, null=True)
     methodologies_complexity = models.CharField(max_length=200, null=True)
     required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification', on_delete=models.CASCADE)
     recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification', on_delete=models.CASCADE)
@@ -154,10 +154,10 @@ class CarbonOffset(models.Model):
     project_location = models.CharField(max_length=200, blank=False, null=True)
     certificate_identification = models.CharField(max_length=200, blank=False, null=True)
     total_carbon_offset = models.CharField(max_length=100, blank=False, null=True)
-    offset_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    offset_cost = models.DecimalField(max_digits=40, decimal_places=20)
     offset_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     period = models.CharField(max_length=100, blank=False, null=True)
-    total_offset_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    total_offset_cost = models.DecimalField(max_digits=40, decimal_places=20)
     total_offset_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     organization_classification = models.ForeignKey(OrganizationClassification, related_name='carbon_offset', on_delete=models.CASCADE)
 
@@ -179,9 +179,9 @@ class Reduction(models.Model):
     detail_reduction = models.TextField(blank=False, null=True)
     emission = models.CharField(max_length=10, blank=False, null=True)
     total_emission = models.CharField(max_length=10, blank=False, null=True)
-    investment = models.DecimalField(max_digits=10, decimal_places=2)
+    investment = models.DecimalField(max_digits=40, decimal_places=20)
     investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
-    total_investment = models.DecimalField(max_digits=10, decimal_places=2)
+    total_investment = models.DecimalField(max_digits=40, decimal_places=20)
     total_investment_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     organization_classification = models.ForeignKey(OrganizationClassification, related_name='reduction', on_delete=models.CASCADE)
 
@@ -202,8 +202,8 @@ class OrganizationCategory(models.Model):
 
     organization_category = models.CharField(max_length=200, null=True)
     buildings_number = models.IntegerField(blank=False, null=True)
-    data_inventory_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    emission_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    data_inventory_quantity = models.DecimalField(max_digits=40, decimal_places=20, null=True)
+    emission_quantity = models.DecimalField(max_digits=40, decimal_places=20)
     methodologies_complexity = models.CharField(max_length=200, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -282,7 +282,7 @@ class SubSector(models.Model):
 
 class BiogenicEmission(models.Model):
 
-    total = models.DecimalField(max_digits=20, decimal_places=5)
+    total = models.DecimalField(max_digits=40, decimal_places=20)
     scope_1 = models.TextField(null=True, blank=True)
     scope_2 = models.TextField(null=True, blank=True)
 
@@ -300,7 +300,7 @@ class GasReport(models.Model):
     biogenic_emission = models.ForeignKey(BiogenicEmission, related_name='gas_report', blank=True, on_delete=models.CASCADE)
     cost_ghg_inventory = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     cost_ghg_inventory_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
-    cost_ovv_process = models.DecimalField(max_digits=20, decimal_places=2)
+    cost_ovv_process = models.DecimalField(max_digits=40, decimal_places=20)
     cost_ovv_process_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
 
     class Meta:
@@ -325,7 +325,7 @@ class GasScope(models.Model):
 class QuantifiedGas(models.Model):
 
     name = models.CharField(max_length=50, blank=False, null=False)
-    value = models.DecimalField(max_digits=20, decimal_places=5)
+    value = models.DecimalField(max_digits=40, decimal_places=20)
     gas_scope = models.ForeignKey(GasScope, related_name='quantified_gases' ,on_delete=models.CASCADE)
     
     class Meta:
@@ -716,7 +716,7 @@ class PPCNFile(models.Model):
 
 class GasRemoval(models.Model):
 
-    removal_cost = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    removal_cost = models.DecimalField(max_digits=40, decimal_places=20, null=True)
     removal_cost_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     total = models.DecimalField(max_digits=20, decimal_places=5, null=True)
     removal_descriptions = models.CharField(max_length=100, null=True, blank=False)
