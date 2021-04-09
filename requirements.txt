@@ -4,7 +4,7 @@ botocore==1.15.38
 certifi==2018.4.16
 chardet==3.0.4
 colorama==0.3.7
-Django==3.0
+Django==3.2
 psycopg2-binary==2.8.4
 django-storages==1.6.6
 djangorestframework==3.12.4
