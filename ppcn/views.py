@@ -30,14 +30,12 @@ def send_to_review(request, id):
     return result
 
 
-@api_view(['POST'])
 @has_permission_decorator('create_ppcn')
 def post_ppcn(request):
     if request.method == 'POST':
         result = view_helper.post(request)
     return result
 
-@api_view(['GET'])
 @has_permission_decorator('read_ppcn')
 def get_ppcn(request,  language = 'en'):
     if request.method == 'GET':
