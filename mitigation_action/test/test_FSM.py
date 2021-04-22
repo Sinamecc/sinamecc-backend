@@ -8,7 +8,7 @@ from mitigation_action.services import MitigationActionService
 import json, uuid, datetime, boto3
 from datetime import datetime
 from workflow.models import Comment, ReviewStatus
-from mitigation_action.models import Mitigation
+from mitigation_action.models import MitigationAction
 from moto import mock_ses
 # initialize the APIClient app
 client = Client()
@@ -30,7 +30,7 @@ class MitigationActionFSMTest(TestCase):
         flow = ['submitted','in_evaluation_by_DCC']
         
         client.force_login(self.superUser)
-        self.model = Mitigation(user=self.superUser, name='name - test', strategy_name='name - strategy_name')
+        self.model = MitigationAction(user=self.superUser)
     
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model, self.superUser)
@@ -42,7 +42,7 @@ class MitigationActionFSMTest(TestCase):
         target = 'in_evaluation_by_DCC'
 
         client.force_login(self.superUser)
-        self.model = Mitigation(user=self.superUser)
+        self.model = MitigationAction(user=self.superUser)
 
         transitions = list(self.model.get_available_fsm_state_transitions())
         for state in transitions:
@@ -56,7 +56,7 @@ class MitigationActionFSMTest(TestCase):
         flow=['in_evaluation_by_DCC','decision_step_DCC','changes_requested_by_DCC','updating_by_request']
 
         client.force_login(self.superUser)
-        self.model = Mitigation(user=self.superUser,fsm_state='submitted')
+        self.model = MitigationAction(user=self.superUser,fsm_state='submitted')
         
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -72,7 +72,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_by_DCC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_by_DCC')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -89,7 +89,7 @@ class MitigationActionFSMTest(TestCase):
         
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='submitted')
+        self.model = MitigationAction(user=self.superUser,fsm_state='submitted')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -113,7 +113,7 @@ class MitigationActionFSMTest(TestCase):
         ]
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_by_DCC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_by_DCC')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -129,7 +129,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
         
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -147,7 +147,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
+        self.model = MitigationAction(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -162,7 +162,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -178,7 +178,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
+        self.model = MitigationAction(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -192,7 +192,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_INGEI_changes_proposal_by_DCC_IMN')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -208,7 +208,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
+        self.model = MitigationAction(user=self.superUser,fsm_state='submit_INGEI_changes_proposal_evaluation_result')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -224,7 +224,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -240,7 +240,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -254,7 +254,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='in_evaluation_conceptual_proposal_by_DCC')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -270,7 +270,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='decision_step_DCC_proposal')
+        self.model = MitigationAction(user=self.superUser,fsm_state='decision_step_DCC_proposal')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -284,7 +284,7 @@ class MitigationActionFSMTest(TestCase):
         
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='planning_integration_with_SINAMECC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='planning_integration_with_SINAMECC')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -301,7 +301,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='decision_step_SINAMEC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='decision_step_SINAMEC')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())
@@ -315,7 +315,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='planning_integration_with_SINAMECC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='planning_integration_with_SINAMECC')
 
         for state in flow:
             self.mitigation_service.update_fsm_state(state, self.model,self.superUser)
@@ -331,7 +331,7 @@ class MitigationActionFSMTest(TestCase):
 
         client.force_login(self.superUser)
 
-        self.model = Mitigation(user=self.superUser,fsm_state='decision_step_SINAMEC')
+        self.model = MitigationAction(user=self.superUser,fsm_state='decision_step_SINAMEC')
 
         for point in points:
             transitions = list(self.model.get_available_fsm_state_transitions())

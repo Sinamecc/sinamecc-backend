@@ -18,27 +18,6 @@ User =  get_user_model()
 permission = PermissionsHelper()
 ##Email services, defaul email -> sinamec@grupoincocr.com
 ses_service = EmailServices()
-class RegistrationType(models.Model):
-    type_key = models.CharField(max_length=20, blank=False, null=False)
-    type_es = models.CharField(max_length=100, blank=False, null=False)
-    type_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("RegistrationType")
-        verbose_name_plural = _("RegistrationTypes")
-
-    def __unicode__(self):
-        return smart_unicode(self.type)
-
-class Institution(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("Institution")
-        verbose_name_plural = _("Institutions")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
 
 class Contact(models.Model):
     full_name = models.CharField(max_length=100, blank=False, null=False)
@@ -53,191 +32,22 @@ class Contact(models.Model):
     def __unicode__(self):
         return smart_unicode(self.full_name)
 
-class Status(models.Model):
-    status_es = models.CharField(max_length=100, blank=False, null=False)
-    status_en = models.CharField(max_length=100, blank=False, null=False)
 
-    class Meta:
-        verbose_name = _("Status")
-        verbose_name_plural = _("Statuses")
-
-    def __unicode__(self):
-        return smart_unicode(self.status)
-
-class ProgressIndicator(models.Model):
-    name = models.CharField(max_length=100, blank=False, null=False)
-    type = models.CharField(max_length=100, blank=False, null=False)
-    unit = models.CharField(max_length=100, blank=False, null=False)
-    start_date = models.DateField(null=False)
-
-    class Meta:
-        verbose_name = _("ProgressIndicator")
-        verbose_name_plural = _("ProgressIndicators")
-
-    def __unicode__(self):
-        return smart_unicode(self.type)
-
-class FinanceSourceType(models.Model):
-    name_es = models.CharField(max_length=100, blank=False, null=False)
-    name_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("FinanceSourceType")
-        verbose_name_plural = _("FinanceSourceTypes")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class FinanceStatus(models.Model):
-    name_es = models.CharField(max_length=100, blank=False, null=False)
-    name_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("FinanceStatus")
-        verbose_name_plural = _("FinanceStatuses")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class InitiativeFinance(models.Model):
-
-    status = models.ForeignKey(FinanceStatus, related_name='initiative_finance_status', blank=False, null=False, on_delete=models.CASCADE)
-    finance_source_type = models.ForeignKey(FinanceSourceType, related_name='initiative_finance_source_type', blank=False, null=False, on_delete=models.CASCADE)
-    source = models.CharField(max_length=500, blank=True, null=True)
-
-    class Meta:
-        verbose_name = _("InitiativeFinance")
-        verbose_name_plural = _("InitiativeFinances")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class Finance(models.Model):
-
-    status = models.ForeignKey(FinanceStatus, related_name='finance_status', blank=False, null=False, on_delete=models.CASCADE)
-    source = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        verbose_name = _("Finance")
-        verbose_name_plural = _("Finances")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class IngeiCompliance(models.Model):
-    name_es = models.CharField(max_length=100, blank=False, null=False)
-    name_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("IngeiCompliance")
-        verbose_name_plural = _("IngeiCompliances")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class GeographicScale(models.Model):
-    name_es = models.CharField(max_length=100, blank=False, null=False)
-    name_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("GeographicScale")
-        verbose_name_plural = _("GeographicScales")
-
-    def __unicode__(self):
-        return smart_unicode(self.name)
-
-class Location(models.Model):
-    geographical_site = models.CharField(max_length=100, blank=False, null=False)
-    is_gis_annexed = models.BooleanField(blank=False, null=False)
-    class Meta:
-        verbose_name = _("Location")
-        verbose_name_plural = _("Locations")
-
-    def __unicode__(self):
-        return smart_unicode(self.geographical_site)
-
-
-
-class InitiativeType(models.Model):
-
-    initiative_type_es = models.CharField(max_length=100, blank=False, null=False)
-    initiative_type_en = models.CharField(max_length=100, blank=False, null=False)
-
-    class Meta:
-        verbose_name = _("InitiativeType")
-        verbose_name_plural = _("InitiativeTypes")
-
-    def __unicode__(self):
-        return smart_unicode(self.initiative_type_en)
-
-class Initiative(models.Model):
-
-    name = models.CharField(max_length=100, blank=False, null=False)
-    
-    objective = models.CharField(max_length=400, blank=False, null=False)
-    description = models.CharField(max_length=400, blank=False, null=False)
-    goal = models.CharField(max_length=400, blank=False, null=False)
-
-    initiative_type  = models.ForeignKey(InitiativeType, related_name = "initiative_type", on_delete=models.CASCADE)
-    entity_responsible = models.CharField(max_length=100, blank=False, null=False)
-    contact =  models.ForeignKey(Contact, related_name='contact', on_delete=models.CASCADE)
-    budget = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
-    finance = models.ForeignKey(InitiativeFinance, related_name='finance', on_delete=models.CASCADE)
-    status = models.ForeignKey(Status, related_name = 'status', on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = _("Initiative")
-        verbose_name_plural = _("Initiatives")
-
-    def __unicode__(self):
-        return smart_unicode(self.initiative_type_en)
-
-class Mitigation(models.Model):
+class MitigationAction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    strategy_name = models.CharField(max_length=100, blank=True, null=True)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    purpose = models.CharField(max_length=500, blank=True, null=True)
-    start_date = models.DateField(blank = True, null=True)
-    end_date = models.DateField(blank = True, null=True)
-    gas_inventory = models.CharField(max_length=100, blank=True, null=True)
-    emissions_source = models.CharField(max_length=100, blank=True, null=True)
-    carbon_sinks = models.CharField(max_length=100, blank=True, null=True)
-    impact_plan = models.CharField(max_length=500, blank=True, null=True)
-    impact = models.CharField(max_length=500, blank=True, null=True)
-    calculation_methodology = models.CharField(max_length=500, blank=True, null=True)
-    is_international = models.NullBooleanField(blank=True, null=True)
-    international_participation = models.CharField(max_length=100, blank=True, null=True)
-    # Foreign Keys
-    user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
-    registration_type = models.ForeignKey(RegistrationType, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    initiative = models.ForeignKey(Initiative, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    institution = models.ForeignKey(Institution, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
+
+    # Foreign Key
     contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    status = models.ForeignKey(Status, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    progress_indicator = models.ForeignKey(ProgressIndicator, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    finance = models.ForeignKey(Finance, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    ingei_compliances = models.ManyToManyField(IngeiCompliance)
-    geographic_scale = models.ForeignKey(GeographicScale, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-
-    # Workflow
-    review_count = models.IntegerField(null=True, blank=True, default=0)
-    comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='new', protected=True, max_length=100)
-
-    # Timestamps
+    # Timestamps and log 
+    user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("MitigationAccess")
-        verbose_name_plural = _("MitigationAccesses")
+        verbose_name = _("Mitigation Action")
+        verbose_name_plural = _("Mitigation Actions")
         ordering = ('created',)
-        permissions = (
-            ("can_provide_information", "Can Provide Information MA"),
-            ("user_dcc_permission", "User DCC Permission MA"),
-            ("user_executive_secretary_permission", "User Executive Secretary Permission MA"),
-        )
 
     # FSM Annotated Methods (Transitions) and Ordinary Conditions
     # --- Transition ---
@@ -253,12 +63,7 @@ class Mitigation(models.Model):
         result = 'The mitigation action is transitioning from new to submitted'
         # Notify to DCC placeholder
         print(result)
-        email_services = MitigationActionEmailServices(ses_service)
-    
-        result_status, result_data = email_services.notify_submission_user(self)
-        if not result_status: return (result_status, result_data)
-        
-        return (True, result)
+
 
 
     # --- Transition ---
@@ -372,12 +177,7 @@ class Mitigation(models.Model):
         result = 'The mitigation action is transitioning from changes_requested_by_DCC to updating_by_request'
         
         print(result)
-        email_services = MitigationActionEmailServices(ses_service)
         
-        result_status, result_data = email_services.notify_submission_user(self)
-        if not result_status: return (result_status, result_data)
-        
-        return (True, result)
     # --- Transition ---
     # in_evaluation_by_DCC -> rejected_by_DCC
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_reject_DCC], on_error='failed', permission='')
@@ -864,7 +664,7 @@ class Mitigation(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    mitigation_action = models.ForeignKey(Mitigation, related_name='change_log', on_delete=models.CASCADE)
+    mitigation_action = models.ForeignKey(MitigationAction, related_name='change_log', on_delete=models.CASCADE)
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     
