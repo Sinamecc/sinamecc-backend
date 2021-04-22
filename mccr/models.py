@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db import models
 from general.storages import PrivateMediaStorage
-from mitigation_action.models import Mitigation
+from mitigation_action.models import MitigationAction
 from workflow.models import Comment, ReviewStatus
 from django_fsm import FSMField, transition
 import uuid
@@ -29,7 +29,7 @@ class MCCRRegistry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     status = models.CharField(max_length=50, blank=False, null=False)
     user = models.ForeignKey(User, related_name='mccr', on_delete=models.CASCADE)
-    mitigation = models.ForeignKey(Mitigation, related_name='mccr', on_delete=models.CASCADE)
+    mitigation = models.ForeignKey(MitigationAction, related_name='mccr', on_delete=models.CASCADE)
     fsm_state = FSMField(default='new', protected=True)
     user_type = models.ForeignKey(MCCRUserType, related_name='mccr', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
@@ -96,12 +96,12 @@ class MCCRRegistry(models.Model):
         print('The MCCR is transitioning from mccr_ovv_assigned_first_review to mccr_ovv_assigned_notification')
         # Additional logic goes here.
         # We need to identify ovv  
-        mccr_ovv = MCCRRegistryOVVRelation.objects.filter(mccr = self.id).latest('id')
+        """ mccr_ovv = MCCRRegistryOVVRelation.objects.filter(mccr = self.id).latest('id')
         ovv = mccr_ovv.ovv
         email_services = MCCREmailServices(ses_service)
         result = email_services.notify_submission_ovv(self, ovv)
         return result
-        
+         """
 
     # --- Transition ---
     # mccr_ovv_assigned_notification -> mccr_ovv_accept_reject

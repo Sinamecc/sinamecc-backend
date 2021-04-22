@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from mccr.models import *
-from mitigation_action.models import Mitigation
+from mitigation_action.models import MitigationAction
 from users.models import CustomUser
 from mccr.services import MCCRService
 
@@ -15,7 +15,7 @@ class MCCRModelTest(TestCase):
         client.force_login(self.superUser)
 
         self.user_type = MCCRUserType.objects.create(name='user_type_name')
-        self.mitigation_action = Mitigation.objects.create(user=self.superUser)
+        self.mitigation_action = MitigationAction.objects.create(user=self.superUser)
         self.mccr_registry = MCCRRegistry.objects.create(status='mccr_status', user_type=self.user_type, mitigation=self.mitigation_action, user = self.superUser)
         self.ovv = OVV.objects.create(name='ovv_name', email='ovv@email.com', phone=89898989)
         self.ovv_2 = OVV.objects.create(name='ovv_name_2', email='ovv2@email.com', phone=77777777)
