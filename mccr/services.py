@@ -1,6 +1,6 @@
 from django.urls import reverse
 from general.storages import S3Storage
-from mitigation_action.models import Mitigation
+from mitigation_action.models import MitigationAction
 from mccr.models import MCCRRegistry, MCCRUserType, MCCRFile, OVV
 from mccr.serializers import MCCRRegistrySerializerView, MCCRRegistrySerializerCreate, MCCRFileSerializer, MCCRRegistryOVVRelationSerializer
 from mccr.workflow_steps.services import MCCRWorkflowStepService
@@ -147,7 +147,7 @@ class MCCRService():
                 {
                     "id": str(m.id),
                     "name": m.name,
-                } for m in Mitigation.objects.all()
+                } for m in MitigationAction.objects.all()
             ]
             user_types_list = [
                 {
@@ -160,7 +160,7 @@ class MCCRService():
                 "user_types": user_types_list,
             }
             result = (True, final_result)
-        except Mitigation.DoesNotExist:
+        except MitigationAction.DoesNotExist:
             result = (False, {"error": self.MCCR_ERROR_EMPTY_MITIGATIONS_LIST})
         except:
             result = (False, {"error": self.MCCR_ERROR_UNKNOWN_MITIGATION_LIST})

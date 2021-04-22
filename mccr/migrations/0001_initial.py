@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('mitigation_action', '0003_auto_20180410_0140'),
+        ('mitigation_action', '0001_initial'),
     ]
 
     operations = [
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('user_type', models.CharField(max_length=100)),
-                ('mitigation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mccr', to='mitigation_action.Mitigation')),
+                ('mitigation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mccr', to='mitigation_action.MitigationAction')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mccr', to=settings.AUTH_USER_MODEL)),
             ],
         ),
