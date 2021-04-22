@@ -11,4 +11,3 @@ class MitigationSerializer(serializers.ModelSerializer):
         model = MitigationAction
         fields = ('id', 'created', 'updated', 'user')
 
-        )
