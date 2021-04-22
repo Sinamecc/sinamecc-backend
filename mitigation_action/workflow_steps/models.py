@@ -3,7 +3,7 @@ from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from general.storages import PrivateMediaStorage
-from mitigation_action.models import Mitigation
+from mitigation_action.models import MitigationAction
 from time import gmtime, strftime
 
 User = get_user_model()
@@ -18,7 +18,7 @@ def workflow_step_directory_path(instance, filename):
 
 class MAWorkflowStep(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    mitigation_action = models.ForeignKey(Mitigation, related_name='workflow_step', on_delete=models.CASCADE)
+    mitigation_action = models.ForeignKey(MitigationAction, related_name='workflow_step', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=False, null=False)
     entry_name = models.CharField(max_length=100, blank=False, null=False)
     status = models.CharField(max_length=50, blank=True) # Accepted, Rejected, Commented

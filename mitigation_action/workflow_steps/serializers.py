@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from mitigation_action.workflow_steps.models import MAWorkflowStepFile, MAWorkflowStep
-from mitigation_action.models import Mitigation
 
 class MAWorkflowStepSerializer(serializers.ModelSerializer):
     class Meta:
