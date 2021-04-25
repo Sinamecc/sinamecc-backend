@@ -134,8 +134,8 @@ class OrganizationClassification(models.Model):
     buildings_number = models.IntegerField(blank=False, null=True)
     data_inventory_quantity = models.DecimalField(max_digits=40, decimal_places=20, null=True)
     methodologies_complexity = models.CharField(max_length=200, null=True)
-    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification')
-    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification')
+    required_level = models.ForeignKey(RequiredLevel,null=True, blank=True, related_name='organization_classification', on_delete=models.CASCADE)
+    recognition_type = models.ForeignKey(RecognitionType,null=True, blank=True, related_name='organization_classification', on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -243,7 +243,7 @@ class Organization(models.Model):
 class CIIUCode(models.Model):
 
     ciiu_code = models.CharField(max_length=200, blank=False, null=False)
-    organization = models.ForeignKey(Organization, blank=False, null=False,  related_name='ciiu_code')
+    organization = models.ForeignKey(Organization, blank=False, null=False,  related_name='ciiu_code', on_delete=models.CASCADE)
     
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -258,7 +258,7 @@ class CIIUCode(models.Model):
 class Sector(models.Model):
     name_es = models.CharField(max_length=200, blank=False, null=False)
     name_en = models.CharField(max_length=200, blank=False, null=False)
-    geographicLevel = models.ForeignKey(GeographicLevel, blank = False, null = False)
+    geographicLevel = models.ForeignKey(GeographicLevel, blank = False, null = False, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Sector")
@@ -272,7 +272,7 @@ class SubSector(models.Model):
 
     name_es = models.CharField(max_length=200, blank=False, null=False)
     name_en = models.CharField(max_length=200, blank=False, null=False)
-    sector = models.ForeignKey(Sector, related_name='sector')
+    sector = models.ForeignKey(Sector, related_name='sector', on_delete=models.CASCADE)
     class Meta:
         verbose_name = _("SubSector")
         verbose_name_plural = _("SubSectors")
@@ -297,8 +297,8 @@ class BiogenicEmission(models.Model):
 class GasReport(models.Model):
 
     other_gases = models.TextField(null=True, blank=True)
-    biogenic_emission = models.ForeignKey(BiogenicEmission, related_name='gas_report', blank=True)
-    cost_ghg_inventory = models.DecimalField(max_digits=40, decimal_places=20, null=True)
+    biogenic_emission = models.ForeignKey(BiogenicEmission, related_name='gas_report', blank=True, on_delete=models.CASCADE)
+    cost_ghg_inventory = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     cost_ghg_inventory_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     cost_ovv_process = models.DecimalField(max_digits=40, decimal_places=20)
     cost_ovv_process_currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
@@ -338,13 +338,13 @@ class QuantifiedGas(models.Model):
 
 class GeiOrganization(models.Model):
 
-    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True)
+    ovv = models.ForeignKey(OVV, related_name='ovv', blank=False, null=True, on_delete=models.CASCADE)
     emission_ovv_date = models.DateField(blank=False, null=True)
     report_year =  models.IntegerField(blank=False, null=True)
     base_year = models.IntegerField(blank=False, null=True)
-    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True)
+    gas_report = models.ForeignKey(GasReport, related_name='gei_organization',null=True, blank=True, on_delete=models.CASCADE)
     scope = models.TextField(null=True)
-    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True)
+    organization_category = models.ForeignKey(OrganizationCategory, related_name='gei_organization', null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("GeiOrganization")
@@ -356,10 +356,10 @@ class GeiOrganization(models.Model):
 
 class GeiActivityType(models.Model):
     
-    gei_organization = models.ForeignKey(GeiOrganization, related_name='gei_activity_type')
+    gei_organization = models.ForeignKey(GeiOrganization, related_name='gei_activity_type', on_delete=models.CASCADE)
     activity_type = models.CharField(max_length=500, blank=False, null=True)
-    sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector')
-    sector = models.ForeignKey(Sector, related_name='gei_sector')
+    sub_sector = models.ForeignKey(SubSector, related_name='gei_sub_sector', on_delete=models.CASCADE)
+    sector = models.ForeignKey(Sector, related_name='gei_sector', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Gei Activity Type")
@@ -395,13 +395,13 @@ class PPCN(models.Model):
     )
 
     file_number = models.CharField(max_length=50, unique=True, null=True)
-    user = models.ForeignKey(User, related_name='ppcn', null = False)
+    user = models.ForeignKey(User, related_name='ppcn', null = False, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, related_name='organization',null=True, blank=True, on_delete=models.CASCADE )
     confidential = models.CharField(max_length=50, choices=CONFIDENTIAL, default='confidential')
     confidential_fields = models.TextField(blank=False, null=True) ## use to partially confidential
-    geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level')
-    organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn')
-    gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization')
+    geographic_level = models.ForeignKey(GeographicLevel,null=True, blank=True, related_name='geographic_level', on_delete=models.CASCADE)
+    organization_classification = models.ForeignKey(OrganizationClassification, blank=False, null=True, related_name='ppcn', on_delete=models.CASCADE)
+    gei_organization = models.ForeignKey(GeiOrganization, blank=True, null=True, related_name='gei_organization', on_delete=models.CASCADE)
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
     fsm_state = FSMField(default='PPCN_new', protected=True)
@@ -684,11 +684,11 @@ class PPCN(models.Model):
 class ChangeLog(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=False)
     # Foreign Keys
-    ppcn = models.ForeignKey(PPCN, related_name='change_log')
+    ppcn = models.ForeignKey(PPCN, related_name='change_log', on_delete=models.CASCADE)
     previous_status = models.CharField(max_length=100, null=True)
     current_status = models.CharField(max_length=100)
     
-    user = models.ForeignKey(User, related_name='change_log_ppcn')
+    user = models.ForeignKey(User, related_name='change_log_ppcn', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("ChangeLog")
@@ -700,7 +700,7 @@ class ChangeLog(models.Model):
 
 class PPCNFile(models.Model):
 
-    user = models.ForeignKey(User, related_name='ppcn_file')
+    user = models.ForeignKey(User, related_name='ppcn_file', on_delete=models.CASCADE)
     file = models.FileField(blank = False, null = False, upload_to='ppcn/files/%Y%m%d/%H%M%S',storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now=True)

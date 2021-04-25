@@ -28,6 +28,8 @@ SECRET_KEY = 'ru$4(po@26!%(a%xi0*k!f2@$l+v6xs6j=&rpt1$3jtc@3(06i'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Default id's
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 

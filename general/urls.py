@@ -1,7 +1,6 @@
-from django.conf.urls import url, handler500, handler404
+from django.conf.urls import url, handler404
 from general import views
 
-handler500 = views.handler500
 
 urlpatterns = [
     url(
