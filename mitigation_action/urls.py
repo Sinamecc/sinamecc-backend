@@ -21,4 +21,6 @@ urlpatterns = [
     )
 ]
 
+urlpatterns.extend(urlpatterns_to_delete)
+
 
