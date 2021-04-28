@@ -87,7 +87,6 @@ class Migration(migrations.Migration):
             model_name='contact',
             name='created',
             field=models.DateTimeField(auto_now_add=True),
-            preserve_default=False,
         ),
         migrations.AddField(
             model_name='contact',
@@ -97,6 +96,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contact',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contact_registered', to='users.customuser')
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='contact_registered', to='users.customuser')
         ),
     ]

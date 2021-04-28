@@ -13,7 +13,7 @@ from general.storages import S3Storage
 from django.http import FileResponse
 from django.urls import reverse
 from general.services import EmailServices
-from general.helpers.services import ServiceHelper
+from general.helpers.serializer import SerializersHelper
 from workflow.models import ReviewStatus
 from workflow.serializers import CommentSerializer
 from django.contrib.auth import get_user_model
@@ -31,7 +31,7 @@ class PpcnService():
 
     def __init__(self):
         self.storage = S3Storage()
-        self._service_helper = ServiceHelper()
+        self._serialize_helper = SerializersHelper()
         self.GENERIC_CREATE_ERROR = "Error at the moment to create {}"
         self.ORGANIZATION_DOES_NOT_EXIST = "Organization does not exist."
         self.EMPTY_ORGANIZATION_ERROR = "Request doesn't have organization, contact organization or ciiu code"
@@ -188,90 +188,90 @@ class PpcnService():
     # serialized objects
     def _get_serialized_contact(self, data, contact = False):
 
-        serializer = self._service_helper.get_serialized_record(ContactSerializer, data, record=contact)
+        serializer = self._serialize_helper.get_serialized_record(ContactSerializer, data, record=contact)
 
         return serializer
         
 
     def _get_serialized_organization(self, data, organization = False):
 
-        serializer = self._service_helper.get_serialized_record(OrganizationSerializer, data, record=organization)
+        serializer = self._serialize_helper.get_serialized_record(OrganizationSerializer, data, record=organization)
 
         return serializer
 
 
     def _get_serialized_ppcn(self, data, ppcn=False):
 
-        serializer = self._service_helper.get_serialized_record(PPCNSerializer, data, record=ppcn)
+        serializer = self._serialize_helper.get_serialized_record(PPCNSerializer, data, record=ppcn)
 
         return serializer
 
 
     def _get_serialized_organization_classification(self, data, organization_classification=False):
 
-        serializer = self._service_helper.get_serialized_record(OrganizationClassificationSerializer, data, record=organization_classification)
+        serializer = self._serialize_helper.get_serialized_record(OrganizationClassificationSerializer, data, record=organization_classification)
 
         return serializer
     
 
     def _get_serialized_reduction(self, data, reduction=False):
 
-        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, record=reduction, partial=True)
+        serializer = self._serialize_helper.get_serialized_record(ReductionSerializer, data, record=reduction, partial=True)
 
         return serializer
     
 
     def _get_serialized_carbon_offset(self, data, carbon_offset=False):
 
-        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset, partial=True)
+        serializer = self._serialize_helper.get_serialized_record(CarbonOffsetSerializer, data, record=carbon_offset, partial=True)
 
         return serializer
 
 
     def _get_serialized_gei_organization(self, data, gei_organization = False):
 
-        serializer = self._service_helper.get_serialized_record(GeiOrganizationSerializer, data, record=gei_organization)
+        serializer = self._serialize_helper.get_serialized_record(GeiOrganizationSerializer, data, record=gei_organization)
 
         return serializer
 
 
     def _get_serialized_biogenic_emission(self, data, biogenic_emission=False):
 
-        serializer = self._service_helper.get_serialized_record(BiogenicEmissionSerializer, data, record=biogenic_emission)
+        serializer = self._serialize_helper.get_serialized_record(BiogenicEmissionSerializer, data, record=biogenic_emission)
 
         return serializer
 
 
     def _get_serialized_gas_report(self, data, gas_report=False):
 
-        serializer = self._service_helper.get_serialized_record(GasReportSerializer, data, record=gas_report)
+        serializer = self._serialize_helper.get_serialized_record(GasReportSerializer, data, record=gas_report)
 
         return serializer
 
 
     def _get_serialized_gas_scope(self, data, gas_scope=False):
 
-        serializer = self._service_helper.get_serialized_record(GasScopeSerializer, data, record=gas_scope)
+        serializer = self._serialize_helper.get_serialized_record(GasScopeSerializer, data, record=gas_scope)
 
         return serializer
 
 
     def _get_serialized_gas_removal(self, data, gas_removal=False):
 
-        serializer = self._service_helper.get_serialized_record(GasRemovalSerializer, data, record=gas_removal, partial=True)
+        serializer = self._serialize_helper.get_serialized_record(GasRemovalSerializer, data, record=gas_removal, partial=True)
 
         return serializer
 
 
     def _get_serialized_organization_category(self, data, organization_category=False):
-        serializer = self._service_helper.get_serialized_record(OrganizationCategorySerializer, data, record=organization_category)
+        serializer = self._serialize_helper.get_serialized_record(OrganizationCategorySerializer, data, record=organization_category)
 
         return serializer
 
 
     def _get_serialized_gei_activity_type(self, data , gei_actitvity_type=False):
 
-        serializer = self._service_helper.get_serialized_record(GeiActivityTypeSerializer, data, record=gei_actitvity_type, partial=True)
+        serializer = self._serialize_helper.get_serialized_record(GeiActivityTypeSerializer, data, record=gei_actitvity_type, partial=True)
 
         return serializer
 
@@ -280,7 +280,7 @@ class PpcnService():
 
         data = [{**quantified_gas, 'gas_scope': gas_scope_id}  for quantified_gas in data]
 
-        serializer = self._service_helper.get_serialized_record(QuantifiedGasSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(QuantifiedGasSerializer, data, many=True)
 
         return serializer
 
@@ -288,7 +288,7 @@ class PpcnService():
         
         data = [{**ciiu_code, 'organization': organization_id}  for ciiu_code in data]
  
-        serializer = self._service_helper.get_serialized_record(CIIUCodeSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(CIIUCodeSerializer, data, many=True)
 
         return serializer
 
@@ -296,7 +296,7 @@ class PpcnService():
 
         data = [{**gei_actitvity_type, 'gei_organization': gei_organization_id}  for gei_actitvity_type in data]
 
-        serializer = self._service_helper.get_serialized_record(GeiActivityTypeSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(GeiActivityTypeSerializer, data, many=True)
 
         return serializer 
     
@@ -304,7 +304,7 @@ class PpcnService():
 
         data = [{**reduction, 'organization_classification': organization_classification_id}  for reduction in data]
 
-        serializer = self._service_helper.get_serialized_record(ReductionSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(ReductionSerializer, data, many=True)
 
         return serializer 
     
@@ -312,7 +312,7 @@ class PpcnService():
 
         data = [{**gas_removal, 'ppcn': ppcn_id}  for gas_removal in data]
 
-        serializer = self._service_helper.get_serialized_record(GasRemovalSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(GasRemovalSerializer, data, many=True)
 
         return serializer 
     
@@ -320,7 +320,7 @@ class PpcnService():
 
         data = [{**carbon_offset, 'organization_classification': organization_classification_id}  for carbon_offset in data]
 
-        serializer = self._service_helper.get_serialized_record(CarbonOffsetSerializer, data, many=True)
+        serializer = self._serialize_helper.get_serialized_record(CarbonOffsetSerializer, data, many=True)
 
         return serializer 
   

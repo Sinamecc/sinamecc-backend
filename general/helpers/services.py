@@ -1,37 +1,55 @@
+from django.urls import reverse
+
 class ServiceHelper():
 
-    def get_serialized_record(self, Serializer, data, record = False, partial = False, many = False):
+    def __init__(self):
+        self.RECORD_DOES_NOT_EXIST_ERROR = '{0} with ID: {1}, does not exist in our database'
+        self.NO_EXISTING_RECORDS = 'There are not {0} records in our database'
+        self.HAVE_OCCURRED_AN_ERROR = 'Error: {1}'
 
-        record_data = self._get_serialized_record_list(Serializer, data) if isinstance(data, list) else \
-                        self._get_serialized_record(Serializer, data)
-  
-        if record:
-            serializer = Serializer(record, data = record_data, partial = partial)
+    def get_one(self, Instance, record_id, **custom_filter):
 
-        else:
-            serializer = Serializer(data = record_data, partial = partial,  many=many)
-        
-        return serializer
+        result = (False, self.RECORD_DOES_NOT_EXIST_ERROR.format(Instance._meta.verbose_name, record_id))
+        try:
+            record = Instance.objects.filter(id=record_id, active=True).last() if not custom_filter \
+                    else Instance.objects.filter(id=record_id, **custom_filter).last()
+
+            if record:
+                result = (True, record)
+
+            else:
+                result = (False, self.RECORD_DOES_NOT_EXIST_ERROR.format(Instance._meta.verbose_name, record_id))
+
+        except Instance.DoesNotExist as exc:
+            result = (False, self.RECORD_DOES_NOT_EXIST_ERROR.format(Instance._meta.verbose_name, record_id))
+
+        except Exception as exc:
+            result = (False, self.RECORD_DOES_NOT_EXIST_ERROR.format(str(exc)))
+
+        finally:
+
+            return result
+
+
+    def get_all(self, Instance, **custom_filter):
+
+        result = (False, self.NO_EXISTING_RECORDS.format(Instance._meta.verbose_name))
+
+        try:
+            record_list = Instance.objects.filter(**custom_filter).all()
+
+            result = (True, record_list)
+
+        except Exception as exc:
+            result = (False, self.HAVE_OCCURRED_AN_ERROR.format(str(exc)))
+
+        finally:
+
+            return result
+
     
-    def _get_serialized_record(self, Serializer, data):
+    def get_download_endpoint(self, view_name,  *args, **kwargs):
+ 
+        url = reverse(view_name, args=args, kwargs=kwargs)
 
-        record_data = {}
-        for field in Serializer.Meta.fields:
-            if field in data:
-                record_data[field] = data.get(field)
-        
-        return record_data
-    
-    def _get_serialized_record_list(self, Serializer, data):
-        record_data = {}
-        record_data_list = []
-        for record in data:
-            
-            for field in Serializer.Meta.fields:
-                if field in record:
-                    record_data[field] = record.get(field)
-            record_data_list.append(record_data.copy())
-            record_data.clear()
-
-        return record_data_list
-    
+        return url

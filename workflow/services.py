@@ -1,7 +1,7 @@
 from workflow.models import Comment, ReviewStatus
 from workflow.serializers import CommentSerializer, ReviewStatusSerializer
 from rest_framework.parsers import JSONParser
-from general.helpers.services import ServiceHelper
+from general.helpers.serializer import SerializersHelper
 
 class WorkflowService():
     def __init__(self):
@@ -12,7 +12,7 @@ class WorkflowService():
         self.ON_CHANGE_STATUS = 'on-change'
         self.APPROVED_STATUS = 'approved'
         self.REJECTED_STATUS = 'rejected'
-        self._service_helper = ServiceHelper()
+        self._serialize_helper = SerializersHelper()
 
     def get_review_status_id(self, review_status):
         try:
@@ -24,7 +24,7 @@ class WorkflowService():
 
     def _get_serialized_comment(self, data , comment=False, many=False):
 
-        serializer = self._service_helper.get_serialized_record(CommentSerializer, data, many=many, record=comment, partial=True)
+        serializer = self._serialize_helper.get_serialized_record(CommentSerializer, data, many=many, record=comment, partial=True)
 
         return serializer
 

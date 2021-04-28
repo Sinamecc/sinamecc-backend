@@ -128,7 +128,7 @@ class Contact(models.Model):
     email = models.EmailField(max_length=254, blank=False, null=False)
     phone = models.CharField(max_length=100, blank=False, null=False)
 
-    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
