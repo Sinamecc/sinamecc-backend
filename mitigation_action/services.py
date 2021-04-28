@@ -39,6 +39,22 @@ class MitigationActionService():
 
         return serializer
 
+    def get(self, request, mitigation_action_id):
+        
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        result = (mitigation_action_status, mitigation_action_data)
+
+        return result
+    
+
+    def get_all(self, request):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
+
+        result = (mitigation_action_status, mitigation_action_data)
+
+        return result
 
     def get_catalog_data(self, request):
         
@@ -51,32 +67,20 @@ class MitigationActionService():
         }
 
         data = {}
-        error = False
 
         for name , (_model, _serializer) in catalog.items():
             result_status, result_data = self._service_helper.get_all(_model)
 
             if not result_status:
                 result = (False, result_data)
-                error = True
-                break
+                return result
             
             data = {**data, **{name: _serializer(result_data, many=True).data}}
         
-        if not error:
-            result = (True, data)
+        result = (True, data)
         
         return result
 
-
-
-
-
-
-
-        result = (True, {})
-
-        return result
 
     def update_fsm_state(self, next_state, mitigation_action,user):
 

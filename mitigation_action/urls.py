@@ -13,12 +13,24 @@ urlpatterns_to_delete =[
 
 
 urlpatterns = [
-    # ID 1
-    re_path(
-        'api/v1/mitigation-action/data/$',
+   
+    path(
+        'api/v1/mitigation-action/',
+        views.get_post_put_patch_delete,
+        name='get_post_mitigation_action'
+    ),
+
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/',
+        views.get_post_put_patch_delete,
+        name='get_put_patch_delete_mitigation_action'
+    ),
+     # ID 1
+    path(
+        'api/v1/mitigation-action/data/',
         views.get_catalog_data,
         name='get_catalog_data',
-    )
+    ),
 ]
 
 urlpatterns.extend(urlpatterns_to_delete)
