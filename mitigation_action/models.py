@@ -16,14 +16,121 @@ from general.services import EmailServices
 from general.permissions import PermissionsHelper
 User =  get_user_model()
 permission = PermissionsHelper()
-##Email services, defaul email -> sinamec@grupoincocr.com
+##Email services, default email -> sinamec@grupoincocr.com
 ses_service = EmailServices()
+
+
+## TODO: 
+# STATUS model --> ##Done
+# finance source types --> ##Done
+# Geographic Scales --> --> ##Done
+# Initiatives Types --> ##Done
+# Finances Status --> ##Done
+
+##
+## Start Catalogs
+##
+
+class InitiativeType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+     
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Initiative Type")
+        verbose_name_plural = _("Initiative Types")
+
+    def __unicode__(self):
+        return smart_unicode(self.initiative_type_en)
+
+
+class GeographicScale(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+     
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Geographic Scale")
+        verbose_name_plural = _("Geographic Scales")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+
+class FinanceSourceType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+     
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Source Type")
+        verbose_name_plural = _("Finance Source Types")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class FinanceStatus(models.Model):
+    
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Status")
+        verbose_name_plural = _("Finance Statuses")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+class Status(models.Model):
+
+    status = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Status")
+        verbose_name_plural = _("Statuses")
+
+    def __unicode__(self):
+        return smart_unicode(self.status)
+
+
+
+
+##
+## Finish Catalogs
+##
+
+
 
 class Contact(models.Model):
     full_name = models.CharField(max_length=100, blank=False, null=False)
     job_title = models.CharField(max_length=100, blank=False, null=False)
     email = models.EmailField(max_length=254, blank=False, null=False)
     phone = models.CharField(max_length=100, blank=False, null=False)
+
+    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Contact")
