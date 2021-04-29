@@ -6,7 +6,7 @@ class SerializersHelper():
                         self._get_serialized_record(Serializer, data)
   
         if record:
-            serializer = Serializer(record, data = record_data, partial = partial)
+            serializer = Serializer(record, data = record_data, partial = partial, many=many)
 
         else:
             serializer = Serializer(data = record_data, partial = partial,  many=many)

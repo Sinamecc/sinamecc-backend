@@ -11,7 +11,7 @@ class ServiceHelper():
 
         result = (False, self.RECORD_DOES_NOT_EXIST_ERROR.format(Instance._meta.verbose_name, record_id))
         try:
-            record = Instance.objects.filter(id=record_id, active=True).last() if not custom_filter \
+            record = Instance.objects.filter(id=record_id).last() if not custom_filter \
                     else Instance.objects.filter(id=record_id, **custom_filter).last()
 
             if record:

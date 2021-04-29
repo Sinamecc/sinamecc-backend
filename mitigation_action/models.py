@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+
+from django.db.models.fields import BLANK_CHOICE_DASH
+from users.serializers import NewCustomUserSerializer
 from django.conf import settings
 
 import uuid
@@ -18,14 +21,6 @@ User =  get_user_model()
 permission = PermissionsHelper()
 ##Email services, default email -> sinamec@grupoincocr.com
 ses_service = EmailServices()
-
-
-## TODO: 
-# STATUS model --> ##Done
-# finance source types --> ##Done
-# Geographic Scales --> --> ##Done
-# Initiatives Types --> ##Done
-# Finances Status --> ##Done
 
 ##
 ## Start Catalogs
@@ -120,13 +115,95 @@ class Status(models.Model):
 ## Finish Catalogs
 ##
 
+##
+## Extra models
+##
 
+class GeographicLocation(models.Model):
+    ## TODO: Missing File field for location
+
+    geographic_scale = models.ForeignKey(GeographicScale, related_name='geographic_location', null=True, on_delete=models.CASCADE)
+    location = models.CharField(max_length=254, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Initiative")
+        verbose_name_plural = _("Initiative")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+
+
+class Initiative(models.Model):
+    ## TODO : Missing file field  for description
+
+    name = models.CharField(max_length=500, null=True)
+    objective = models.TextField(null=True)
+    description = models.TextField(null=True)
+
+    initiative_type = models.ForeignKey(InitiativeType, related_name='initiative', null=True, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Initiative")
+        verbose_name_plural = _("Initiative")
+
+    def __unicode__(self):
+        return smart_unicode(self.name)
+
+
+class InitiativeGoal(models.Model):
+
+    goal = models.TextField(null=True)
+    initiative = models.ForeignKey(Initiative, related_name='goal',on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Initiative Goal")
+        verbose_name_plural = _("Initiative Goal")
+
+    def __unicode__(self):
+        return smart_unicode(self.goal)
+
+class MitigationActionStatus(models.Model):
+
+    status = models.ForeignKey(Status, related_name='mitigation_action_status', null=True, on_delete=models.CASCADE)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+    other_end_date = models.CharField(max_length=254, null=True)
+    institution = models.CharField(max_length=254, null=True)
+    other_institution = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        verbose_name = _("Mitigation Action Status")
+        verbose_name_plural = _("Mitigation Action Status")
+
+    def __unicode__(self):
+        return smart_unicode(self.status)
+
+
+
+##
+## Finish extra model
+##
 
 class Contact(models.Model):
-    full_name = models.CharField(max_length=100, blank=False, null=False)
-    job_title = models.CharField(max_length=100, blank=False, null=False)
-    email = models.EmailField(max_length=254, blank=False, null=False)
-    phone = models.CharField(max_length=100, blank=False, null=False)
+
+    institution = models.CharField(max_length=500, null=True)
+    full_name = models.CharField(max_length=100, blank=False, null=True)
+    job_title = models.CharField(max_length=100, blank=False, null=True)
+    email = models.EmailField(max_length=254, blank=False, null=True)
+    phone = models.CharField(max_length=100, blank=False, null=True)
 
     user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -141,11 +218,14 @@ class Contact(models.Model):
 
 
 class MitigationAction(models.Model):
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
+    fsm_state = FSMField(default='new', protected=True, max_length=100)
     # Foreign Key
     contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
-    fsm_state = FSMField(default='new', protected=True, max_length=100)
+    initiative = models.ForeignKey(Initiative, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    status_information = models.ForeignKey(MitigationActionStatus, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
