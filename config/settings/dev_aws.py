@@ -10,7 +10,7 @@ DATABASES = {'default': env.db('DATABASE_URL')}
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 BASE_DIR_FRONTEND = 'dev.sinamecc.go.cr'
-CORS_ORIGIN_WHITELIST = ('dev.sinamecc.go.cr','ec2-18-218-214-170.us-east-2.compute.amazonaws.com','ip-172-31-20-146.us-east-2.compute.internal')
+CORS_ORIGIN_WHITELIST = ('dev.sinamecc.go.cr','ec2-18-218-214-170.us-east-2.compute.amazonaws.com','ip-172-31-20-146.us-east-2.compute.internal',)
 
 MEDIA_ROOT = "/var/www/app/sinamecc-uploads"
 
