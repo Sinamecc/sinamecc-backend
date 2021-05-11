@@ -1606,8 +1606,8 @@ class PpcnService():
                     
                     if record_status:
                         data[field] = record_data.id
-                dict_data = record_data if isinstance(record_data, list) else [record_data]
-                validation_dict.setdefault(record_status,[]).extend(dict_data)
+                    dict_data = record_data if isinstance(record_data, list) else [record_data]
+                    validation_dict.setdefault(record_status,[]).extend(dict_data)
 
             if all(validation_dict):
                 serialized_ppcn = self._get_serialized_ppcn(data, ppcn)
