@@ -88,7 +88,7 @@ class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
         fields = ('id', 'status', 'administration', 'source', 'source_description', 'reference_year', 'budget',
-                    'mideplan_registered', 'executing_entity')
+                    'currency', 'mideplan_registered', 'mideplan_project', 'executing_entity')
 
 
 class InitiativeGoalSerializer(serializers.ModelSerializer):
@@ -148,7 +148,8 @@ class ContactSerializer(serializers.ModelSerializer):
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
-        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'user', 'created', 'updated')
+        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
+                    'user', 'created', 'updated')
 
     def to_representation(self, instance):
 
@@ -157,6 +158,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['initiative'] = InitiativeSerializer(instance.initiative).data
         data['status_information'] = MitigationActionStatusSerializer(instance.status_information).data
         data['geographic_location'] = GeographicLocationSerializer(instance.geographic_location).data
+        data['finance'] = FinanceSerializer(instance.finance).data
 
         return data
 

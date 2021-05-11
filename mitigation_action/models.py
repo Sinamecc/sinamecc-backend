@@ -18,11 +18,14 @@ from mitigation_action.email_services import MitigationActionEmailServices
 from general.services import EmailServices
 from general.permissions import PermissionsHelper
 from general.helpers.validators import validate_year
+
+
 User =  get_user_model()
 permission = PermissionsHelper()
 ##Email services, default email -> sinamec@grupoincocr.com
 ses_service = EmailServices()
 
+CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')))
 ##
 ## Start Catalogs
 ##
@@ -122,15 +125,17 @@ class Status(models.Model):
 
 
 
-class Finance(models.Models):
+class Finance(models.Model):
 
     status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
     administration = models.TextField(null=True)
     source = models.ForeignKey(FinanceSourceType, related_name='finance', null=True, on_delete=models.CASCADE)
     source_description = models.CharField(max_length=255, null=True)
     reference_year =models.IntegerField(null=True, validators=[validate_year])
-    budget = models.DecimalField(max_digits=20, decimal_places=5)
-    mideplan_registered = models.NullBooleanField(null=True)
+    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    mideplan_registered = models.BooleanField(null=True)
+    mideplan_project = models.CharField(max_length=255, null=True) ## depend on mideplan registered
     executing_entity = models.CharField(max_length=255, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -251,6 +256,8 @@ class MitigationAction(models.Model):
     initiative = models.ForeignKey(Initiative, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     status_information = models.ForeignKey(MitigationActionStatus, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    finance = models.ForeignKey(Finance, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)

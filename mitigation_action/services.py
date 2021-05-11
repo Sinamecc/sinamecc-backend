@@ -2,7 +2,7 @@
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
-    InitiativeType, GeographicScale
+    InitiativeType, GeographicScale, Finance
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -95,6 +95,13 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(ContactSerializer, data, record=contact)
 
         return serializer
+    
+
+    def _get_serialized_finance(self, data, finance = False):
+
+        serializer = self._serialize_helper.get_serialized_record(FinanceSerializer, data, record=finance)
+
+        return serializer
 
 
     def _get_serialized_status_information(self, data, status_information = False):
@@ -156,6 +163,25 @@ class MitigationActionService():
 
         else:
             result = (False, serialized_contact.errors)
+
+        return result
+    
+
+    ## update and create function
+    def _create_update_finance(self, data, finance=False):
+        
+        if finance:
+            serialized_finance = self._get_serialized_finance(data, finance)
+
+        else:
+            serialized_finance = self._get_serialized_finance(data)
+        
+        if serialized_finance.is_valid():
+            finance = serialized_finance.save()
+            result = (True, finance)
+
+        else:
+            result = (False, serialized_finance.errors)
 
         return result
 
@@ -280,7 +306,7 @@ class MitigationActionService():
         data['user'] = request.user.id
 
         # fk's of object mitigation_action that have nested fields
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative']     
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance']     
         for field in field_list:
             if data.get(field, False):
                 record_status, record_data = self._create_sub_record(data.get(field), field)
@@ -312,7 +338,7 @@ class MitigationActionService():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative'] 
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
@@ -350,6 +376,7 @@ class MitigationActionService():
     def get_catalog_data(self, request):
         
         catalog = {
+            
             'initiative_type': (InitiativeType, InitiativeTypeSerializer),
             'status': (Status, StatusSerializer),
             'finance_source_type': (FinanceSourceType, FinanceSourceTypeSerializer),
