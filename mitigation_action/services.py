@@ -2,7 +2,7 @@
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
-    InitiativeType, GeographicScale, Finance
+    InitiativeType, GeographicScale, Finance, GHGInformation
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -97,6 +97,13 @@ class MitigationActionService():
         return serializer
     
 
+    def _get_serialized_ghg_information(self, data, ghg_information = False):
+
+        serializer = self._serialize_helper.get_serialized_record(GHGInformationSerializer, data, record=ghg_information)
+
+        return serializer
+
+
     def _get_serialized_finance(self, data, finance = False):
 
         serializer = self._serialize_helper.get_serialized_record(FinanceSerializer, data, record=finance)
@@ -168,6 +175,25 @@ class MitigationActionService():
     
 
     ## update and create function
+
+    def _create_update_ghg_information(self, data, ghg_information=False):
+        
+        if ghg_information:
+            serialized_ghg_information= self._get_serialized_ghg_information(data, ghg_information)
+
+        else:
+            serialized_ghg_information = self._get_serialized_ghg_information(data)
+        
+        if serialized_ghg_information.is_valid():
+            ghg_information = serialized_ghg_information.save()
+            result = (True, ghg_information)
+
+        else:
+            result = (False, serialized_ghg_information.errors)
+
+        return result
+
+
     def _create_update_finance(self, data, finance=False):
         
         if finance:
@@ -306,7 +332,7 @@ class MitigationActionService():
         data['user'] = request.user.id
 
         # fk's of object mitigation_action that have nested fields
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance']     
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance',  'ghg_information']     
         for field in field_list:
             if data.get(field, False):
                 record_status, record_data = self._create_sub_record(data.get(field), field)
@@ -338,7 +364,7 @@ class MitigationActionService():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance'] 
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'ghg_information'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)

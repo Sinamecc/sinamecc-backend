@@ -246,6 +246,25 @@ class Contact(models.Model):
     def __unicode__(self):
         return smart_unicode(self.full_name)
 
+## Greenhouse gases(GHG) - Gases de efectos invernadero (GEI)
+class GHGInformation(models.Model): 
+    
+    ## TODO missing file to graphic description 
+    impact_emission = models.TextField(null=True)
+    graphic_description = models.TextField(null=True)
+
+    ##TODO missing 2 fields with catalogs
+    ##sector
+    ##perliminar something
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("GHG Informaction")
+        verbose_name_plural = _("GHG Informaction")
+
+
 
 class MitigationAction(models.Model):
     
@@ -257,6 +276,7 @@ class MitigationAction(models.Model):
     status_information = models.ForeignKey(MitigationActionStatus, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     finance = models.ForeignKey(Finance, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    ghg_information = models.ForeignKey(GHGInformation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
 
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)

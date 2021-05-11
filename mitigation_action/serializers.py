@@ -1,7 +1,7 @@
 from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
-    InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation
+    InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation
 
 
 ##
@@ -84,6 +84,12 @@ class StatusSerializer(serializers.ModelSerializer):
 ## Start Model Serializers
 ##
 
+class GHGInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GHGInformation
+        fields = ('id', 'impact_emission', 'graphic_description')
+
+
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
@@ -149,8 +155,8 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
         fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
-                    'user', 'created', 'updated')
-
+                    'ghg_information', 'user', 'created', 'updated')
+    
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
@@ -159,6 +165,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['status_information'] = MitigationActionStatusSerializer(instance.status_information).data
         data['geographic_location'] = GeographicLocationSerializer(instance.geographic_location).data
         data['finance'] = FinanceSerializer(instance.finance).data
+        data['ghg_information'] = GHGInformationSerializer(instance.ghg_information).data
 
         return data
 
