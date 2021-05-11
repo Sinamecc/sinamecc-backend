@@ -1,6 +1,6 @@
 from django.utils.translation import override
 from rest_framework import serializers
-from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
+from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation
 
 
@@ -83,6 +83,14 @@ class StatusSerializer(serializers.ModelSerializer):
 ##
 ## Start Model Serializers
 ##
+
+class FinanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Finance
+        fields = ('id', 'status', 'administration', 'source', 'source_description', 'reference_year', 'budget',
+                    'mideplan_registered', 'executing_entity')
+
+
 class InitiativeGoalSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:

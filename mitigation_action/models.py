@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.db.models.fields import BLANK_CHOICE_DASH
+from django.db.models.fields import BLANK_CHOICE_DASH, related
 from users.serializers import NewCustomUserSerializer
 from django.conf import settings
 
@@ -17,6 +17,7 @@ from general.services import EmailServices
 from mitigation_action.email_services import MitigationActionEmailServices
 from general.services import EmailServices
 from general.permissions import PermissionsHelper
+from general.helpers.validators import validate_year
 User =  get_user_model()
 permission = PermissionsHelper()
 ##Email services, default email -> sinamec@grupoincocr.com
@@ -118,6 +119,30 @@ class Status(models.Model):
 ##
 ## Extra models
 ##
+
+
+
+class Finance(models.Models):
+
+    status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
+    administration = models.TextField(null=True)
+    source = models.ForeignKey(FinanceSourceType, related_name='finance', null=True, on_delete=models.CASCADE)
+    source_description = models.CharField(max_length=255, null=True)
+    reference_year =models.IntegerField(null=True, validators=[validate_year])
+    budget = models.DecimalField(max_digits=20, decimal_places=5)
+    mideplan_registered = models.NullBooleanField(null=True)
+    executing_entity = models.CharField(max_length=255, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance")
+        verbose_name_plural = _("Finance")
+
+    def __unicode__(self):
+        return smart_unicode(self.administration)
+
 
 class GeographicLocation(models.Model):
     ## TODO: Missing File field for location
