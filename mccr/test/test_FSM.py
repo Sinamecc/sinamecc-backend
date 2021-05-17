@@ -3,7 +3,6 @@ from mccr.models import *
 
 from users.models import CustomUser
 from mccr.services import MCCRService
-from mccr.models import MCCRRegistry,MCCRRegistryOVVRelation,OVV,MCCRUserType
 
 from django.test import TestCase, Client
 from django.utils import timezone
@@ -23,7 +22,7 @@ class MCCRFSMTest(TestCase):
         self.user = CustomUser.objects.get_or_create(username='test_user')[0]
         self.mccr_service = MCCRService()
         self.user_type=MCCRUserType.objects.create(name='Registrator')
-        self.mitigation = Mitigation.objects.create(
+        self.mitigation = MitigationAction.objects.create(
             user = self.user,
         )
         self.superUser = CustomUser.objects.get_or_create(username='admin', is_superuser=True)[0]

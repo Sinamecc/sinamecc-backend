@@ -1,124 +1,174 @@
+from django.utils.translation import override
 from rest_framework import serializers
-from mitigation_action.models import RegistrationType, Institution, Contact, Status, ProgressIndicator, FinanceSourceType, Finance, IngeiCompliance, \
-GeographicScale, Location, ChangeLog,  Mitigation, Initiative, InitiativeType, InitiativeFinance, FinanceStatus
+from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
+    InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation
 
-class RegistrationTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RegistrationType
-        fields = ('id', 'type_es','type_en')
 
-class InstitutionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Institution
-        fields = ('id', 'name')
+##
+## Auxiliar Class Serializer
+##
+class GenericListSerializer(serializers.ListSerializer):
+    def update(self, instance, validated_data):
+        # Maps for id->instance and id->data item.
+        record_mapping = {record.id: record for record in instance}
+        data_mapping = {}
+        new_record_list = []
 
-class ContactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contact
-        fields = ('id','full_name', 'job_title', 'email', 'phone')
+        for item in validated_data:
+            if item.get('id', False):
+                data_mapping[item.get('id')] = item
+            else:
+                new_record_list.append(item)
 
-class StatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Status
-        fields = ('id', 'status_es','status_en')
+        # Perform creations and updates.
+        ret = []
 
-class FinanceStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FinanceStatus
-        fields = ('id', 'name_es','name_en')
+        for record_id, data in data_mapping.items():
+            record = record_mapping.get(record_id, None)
+            if record is None:
+                ret.append(self.child.create(data))
+            else:
+                ret.append(self.child.update(record, data))
 
-class ProgressIndicatorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProgressIndicator
-        fields = ('id', 'name', 'type', 'unit', 'start_date')
+        for data in new_record_list:
+            ret.append(self.child.create(data))
 
-class FinanceSourceTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FinanceSourceType
-        fields = ('id', 'name_es','name_en')
 
-class FinanceSerializer(serializers.ModelSerializer):
+        # Perform deletions.
+        for record_id, record in record_mapping.items():
+            if record_id not in data_mapping:
+                record.delete()
+
+        return ret
+
+
+##
+## Start Catalogs Serializers
+##
+class InitiativeTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Finance
-        fields = ('id', 'status', 'source')
-class InitiativeFinanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InitiativeFinance
-        fields = ('id', 'status', 'finance_source_type', 'source')
-        
-class IngeiComplianceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IngeiCompliance
-        fields = ('name_es', 'name_en')
+        model = InitiativeType
+        fields = ('id', 'code', 'name')
+
 
 class GeographicScaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeographicScale
-        fields = ('id', 'name_es', 'name_en')
+        fields = ('id', 'code', 'name')
 
-class LocationSerializer(serializers.ModelSerializer):
+
+class FinanceSourceTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Location
-        fields = ('id', 'geographical_site', 'is_gis_annexed')
+        model = FinanceSourceType
+        fields = ('id', 'code','name')
 
-class ChangeLogSerializer(serializers.ModelSerializer):
+
+class FinanceStatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChangeLog
-        fields = ('mitigation_action', 'previous_status', 'current_status', 'user')
+        model = FinanceStatus
+        fields = ('id', 'code', 'name')
 
-class InitiativeTypeSerializer(serializers.ModelSerializer):
+
+class StatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InitiativeType
-        fields = ('id', 'initiative_type_es', 'initiative_type_en')
+        model = Status
+        fields = ('id', 'code', 'status')
 
-class InitiaveSerializer(serializers.ModelSerializer):
-     
-     class Meta:
-         model = Initiative
-         fields = (
-             'id',
-             'name',
-             'objective',
-             'description',
-             'goal',
-             'initiative_type',
-             'entity_responsible',
-             'contact',
-             'budget',
-             'finance',
-             'status',
-            )
 
-class MitigationSerializer(serializers.ModelSerializer):
+##
+## Finish Catalogs Serializers
+##
+
+
+##
+## Start Model Serializers
+##
+
+class GHGInformationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Mitigation
-        fields = (
-            'id',
-            'name',
-            'purpose',
-            'start_date',
-            'end_date',
-            'gas_inventory',
-            'emissions_source',
-            'carbon_sinks',
-            'impact_plan',
-            'impact',
-            'calculation_methodology',
-            'is_international',
-            'international_participation',
-            'strategy_name',
-            'user',
-            'registration_type',
-            'initiative',
-            'institution',
-            'contact',
-            'status',
-            'progress_indicator',
-            'finance',
-            'geographic_scale',
-            'location',
-            'review_count',
-            'comments',
-            'created',
-            'updated'
-        )
+        model = GHGInformation
+        fields = ('id', 'impact_emission', 'graphic_description')
+
+
+class FinanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Finance
+        fields = ('id', 'status', 'administration', 'source', 'source_description', 'reference_year', 'budget',
+                    'currency', 'mideplan_registered', 'mideplan_project', 'executing_entity')
+
+
+class InitiativeGoalSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = InitiativeGoal
+        fields = ('id', 'goal', 'initiative')
+        list_serializer_class = GenericListSerializer
+        
+
+class InitiativeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Initiative
+        fields = ('id', 'name', 'objective', 'description', 'initiative_type')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['initiative_type'] = InitiativeTypeSerializer(instance.initiative_type).data
+        data['goal'] = InitiativeGoalSerializer(instance.goal.all(), many=True).data
+
+        return data
+
+
+class MitigationActionStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MitigationActionStatus
+        fields = ('id', 'status', 'start_date', 'end_date', 'other_end_date', 'institution', 'other_institution')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['status'] = StatusSerializer(instance.status).data
+        
+        return data
+
+
+class GeographicLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeographicLocation
+        fields = ('id', 'geographic_scale', 'location')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['geographic_scale'] = GeographicScaleSerializer(instance.geographic_scale).data
+
+        return data
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')
+
+
+class MitigationActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MitigationAction
+        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
+                    'ghg_information', 'user', 'created', 'updated')
+    
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['contact'] = ContactSerializer(instance.contact).data
+        data['initiative'] = InitiativeSerializer(instance.initiative).data
+        data['status_information'] = MitigationActionStatusSerializer(instance.status_information).data
+        data['geographic_location'] = GeographicLocationSerializer(instance.geographic_location).data
+        data['finance'] = FinanceSerializer(instance.finance).data
+        data['ghg_information'] = GHGInformationSerializer(instance.ghg_information).data
+
+        return data
+
+
+
+
