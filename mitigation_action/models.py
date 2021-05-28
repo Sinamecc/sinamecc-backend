@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-from django.db.models.fields import BLANK_CHOICE_DASH, related
+from django.db.models.fields import BLANK_CHOICE_DASH, CharField, related
+from django.db.models.query import QuerySet
 from users.serializers import NewCustomUserSerializer
 from django.conf import settings
 
@@ -123,6 +124,57 @@ class Status(models.Model):
 ## Extra models
 ##
 
+
+class ImpactDocumentation(models.Model):
+    ## TODO: Missing. catalogs emission sources and gases
+    ## Missing catalogs carbon deposits
+    ## missing file for documentation of calculations estimate 
+    estimate_reduction_co2 = models.TextField(null=True)
+    period_potential_reduction =models.TextField(null=True)
+    ##catalog
+    ##catalog
+    base_line_definition = models.TextField(null=True)
+    calculation_methodology = models.TextField(null=True)
+    estimate_calculation_documentation = models.TextField(null=True)
+    ##file 
+    mitigation_action_in_inventory = models.BooleanField(null=True)
+
+
+    ## Section 3
+    ## TODO: Missing. catalogs standar to apply
+    carbon_international_commerce = models.BooleanField(null=True)
+    methodologies_to_use = models.TextField(null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Impact Documentation")
+        verbose_name_plural = _("Impact Documentation")
+
+
+
+class QAQCReductionEstimateQuestion(models.Model):
+
+    code = models.CharField(max_length=5, null=True)
+    question = models.TextField(null=True)
+    check = models.BooleanField(null=True)
+    detail = models.TextField(null=True)
+    
+    ## FK
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='question', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Impact Documentation")
+        verbose_name_plural = _("Impact Documentation")
+
+    def __str__(self):
+        return smart_unicode(self.status)
 
 
 class Finance(models.Model):
@@ -253,9 +305,10 @@ class GHGInformation(models.Model):
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
 
-    ##TODO missing 2 fields with catalogs
-    ##sector
-    ##perliminar something
+
+    ## TODO missing 2 fields with catalogs
+    ## sector
+    ## preliminar something
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -277,6 +330,9 @@ class MitigationAction(models.Model):
     geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     finance = models.ForeignKey(Finance, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     ghg_information = models.ForeignKey(GHGInformation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    
+    ## section 4
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
 
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
