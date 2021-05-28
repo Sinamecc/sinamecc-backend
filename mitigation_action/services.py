@@ -139,6 +139,13 @@ class MitigationActionService():
         return serializer
 
 
+    def _get_serialized_impact_documentation(self, data, impact_documentation = False):
+        
+        serializer = self._serialize_helper.get_serialized_record(ImpactDocumentationSerializer, data, record=impact_documentation)
+
+        return serializer
+
+
     def _get_serialized_initiative_goal(self, data, initiative_goal=False):
         
         serializer = self._serialize_helper.get_serialized_record(InitiativeGoal, data, record=initiative_goal)
@@ -151,6 +158,15 @@ class MitigationActionService():
         data = [{**initiative_goal, 'initiative': initiative_id}  for initiative_goal in data ]
  
         serializer = self._serialize_helper.get_serialized_record(InitiativeGoalSerializer, data, record=initiative_goal_list, many=True,  partial=True)
+
+        return serializer
+
+
+    def _get_serialized_question_list(self, data, question_list, impact_documentation_id):
+        
+        data = [{**question, 'impact_documentation': impact_documentation_id}  for question in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(QAQCReductionEstimateQuestionSerializer, data, record=question_list, many=True,  partial=True)
 
         return serializer
 
@@ -269,6 +285,29 @@ class MitigationActionService():
         return result
     
 
+    def _create_update_question(self, data, impact_documentation):
+ 
+        result = (True, [])
+        
+        if isinstance(data, list):
+            question_list = impact_documentation.question.all() 
+            serializer = self._get_serialized_question_list(data, question_list, impact_documentation.id)
+            
+            if serializer.is_valid():
+                
+                question = serializer.save()
+
+                result = (True, question)
+
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('question'))
+            
+        return result
+    
+
     def _create_update_initiative(self, data, initiative=False):
         
         validation_dict = {}
@@ -296,6 +335,37 @@ class MitigationActionService():
 
 
         return result
+
+
+    def _create_update_impact_documentation(self, data, impact_documentation=False):
+        
+        validation_dict = {}
+        if impact_documentation:
+            serialized_impact_documentation = self._get_serialized_impact_documentation(data, impact_documentation)
+        
+        else:
+            serialized_impact_documentation = self._get_serialized_impact_documentation(data)
+
+        if serialized_impact_documentation.is_valid():
+
+            impact_documentation = serialized_impact_documentation.save()
+
+            question_data = data.get("question", [])
+            serialized_question_status, serialized_question_data = self._create_update_question(question_data, impact_documentation)
+
+            if serialized_question_status:
+                result = (True, impact_documentation)
+
+            else:
+                result = (serialized_question_status, serialized_question_data )
+
+        else:
+            errors = serialized_impact_documentation.errors
+            result = (False, errors)
+
+
+        return result
+
 
 
     def get(self, request, mitigation_action_id):
@@ -332,7 +402,9 @@ class MitigationActionService():
         data['user'] = request.user.id
 
         # fk's of object mitigation_action that have nested fields
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance',  'ghg_information']     
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance',  
+            'ghg_information', 'impact_documentation']
+
         for field in field_list:
             if data.get(field, False):
                 record_status, record_data = self._create_sub_record(data.get(field), field)
@@ -364,7 +436,8 @@ class MitigationActionService():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'ghg_information'] 
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 
+                        'ghg_information', 'impact_documentation'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
