@@ -1,8 +1,9 @@
+from general import models
 from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
-        ImpactDocumentation, QAQCReductionEstimateQuestion
+        ImpactDocumentation, QAQCReductionEstimateQuestion, MonitoringIndicator, MonitoringInformation
 
 
 ##
@@ -94,6 +95,29 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
         list_serializer_class = GenericListSerializer
 
 
+class MonitoringIndicatorSerializer(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
+    class Meta:
+        model = MonitoringIndicator
+        fields = ('id', 'name', 'description', 'type', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
+                    'reporting_institution', 'measurement_start_date', 'additional_information', 'monitoring_information')
+        list_serializer_class = GenericListSerializer
+
+
+class MonitoringInformationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MonitoringInformation
+        fields = ('id', 'code')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['monitoring_indicator'] = MonitoringIndicatorSerializer(instance.monitoring_indicator.all(), many=True).data
+
+        return data
+
 class ImpactDocumentationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImpactDocumentation
@@ -112,9 +136,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
 class GHGInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GHGInformation
-        fields = ('id', 'impact_emission', 'graphic_description')
-    
-    
+        fields = ('id', 'impact_emission', 'graphic_description') 
 
 
 class FinanceSerializer(serializers.ModelSerializer):
@@ -182,7 +204,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
         fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
-                    'ghg_information', 'impact_documentation', 'user', 'created', 'updated')
+                    'ghg_information', 'impact_documentation', 'monitoring_information', 'user', 'created', 'updated')
     
     def to_representation(self, instance):
 
@@ -194,6 +216,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['finance'] = FinanceSerializer(instance.finance).data
         data['ghg_information'] = GHGInformationSerializer(instance.ghg_information).data
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
+        data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
 
         return data
 
