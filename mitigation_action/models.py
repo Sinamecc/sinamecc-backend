@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from django.db.models import manager
 
 from django.db.models.fields import BLANK_CHOICE_DASH, CharField, related
 from django.db.models.query import QuerySet
@@ -124,6 +125,26 @@ class Status(models.Model):
 ## Extra models
 ##
 
+## section 5
+class MonitoringInformation(models.Model):
+    
+    ## TODO 
+    ## This model is necessary, at the moment will be empty
+    ## missing attributes that are not defined 
+    code = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Information")
+        verbose_name_plural = _("Monitoring Information")
+
+    
+    def __str__(self):
+        return smart_unicode(self.id)
+
 
 class ImpactDocumentation(models.Model):
     ## TODO: Missing. catalogs emission sources and gases
@@ -150,9 +171,49 @@ class ImpactDocumentation(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Impact Documentation")
-        verbose_name_plural = _("Impact Documentation")
+        verbose_name = _("Monitoring Information")
+        verbose_name_plural = _("Monitoring Information")
 
+
+
+class MonitoringIndicator(models.Model):
+    PERIODICITY = [
+        ('YEARLY', 'Yearly'),
+        ('BIANNUAL', 'Biannual'),
+        ('QUARTERLY', 'Quartely')
+    ]
+    ## TODO: Missing. catalogs for type 
+    ## missing file for detail
+    ## missing file for additional information
+
+    name = models.CharField(max_length=255, null=True)
+    description = models.TextField(null=True)
+    type = models.CharField(max_length=255, null=True)
+    unit = models.CharField(max_length=255, null=True)
+    methodological_detail = models.TextField(null=True)
+    ## detail file here
+    reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
+    
+    data_generating_institution = models.CharField(max_length=255, null=True)
+    reporting_institution = models.CharField(max_length=255, null=True)
+    measurement_start_date = models.DateField(null=True)
+    additional_information = models.TextField(null=True)
+    ## aditional information file
+
+    ## FK
+    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Indicator")
+        verbose_name_plural = _("Monitoring Indicator")
+    
+
+    def __str__(self):
+        return smart_unicode(self.name)
 
 
 class QAQCReductionEstimateQuestion(models.Model):
@@ -333,6 +394,9 @@ class MitigationAction(models.Model):
     
     ## section 4
     impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
+    
+    ## section 5
+    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
 
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
