@@ -178,11 +178,11 @@ class MitigationActionService():
         return serializer
 
     
-    def _get_serialized_monitoring_indicator_list(self, data, monitoring_indicator_list, monitoring_information_id):
+    def _get_serialized_indicator_list(self, data, indicator_list, monitoring_information_id):
         
-        data = [{**monitoring_indicator, 'monitoring_information': monitoring_information_id}  for monitoring_indicator in data ]
+        data = [{**indicator, 'monitoring_information': monitoring_information_id}  for indicator in data ]
  
-        serializer = self._serialize_helper.get_serialized_record(MonitoringIndicatorSerializer, data, record=monitoring_indicator_list, many=True,  partial=True)
+        serializer = self._serialize_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_list, many=True,  partial=True)
 
         return serializer
 
@@ -324,25 +324,25 @@ class MitigationActionService():
         return result
 
     
-    def _create_update_monitoring_indicator(self, data, monitoring_information):
+    def _create_update_indicator(self, data, monitoring_information):
 
         result = (True, [])
         
         if isinstance(data, list):
-            monitoring_indicator_list = monitoring_information.monitoring_indicator.all() 
-            serializer = self._get_serialized_monitoring_indicator_list(data, monitoring_indicator_list, monitoring_information.id)
+            indicator_list = monitoring_information.indicator.all() 
+            serializer = self._get_serialized_indicator_list(data, indicator_list, monitoring_information.id)
             
             if serializer.is_valid():
                 
-                monitoring_indicator = serializer.save()
+                indicator = serializer.save()
 
-                result = (True, monitoring_indicator)
+                result = (True, indicator)
 
             else: 
                 result = (False, serializer.errors)
 
         else:
-            result = (False, self.LIST_ERROR.format('monitoring_indicator'))
+            result = (False, self.LIST_ERROR.format('indicator'))
             
         return result
     
@@ -418,14 +418,14 @@ class MitigationActionService():
 
             monitoring_information = serialized_monitoring_information.save()
 
-            monitoring_indicator_data = data.get("monitoring_indicator", [])
-            serialized_monitoring_indicator_status, serialized_monitoring_indicator_data = self._create_update_monitoring_indicator(monitoring_indicator_data, monitoring_information)
+            indicator_data = data.get("indicator", [])
+            serialized_indicator_status, serialized_indicator_data = self._create_update_indicator(indicator_data, monitoring_information)
 
-            if serialized_monitoring_indicator_status:
+            if serialized_indicator_status:
                 result = (True, monitoring_information)
 
             else:
-                result = (serialized_monitoring_indicator_status, serialized_monitoring_indicator_data )
+                result = (serialized_indicator_status, serialized_indicator_data )
 
         else:
             errors = serialized_monitoring_information.errors
