@@ -33,6 +33,7 @@ class MitigationActionService():
         self.FUNCTION_INSTANCE_ERROR = 'Error Mitigation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.LIST_ERROR = "Was expected a {0} list into data"
+        self.MITIGATION_ACTION_NO_INDICATOR = 'Mitigation action {0} does not have indicators related'
 
     
     # auxiliary functions
@@ -603,6 +604,26 @@ class MitigationActionService():
         else:
             result = (mitigation_action_status, mitigation_action_data)
 
+
+        return result
+
+
+    def get_indicator_from_mitigation_action(self, request, mitigation_action_id):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        if mitigation_action_status:
+            monitoring_information = mitigation_action_data.monitoring_information
+            
+            if monitoring_information:
+                indicator_list = monitoring_information.indicator.all()
+                result = (True, IndicatorSerializer(indicator_list, many=True).data)
+
+            else:
+                result = (False, self.MITIGATION_ACTION_NO_INDICATOR.format(mitigation_action_data.id))
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
 
         return result
 
