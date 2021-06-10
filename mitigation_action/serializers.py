@@ -3,7 +3,7 @@ from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
-        ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation
+        ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator
 
 
 ##
@@ -95,6 +95,15 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
         list_serializer_class = GenericListSerializer
 
 
+class MonitoringIndicatorSerializer(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
+    class Meta:
+        model = MonitoringIndicator
+        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'updated_data', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        list_serializer_class = GenericListSerializer
+
+
 class IndicatorSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
@@ -117,6 +126,21 @@ class MonitoringInformationSerializer(serializers.ModelSerializer):
         data['indicator'] = IndicatorSerializer(instance.indicator.all(), many=True).data
 
         return data
+
+
+class MonitoringReportingIndicatorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MonitoringReportingIndicator
+        fields = ('id', 'progress_in_monitoring')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['monitoring_indicator'] = MonitoringIndicatorSerializer(instance.monitoring_indicator.all(), many=True).data
+
+        return data
+
 
 class ImpactDocumentationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -204,7 +228,8 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
         fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
-                    'ghg_information', 'impact_documentation', 'monitoring_information', 'user', 'created', 'updated')
+                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 
+                    'user', 'created', 'updated')
     
     def to_representation(self, instance):
 
@@ -217,6 +242,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['ghg_information'] = GHGInformationSerializer(instance.ghg_information).data
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
+        data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
 
         return data
 

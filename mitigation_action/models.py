@@ -127,7 +127,6 @@ class Status(models.Model):
 
 ## section 5
 
-""" 
 class MonitoringReportingIndicator(models.Model):
 
     progress_in_monitoring = models.BooleanField(null=True)
@@ -139,7 +138,7 @@ class MonitoringReportingIndicator(models.Model):
 
     class Meta:
         verbose_name = _("Monitoring and Reporting Indicators")
-        verbose_name_plural = _("Monitoring and Reporting Indicators") """
+        verbose_name_plural = _("Monitoring and Reporting Indicators")
 
 
 class MonitoringInformation(models.Model):
@@ -229,7 +228,35 @@ class Indicator(models.Model):
     
 
     def __str__(self):
+
         return smart_unicode(self.name)
+
+
+class MonitoringIndicator(models.Model):
+
+    ## TODO: Missing.
+    ## missing file for updated data
+    ## missing url for updated data
+    initial_date_report_period = models.DateField(null=True)
+    final_date_report_period = models.DateField(null=True)
+    data_updated_date = models.DateField(null=True)
+    updated_data = models.CharField(max_length=150, null=True)
+    progress_report = models.TextField(null=True)
+
+    ## FK 
+    indicator = models.ForeignKey(Indicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+    monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Indicator")
+        verbose_name_plural = _("Monitoring Indicator")
+
+    def __str__(self):
+        return smart_unicode(self.status)
 
 
 class QAQCReductionEstimateQuestion(models.Model):
@@ -414,6 +441,10 @@ class MitigationAction(models.Model):
     ## section 5
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
 
+    ## section 6
+
+    monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
+    
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
