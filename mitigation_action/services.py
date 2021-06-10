@@ -145,6 +145,12 @@ class MitigationActionService():
 
         return serializer
 
+    def _get_serialized_monitoring_reporting_indicator(self, data, monitoring_reporting_indicator = False):
+        
+        serializer = self._serialize_helper.get_serialized_record(MonitoringReportingIndicatorSerializer, data, record=monitoring_reporting_indicator)
+
+        return serializer
+
 
     def _get_serialized_monitoring_information(self, data, monitoring_information = False):
         
@@ -183,6 +189,15 @@ class MitigationActionService():
         data = [{**indicator, 'monitoring_information': monitoring_information_id}  for indicator in data ]
  
         serializer = self._serialize_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_list, many=True,  partial=True)
+
+        return serializer
+
+    
+    def _get_serialized_monitoring_indicator_list(self, data, monitoring_indicator_list, monitoring_reporting_indicator_id):
+        
+        data = [{**monitoring_indicator, 'monitoring_reporting_indicator': monitoring_reporting_indicator_id}  for monitoring_indicator in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(MonitoringIndicatorSerializer, data, record=monitoring_indicator_list, many=True,  partial=True)
 
         return serializer
 
@@ -345,6 +360,29 @@ class MitigationActionService():
             result = (False, self.LIST_ERROR.format('indicator'))
             
         return result
+
+
+    def _create_update_monitoring_indicator(self, data, monitoring_reporting_indicator):
+
+        result = (True, [])
+        
+        if isinstance(data, list):
+            monitoring_indicator_list = monitoring_reporting_indicator.monitoring_indicator.all()
+            serializer = self._get_serialized_monitoring_indicator_list(data, monitoring_indicator_list, monitoring_reporting_indicator.id)
+            
+            if serializer.is_valid():
+                print(serializer.data)
+                monitoring_indicator = serializer.save()
+
+                result = (True, monitoring_indicator)
+
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('monitoring_indicator'))
+            
+        return result
     
 
     def _create_update_initiative(self, data, initiative=False):
@@ -374,7 +412,7 @@ class MitigationActionService():
 
 
         return result
-
+    
 
     def _create_update_impact_documentation(self, data, impact_documentation=False):
         
@@ -434,6 +472,35 @@ class MitigationActionService():
 
         return result
 
+    
+    def _create_update_monitoring_reporting_indicator(self, data, monitoring_reporting_indicator=False):
+        
+        if monitoring_reporting_indicator:
+            serialized_monitoring_reporting_indicator = self._get_serialized_monitoring_reporting_indicator(data, monitoring_reporting_indicator)
+        
+        else:
+            serialized_monitoring_reporting_indicator = self._get_serialized_monitoring_reporting_indicator(data)
+
+        if serialized_monitoring_reporting_indicator.is_valid():
+
+            monitoring_reporting_indicator = serialized_monitoring_reporting_indicator.save()
+
+            monitoring_indicator_data = data.get("monitoring_indicator", [])
+            serialized_monitoring_indicator_status, serialized_monitoring_indicator_data = self._create_update_monitoring_indicator(monitoring_indicator_data, monitoring_reporting_indicator)
+
+            if serialized_monitoring_indicator_status:
+                result = (True, monitoring_reporting_indicator)
+
+            else:
+                result = (serialized_monitoring_indicator_status, serialized_monitoring_indicator_data)
+
+        else:
+            errors = serialized_monitoring_reporting_indicator.errors
+            result = (False, errors)
+
+
+        return result
+
 
     def get(self, request, mitigation_action_id):
         
@@ -470,7 +537,7 @@ class MitigationActionService():
 
         # fk's of object mitigation_action that have nested fields
         field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance',  
-            'ghg_information', 'impact_documentation', 'monitoring_information']
+            'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator']
 
         for field in field_list:
             if data.get(field, False):
@@ -504,7 +571,7 @@ class MitigationActionService():
         data['user'] = request.user.id
 
         field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 
-                        'ghg_information', 'impact_documentation', 'monitoring_information'] 
+                        'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
