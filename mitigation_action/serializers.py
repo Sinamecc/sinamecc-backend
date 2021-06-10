@@ -3,7 +3,7 @@ from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
-        ImpactDocumentation, QAQCReductionEstimateQuestion, MonitoringIndicator, MonitoringInformation
+        ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation
 
 
 ##
@@ -95,11 +95,11 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
         list_serializer_class = GenericListSerializer
 
 
-class MonitoringIndicatorSerializer(serializers.ModelSerializer):
+class IndicatorSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
     class Meta:
-        model = MonitoringIndicator
+        model = Indicator
         fields = ('id', 'name', 'description', 'type', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
                     'reporting_institution', 'measurement_start_date', 'additional_information', 'monitoring_information')
         list_serializer_class = GenericListSerializer
@@ -114,7 +114,7 @@ class MonitoringInformationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
-        data['monitoring_indicator'] = MonitoringIndicatorSerializer(instance.monitoring_indicator.all(), many=True).data
+        data['indicator'] = IndicatorSerializer(instance.indicator.all(), many=True).data
 
         return data
 

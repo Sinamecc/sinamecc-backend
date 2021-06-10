@@ -126,6 +126,22 @@ class Status(models.Model):
 ##
 
 ## section 5
+
+""" 
+class MonitoringReportingIndicator(models.Model):
+
+    progress_in_monitoring = models.BooleanField(null=True)
+
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring and Reporting Indicators")
+        verbose_name_plural = _("Monitoring and Reporting Indicators") """
+
+
 class MonitoringInformation(models.Model):
     
     ## TODO 
@@ -176,7 +192,7 @@ class ImpactDocumentation(models.Model):
 
 
 
-class MonitoringIndicator(models.Model):
+class Indicator(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
         ('BIANNUAL', 'Biannual'),
@@ -201,15 +217,15 @@ class MonitoringIndicator(models.Model):
     ## aditional information file
 
     ## FK
-    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Monitoring Indicator")
-        verbose_name_plural = _("Monitoring Indicator")
+        verbose_name = _("Indicator")
+        verbose_name_plural = _("Indicator")
     
 
     def __str__(self):
