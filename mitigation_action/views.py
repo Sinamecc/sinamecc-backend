@@ -15,6 +15,13 @@ def get_catalog_data(request, **kwargs): ## We need delete *args this parametes 
         result = view_helper.execute_by_name("get_catalog_data", request)
     return result
 
+## Permission!!!!
+@api_view(['GET'])
+def get_indicator_from_mitigation_action(request, mitigation_action_id=False):
+
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_indicator_from_mitigation_action", request, mitigation_action_id)
+    return result
 
 
 ## Permission!!!!
