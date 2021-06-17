@@ -372,7 +372,6 @@ class MitigationActionService():
             serializer = self._get_serialized_monitoring_indicator_list(data, monitoring_indicator_list, monitoring_reporting_indicator.id)
             
             if serializer.is_valid():
-                print(serializer.data)
                 monitoring_indicator = serializer.save()
 
                 result = (True, monitoring_indicator)
