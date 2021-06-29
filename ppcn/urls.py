@@ -59,13 +59,10 @@ urlpatterns = [
         name='send_to_review'
     ), 
     url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/(?P<language>es|en)*/*$',
-        views.get_one_ppcn,
-        name='get_one_ppcn'
+        views.get_put_delete_patch_ppcn,
+        name='get_put_delete_patch_ppcn'
     ), 
-    url(r'^api/v1/ppcn/(?P<id>[0-9a-f-]+)/*$',
-        views.put_delete_patch_ppcn,
-        name='put_delete_patch_ppcn'
-    ),
+
     url(r'^api/v1/ppcn/form/(?P<geographicLevel_id>[0-9]+)/(?P<language>es|en)*/*$',
         views.get_form_ppcn,
         name='get_form_ppcn'

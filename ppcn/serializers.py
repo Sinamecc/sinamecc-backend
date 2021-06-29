@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from ppcn.fsm_utils.state import FSM_STATES
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
                             PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, \
                             OrganizationClassification, CarbonOffset, BiogenicEmission, GasReport, GasScope, QuantifiedGas, \
@@ -192,13 +193,31 @@ class ChangeLogSerializer(serializers.ModelSerializer):
         model = ChangeLog
         fields = ('ppcn', 'previous_status', 'current_status', 'user')
 
+class PPCNFileSeriaizer (serializers.ModelSerializer):
+    class Meta:
+        model = PPCNFile
+        fields = ('id', 'user', 'file', 'created', 'updated', 'ppcn_form')
+
+
 class PPCNSerializer(serializers.ModelSerializer):
     class Meta:
         model = PPCN
         fields = ('id','user','organization', 'gei_organization','geographic_level', 'organization_classification', 
                     'confidential', 'confidential_fields', 'fsm_state' , 'review_count', 'created', 'updated')
 
-class PPCNFileSeriaizer (serializers.ModelSerializer):
-    class Meta:
-        model = PPCNFile
-        fields = ('id', 'user', 'file', 'created', 'updated', 'ppcn_form')
+    def _get_fsm_state_info(self, instance):
+
+        data = {
+            'state': instance.fsm_state, 
+            "label": FSM_STATES.get(instance.fsm_state, f'Error - {instance.fsm_state}')
+        }
+
+        return data
+
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['fsm_state'] = self._get_fsm_state_info(instance)
+
+        return data
+

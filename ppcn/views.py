@@ -43,21 +43,20 @@ def get_ppcn(request,  language = 'en'):
         result = view_helper.get_all(request, language, user)
     return result
 
-@api_view(['GET'])
+
 @has_permission_decorator('read_ppcn')
 def get_one_ppcn(request, id , language = 'en'):
     if request.method == 'GET':
         result = view_helper.get_one(id, language)
     return result
 
-@api_view(['PUT'])
 @has_permission_decorator('edit_ppcn')
 def put_ppcn(request, id):
     if request.method == 'PUT':
         result = view_helper.put(id, request)
     return result
 
-@api_view(['PATCH'])
+
 @has_permission_decorator('edit_ppcn')
 def patch_ppcn(request, id):
     if request.method == 'PATCH':
@@ -65,7 +64,6 @@ def patch_ppcn(request, id):
     return result
 
 
-@api_view(['DELETE'])
 @has_permission_decorator('delete_ppcn')
 def delete_ppcn(request, id):
     if request.method == 'DELETE':
@@ -188,7 +186,7 @@ def get_post_ppcn(request, language = 'en'):
 
 @api_view(['DELETE', 'PUT', 'PATCH', 'GET'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
-def put_delete_patch_ppcn(request, id , language = 'en'):
+def get_put_delete_patch_ppcn(request, id , language = 'en'):
 
     if request.method == 'GET':
         result = get_one_ppcn(request, id, language)
