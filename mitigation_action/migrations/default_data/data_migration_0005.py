@@ -10,9 +10,10 @@ _finance_status_data = [
 ]
 
 _initiative_type_data = [
-    {'name':'Project', 'code': 'project'},
-    {'name':'Policy', 'code': 'policy'},
-    {'name':'Goal', 'code': 'goal'}
+
+    {'name':'Policy Instrument', 'code': 'policy_instrument', 'type': 'A'},
+    {'name':'Project', 'code': 'project', 'type': 'B'},
+    {'name':'Activity', 'code': 'activity' ,'type': 'C'}
 ]
 
 _finance_source_type_data = [
@@ -26,5 +27,5 @@ _finance_source_type_data = [
 _geographic_scale_data = [
     {'name':'National', 'code': 'national'},
     {'name':'Regional', 'code': 'regional'},
-    {'name':'Other', 'code': 'other'},
+    {'name':'Local', 'code': 'local'},
 ]
