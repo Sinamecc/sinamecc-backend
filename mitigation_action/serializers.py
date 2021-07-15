@@ -50,7 +50,7 @@ class GenericListSerializer(serializers.ListSerializer):
 class InitiativeTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativeType
-        fields = ('id', 'code', 'name')
+        fields = ('id', 'code', 'name', 'type')
 
 
 class GeographicScaleSerializer(serializers.ModelSerializer):
@@ -181,12 +181,22 @@ class InitiativeGoalSerializer(serializers.ModelSerializer):
 class InitiativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Initiative
-        fields = ('id', 'name', 'objective', 'description', 'initiative_type')
+        fields = ('id', 'name', 'objective', 'description', 'description_file', 'initiative_type')
+
+    def _get_description_file_url(self, instance):
+
+        if instance.description_file:
+
+            return 'fake/url/{0}'.format(instance.description_file.name)
+        
+        return None
+
 
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['initiative_type'] = InitiativeTypeSerializer(instance.initiative_type).data
+        data['description_file'] = self._get_description_file_url(instance)
         data['goal'] = InitiativeGoalSerializer(instance.goal.all(), many=True).data
 
         return data

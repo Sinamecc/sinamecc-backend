@@ -20,6 +20,8 @@ from mitigation_action.email_services import MitigationActionEmailServices
 from general.services import EmailServices
 from general.permissions import PermissionsHelper
 from general.helpers.validators import validate_year
+from time import gmtime, strftime
+
 
 
 User =  get_user_model()
@@ -31,11 +33,19 @@ CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')
 ##
 ## Start Catalogs
 ##
+def directory_path(instance, filename): 
+    path = "mitigation_action/{0}/{1}/{2}/"
+
+    return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
+                        
+                        
+                        
 
 class InitiativeType(models.Model):
 
     name = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
+    type = models.CharField(max_length=2, blank=False, null=False)
      
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -315,8 +325,8 @@ class GeographicLocation(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Initiative")
-        verbose_name_plural = _("Initiative")
+        verbose_name = _("Geographic Location")
+        verbose_name_plural = _("Geographic Locations")
 
     def __unicode__(self):
         return smart_unicode(self.name)
@@ -329,7 +339,7 @@ class Initiative(models.Model):
     name = models.CharField(max_length=500, null=True)
     objective = models.TextField(null=True)
     description = models.TextField(null=True)
-
+    description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     initiative_type = models.ForeignKey(InitiativeType, related_name='initiative', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

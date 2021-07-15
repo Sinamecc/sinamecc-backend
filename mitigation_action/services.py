@@ -34,8 +34,9 @@ class MitigationActionService():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.LIST_ERROR = "Was expected a {0} list into data"
         self.MITIGATION_ACTION_NO_INDICATOR = 'Mitigation action {0} does not have indicators related'
+        self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
 
-    
+
     # auxiliary functions
     def _create_sub_record(self, data, sub_record_name):
         
@@ -133,9 +134,9 @@ class MitigationActionService():
         return serializer
 
 
-    def _get_serialized_initiative(self, data, initiative = False):
+    def _get_serialized_initiative(self, data, initiative = False,  partial=False):
         
-        serializer = self._serialize_helper.get_serialized_record(InitiativeSerializer, data, record=initiative)
+        serializer = self._serialize_helper.get_serialized_record(InitiativeSerializer, data, record=initiative, partial=partial)
 
         return serializer
 
@@ -389,10 +390,10 @@ class MitigationActionService():
         
         validation_dict = {}
         if initiative:
-            serialized_initiative= self._get_serialized_initiative(data, initiative)
+            serialized_initiative= self._get_serialized_initiative(data, initiative, partial=True)
         
         else:
-            serialized_initiative = self._get_serialized_initiative(data)
+            serialized_initiative = self._get_serialized_initiative(data, partial=True)
 
         if serialized_initiative.is_valid():
 
@@ -500,6 +501,65 @@ class MitigationActionService():
 
 
         return result
+
+    ## helpers functions for uploading files
+    
+    def _upload_file_to_initiative(self, data, mitigation_action):
+        ## This function uploads to description files to the initiative
+        file_data = {"description_file": data.get("file", None)}
+        initiative = mitigation_action.initiative
+        initiative_status, initiative_data = self._create_update_initiative(file_data, initiative) 
+
+        if initiative_status:
+
+            if initiative == None:
+                mitigation_action.initiative = initiative_data
+                mitigation_action.save()
+
+            result = (True, mitigation_action)
+
+        else:
+            result = (initiative_status, initiative_data)
+
+        return result
+
+
+    ## upload files in the models
+    def upload_file_from_mitigation_action(self, request, mitigation_action_id, model_type):
+
+        model_type_options = {
+            'initiative': self._upload_file_to_initiative
+        }    
+    
+        data = request.data
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        if mitigation_action_status:
+            method = model_type_options.get(model_type, False)
+            
+            if method:
+                response_status, response_data = method(data, mitigation_action_data)
+                
+                if response_status:
+                    result = (response_status, MitigationActionSerializer(mitigation_action_data).data)
+                    
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(model_type))
+
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+        
+        return result
+        
+
+
+
+
+
 
 
     def get(self, request, mitigation_action_id):

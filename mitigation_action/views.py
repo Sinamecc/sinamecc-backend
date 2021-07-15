@@ -41,3 +41,11 @@ def get_post_put_patch_delete(request, mitigation_action_id=False): ## We need d
         result = view_helper.put(request, mitigation_action_id)
 
     return result
+
+
+## Permission!!!!
+@api_view(['PUT'])
+def upload_file_from_mitigation_action(request, mitigation_action_id, model_type):
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name("upload_file_from_mitigation_action", request, mitigation_action_id, model_type)
+    return result
