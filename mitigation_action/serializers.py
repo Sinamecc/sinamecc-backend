@@ -218,12 +218,23 @@ class MitigationActionStatusSerializer(serializers.ModelSerializer):
 class GeographicLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeographicLocation
-        fields = ('id', 'geographic_scale', 'location')
+        fields = ('id', 'geographic_scale', 'location', 'location_file')
+
+    
+    def _get_location_file_url(self, instance):
+
+        if instance.location_file:
+
+            return 'fake/url/{0}'.format(instance.location_file.name)
+        
+        return None
+
 
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['geographic_scale'] = GeographicScaleSerializer(instance.geographic_scale).data
+        data['location_file'] = self._get_location_file_url(instance)
 
         return data
 

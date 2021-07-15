@@ -316,11 +316,10 @@ class Finance(models.Model):
 
 
 class GeographicLocation(models.Model):
-    ## TODO: Missing File field for location
 
     geographic_scale = models.ForeignKey(GeographicScale, related_name='geographic_location', null=True, on_delete=models.CASCADE)
     location = models.CharField(max_length=254, null=True)
-
+    location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -334,8 +333,7 @@ class GeographicLocation(models.Model):
 
 
 class Initiative(models.Model):
-    ## TODO : Missing file field  for description
-
+    
     name = models.CharField(max_length=500, null=True)
     objective = models.TextField(null=True)
     description = models.TextField(null=True)
