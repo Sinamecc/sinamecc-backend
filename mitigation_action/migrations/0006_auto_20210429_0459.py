@@ -92,6 +92,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('location', models.CharField(max_length=254, null=True)),
+                ('location_file',models.FileField(null=True, storage=general.storages.PrivateMediaStorage(), upload_to=mitigation_action.models.directory_path)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('geographic_scale', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='geographic_location', to='mitigation_action.geographicscale')),

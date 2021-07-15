@@ -120,9 +120,9 @@ class MitigationActionService():
         return serializer
 
     
-    def _get_serialized_geographic_location(self, data, geographic_location = False):
+    def _get_serialized_geographic_location(self, data, geographic_location = False, partial=False):
 
-        serializer = self._serialize_helper.get_serialized_record(GeographicLocationSerializer, data, record=geographic_location)
+        serializer = self._serialize_helper.get_serialized_record(GeographicLocationSerializer, data, record=geographic_location, partial=partial)
 
         return serializer
 
@@ -264,10 +264,10 @@ class MitigationActionService():
     def _create_update_geographic_location(self, data, geographic_location=False):
         
         if geographic_location:
-            serialized_geographic_location = self._get_serialized_geographic_location(data, geographic_location)
+            serialized_geographic_location = self._get_serialized_geographic_location(data, geographic_location, partial=True)
 
         else:
-            serialized_geographic_location = self._get_serialized_geographic_location(data)
+            serialized_geographic_location = self._get_serialized_geographic_location(data, partial=True)
 
         if serialized_geographic_location.is_valid():
             geographic_location = serialized_geographic_location.save()
@@ -507,6 +507,7 @@ class MitigationActionService():
     def _upload_file_to_initiative(self, data, mitigation_action):
         ## This function uploads to description files to the initiative
         file_data = {"description_file": data.get("file", None)}
+
         initiative = mitigation_action.initiative
         initiative_status, initiative_data = self._create_update_initiative(file_data, initiative) 
 
@@ -522,13 +523,35 @@ class MitigationActionService():
             result = (initiative_status, initiative_data)
 
         return result
+    
+
+    def _upload_file_to_geographic_location(self, data, mitigation_action):
+        ## This function uploads to location_file to the geographic location
+        file_data = {"location_file": data.get("file", None)}
+
+        geographic_location = mitigation_action.geographic_location
+        geographic_location_status, geographic_location_data = self._create_update_geographic_location(file_data, geographic_location) 
+
+        if geographic_location_status:
+
+            if geographic_location == None:
+                mitigation_action.geographic_location = geographic_location_data
+                mitigation_action.save()
+
+            result = (True, mitigation_action)
+
+        else:
+            result = (geographic_location_status, geographic_location_data)
+
+        return result
 
 
     ## upload files in the models
     def upload_file_from_mitigation_action(self, request, mitigation_action_id, model_type):
 
         model_type_options = {
-            'initiative': self._upload_file_to_initiative
+            'initiative': self._upload_file_to_initiative, 
+            'geographic-location': self._upload_file_to_geographic_location,
         }    
     
         data = request.data
