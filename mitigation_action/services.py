@@ -2,7 +2,7 @@
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
-    InitiativeType, GeographicScale, Finance, GHGInformation
+    InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -35,6 +35,7 @@ class MitigationActionService():
         self.LIST_ERROR = "Was expected a {0} list into data"
         self.MITIGATION_ACTION_NO_INDICATOR = 'Mitigation action {0} does not have indicators related'
         self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
+        self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
 
 
     # auxiliary functions
@@ -577,12 +578,6 @@ class MitigationActionService():
             result = (mitigation_action_status, mitigation_action_data)
         
         return result
-        
-
-
-
-
-
 
 
     def get(self, request, mitigation_action_id):
@@ -713,12 +708,15 @@ class MitigationActionService():
     def get_catalog_data(self, request):
         
         catalog = {
-            
+
             'initiative_type': (InitiativeType, InitiativeTypeSerializer),
             'status': (Status, StatusSerializer),
             'finance_source_type': (FinanceSourceType, FinanceSourceTypeSerializer),
             'finance_status': (FinanceStatus, FinanceStatusSerializer),
-            'geographic_scale': (GeographicScale, GeographicScaleSerializer)
+            'geographic_scale': (GeographicScale, GeographicScaleSerializer),
+            'action_areas': (ActionAreas, ActionAreasSerializer),
+            'descarbonization_axis': (DescarbonizationAxis, DescarbonizationAxisSerializer),
+            'topics': (Topics, TopicsSerializer),
         }
 
         data = {}
@@ -733,6 +731,35 @@ class MitigationActionService():
             data = {**data, **{name: _serializer(result_data, many=True).data}}
         
         result = (True, data)
+        
+        return result
+
+    
+    def  get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
+
+        catalogs_by_parent = {
+            'action-areas':{'action-goal': (ActionGoals, ActionGoalsSerializer, 'area')},
+            'descarbonization-axis':{'transformational-visions': (TransformationalVisions, TransformationalVisionsSerializer, 'axis')},
+            'topics': {'sub-topics': (SubTopics, SubTopicsSerializer, 'topic')},
+            'sub-topics':{'activities': (Activity, ActivitySerializer, 'sub_topic')},
+        }
+        result = (False, self.CATALOG_DOES_NOT_EXIST.format(parent, child))
+
+        if catalogs_by_parent.get(parent, None):
+            child_data_class = catalogs_by_parent.get(parent)
+            child_model, child_serializer, field_parent_search = child_data_class.get(child, (None, None, None))
+
+            if child_model:
+                filter_query = {field_parent_search: parent_id}
+                catalog_status, catalog_data = self._service_helper.get_all(child_model, **filter_query)
+                
+                result = (catalog_status, child_serializer(catalog_data, many=True).data) if catalog_status else (catalog_status, catalog_data)
+            
+            else:
+                result = (False, self.CATALOG_DOES_NOT_EXIST.format(parent, child))
+
+        else:
+            result = (False, self.CATALOG_DOES_NOT_EXIST.format(parent, child))
         
         return result
 
