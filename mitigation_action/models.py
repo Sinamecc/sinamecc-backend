@@ -38,8 +38,107 @@ def directory_path(instance, filename):
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
                         
-                        
-                        
+
+class ActionAreas(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False)
+    code = models.CharField(max_length=3, null=False, blank=False)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Action Area')
+        verbose_name_plural = _('Action Areas')
+
+
+class ActionGoals(models.Model):
+
+    goal = models.TextField()
+    code = models.CharField(max_length=3, null=False, blank=False)
+    area = models.ForeignKey(ActionAreas, null=False, related_name='goal', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Action Goal')
+        verbose_name_plural = _('Action Goals')
+
+
+class DescarbonizationAxis(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Descarbonization Axis')
+        verbose_name_plural = _('Descarbonization Axes')
+
+
+class TransformationalVisions(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+    axis = models.ForeignKey(DescarbonizationAxis, null=False, related_name='transformational_vision', on_delete=models.CASCADE)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Transformational Vision')
+        verbose_name_plural = _('Transformational Visions')
+
+
+class Topics(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Topic')
+        verbose_name_plural = _('Topics')
+
+
+class SubTopics(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    topic = models.ForeignKey(Topics, null=False, related_name='sub_topic', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Sub Topic')
+        verbose_name_plural = _('Sub Topics')
+
+
+class Activity(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+    sub_topic = models.ForeignKey(SubTopics, null=False, related_name='activity', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Activity')
+        verbose_name_plural = _('Activities')
+
 
 class InitiativeType(models.Model):
 
@@ -199,6 +298,25 @@ class ImpactDocumentation(models.Model):
         verbose_name = _("Monitoring Information")
         verbose_name_plural = _("Monitoring Information")
 
+## missing Serializer
+class Categorization(models.Model):
+    
+    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
+    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
+    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
+    activities = models.ManyToManyField(Activity, related_name='categorization' ,blank=True)
+
+    ## missing one catalog -->mpacto directo en GEI - Medida habilitante-Ambas
+    is_part_to_another_mitigation_action = models.BooleanField(null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Categorization")
+        verbose_name_plural = _("Categorization")
+
 
 
 class Indicator(models.Model):
@@ -329,7 +447,6 @@ class GeographicLocation(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.name)
-
 
 
 class Initiative(models.Model):

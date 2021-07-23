@@ -1,9 +1,10 @@
 from general import models
 from django.utils.translation import override
 from rest_framework import serializers
-from mitigation_action.models import Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
+from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
-        ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator
+    ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
+    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity        
 
 
 ##
@@ -47,6 +48,51 @@ class GenericListSerializer(serializers.ListSerializer):
 ##
 ## Start Catalogs Serializers
 ##
+
+class ActionAreasSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActionAreas
+        fields = ('id', 'name', 'code')
+
+
+class ActionGoalsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActionGoals
+        fields = ('id', 'goal', 'code', 'area')
+
+
+class DescarbonizationAxisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DescarbonizationAxis
+        fields = ('id', 'description', 'code')
+
+
+class TransformationalVisionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransformationalVisions
+        fields = ('id', 'description', 'code', 'axis')
+
+
+class TopicsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topics
+        fields = ('id', 'name', 'code')
+
+class SubTopicsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubTopics
+        fields = ('id', 'name', 'code', 'topic')
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ('id', 'description', 'code', 'sub_topic')
+
+
+
+
+
 class InitiativeTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativeType
