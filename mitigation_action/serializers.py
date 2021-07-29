@@ -6,7 +6,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector      
+    GHGImpactSector, CarbonDeposit, Standard
 
 
 ##
@@ -50,7 +50,6 @@ class GenericListSerializer(serializers.ListSerializer):
 ##
 ## Start Catalogs Serializers
 ##
-
 class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SustainableDevelopmentGoals
@@ -60,6 +59,18 @@ class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
 class GHGImpactSectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = GHGImpactSector
+        fields = ('id', 'code', 'name')
+
+
+class CarbonDepositSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarbonDeposit
+        fields = ('id', 'code', 'name')
+
+
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
         fields = ('id', 'code', 'name')
 
 
@@ -224,16 +235,29 @@ class MonitoringReportingIndicatorSerializer(serializers.ModelSerializer):
 
 
 class ImpactDocumentationSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = ImpactDocumentation
-        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'calculation_methodology', 
-                        'estimate_calculation_documentation', 'mitigation_action_in_inventory', 'carbon_international_commerce', 
-                        'methodologies_to_use')
+        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit','calculation_methodology', 
+                    'estimate_calculation_documentation', 'estimate_calculation_documentation_file', 'mitigation_action_in_inventory', 'standard', 
+                    'other_standard', 'carbon_international_commerce', 'methodologies_to_use')
+    
+
+    def _get_estimate_calculation_documentation_file_url(self, instance):
+
+        if instance.estimate_calculation_documentation_file:
+
+            return 'fake/url/{0}'.format(instance.estimate_calculation_documentation_file.name)
         
+        return None
+
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['question'] = QAQCReductionEstimateQuestionSerializer(instance.question.all(), many=True).data
+        data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit).data
+        data['standard'] =  StandardSerializer(instance.standard).data
+        data['estimate_calculation_documentation_file'] = self._get_estimate_calculation_documentation_file_url(instance)
 
         return data
 

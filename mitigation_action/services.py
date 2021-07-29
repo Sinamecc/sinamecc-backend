@@ -144,9 +144,9 @@ class MitigationActionService():
         return serializer
 
 
-    def _get_serialized_impact_documentation(self, data, impact_documentation = False):
+    def _get_serialized_impact_documentation(self, data, impact_documentation = False, partial=False):
         
-        serializer = self._serialize_helper.get_serialized_record(ImpactDocumentationSerializer, data, record=impact_documentation)
+        serializer = self._serialize_helper.get_serialized_record(ImpactDocumentationSerializer, data, record=impact_documentation, partial=partial)
 
         return serializer
 
@@ -448,10 +448,10 @@ class MitigationActionService():
         
         validation_dict = {}
         if impact_documentation:
-            serialized_impact_documentation = self._get_serialized_impact_documentation(data, impact_documentation)
+            serialized_impact_documentation = self._get_serialized_impact_documentation(data, impact_documentation, partial=True)
         
         else:
-            serialized_impact_documentation = self._get_serialized_impact_documentation(data)
+            serialized_impact_documentation = self._get_serialized_impact_documentation(data, partial=True)
 
         if serialized_impact_documentation.is_valid():
 
@@ -593,6 +593,25 @@ class MitigationActionService():
             result = (ghg_information_status, ghg_information_data)
             
         return result
+    
+    def _upload_file_to_impact_documentation(self, data, mitigation_action):
+        ## This function uploads to estimate_calculation_documentation_file to the impact documentation
+        file_data = {"estimate_calculation_documentation_file": data.get("file", None)}
+
+        impact_documentation = mitigation_action.impact_documentation
+        impact_documentation_status, impact_documentation_data = self._create_update_impact_documentation(file_data, impact_documentation)
+
+        if impact_documentation_status:
+            if impact_documentation == None:
+                mitigation_action.impact_documentation = impact_documentation_data
+                mitigation_action.save()
+            result = (True, mitigation_action)
+        
+        else:
+            result = (impact_documentation_status, impact_documentation_data)
+            
+        return result
+        
 
 
     ## upload files in the models
@@ -601,7 +620,8 @@ class MitigationActionService():
         model_type_options = {
             'initiative': self._upload_file_to_initiative, 
             'geographic-location': self._upload_file_to_geographic_location,
-            'ghg-information': self._upload_file_to_ghg_information
+            'ghg-information': self._upload_file_to_ghg_information,
+            'impact-documentation': self._upload_file_to_impact_documentation
         }    
     
         data = request.data
@@ -769,6 +789,8 @@ class MitigationActionService():
             'impact_category': (ImpactCategory, ImpactCategorySerializer),
             'sustainable_development_goals': (SustainableDevelopmentGoals, SustainableDevelopmentGoalsSerializer),
             'ghg_impact_sector': (GHGImpactSector, GHGImpactSectorSerializer),
+            'carbon_deposit': (CarbonDeposit, CarbonDepositSerializer),
+            'standard': (Standard, StandardSerializer),
         }
 
         data = {}
