@@ -1,9 +1,10 @@
 
+from functools import partial
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
     InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics, \
-    ImpactCategory
+    ImpactCategory, SustainableDevelopmentGoals, GHGImpactSector
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -101,9 +102,9 @@ class MitigationActionService():
         return serializer
     
 
-    def _get_serialized_ghg_information(self, data, ghg_information = False):
+    def _get_serialized_ghg_information(self, data, ghg_information = False, partial=False):
 
-        serializer = self._serialize_helper.get_serialized_record(GHGInformationSerializer, data, record=ghg_information)
+        serializer = self._serialize_helper.get_serialized_record(GHGInformationSerializer, data, record=ghg_information, partial=partial)
 
         return serializer
 
@@ -149,6 +150,7 @@ class MitigationActionService():
 
         return serializer
 
+
     def _get_serialized_monitoring_reporting_indicator(self, data, monitoring_reporting_indicator = False):
         
         serializer = self._serialize_helper.get_serialized_record(MonitoringReportingIndicatorSerializer, data, record=monitoring_reporting_indicator)
@@ -168,6 +170,7 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(InitiativeGoalSerializer, data, record=initiative_goal)
 
         return serializer
+
 
     def _get_serialized_categorization(self, data, categorization = False):
         
@@ -236,10 +239,10 @@ class MitigationActionService():
     def _create_update_ghg_information(self, data, ghg_information=False):
         
         if ghg_information:
-            serialized_ghg_information= self._get_serialized_ghg_information(data, ghg_information)
+            serialized_ghg_information= self._get_serialized_ghg_information(data, ghg_information, partial=True)
 
         else:
-            serialized_ghg_information = self._get_serialized_ghg_information(data)
+            serialized_ghg_information = self._get_serialized_ghg_information(data, partial=True)
         
         if serialized_ghg_information.is_valid():
             ghg_information = serialized_ghg_information.save()
@@ -572,12 +575,33 @@ class MitigationActionService():
         return result
 
 
+    def _upload_file_to_ghg_information(self, data, mitigation_action):
+
+        ## This function uploads to graphic_description_file to the ghg information
+        file_data = {"graphic_description_file": data.get("file", None)}
+
+        ghg_information = mitigation_action.ghg_information
+        ghg_information_status, ghg_information_data = self._create_update_ghg_information(file_data, ghg_information)
+
+        if ghg_information_status:
+            if ghg_information == None:
+                mitigation_action.ghg_information = ghg_information_data
+                mitigation_action.save()
+            result = (True, mitigation_action)
+        
+        else:
+            result = (ghg_information_status, ghg_information_data)
+            
+        return result
+
+
     ## upload files in the models
     def upload_file_from_mitigation_action(self, request, mitigation_action_id, model_type):
 
         model_type_options = {
             'initiative': self._upload_file_to_initiative, 
             'geographic-location': self._upload_file_to_geographic_location,
+            'ghg-information': self._upload_file_to_ghg_information
         }    
     
         data = request.data
@@ -742,7 +766,9 @@ class MitigationActionService():
             'action_areas': (ActionAreas, ActionAreasSerializer),
             'descarbonization_axis': (DescarbonizationAxis, DescarbonizationAxisSerializer),
             'topics': (Topics, TopicsSerializer),
-            'impact_category': (ImpactCategory, ImpactCategorySerializer)
+            'impact_category': (ImpactCategory, ImpactCategorySerializer),
+            'sustainable_development_goals': (SustainableDevelopmentGoals, SustainableDevelopmentGoalsSerializer),
+            'ghg_impact_sector': (GHGImpactSector, GHGImpactSectorSerializer),
         }
 
         data = {}
