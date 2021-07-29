@@ -10,7 +10,7 @@ view_helper = ViewHelper(service)
 
 ## Permission!!!!
 @api_view(['GET'])
-def get_catalog_data(request, parent=None, parent_id=None, child=None): ## We need delete *args this parametes is temp at the moment to refactor MA
+def get_catalog_data(request, parent=None, parent_id=None, child=None, **kwargs): ## We need delete *args this parametes is temp at the moment to refactor MA
     if request.method == 'GET' and not parent:
         result = view_helper.execute_by_name("get_catalog_data", request)
 

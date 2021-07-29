@@ -29,3 +29,8 @@ _geographic_scale_data = [
     {'name':'Regional', 'code': 'regional'},
     {'name':'Local', 'code': 'local'},
 ]
+
+_impact_category_data = [
+    {'name': 'Direct impact on GHG', 'code': 'direct_impact_on_ghg'},
+    {'name': 'Enabling measure', 'code': 'enabling_measure'},
+]

@@ -84,6 +84,20 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Statuses',
             },
         ),
+        migrations.CreateModel(
+            name='ImpactCategory',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('code', models.CharField(max_length=255)),
+                ('name', models.CharField(max_length=255)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+            ],
+            options={
+                'verbose_name': 'Impact Category',
+                'verbose_name_plural': 'Impact Categories',
+            },
+        ),
         migrations.AddField(
             model_name='contact',
             name='created',

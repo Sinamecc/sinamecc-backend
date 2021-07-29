@@ -2,7 +2,8 @@
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
-    InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics
+    InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics, \
+    ImpactCategory
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -168,6 +169,12 @@ class MitigationActionService():
 
         return serializer
 
+    def _get_serialized_categorization(self, data, categorization = False):
+        
+        serializer = self._serialize_helper.get_serialized_record(CategorizationSerializer, data, record=categorization, partial=True)
+
+        return serializer
+
 
     def _get_serialized_initiative_goal_list(self, data, initiative_goal_list, initiative_id):
         
@@ -294,6 +301,24 @@ class MitigationActionService():
 
         else:
             result = (False, serialized_status_information.errors)
+
+        return result
+
+    
+    def _create_update_categorization(self, data, categorization=False):
+        
+        if categorization:
+            serialized_categorization = self._get_serialized_categorization(data, categorization)
+
+        else:
+            serialized_categorization = self._get_serialized_categorization(data)
+        
+        if serialized_categorization.is_valid():
+            categorization = serialized_categorization.save()
+            result = (True, categorization)
+
+        else:
+            result = (False, serialized_categorization.errors)
 
         return result
 
@@ -614,7 +639,7 @@ class MitigationActionService():
         data['user'] = request.user.id
 
         # fk's of object mitigation_action that have nested fields
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance',  
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'categorization', 
             'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator']
 
         for field in field_list:
@@ -648,7 +673,7 @@ class MitigationActionService():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 
+        field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'categorization',
                         'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator'] 
 
         mitigation_action_status, mitigation_action_data = \
@@ -717,6 +742,7 @@ class MitigationActionService():
             'action_areas': (ActionAreas, ActionAreasSerializer),
             'descarbonization_axis': (DescarbonizationAxis, DescarbonizationAxisSerializer),
             'topics': (Topics, TopicsSerializer),
+            'impact_category': (ImpactCategory, ImpactCategorySerializer)
         }
 
         data = {}
