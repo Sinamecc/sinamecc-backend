@@ -1,10 +1,11 @@
+from django.db.models import manager
 from general import models
 from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
-    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity        
+    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization       
 
 
 ##
@@ -84,13 +85,16 @@ class SubTopicsSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'code', 'topic')
 
 
+class ImpactCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImpactCategory
+        fields = ('id', 'code', 'name')
+
+
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
         fields = ('id', 'description', 'code', 'sub_topic')
-
-
-
 
 
 class InitiativeTypeSerializer(serializers.ModelSerializer):
@@ -131,6 +135,28 @@ class StatusSerializer(serializers.ModelSerializer):
 ##
 ## Start Model Serializers
 ##
+## Edit this serializers
+class CategorizationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Categorization
+        fields = ('id', 'action_goal', 'transformational_vision', 'sub_topics', 'activities', 'impact_categories', 'is_part_to_another_mitigation_action', 'relation_description')
+    
+    def to_representation(self, instance):
+        
+        data = super().to_representation(instance)
+        data['action_goal'] = ActionGoalsSerializer(instance.action_goal.all(), many=True).data
+        data['transformational_vision'] = TransformationalVisionsSerializer(instance.transformational_vision.all(), many=True).data
+        data['sub_topics'] = SubTopicsSerializer(instance.sub_topics.all(), many=True).data
+        data['activities'] = ActivitySerializer(instance.activities.all(), many=True).data
+        data['impact_categories'] = ImpactCategorySerializer(instance.impact_categories.all(), many=True).data
+
+        return data
+
+
+
+
+
 
 class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
@@ -294,7 +320,7 @@ class ContactSerializer(serializers.ModelSerializer):
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
-        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'finance', 
+        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
                     'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 
                     'user', 'created', 'updated')
     
@@ -305,6 +331,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['initiative'] = InitiativeSerializer(instance.initiative).data
         data['status_information'] = MitigationActionStatusSerializer(instance.status_information).data
         data['geographic_location'] = GeographicLocationSerializer(instance.geographic_location).data
+        data['categorization'] = CategorizationSerializer(instance.categorization).data
         data['finance'] = FinanceSerializer(instance.finance).data
         data['ghg_information'] = GHGInformationSerializer(instance.ghg_information).data
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data

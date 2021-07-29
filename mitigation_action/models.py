@@ -140,6 +140,20 @@ class Activity(models.Model):
         verbose_name_plural = _('Activities')
 
 
+class ImpactCategory(models.Model):
+
+    code = models.CharField(max_length=255, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Impact Category')
+        verbose_name_plural =  _('Impact Categories')
+
+
 class InitiativeType(models.Model):
 
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -301,13 +315,16 @@ class ImpactDocumentation(models.Model):
 ## missing Serializer
 class Categorization(models.Model):
     
-    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
-    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
-    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization' ,on_delete=models.CASCADE ,null=True)
-    activities = models.ManyToManyField(Activity, related_name='categorization' ,blank=True)
+    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization', blank=True)
+    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization', blank=True)
+    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization', blank=True)
+    activities = models.ManyToManyField(Activity, related_name='categorization', blank=True)
 
-    ## missing one catalog -->mpacto directo en GEI - Medida habilitante-Ambas
+    ## can be select more than one
+    impact_categories = models.ManyToManyField(ImpactCategory, related_name='categorization', blank=True)
     is_part_to_another_mitigation_action = models.BooleanField(null=True)
+    relation_description = models.CharField(max_length=255, null=True)
+
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -557,6 +574,7 @@ class MitigationAction(models.Model):
     initiative = models.ForeignKey(Initiative, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     status_information = models.ForeignKey(MitigationActionStatus, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     finance = models.ForeignKey(Finance, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     ghg_information = models.ForeignKey(GHGInformation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     
