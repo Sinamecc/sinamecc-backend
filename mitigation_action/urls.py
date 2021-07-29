@@ -42,7 +42,7 @@ urlpatterns = [
         name='get_indicator_from_mitigation_action'
     ),
     path(
-        'api/v1/mitigation-action/<uuid:mitigation_action_id>/<str:model_type>/',
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/file/<str:model_type>/',
         views.upload_file_from_mitigation_action,
         name='upload_file_from_mitigation_action'
     ),
