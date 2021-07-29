@@ -37,7 +37,34 @@ def directory_path(instance, filename):
     path = "mitigation_action/{0}/{1}/{2}/"
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
-                        
+
+
+class SustainableDevelopmentGoals(models.Model): 
+    code = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Sustainable Development Goal")
+        verbose_name_plural = _("Sustainable Development Goals")
+
+
+class GHGImpactSector(models.Model):
+
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("GHG Impact Sector")
+        verbose_name_plural = _("GHG Impact Sectors")
+
 
 class ActionAreas(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
@@ -550,12 +577,11 @@ class GHGInformation(models.Model):
     ## TODO missing file to graphic description 
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
+    graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    impact_sector = models.ManyToManyField(GHGImpactSector, related_name='ghg_information', blank=True)
+    goals = models.ManyToManyField(SustainableDevelopmentGoals, related_name='ghg_information', blank=True)
 
-
-    ## TODO missing 2 fields with catalogs
-    ## sector
-    ## preliminar something
-
+    ##logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
