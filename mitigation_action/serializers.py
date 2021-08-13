@@ -5,7 +5,8 @@ from rest_framework import serializers
 from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
-    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization       
+    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
+    GHGImpactSector, CarbonDeposit, Standard
 
 
 ##
@@ -49,6 +50,29 @@ class GenericListSerializer(serializers.ListSerializer):
 ##
 ## Start Catalogs Serializers
 ##
+class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SustainableDevelopmentGoals
+        fields = ('id', 'code', 'description')
+
+
+class GHGImpactSectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GHGImpactSector
+        fields = ('id', 'code', 'name')
+
+
+class CarbonDepositSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CarbonDeposit
+        fields = ('id', 'code', 'name')
+
+
+class StandardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Standard
+        fields = ('id', 'code', 'name')
+
 
 class ActionAreasSerializer(serializers.ModelSerializer):
     class Meta:
@@ -154,10 +178,6 @@ class CategorizationSerializer(serializers.ModelSerializer):
         return data
 
 
-
-
-
-
 class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
@@ -215,16 +235,29 @@ class MonitoringReportingIndicatorSerializer(serializers.ModelSerializer):
 
 
 class ImpactDocumentationSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = ImpactDocumentation
-        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'calculation_methodology', 
-                        'estimate_calculation_documentation', 'mitigation_action_in_inventory', 'carbon_international_commerce', 
-                        'methodologies_to_use')
+        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit','calculation_methodology', 
+                    'estimate_calculation_documentation', 'estimate_calculation_documentation_file', 'mitigation_action_in_inventory', 'standard', 
+                    'other_standard', 'carbon_international_commerce', 'methodologies_to_use')
+    
+
+    def _get_estimate_calculation_documentation_file_url(self, instance):
+
+        if instance.estimate_calculation_documentation_file:
+
+            return 'fake/url/{0}'.format(instance.estimate_calculation_documentation_file.name)
         
+        return None
+
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['question'] = QAQCReductionEstimateQuestionSerializer(instance.question.all(), many=True).data
+        data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit).data
+        data['standard'] =  StandardSerializer(instance.standard).data
+        data['estimate_calculation_documentation_file'] = self._get_estimate_calculation_documentation_file_url(instance)
 
         return data
 
@@ -232,7 +265,26 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
 class GHGInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GHGInformation
-        fields = ('id', 'impact_emission', 'graphic_description') 
+        fields = ('id', 'impact_emission', 'graphic_description', 'graphic_description_file', 'impact_sector', 'goals')
+    
+
+    def _get_graphic_description_file_url(self, instance):
+
+        if instance.graphic_description_file:
+
+            return 'fake/url/{0}'.format(instance.graphic_description_file.name)
+        
+        return None
+
+
+    def to_representation(self, instance):
+        
+        data = super().to_representation(instance)
+        data['impact_sector'] = GHGImpactSectorSerializer(instance.impact_sector.all(), many=True).data
+        data['goals'] = SustainableDevelopmentGoalsSerializer(instance.goals.all(), many=True).data
+        data['graphic_description_file'] = self._get_graphic_description_file_url(instance)
+
+        return data
 
 
 class FinanceSerializer(serializers.ModelSerializer):

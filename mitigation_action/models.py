@@ -37,7 +37,60 @@ def directory_path(instance, filename):
     path = "mitigation_action/{0}/{1}/{2}/"
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
-                        
+
+
+class CarbonDeposit(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Carbon Deposit')
+        verbose_name_plural = _('Carbon Deposits')
+
+
+class Standard(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Standar')
+        verbose_name_plural = _('Standars')
+
+
+class SustainableDevelopmentGoals(models.Model): 
+    code = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Sustainable Development Goal")
+        verbose_name_plural = _("Sustainable Development Goals")
+
+
+class GHGImpactSector(models.Model):
+
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("GHG Impact Sector")
+        verbose_name_plural = _("GHG Impact Sectors")
+
 
 class ActionAreas(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
@@ -286,21 +339,22 @@ class MonitoringInformation(models.Model):
 
 class ImpactDocumentation(models.Model):
     ## TODO: Missing. catalogs emission sources and gases
-    ## Missing catalogs carbon deposits
     ## missing file for documentation of calculations estimate 
     estimate_reduction_co2 = models.TextField(null=True)
     period_potential_reduction =models.TextField(null=True)
     ##catalog
-    ##catalog
+    carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
     estimate_calculation_documentation = models.TextField(null=True)
-    ##file 
+    estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     mitigation_action_in_inventory = models.BooleanField(null=True)
 
 
-    ## Section 3
+    ## Section 4.3
     ## TODO: Missing. catalogs standar to apply
+    standard = models.ForeignKey(Standard, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    other_standard = models.TextField(null=True)
     carbon_international_commerce = models.BooleanField(null=True)
     methodologies_to_use = models.TextField(null=True)
 
@@ -550,12 +604,11 @@ class GHGInformation(models.Model):
     ## TODO missing file to graphic description 
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
+    graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    impact_sector = models.ManyToManyField(GHGImpactSector, related_name='ghg_information', blank=True)
+    goals = models.ManyToManyField(SustainableDevelopmentGoals, related_name='ghg_information', blank=True)
 
-
-    ## TODO missing 2 fields with catalogs
-    ## sector
-    ## preliminar something
-
+    ##logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
