@@ -31,150 +31,25 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Contacts',
             },
         ),
-        migrations.CreateModel(
-            name='Finance',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('source', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'Finance',
-                'verbose_name_plural': 'Finances',
-            },
-        ),
-        migrations.CreateModel(
-            name='GeographicScale',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'GeographicScale',
-                'verbose_name_plural': 'GeographicScales',
-            },
-        ),
-        migrations.CreateModel(
-            name='IngeiCompliance',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'IngeiCompliance',
-                'verbose_name_plural': 'IngeiCompliances',
-            },
-        ),
-        migrations.CreateModel(
-            name='Institution',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'Institution',
-                'verbose_name_plural': 'Institutions',
-            },
-        ),
-        migrations.CreateModel(
-            name='Location',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('geographical_site', models.CharField(max_length=100)),
-                ('is_gis_annexed', models.BooleanField()),
-            ],
-            options={
-                'verbose_name': 'Location',
-                'verbose_name_plural': 'Locations',
-            },
-        ),
+       
         migrations.CreateModel(
             name='MitigationAction',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('strategy_name', models.CharField(max_length=100)),
-                ('name', models.CharField(max_length=100)),
-                ('purpose', models.CharField(max_length=500)),
-                ('quantitative_purpose', models.CharField(max_length=500)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('gas_inventory', models.CharField(max_length=100)),
-                ('emissions_source', models.CharField(max_length=100)),
-                ('carbon_sinks', models.CharField(max_length=100)),
-                ('impact_plan', models.CharField(max_length=500)),
-                ('impact', models.CharField(max_length=500)),
-                ('bibliographic_sources', models.CharField(max_length=500)),
-                ('is_international', models.BooleanField()),
-                ('international_participation', models.CharField(max_length=100)),
-                ('sustainability', models.CharField(max_length=500)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('contact', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Contact')),
-                ('finance', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Finance')),
-                ('geographic_scale', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.GeographicScale')),
-                ('ingei_compliance', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.IngeiCompliance')),
-                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Institution')),
-                ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Location')),
+                ('contact', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Contact'))
             ],
             options={
-                'verbose_name': 'MitigationAccess',
-                'verbose_name_plural': 'MitigationAccesses',
+                'verbose_name': 'Mitigation Action',
+                'verbose_name_plural': 'Mitigation Actions',
                 'ordering': ('created',),
             },
         ),
-        migrations.CreateModel(
-            name='ProgressIndicator',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(max_length=100)),
-                ('unit', models.CharField(max_length=100)),
-                ('start_date', models.DateField()),
-            ],
-            options={
-                'verbose_name': 'ProgressIndicator',
-                'verbose_name_plural': 'ProgressIndicators',
-            },
-        ),
-        migrations.CreateModel(
-            name='RegistrationType',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'RegistrationType',
-                'verbose_name_plural': 'RegistrationTypes',
-            },
-        ),
-        migrations.CreateModel(
-            name='Status',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'Status',
-                'verbose_name_plural': 'Statuses',
-            },
-        ),
-        migrations.AddField(
-            model_name='mitigationaction',
-            name='progress_indicator',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.ProgressIndicator'),
-        ),
-        migrations.AddField(
-            model_name='mitigationaction',
-            name='registration_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.RegistrationType'),
-        ),
-        migrations.AddField(
-            model_name='mitigationaction',
-            name='status',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.Status'),
-        ),
-        migrations.AddField(
+         migrations.AddField(
             model_name='mitigationaction',
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to=settings.AUTH_USER_MODEL),
         ),
+       
     ]

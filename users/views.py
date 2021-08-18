@@ -7,9 +7,12 @@ from users.services import UserService
 from general.helpers.views import ViewHelper
 from django.http import FileResponse
 # Create your views here.
-
+from rolepermissions.decorators import has_permission_decorator
+from rest_framework.decorators import authentication_classes, permission_classes
+from django.conf import settings
 service = UserService()
 view_helper = ViewHelper(service)
+
 
 
 @api_view(['GET', 'POST'])
@@ -20,6 +23,26 @@ def post_get_permissions(request):
     elif request.method == 'POST':
         result = view_helper.execute_by_name('create_permission', request)
     return result
+
+@api_view(['GET'])
+@csrf_exempt
+@has_permission_decorator('read_user')
+def get_roles(request):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name('get_roles',request)
+
+    return result
+
+@api_view(['POST'])
+@csrf_exempt
+@has_permission_decorator('edit_user')
+def assign_role_to_user(request, user_id):
+    if request.method == 'POST':
+        result = view_helper.execute_by_name('assign_role_to_user',request, user_id)
+
+    return result
+
+
 
 @api_view(['POST', 'GET'])
 @csrf_exempt
@@ -32,7 +55,6 @@ def post_get_user(request):
     return result
 
 
-
 @api_view(['GET', 'POST'])
 @csrf_exempt
 def post_get_all_profile_picture(request, user_id):
@@ -42,39 +64,6 @@ def post_get_all_profile_picture(request, user_id):
     elif request.method == 'POST':
         result = view_helper.execute_by_name('create_profile_picture', request, user_id)
 
-    return result
-
-
-
-
- ## Review this    
-@api_view(['GET', 'POST'])
-@csrf_exempt
-def post_get_groups(request):
-    if request.method == 'GET':
-        result = view_helper.execute_by_name('get_all_groups', request)
-    elif request.method == 'POST':
-        result = view_helper.execute_by_name('create_group', request)
-    
-    return result
-
-@api_view(['GET', 'PUT'])
-@csrf_exempt
-def put_get_group(request, group_id):
-    if request.method == 'GET':
-        result = view_helper.execute_by_name('get_group', request, group_id)
-    elif request.method == 'PUT':
-        result = view_helper.execute_by_name('update_group', request, group_id)
-    
-    return result
-
-@api_view(['POST', 'PUT'])
-@csrf_exempt
-def assign_user_to_group(request, username):
-    if request.method == 'POST':
-        result = view_helper.execute_by_name('assign_user_to_group', request, username)
-    elif request.method == 'PUT':
-        result = view_helper.execute_by_name('unassign_user_to_group', request, username)
     return result
 
 @api_view(['POST', 'PUT'])
@@ -101,6 +90,24 @@ def put_password(request, user_id):
     return result
 
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def request_to_change_password(request):
+    if request.method == 'POST':
+        result = view_helper.execute_by_name('request_to_change_password', request)
+    return result
+
+@api_view(['PUT'])
+@authentication_classes([])
+@permission_classes([])
+def update_password_by_request(request, token, code):
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name('update_password_by_request', request, token, code)
+    return result
+
+
+
 @api_view(['GET'])
 @csrf_exempt
 def get_profile_picture_version(request, image_id, user_id):
@@ -111,3 +118,4 @@ def get_profile_picture_version(request, image_id, user_id):
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
     return view_helper.error_message("Unsupported METHOD for download_profile_picture view")
+

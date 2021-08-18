@@ -9,8 +9,22 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 User =  get_user_model()
 
+
+STATUS = (('resolved', _('Resolved')), ('pending', _('Pending'), )) 
+
 class Comment(models.Model):
-    comment = models.CharField(max_length=3000, blank=False, null=False)
+
+    form_section = models.CharField(max_length=3000, blank=False, null=True)
+    field = models.CharField(max_length=1048, blank=False, null=True)
+    comment = models.TextField(max_length=2048, blank=False, null=False)
+    status = models.CharField(choices=STATUS, default='pending', max_length=10, blank=False, null=False)
+    review_number = models.IntegerField()
+    fsm_state = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
 
     class Meta:
         verbose_name = _("Comment")

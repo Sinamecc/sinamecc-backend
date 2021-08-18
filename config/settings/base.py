@@ -18,7 +18,7 @@ env.read_env() ## load variable env config/settings/.env
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-BASE_DIR_VIEW = "http://localhost:4200"
+BASE_DIR_FRONTEND = "http://localhost:4200"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -28,8 +28,8 @@ SECRET_KEY = 'ru$4(po@26!%(a%xi0*k!f2@$l+v6xs6j=&rpt1$3jtc@3(06i'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# Default id's
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_fsm',
     'rolepermissions', 
-    'users.apps.UsersConfig',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -138,7 +138,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "../media")
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=30),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=480),
     'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
     'JWT_RESPONSE_PAYLOAD_HANDLER':'users.utils.jwt_response_payload_handler',

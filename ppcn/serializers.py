@@ -2,7 +2,7 @@ from rest_framework import serializers
 from ppcn.models import  Organization, GeographicLevel, Contact, RequiredLevel, RecognitionType, GeiOrganization,\
                             PPCN, PPCNFile, ChangeLog, GeiActivityType, CIIUCode, Sector, SubSector, Reduction, \
                             OrganizationClassification, CarbonOffset, BiogenicEmission, GasReport, GasScope, QuantifiedGas, \
-                            OrganizationCategory
+                            OrganizationCategory, RemovalProject, GasRemoval
 
 class GeographicLevelSerializer(serializers.ModelSerializer):
 
@@ -56,6 +56,22 @@ class SectorSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField('language')
     class Meta:
         model = Sector
+        fields = ('id','name_es', 'name_en', 'name', 'geographicLevel')
+        extra_kwargs = {
+            'name_es': {'write_only': True},
+            'name_en': {'write_only': True},
+            'name': {'read_only': True}
+        }
+
+    def language(self, obj):
+        return  obj.name_en if self.context.get('language', 'en') == 'en' else obj.name_es
+
+
+class RemovalProjectSerializer(serializers.ModelSerializer):
+
+    name = serializers.SerializerMethodField('language')
+    class Meta:
+        model = RemovalProject
         fields = ('id','name_es', 'name_en', 'name')
         extra_kwargs = {
             'name_es': {'write_only': True},
@@ -65,6 +81,8 @@ class SectorSerializer(serializers.ModelSerializer):
 
     def language(self, obj):
         return  obj.name_en if self.context.get('language', 'en') == 'en' else obj.name_es
+
+
 
 class SubSectorSerializer(serializers.ModelSerializer):
 
@@ -81,24 +99,25 @@ class SubSectorSerializer(serializers.ModelSerializer):
     def language(self, obj):
         return  obj.name_en if self.context.get('language', 'en') == 'en' else obj.name_es
 
+
 class ReductionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reduction
         fields = ('id', 'project', 'activity', 'detail_reduction', 'emission', 'total_emission', 'investment', 
-                    'investment_currency', 'total_investment', 'total_investment_currency')
+                'investment_currency', 'total_investment', 'total_investment_currency', 'organization_classification')
 
 class CarbonOffsetSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarbonOffset
         fields = ('id', 'offset_scheme', 'project_location', 'certificate_identification', 'total_carbon_offset', 
-                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency')
+                    'offset_cost', 'offset_cost_currency', 'period', 'total_offset_cost', 'total_offset_cost_currency', 'organization_classification')
 
 class OrganizationClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationClassification
-        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'required_level', 'recognition_type', 'reduction', 'carbon_offset')
+        fields = ('id', 'emission_quantity', 'buildings_number', 'data_inventory_quantity', 'methodologies_complexity','required_level', 'recognition_type')
 
 class OrganizationCategorySerializer(serializers.ModelSerializer):
 
@@ -109,7 +128,8 @@ class OrganizationCategorySerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ('id', 'name', 'legal_identification','representative_name','representative_legal_identification','phone_organization', 'postal_code', 'fax', 'address', 'contact')
+        fields = ('id', 'name', 'legal_identification','representative_name','representative_legal_identification', 'email_representative_legal',
+        'phone_organization', 'postal_code', 'fax', 'address', 'contact')
 
 class CIIUCodeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -128,6 +148,12 @@ class BiogenicEmissionSerializer(serializers.ModelSerializer):
         fields = ('id', 'total', 'scope_1', 'scope_2')
 
 
+class GasRemovalSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GasRemoval
+        fields = ('id', 'removal_cost', 'removal_cost_currency', 'total', 'removal_descriptions', 'ppcn')
+        
 class GasReportSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -153,13 +179,13 @@ class GeiOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model =  GeiOrganization
-        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'gas_report')
+        fields = ('id', 'ovv', 'emission_ovv_date', 'organization_category', 'report_year', 'base_year', 'scope','gas_report')
 
 class GeiActivityTypeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model =  GeiActivityType
-        fields = ('id', 'activity_type', 'sub_sector', 'sector')
+        fields = ('id', 'gei_organization', 'activity_type', 'sub_sector', 'sector')
 
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:

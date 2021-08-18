@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from rolepermissions.decorators import has_permission_decorator
 from django.utils.decorators import method_decorator
+from rolepermissions.checkers import has_permission
 service = PpcnService()
 view_helper = ViewHelper(service)
 permission = PermissionsHelper()
@@ -23,16 +24,23 @@ permission = PermissionsHelper()
 
 @api_view(['POST'])
 @has_permission_decorator('create_ppcn')
+def send_to_review(request, id):
+    if request.method == 'POST':
+        result = view_helper.execute_by_name("send_to_review", request, id)
+    return result
+
+
+@has_permission_decorator('create_ppcn')
 def post_ppcn(request):
     if request.method == 'POST':
         result = view_helper.post(request)
     return result
 
-@api_view(['GET'])
-##@has_permission_decorator('read_all_ppcn')
+@has_permission_decorator('read_ppcn')
 def get_ppcn(request,  language = 'en'):
     if request.method == 'GET':
-        result = view_helper.get_all(request, language)
+        user = request.user if not has_permission(request.user, 'read_all_ppcn') else False
+        result = view_helper.get_all(request, language, user)
     return result
 
 @api_view(['GET'])
@@ -53,7 +61,7 @@ def put_ppcn(request, id):
 @has_permission_decorator('edit_ppcn')
 def patch_ppcn(request, id):
     if request.method == 'PATCH':
-        result = view_helper.patch(id, request)
+        result = view_helper.patch(request, id)
     return result
 
 
@@ -62,6 +70,18 @@ def patch_ppcn(request, id):
 def delete_ppcn(request, id):
     if request.method == 'DELETE':
         result = view_helper.delete(id)
+    return result
+
+
+@api_view(['GET'])
+@has_permission_decorator('read_ppcn')
+def get_current_comments(request, ppcn_id, fsm_state=False, review_number=False):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, ppcn_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, ppcn_id, fsm_state, review_number)
+
     return result
 
 ##
@@ -142,6 +162,16 @@ def get_all_ovv(request):
 ##
 ## Endpoints with aux views
 ##
+@api_view(['GET'])
+@has_permission_decorator('read_ppcn')
+def get_comments(request, ppcn_id, fsm_state=False, review_number=False):
+    if request.method == 'GET':
+        result = get_current_comments(request, ppcn_id, fsm_state, review_number)
+    
+    return result
+
+
+
 
 @api_view(['GET','POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
@@ -173,9 +203,6 @@ def put_delete_patch_ppcn(request, id , language = 'en'):
         result = patch_ppcn(request, id)
 
     return result
-
-
-
 
 
 ## Review these endpoints ******

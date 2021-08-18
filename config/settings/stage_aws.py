@@ -8,7 +8,7 @@ DATABASES = {'default': env.db('DATABASE_URL')}
 
 DEBUG = False
 ALLOWED_HOSTS = ['*']
-
+BASE_DIR_FRONTEND = 'stage.sinamecc.go.cr'
 CORS_ORIGIN_WHITELIST = ('stage.sinamecc.go.cr','ec2-18-218-214-170.us-east-2.compute.amazonaws.com','ip-172-31-20-146.us-east-2.compute.internal')
 
 AWS_STORAGE_BUCKET_NAME = 'sinamecc-dev'

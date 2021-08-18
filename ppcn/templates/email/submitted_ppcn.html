@@ -1,0 +1,20 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de registro {% else %}  Registration notification {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p>
+            Estimado(a) Sr(a). {{representative_name}}
+            <br/>
+            Representante de: {{organization_name}}
+            </p>
+            <p>Reciba un cordial saludo.</p>
+            <p>Le confirmo la recepci&oacute;n de los documentos enviados por su representada, para participar en el Programa Pa&iacute;s Carbono Neutralidad 2.0 
+            <br/>en la categor&iacute;a <strong>{{geographic_level}}</strong>, bajo el reconocimiento de <strong>{{recognition_type}}</strong>.
+            </p>
+            <p>Les estaremos informando sobre el estado de la revisi&oacute;n.&nbsp;</p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/signature.html"%}
+        </div>
+{% endblock content %}

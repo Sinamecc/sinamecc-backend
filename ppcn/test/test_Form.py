@@ -43,19 +43,17 @@ class PPCNFormTest(TestCase):
         self.cantonal_sub_sector = SubSector.objects.create(name_es='cantonal_sub_sector_es', name_en='cantonal_sub_sector_en', sector=self.cantonal_sector)
         self.organizational_sub_sector = SubSector.objects.create(name_es='organizational_sub_sector_es', name_en='organizational_sub_sector_en', sector=self.organizational_sector)
 
-        self.cantonal_gei_activity_type = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.cantonal_sub_sector, sector=self.cantonal_sector)
-        self.organizational_gei_activity_type_1 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
-        self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
-
+        
         self.ovv = OVV.objects.create(name='name_ovv', email='ovv@fake.com', phone='22332233')
         self.gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
         self.cantonal_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
 
         self.organizational_gei_organization = GeiOrganization.objects.create(ovv =self.ovv,  emission_ovv_date=dt.date(2007, 1, 1), report_year=2019, base_year=2018)
-
-        self.cantonal_gei_organization.gei_activity_types.add(self.cantonal_gei_activity_type)
-        self.organizational_gei_organization.gei_activity_types.add(self.organizational_gei_activity_type_1, self.organizational_gei_activity_type_2)
+        
+        self.cantonal_gei_activity_type = GeiActivityType.objects.create(gei_organization=self.cantonal_gei_organization, activity_type='activity_type', sub_sector=self.cantonal_sub_sector, sector=self.cantonal_sector)
+        self.organizational_gei_activity_type_1 = GeiActivityType.objects.create(gei_organization=self.organizational_gei_organization, activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
+        self.organizational_gei_activity_type_2 = GeiActivityType.objects.create(gei_organization=self.organizational_gei_organization, activity_type='activity_type', sub_sector=self.organizational_sub_sector, sector=self.organizational_sector)
 
         self.ppcn_cantonal = PPCN.objects.create(user= self.superUser, confidential= 'confidential', organization=self.organization, geographic_level=self.cantonal_geographic_level, 
                                                     gei_organization=self.cantonal_gei_organization, organization_classification= self.organization_classification)
@@ -95,7 +93,30 @@ class PPCNFormTest(TestCase):
                 'buildings_number': 10000,
                 'data_inventory_quantity': 1000,
                 'required_level': self.required_level.id,
-                'recognition_type': self.recognition_type.id
+                'recognition_type': self.recognition_type.id,
+                "reduction" :[{
+                    "proyect": "test",
+                    "activity": "Test activity",
+                    "detail_reduction": "test reduction detail", 
+                    "emission": "10000", 
+                    "total_emission": "10000", 
+                    "investment": "1000000", 
+                    "investment_currency": "USD", 
+                    "total_investment": "10000", 
+                    "total_investment_currency": "CRC"
+                }],
+                "carbon_offset":
+                [{
+                    "offset_scheme" : "UCC", 
+                    "project_location" : "Project Location", 
+                    "certificate_identification" : "CRSD-123214", 
+                    "total_carbon_offset" : "80000 carbon OFFSET", 
+                    "offset_cost" : "5000", 
+                    "offset_cost_currency" : "USD", 
+                    "period" : "May period", 
+                    "total_offset_cost" : "5000", 
+                    "total_offset_cost_currency":"CRC"
+                }]
             },
             "gei_organization":
             {	
@@ -244,31 +265,31 @@ class PPCNFormTest(TestCase):
         self.assertEquals(gei_organization.get('ovv').get('email'), self.organizational_gei_organization.ovv.email)
         
         ## gei_organization_ gei_activity_types
-        gei_activity_1 = self.organizational_gei_organization.gei_activity_types.all()[0]
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('id'), gei_activity_1.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('activity_type'), gei_activity_1.activity_type)
+        gei_activity_1 = self.organizational_gei_organization.gei_activity_type.all()[0]
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('id'), gei_activity_1.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('activity_type'), gei_activity_1.activity_type)
 
         ## gei_organization[0] - sector
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('id'), gei_activity_1.sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sector').get('id'), gei_activity_1.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
 
         ## gei_organization[0] - subsector
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
         
 
         ## gei_organization_ gei_activity_types
-        gei_activity_2 = self.organizational_gei_organization.gei_activity_types.all()[1]
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('id'), gei_activity_2.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('activity_type'), gei_activity_2.activity_type)
+        gei_activity_2 = self.organizational_gei_organization.gei_activity_type.all()[1]
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('id'), gei_activity_2.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('activity_type'), gei_activity_2.activity_type)
 
         ## gei_organization[1] - sector
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sector').get('id'), gei_activity_2.sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sector').get('name'), gei_activity_2.sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('sector').get('id'), gei_activity_2.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('sector').get('name'), gei_activity_2.sector.name_en)
 
         ## gei_organization[1] - subsector
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sub_sector').get('id'), gei_activity_2.sub_sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[1].get('sub_sector').get('name'), gei_activity_2.sub_sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('sub_sector').get('id'), gei_activity_2.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[1].get('sub_sector').get('name'), gei_activity_2.sub_sector.name_en)
 
 
         
@@ -330,17 +351,17 @@ class PPCNFormTest(TestCase):
         self.assertEquals(gei_organization.get('ovv').get('email'), self.organizational_gei_organization.ovv.email)
         
         ## gei_organization_ gei_activity_types
-        gei_activity_1 = self.cantonal_gei_organization.gei_activity_types.all()[0]
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('id'), gei_activity_1.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('activity_type'), gei_activity_1.activity_type)
+        gei_activity_1 = self.cantonal_gei_organization.gei_activity_type.all()[0]
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('id'), gei_activity_1.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('activity_type'), gei_activity_1.activity_type)
 
         ## gei_organization[0] - sector
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('id'), gei_activity_1.sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sector').get('id'), gei_activity_1.sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sector').get('name'), gei_activity_1.sector.name_en)
 
         ## gei_organization[0] - subsector
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
-        self.assertEquals(gei_organization.get('gei_activity_types')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sub_sector').get('id'), gei_activity_1.sub_sector.id)
+        self.assertEquals(gei_organization.get('gei_activity_type')[0].get('sub_sector').get('name'), gei_activity_1.sub_sector.name_en)
         
 
     ## POST ENDPOINTS
