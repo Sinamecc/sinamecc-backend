@@ -1,54 +1,60 @@
 pipeline {
-    agent any;
-    environment {
-        DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
-        DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
-        DATABASE_NAME = "sinamecc_dev_2020"
-        DATABASE_CREDS  = credentials('sinamecc-dev-dba')
-        DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
+  agent any;
+  environment {
+    DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
+    DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
+    DATABASE_NAME = "sinamecc_dev_2020"
+    DATABASE_CREDS  = credentials('sinamecc-dev-dba')
+    DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
+
+    DEFAULT_REGION = "us-east-2"
+    BASE_ECR = "973157324549.dkr.ecr.$DEFAULT_REGION.amazonaws.com"
+    ENVIRONMENT = "dev"
+    APP = "sinamecc-backend"
+    ECS_CLUSTER_NAME = "sinamecc-cluster-$ENVIRONMENT"
+    ECS_SERVICE_NAME = "$APP-$ENVIRONMENT"
+  }
+
+  stages {
+    stage("Build and Test") {
+      steps {
+        withPythonEnv('/bin/python3.7') {
+          echo "Step: Upgrading pip"
+          sh 'pip install --upgrade pip'
+
+          echo "Step: Updating requirements"
+          sh 'pip install -r requirements.txt'
+
+          echo "Step: Running Tests"
+          sh 'python manage.py test'
+
+          echo "Step: Running Migrations"
+          sh 'python manage.py migrate'
+        }
+      }
     }
 
-    stages {
-        stage("Build and Test") {
-            steps {
-                withPythonEnv('/usr/bin/python3.6') {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
-                    {
-                        echo "Step: Upgrading pip"
-                        sh 'pip install --upgrade pip'
-
-                        echo "Step: Updating requirements"
-                        sh 'pip install -r requirements.txt'
-
-                        echo "Step: Running Tests"
-                        sh 'python manage.py test'
-
-                        echo "Step: Running Migrations"
-                        sh 'python manage.py migrate'                    
-                    }
-                }
-            }
-        }
-
-        stage ("Building docker image") {
-            steps {
-                withPythonEnv('/usr/bin/python3.6') {
-                    echo "Step: Building docker image"
-                    sh 'docker build -t sinamecc_backend:dev .'
-                }
-            }   
-        }
-        stage ("Restarting docker container") {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials-us-east-2', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']])
-                {
-                    echo "Step: Stopping current container"
-                    sh 'test ! -z "`docker ps -a| grep sinamecc_backend_dev`" && (docker stop sinamecc_backend_dev && docker rm sinamecc_backend_dev) || echo "sinamecc_backend_dev does not exists"'
-
-                    echo "Step: Running new container"
-                    sh "docker run -d -e \"DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE\" -e \"DATABASE_URL=$DATABASE_URL\" -e \"AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID\" -e \"AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY\" --name sinamecc_backend_dev -p 8015:8015 sinamecc_backend:dev"
-                }
-            }   
-        }
+    stage ("Building docker image") {
+      steps {
+        echo "Step: Building docker image"
+        sh 'docker build -t $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT .'
+      }
     }
+
+    stage ("Pushing Images and Updating Service") {
+      steps {
+        echo "Step: Login ECR"
+        sh '/usr/local/bin/aws ecr get-login-password --region $DEFAULT_REGION | docker login --username AWS --password-stdin $BASE_ECR/$ENVIRONMENT/$APP'
+
+        echo "Step: Pushing base image"
+        sh 'docker push $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT'
+
+        echo "Step: Restarting ECS Service"
+        sh '/usr/local/bin/aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment'
+
+        echo "Step: Waiting on Service to be healthy"
+        sh '/usr/local/bin/aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME'
+      }
+    }
+  }
 }
