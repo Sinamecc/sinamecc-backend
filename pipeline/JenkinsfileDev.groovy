@@ -33,11 +33,25 @@ pipeline {
 
         stage ("Building docker image") {
             steps {
-                withPythonEnv('/bin/python3.7') {
-                    echo "Step: Building docker image"
-                    sh 'docker build -t $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT .'
-                }
+                echo "Step: Building docker image"
+                sh 'docker build -t $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT .'
             }
+        }
+
+        stage ("Pushing Images and Updating Service") {
+          steps {
+            echo "Step: Login ECR"
+            sh '/usr/local/bin/aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $BASE_ECR/$ENVIRONMENT/$APP'
+
+            echo "Step: Pushing base image"
+            sh 'docker push $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT'
+
+            echo "Step: Restarting ECS Service"
+            sh '/usr/local/bin/aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment'
+
+            echo "Step: Waiting on Service to be healthy"
+            sh '/usr/local/bin/aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME'
+          }
         }
     }
 }
