@@ -3,7 +3,7 @@ pipeline {
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.ecs_aws"
         DATABASE_HOST = "sinamecc-pgsql-dev.copuo03vfifp.us-east-2.rds.amazonaws.com"
-        DATABASE_NAME = "sinameccdbadmin"
+        DATABASE_NAME = "sinamecc"
         DATABASE_CREDS  = credentials('sinamecc-dev-dba')
         DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
 
