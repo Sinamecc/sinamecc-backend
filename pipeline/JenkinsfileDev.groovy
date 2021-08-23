@@ -1,7 +1,7 @@
 pipeline {
   agent any;
   environment {
-    DJANGO_SETTINGS_MODULE = "config.settings.dev_aws"
+    DJANGO_SETTINGS_MODULE = "config.settings.ecs_aws"
     DATABASE_HOST = "sinamecc.copuo03vfifp.us-east-2.rds.amazonaws.com"
     DATABASE_NAME = "sinamecc_dev_2020"
     DATABASE_CREDS  = credentials('sinamecc-dev-dba')
