@@ -290,6 +290,46 @@ class Status(models.Model):
     def __unicode__(self):
         return smart_unicode(self.status)
 
+class ThematicCategorizationType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Thematic Categorization Type")
+        verbose_name_plural = _("Thematic Categorization Types")
+
+
+class InformationSourceType(models.Model):
+    name = models.CharField(max_length=500, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source Type")
+        verbose_name_plural = _("Information Source Types")
+
+
+
+class Classifier(models.Model):
+    code = models.CharField(max_length=255, null=True)
+    name = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Classifier")
+        verbose_name_plural = _("Classifiers")
+
+
 
 
 
@@ -300,6 +340,27 @@ class Status(models.Model):
 ##
 ## Extra models
 ##
+
+class Contact(models.Model):
+
+    institution = models.CharField(max_length=500, null=True)
+    full_name = models.CharField(max_length=100, blank=False, null=True)
+    job_title = models.CharField(max_length=100, blank=False, null=True)
+    email = models.EmailField(max_length=254, blank=False, null=True)
+    phone = models.CharField(max_length=100, blank=False, null=True)
+
+    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Contact")
+        verbose_name_plural = _("Contacts")
+
+    def __unicode__(self):
+        return smart_unicode(self.full_name)
+
+
 
 ## section 5
 
@@ -389,6 +450,20 @@ class Categorization(models.Model):
         verbose_name_plural = _("Categorization")
 
 
+class InformationSource(models.Model):
+    responsible_institution = models.CharField(max_length=500, null=True)
+    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.CASCADE)
+    other_type = models.CharField(max_length=500, null=True)
+    statistical_operation = models.CharField(max_length=500, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source")
+        verbose_name_plural = _("Information Sources")
+
 
 class Indicator(models.Model):
     PERIODICITY = [
@@ -396,6 +471,14 @@ class Indicator(models.Model):
         ('BIANNUAL', 'Biannual'),
         ('QUARTERLY', 'Quartely')
     ]
+    GEOGRAPHIC = [
+        ('NATIONAL', 'National'),
+        ('REGIONAL', 'Regional'),
+        ('PROVINCIAL', 'Provincial'),
+        ('CANTONAL', 'Cantonal'),
+        ('OTHER', 'Other')
+    ]
+
     ## TODO: Missing. catalogs for type 
     ## missing file for detail
     ## missing file for additional information
@@ -404,16 +487,28 @@ class Indicator(models.Model):
     description = models.TextField(null=True)
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
-    ## detail file here
+    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     
-    data_generating_institution = models.CharField(max_length=255, null=True)
-    reporting_institution = models.CharField(max_length=255, null=True)
-    measurement_start_date = models.DateField(null=True)
-    additional_information = models.TextField(null=True)
-    ## aditional information file
+    available_time_start_date = models.DateField(null=True)
+    available_time_end_date = models.DateField(null=True)
+    geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
+    other_geographic_coverage = models.CharField(max_length=255, null=True)
+    disaggregation = models.TextField(null=True)
 
+    ## ensure sustainability
+    additional_information = models.TextField(null=True)
+    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+
+    comments = models.TextField(null=True)
     ## FK
+
+    ## thematic categorization
+    type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.CASCADE)
+    other_type_of_data = models.CharField(max_length=255, null=True)
+    classifier = models.ManyToManyField(Classifier, related_name='indicator', through='IndicatorClassifier')
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.CASCADE)
+ 
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
 
     ## Logs
@@ -428,6 +523,20 @@ class Indicator(models.Model):
     def __str__(self):
 
         return smart_unicode(self.name)
+
+class IndicatorClassifier(models.Model):
+    indicator = models.ForeignKey(Indicator, on_delete=models.CASCADE)
+    classifier = models.ForeignKey(Classifier, on_delete=models.CASCADE)
+    description = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Indicator Classifier")
+        verbose_name_plural = _("Indicator Classifier")
+
 
 
 class MonitoringIndicator(models.Model):
@@ -578,24 +687,6 @@ class MitigationActionStatus(models.Model):
 ## Finish extra model
 ##
 
-class Contact(models.Model):
-
-    institution = models.CharField(max_length=500, null=True)
-    full_name = models.CharField(max_length=100, blank=False, null=True)
-    job_title = models.CharField(max_length=100, blank=False, null=True)
-    email = models.EmailField(max_length=254, blank=False, null=True)
-    phone = models.CharField(max_length=100, blank=False, null=True)
-
-    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Contact")
-        verbose_name_plural = _("Contacts")
-
-    def __unicode__(self):
-        return smart_unicode(self.full_name)
 
 ## Greenhouse gases(GHG) - Gases de efectos invernadero (GEI)
 class GHGInformation(models.Model): 

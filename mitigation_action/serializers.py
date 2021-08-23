@@ -6,7 +6,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard
+    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType
 
 
 ##
@@ -151,6 +151,10 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = ('id', 'code', 'status')
 
 
+class InformationSourceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InformationSourceType
+        fields = ('id', 'code', 'name')
 ##
 ## Finish Catalogs Serializers
 ##
@@ -201,9 +205,15 @@ class IndicatorSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = Indicator
-        fields = ('id', 'name', 'description', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
-                    'reporting_institution', 'measurement_start_date', 'additional_information', 'monitoring_information')
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date',
+                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'additional_information', 'comments', 'monitoring_information', 'monitoring_indicator')  
         list_serializer_class = GenericListSerializer
+
+class InformationSourceSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = InformationSource
+        fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation')
 
 
 class MonitoringInformationSerializer(serializers.ModelSerializer):
