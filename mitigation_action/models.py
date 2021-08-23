@@ -402,7 +402,6 @@ class Indicator(models.Model):
 
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
-    type = models.CharField(max_length=255, null=True)
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
     ## detail file here

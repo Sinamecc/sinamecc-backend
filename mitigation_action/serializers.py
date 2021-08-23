@@ -201,7 +201,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = Indicator
-        fields = ('id', 'name', 'description', 'type', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
+        fields = ('id', 'name', 'description', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
                     'reporting_institution', 'measurement_start_date', 'additional_information', 'monitoring_information')
         list_serializer_class = GenericListSerializer
 

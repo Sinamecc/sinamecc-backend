@@ -34,7 +34,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, null=True)),
                 ('description', models.TextField(null=True)),
-                ('type', models.CharField(max_length=255, null=True)),
                 ('unit', models.CharField(max_length=255, null=True)),
                 ('methodological_detail', models.TextField(null=True)),
                 ('reporting_periodicity', models.CharField(choices=[('YEARLY', 'Yearly'), ('BIANNUAL', 'Biannual'), ('QUARTERLY', 'Quartely')], default='YEARLY', max_length=50, null=True)),
