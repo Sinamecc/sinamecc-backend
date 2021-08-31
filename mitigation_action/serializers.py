@@ -6,7 +6,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType
+    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, IndicatorChangeLog
 
 
 ##
@@ -155,6 +155,12 @@ class InformationSourceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InformationSourceType
         fields = ('id', 'code', 'name')
+
+
+class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ThematicCategorizationType
+        fields = ('id', 'code', 'name')
 ##
 ## Finish Catalogs Serializers
 ##
@@ -193,21 +199,35 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField()
     class Meta:
         model = MonitoringIndicator
         fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'updated_data', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
-        list_serializer_class = GenericListSerializer
+        
+
+
+class IndicatorChangeLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorChangeLog
+        fields = ('id', 'indicator', 'update_date', 'changes', 'changes_description', 'author')
+
 
 
 class IndicatorSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField()
     class Meta:
         model = Indicator
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date',
-                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'additional_information', 'comments', 'monitoring_information', 'monitoring_indicator')  
-        list_serializer_class = GenericListSerializer
+
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
+                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'additional_information', 'additional_information_file', 'comments',
+                'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'monitoring_information')
+    
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        ## push the indicator_id to the indicator_change_log
+        return data
+
 
 class InformationSourceSerializer(serializers.ModelSerializer):
     

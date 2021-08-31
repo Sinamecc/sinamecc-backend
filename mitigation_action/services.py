@@ -200,7 +200,7 @@ class MitigationActionService():
     def _get_serialized_indicator_list(self, data, indicator_list, monitoring_information_id):
         
         data = [{**indicator, 'monitoring_information': monitoring_information_id}  for indicator in data ]
- 
+
         serializer = self._serialize_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_list, many=True,  partial=True)
 
         return serializer

@@ -290,6 +290,8 @@ class Status(models.Model):
     def __unicode__(self):
         return smart_unicode(self.status)
 
+
+## section 5 new
 class ThematicCategorizationType(models.Model):
 
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -303,10 +305,10 @@ class ThematicCategorizationType(models.Model):
         verbose_name = _("Thematic Categorization Type")
         verbose_name_plural = _("Thematic Categorization Types")
 
-
+## section 5 new
 class InformationSourceType(models.Model):
     name = models.CharField(max_length=500, null=True)
-
+    code = models.CharField(max_length=500, null=True)
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -315,8 +317,7 @@ class InformationSourceType(models.Model):
         verbose_name = _("Information Source Type")
         verbose_name_plural = _("Information Source Types")
 
-
-
+## section 5 new
 class Classifier(models.Model):
     code = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255, null=True)
@@ -328,8 +329,6 @@ class Classifier(models.Model):
     class Meta:
         verbose_name = _("Classifier")
         verbose_name_plural = _("Classifiers")
-
-
 
 
 
@@ -367,7 +366,6 @@ class Contact(models.Model):
 class MonitoringReportingIndicator(models.Model):
 
     progress_in_monitoring = models.BooleanField(null=True)
-
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -450,6 +448,7 @@ class Categorization(models.Model):
         verbose_name_plural = _("Categorization")
 
 
+## section 5 new
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
     type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.CASCADE)
@@ -465,6 +464,7 @@ class InformationSource(models.Model):
         verbose_name_plural = _("Information Sources")
 
 
+## section 5 new
 class Indicator(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
@@ -487,14 +487,19 @@ class Indicator(models.Model):
     description = models.TextField(null=True)
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
+    ## need to endpoint to upload file
     methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     
     available_time_start_date = models.DateField(null=True)
     available_time_end_date = models.DateField(null=True)
+
     geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
     other_geographic_coverage = models.CharField(max_length=255, null=True)
+    
     disaggregation = models.TextField(null=True)
+
+    limitation = models.TextField(null=True)
 
     ## ensure sustainability
     additional_information = models.TextField(null=True)
@@ -502,14 +507,19 @@ class Indicator(models.Model):
 
     comments = models.TextField(null=True)
     ## FK
-
+    ## information source
+    information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator', on_delete=models.CASCADE)
+    
     ## thematic categorization
     type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.CASCADE)
     other_type_of_data = models.CharField(max_length=255, null=True)
-    classifier = models.ManyToManyField(Classifier, related_name='indicator', through='IndicatorClassifier')
+    classifier = models.ManyToManyField(Classifier, related_name='indicator')
+    other_classifier = models.CharField(max_length=255, null=True)
+
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.CASCADE)
- 
+    
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
+
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -524,18 +534,20 @@ class Indicator(models.Model):
 
         return smart_unicode(self.name)
 
-class IndicatorClassifier(models.Model):
-    indicator = models.ForeignKey(Indicator, on_delete=models.CASCADE)
-    classifier = models.ForeignKey(Classifier, on_delete=models.CASCADE)
-    description = models.CharField(max_length=255, null=True)
 
+## section 5 new
+class IndicatorChangeLog(models.Model):
+
+    indicator = models.ForeignKey(Indicator, related_name='indicator_change_log', on_delete=models.CASCADE)
+    update_date = models.DateTimeField(auto_now=True)
+    changes = models.TextField(null=True)
+    changes_description = models.TextField(null=True)
+    author = models.CharField(max_length=500, null=True)
+    
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = _("Indicator Classifier")
-        verbose_name_plural = _("Indicator Classifier")
 
 
 
@@ -543,11 +555,11 @@ class MonitoringIndicator(models.Model):
 
     ## TODO: Missing.
     ## missing file for updated data
-    ## missing url for updated data
     initial_date_report_period = models.DateField(null=True)
     final_date_report_period = models.DateField(null=True)
     data_updated_date = models.DateField(null=True)
     updated_data = models.CharField(max_length=150, null=True)
+    updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     progress_report = models.TextField(null=True)
 
     ## FK 
