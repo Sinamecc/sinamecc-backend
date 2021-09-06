@@ -9,7 +9,6 @@ pipeline {
         ECS_SERVICE_NAME = "sinamecc-backend-$ENVIRONMENT"
 
         DJANGO_SETTINGS_MODULE = "config.settings.ecs_aws"
-        DATABASE_HOST   = '$(/usr/local/bin/aws ssm get-parameters --region us-east-2 --names /dev/backend/db-url --query Parameters[0].Value --with-decryption | sed \'s/"//g\')'
         DATABASE_NAME   = "sinamecc"
         DATABASE_CREDS  = credentials('sinamecc-dev-dba')
         DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
@@ -19,6 +18,15 @@ pipeline {
         stage("Build and Test") {
             steps {
                 withPythonEnv('/bin/python3.7') {
+                  DATABASE_HOST = sh (
+                    script: '/usr/local/bin/aws ssm get-parameters --region us-east-2 --names /dev/backend/db-url --query Parameters[0].Value --with-decryption | sed \'s/"//g\'',
+                    returnStdout: true
+                  ).trim()
+
+                  DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
+
+                  echo "Step 0: Using DATABASE_URL: ${DATABASE_URL}"
+
                   echo "Step: Upgrading pip"
                   sh 'pip install --upgrade pip'
 
