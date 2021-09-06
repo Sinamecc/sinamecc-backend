@@ -19,9 +19,6 @@ pipeline {
         stage("Build and Test") {
             steps {
                 withPythonEnv('/bin/python3.7') {
-                  sh 'export DATABASE_HOST = $(aws ssm get-parameters --region us-east-2 --names /dev/backend/db-url --query Parameters[0].Value --with-decryption | sed \"s/"//g\")'
-                  echo "Step 0: Using DATABASE_HOST: ${DATABASE_HOST}"
-
                   echo "Step: Upgrading pip"
                   sh 'pip install --upgrade pip'
 
