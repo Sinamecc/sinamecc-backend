@@ -65,9 +65,11 @@ pipeline {
         }
 
         stage("Pushing Image to Prod and Updating Service") {
-          echo "Need to re-tag image"
+          steps {
+            echo "Need to re-tag image"
 
-          echo "Need to push image and update prod"
+            echo "Need to push image and update prod"
+          }
         }
 
         stage ("Waiting on PRod to be healthy") {
