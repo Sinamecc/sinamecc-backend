@@ -2,9 +2,12 @@ pipeline {
     agent any;
     environment {
         DJANGO_SETTINGS_MODULE = "config.settings.ecs_aws"
-        DATABASE_HOST   = '$(aws ssm get-parameters --region us-east-2 --names /dev/backend/db-url --query Parameters[0].Value --with-decryption | sed \'s/"//g\')'
-        DATABASE_NAME = "sinamecc"
-        DATABASE_CREDS  = credentials('sinamecc-dev-dba')
+        DATABASE_HOST = sh (
+          script: '/usr/local/bin/aws ssm get-parameters --region us-east-2 --names /stage/backend/db-url --query Parameters[0].Value --with-decryption | sed \'s/"//g\'',
+          returnStdout: true
+        ).trim()
+        DATABASE_NAME = "sinamecc_stage"
+        DATABASE_CREDS  = credentials('sinamecc-stage-dba')
         DATABASE_URL    = "postgres://${DATABASE_CREDS}@${DATABASE_HOST}:5432/${DATABASE_NAME}"
 
         BASE_ECR = "973157324549.dkr.ecr.us-east-2.amazonaws.com"
@@ -51,9 +54,25 @@ pipeline {
 
             echo "Step: Restarting ECS Service"
             sh '/usr/local/bin/aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment'
+          }
+        }
 
+        stage ("Waiting on Stage to be healthy") {
+          steps {
             echo "Step: Waiting on Service to be healthy"
             sh '/usr/local/bin/aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME'
+          }
+        }
+
+        stage("Pushing Image to Prod and Updating Service") {
+          echo "Need to re-tag image"
+
+          echo "Need to push image and update prod"
+        }
+
+        stage ("Waiting on PRod to be healthy") {
+          steps {
+            echo "Step: Waiting on Service to be healthy"
           }
         }
     }
