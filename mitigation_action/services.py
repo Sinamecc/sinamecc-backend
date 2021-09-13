@@ -39,6 +39,7 @@ class MitigationActionService():
         self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
         self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
         self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
+        self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
 
 
     # auxiliary functions
@@ -913,6 +914,33 @@ class MitigationActionService():
             result = (mitigation_action_status, mitigation_action_data)
 
         return result
+
+    def delete_indicator_from_mitigation_action(self, request, mitigation_action_id, indicator_id):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+        if mitigation_action_status:
+            monitoring_information = mitigation_action_data.monitoring_information
+            
+            if monitoring_information:
+                indicator_list = monitoring_information.indicator.filter(id=indicator_id)
+                if indicator_list:
+                    indicator = indicator_list.first()
+                    indicator.delete()
+                    result = (True, {"id": indicator_id})
+                else:
+                    result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+
+            else:
+                result = (False, self.MITIGATION_ACTION_NO_INDICATOR.format(mitigation_action_data.id))
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+
+        return result
+
+
+
 
 
     def get_catalog_data(self, request):

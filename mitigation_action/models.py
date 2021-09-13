@@ -3,6 +3,7 @@ from django.db.models import manager
 
 from django.db.models.fields import BLANK_CHOICE_DASH, CharField, related
 from django.db.models.query import QuerySet
+from rest_framework import fields
 from users.serializers import NewCustomUserSerializer
 from django.conf import settings
 
@@ -508,16 +509,16 @@ class Indicator(models.Model):
     comments = models.TextField(null=True)
     ## FK
     ## information source
-    information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator', on_delete=models.CASCADE)
+    information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator', on_delete=models.SET_NULL)
     
     ## thematic categorization
-    type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.CASCADE)
+    type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
     other_type_of_data = models.CharField(max_length=255, null=True)
     classifier = models.ManyToManyField(Classifier, related_name='indicator')
     other_classifier = models.CharField(max_length=255, null=True)
 
     ## contact
-    contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.CASCADE)
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
 
 
@@ -533,6 +534,15 @@ class Indicator(models.Model):
     def __str__(self):
 
         return smart_unicode(self.name)
+
+    def delete(self, *args, **kwargs):
+        delete_field = ['contact', 'information_source']
+        for field in delete_field:
+            if hasattr(self, field):
+                getattr(self, field).delete()
+
+        super(Indicator, self).delete(*args, **kwargs)
+
 
 
 ## section 5 new
