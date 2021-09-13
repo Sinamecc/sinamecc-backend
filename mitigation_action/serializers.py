@@ -376,9 +376,30 @@ class MitigationActionSerializer(serializers.ModelSerializer):
                     'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 
                     'user', 'created', 'updated')
     
+    def _get_fsm_state_info(self, instance):
+        data = {
+            'state': instance.fsm_state, 
+            'label': f'{instance.fsm_state} label'
+            ##FSM_STATES.get(instance.fsm_state, f'Error - {instance.fsm_state}')
+        }
+
+        return data
+
+    def _next_action(self, instance):
+
+        result = {'states': False, 'required_comments': False}
+        # change for transitions method available for users
+        transitions = instance.get_available_fsm_state_transitions()
+        ## missing label FSM_LABELs
+        result = [{'state':transition.target, 'label': f'{transition.target} label', 'required_comments': True} for transition in transitions]
+
+        return result
+
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
+        data['fsm_state'] = self._get_fsm_state_info(instance)
+        data['next_state'] = self._next_action(instance)
         data['contact'] = ContactSerializer(instance.contact).data
         data['initiative'] = InitiativeSerializer(instance.initiative).data
         data['status_information'] = MitigationActionStatusSerializer(instance.status_information).data
@@ -389,7 +410,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
-
+        
         return data
 
 
