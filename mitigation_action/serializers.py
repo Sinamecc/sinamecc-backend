@@ -6,12 +6,12 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, IndicatorChangeLog
-
+    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog
 
 ##
 ## Auxiliar Class Serializer
 ##
+
 class GenericListSerializer(serializers.ListSerializer):
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
@@ -161,6 +161,12 @@ class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThematicCategorizationType
         fields = ('id', 'code', 'name')
+
+class ClassifierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classifier
+        fields = ('id', 'code', 'name')
+        
 ##
 ## Finish Catalogs Serializers
 ##
@@ -220,11 +226,14 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
                 'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'additional_information', 'additional_information_file', 'comments',
-                'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'monitoring_information')
+                'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'monitoring_information')
     
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data['contact'] = ContactSerializer(instance.contact).data
+        data['information_source'] = InformationSourceSerializer(instance.information_source).data
+        data['change_log'] = IndicatorChangeLogSerializer(instance.indicator_change_log.all(), many=True).data
         ## push the indicator_id to the indicator_change_log
         return data
 
@@ -398,7 +407,7 @@ class ContactSerializer(serializers.ModelSerializer):
         model = Contact
         fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')
 
-
+    
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
@@ -421,7 +430,6 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
 
         return data
-
 
 
 

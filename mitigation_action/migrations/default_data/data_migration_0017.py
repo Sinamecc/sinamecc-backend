@@ -20,8 +20,8 @@ _information_source_type = [
         'code': 'administrative_register',
     },
     {
-        'name': 'Monitoreo',
-        'code': 'monitoreo',
+        'name': 'Monitoring',
+        'code': 'monitoring',
     },
     {
         'name': 'Estimation direct',

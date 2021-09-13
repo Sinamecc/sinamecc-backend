@@ -516,8 +516,8 @@ class Indicator(models.Model):
     classifier = models.ManyToManyField(Classifier, related_name='indicator')
     other_classifier = models.CharField(max_length=255, null=True)
 
+    ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.CASCADE)
-    
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
 
 
@@ -547,8 +547,6 @@ class IndicatorChangeLog(models.Model):
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
-
 
 
 class MonitoringIndicator(models.Model):
