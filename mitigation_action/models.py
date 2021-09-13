@@ -452,7 +452,7 @@ class Categorization(models.Model):
 ## section 5 new
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.CASCADE)
+    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 

@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='contact',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='indicator', to='mitigation_action.contact'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='indicator', to='mitigation_action.contact'),
         ),
         migrations.AddField(
             model_name='indicator',
@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
                 ('statistical_operation', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='information_source', to='mitigation_action.informationsourcetype')),
+                ('type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='information_source', to='mitigation_action.informationsourcetype')),
             ],
             options={
                 'verbose_name': 'Information Source',
@@ -190,12 +190,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='information_source',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='indicator', to='mitigation_action.informationsource'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='indicator', to='mitigation_action.informationsource'),
         ),
         migrations.AddField(
             model_name='indicator',
             name='type_of_data',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='indicator', to='mitigation_action.thematiccategorizationtype'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='indicator', to='mitigation_action.thematiccategorizationtype'),
         ),
         migrations.RunPython(insert_form_data),
     ]
