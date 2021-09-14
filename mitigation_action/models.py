@@ -665,15 +665,15 @@ class MitigationAction(models.Model):
     ## rejected_by_DCC, changes_requested_by_DCC, accepted_by_DCC
     def can_evaluate_by_DCC_rejected(self):
         ## check current status is submitted
-        return self.fsm_state == 'rejected_by_DCC'
+        return self.fsm_state == 'in_evaluation_by_DCC'
     
     def can_evaluate_by_DCC_changes_requested(self):
         ## check current status is submitted
-        return self.fsm_state == 'changes_requested_by_DCC'
+        return self.fsm_state == 'in_evaluation_by_DCC'
     
     def can_evaluate_by_DCC_accepted(self):
         ## check current status is submitted
-        return self.fsm_state == 'accepted_by_DCC'
+        return self.fsm_state == 'in_evaluation_by_DCC'
 
     def can_update_by_DCC_request(self):
         ## check current status is submitted

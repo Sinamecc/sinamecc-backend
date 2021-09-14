@@ -6,7 +6,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard
+    GHGImpactSector, CarbonDeposit, Standard, ChangeLog
 
 
 ##
@@ -369,6 +369,23 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')
 
 
+class ChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChangeLog
+        fields = ('id', 'date', 'user', 'mitigation_action', 'previous_status', 'current_status')
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        ## missing FSM LAbels
+        data['date'] = instance.date.strftime('%Y-%m-%d %H:%M:%S')
+        data['previous_status'] = f"{data.get('previous_status')} label"
+        data['current_status'] = f"{data.get('current_status')} label"
+        data['user'] = f'{instance.user.first_name} {instance.user.last_name}'
+
+        return data 
+
+
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
@@ -410,6 +427,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
+        data['change_log'] = ChangeLogSerializer(instance.change_log.all(), many=True).data
         
         return data
 

@@ -93,8 +93,28 @@ class MitigationActionService():
 
         return result
 
+    ## auxiliar function
+
+    def _serialize_change_log_data(self, user, mitigation_action, previous_status):
+        
+        data = {
+
+            'user': user.id,
+            'mitigation_action': mitigation_action.id,
+            'current_status': mitigation_action.fsm_state,
+            'previous_status': previous_status
+        }
+
+        return data
 
     ## serializers
+    def _get_serialized_change_log(self, data, change_log=False):
+
+        serializer = self._serialize_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log)
+
+        return serializer
+
+
     def _get_serialized_contact(self, data, contact = False):
 
         serializer = self._serialize_helper.get_serialized_record(ContactSerializer, data, record=contact)
@@ -233,6 +253,22 @@ class MitigationActionService():
 
         return result
     
+    ## change_log
+    def _create_update_change_log(self, data, change_log=False):
+        if change_log:
+            serialized_change_log = self._get_serialized_change_log(data, change_log)
+
+        else:
+            serialized_change_log = self._get_serialized_change_log(data)
+
+        if serialized_change_log.is_valid():
+            change_log = serialized_change_log.save()
+            result = (True, change_log)
+
+        else:
+            result = (False, serialized_change_log.errors)
+
+        return result
 
     ## update and create function
 
@@ -753,6 +789,35 @@ class MitigationActionService():
 
         return result
 
+    ## update FSM State
+    def patch(self, request, mitigation_action_id):
+        ## missing review and comments here!!
+        data = request.data
+        next_state, user = data.pop('fsm_state', None), request.user
+
+        mitigation_action_status, mitigation_action_data = \
+            self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        if mitigation_action_status:
+            mitigation_action = mitigation_action_data
+            if next_state:
+                update_status, update_data = self._update_fsm_state(next_state, mitigation_action, user)
+
+                if update_status:
+                    result = (update_status, MitigationActionSerializer(mitigation_action).data)
+
+                else:
+                    result = (update_status, update_data)
+            else:
+                result = (False, self.INVALID_STATUS_TRANSITION)
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+        
+        return result
+
+
+
+
 
     def get_indicator_from_mitigation_action(self, request, mitigation_action_id):
 
@@ -809,7 +874,7 @@ class MitigationActionService():
         return result
 
     
-    def  get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
+    def get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
 
         catalogs_by_parent = {
             'action-areas':{'action-goal': (ActionGoals, ActionGoalsSerializer, 'area')},
@@ -838,7 +903,7 @@ class MitigationActionService():
         return result
 
 
-    def update_fsm_state(self, next_state, mitigation_action,user):
+    def _update_fsm_state(self, next_state, mitigation_action, user):
 
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
@@ -855,11 +920,21 @@ class MitigationActionService():
         if next_state in states_keys:
             state_transition= states[next_state]
             transition_function = getattr(mitigation_action ,state_transition.method.__name__)
+            previous_state = mitigation_action.fsm_state
 
             if has_transition_perm(transition_function,user):
                 transition_function()
                 mitigation_action.save()
-                result = (True, MitigationActionSerializer(mitigation_action).data)
+                
+                change_log_data = self._serialize_change_log_data(user, mitigation_action, previous_state)
+                serialized_change_log = self._get_serialized_change_log(change_log_data)
+                if serialized_change_log.is_valid():
+                    serialized_change_log.save()
+                    result = (True, mitigation_action)
+
+                else:
+                    result = (False, serialized_change_log.errors)
+
             else: result = (False, self.INVALID_USER_TRANSITION)
 
         return result    
