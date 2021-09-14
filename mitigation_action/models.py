@@ -681,7 +681,7 @@ class MitigationAction(models.Model):
         ## check current status is submitted
         return self.fsm_state == 'requested_changes_by_DCC'
 
-    @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='new', permission='')
+    @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
     def submit(self):
         # new --> submitted        
         # send email to user that submitted the action
@@ -767,7 +767,7 @@ class MitigationAction(models.Model):
     
     ## accepted_by_DCC to	registered_by_DCC
     @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')
-    def accepted_by_DCC_to_registered_by_DCC(self):
+    def registered_by_DCC(self):
         # accepted_by_DCC --> registered_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <accepted_by_DCC> to <registered_by_DCC>')
