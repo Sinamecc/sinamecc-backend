@@ -29,6 +29,15 @@ def get_indicator_from_mitigation_action(request, mitigation_action_id=False):
 
 
 ## Permission!!!!
+@api_view(['GET'])
+def get_change_log_from_mitigation_action(request, mitigation_action_id=None):
+
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_change_log_from_mitigation_action", request, mitigation_action_id)
+    return result
+
+
+## Permission!!!!
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])
 def get_post_put_patch_delete(request, mitigation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor MA
     

@@ -38,6 +38,8 @@ class MitigationActionService():
         self.MITIGATION_ACTION_NO_INDICATOR = 'Mitigation action {0} does not have indicators related'
         self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
         self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
+        self.CHANGE_LOG_NOT_FOUND = "Change log not found"
+
 
 
     # auxiliary functions
@@ -937,8 +939,19 @@ class MitigationActionService():
 
             else: result = (False, self.INVALID_USER_TRANSITION)
 
-        return result    
-
+        return result
+    
+    def get_change_log_from_mitigation_action(self, request, mitigation_action_id):
+        result = (False, self.CHANGE_LOG_NOT_FOUND)
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        if mitigation_action_status:
+            change_log_list = mitigation_action_data.change_log.order_by('-date').all()
+            result = (True, ChangeLogSerializer(change_log_list, many=True).data)
+        else:
+            result = (False, mitigation_action_data)
+        
+        return result
 
 
 

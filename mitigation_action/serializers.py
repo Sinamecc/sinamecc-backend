@@ -427,7 +427,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
-        data['change_log'] = ChangeLogSerializer(instance.change_log.all(), many=True).data
+        data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         
         return data
 

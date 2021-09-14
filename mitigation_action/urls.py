@@ -46,6 +46,11 @@ urlpatterns = [
         views.upload_file_from_mitigation_action,
         name='upload_file_from_mitigation_action'
     ),
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/change-log/',
+        views.get_change_log_from_mitigation_action,
+        name='get_change_log_from_mitigation_action'
+    )
 
 ]
 
