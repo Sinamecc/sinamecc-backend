@@ -26,8 +26,6 @@ from time import gmtime, strftime
 
 User =  get_user_model()
 permission = PermissionsHelper()
-##Email services, default email -> sinamec@grupoincocr.com
-ses_service = EmailServices()
 
 CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')))
 ##
@@ -619,7 +617,8 @@ class GHGInformation(models.Model):
 
 
 class MitigationAction(models.Model):
-    
+
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     fsm_state = FSMField(default='new', protected=True, max_length=100)
     # Foreign Key
@@ -646,6 +645,9 @@ class MitigationAction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    ## email service
+    email_service = MitigationActionEmailServices(EmailServices())
+
     class Meta:
         verbose_name = _("Mitigation Action")
         verbose_name_plural = _("Mitigation Actions")
@@ -656,67 +658,97 @@ class MitigationAction(models.Model):
     def can_submit(self):
         ## check all field are filled !!
         ## check current status is new
-        return self.fsm_state in ['new', 'updating_by_request_DCC']
+        return self.fsm_state in ['new','updating_by_request_DCC']
   
     def can_evaluate_by_DCC(self):
         ## check current status is submitted
         return self.fsm_state == 'submitted'
 
-    ## rejected_by_DCC, changes_requested_by_DCC, accepted_by_DCC
-    def can_evaluate_by_DCC_rejected(self):
+    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
+    def can_rejected_by_DCC(self):
         ## check current status is submitted
         return self.fsm_state == 'in_evaluation_by_DCC'
     
-    def can_evaluate_by_DCC_changes_requested(self):
+    def can_request_changes_by_DCC(self):
         ## check current status is submitted
         return self.fsm_state == 'in_evaluation_by_DCC'
     
-    def can_evaluate_by_DCC_accepted(self):
+    def can_acception_by_DCC(self):
         ## check current status is submitted
         return self.fsm_state == 'in_evaluation_by_DCC'
 
     def can_update_by_DCC_request(self):
         ## check current status is submitted
-        return self.fsm_state == 'changes_requested_by_DCC'
-
+        return self.fsm_state == 'requested_changes_by_DCC'
 
     @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='new', permission='')
     def submit(self):
         # new --> submitted        
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <new> to <submitted>')
-        ...
+        print(f'The mitigation action is transitioning from <{self.fsm_state}> to <submitted>')
+        email_function = {
+            'new': self.email_service.notify_dcc_responsible_mitigation_action_submission,
+            'updating_by_request_DCC': self.email_service.notify_dcc_responsible_mitigation_action_update,
+        }
+
+        email_status, email_data = email_function.get(self.fsm_state)(self)
+        if email_status:
+            print(email_data)
+            return email_status, email_data
+        else:
+            ...
+            ## maybe raise exception
+
     
     @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
     def evaluate_by_DCC(self):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
-        ...
+
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_evaluation_by_dcc(self)
+        if email_status:
+            print(email_data)
+            return email_status, email_data
+        else:
+            ...
+            ## maybe raise exception
 
     ##
-    ## rejected_by_DCC, changes_requested_by_DCC, accepted_by_DCC
+    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
     ##
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_evaluate_by_DCC_rejected], on_error='in_evaluation_by_DCC', permission='')
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_rejected_by_DCC], on_error='in_evaluation_by_DCC', permission='')
     def evaluate_by_DCC_rejected(self):
         # in_evaluation_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
-        ...
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_rejection(self)
+        if email_status:
+            print(email_data)
+            return email_status, email_data
+        else:
+            ...
+            ## maybe raise exception
     
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='changes_requested_by_DCC', conditions=[can_evaluate_by_DCC_changes_requested], on_error='in_evaluation_by_DCC', permission='')
-    def evaluate_by_DCC_changes_requested(self):
-        # in_evaluation_by_DCC --> changes_requested_by_DCC
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='requested_changes_by_DCC', conditions=[can_request_changes_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    def evaluate_by_DCC_requested_changes(self):
+        # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <changes_requested_by_DCC>')
+        print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
         ...
     
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_evaluate_by_DCC_accepted], on_error='in_evaluation_by_DCC', permission='')
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
     def evaluate_by_DCC_accepted(self):
         # in_evaluation_by_DCC --> accepted_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
-        ...
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_approval(self)
+        if email_status:
+            print(email_data)
+            return email_status, email_data
+        else:
+            ...
+            ## maybe raise exception
     
     ## rejected by DCC to end
     @transition(field='fsm_state', source='rejected_by_DCC', target='end', conditions=[], on_error='rejected_by_DCC', permission='')
@@ -726,11 +758,11 @@ class MitigationAction(models.Model):
         print('The mitigation action is transitioning from <rejected_by_DCC> to <end>')
         ...
     
-    @transition(field='fsm_state', source='changes_requested_by_DCC', target='updating_by_request_DCC', conditions=[can_update_by_DCC_request], on_error='changes_requested_by_DCC', permission='')
+    @transition(field='fsm_state', source='requested_changes_by_DCC', target='updating_by_request_DCC', conditions=[can_update_by_DCC_request], on_error='requested_changes_by_DCC', permission='')
     def update_by_DCC_request(self):
-        # changes_requested_by_DCC --> updating_by_request_DCC
+        # requested_changes_by_DCC --> updating_by_request_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <changes_requested_by_DCC> to <updating_by_request_DCC>')
+        print('The mitigation action is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
         ...
     
     ## accepted_by_DCC to	registered_by_DCC
