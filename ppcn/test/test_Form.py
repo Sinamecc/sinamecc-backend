@@ -210,7 +210,7 @@ class PPCNFormTest(TestCase):
     def test_get_ppcn_organizational(self):
 
         client.force_login(self.superUser)
-        response = client.get(reverse('get_one_ppcn', args=[self.ppcn_organizational.id, 'en']))
+        response = client.get(reverse('get_put_delete_patch_ppcn', args=[self.ppcn_organizational.id, 'en']))
         data = response.data
         organization_data = data.get('organization')
         gei_organization = data.get('gei_organization')
@@ -295,7 +295,7 @@ class PPCNFormTest(TestCase):
         
     def test_get_ppcn_cantonal(self):
         client.force_login(self.superUser)
-        response = client.get(reverse('get_one_ppcn', args=[self.ppcn_cantonal.id, 'en']))
+        response = client.get(reverse('get_put_delete_patch_ppcn', args=[self.ppcn_cantonal.id, 'en']))
 
         data = response.data
        
