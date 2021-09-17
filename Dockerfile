@@ -8,7 +8,7 @@ COPY requirements.txt /code/
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /code/
 
-EXPOSE 8015
+EXPOSE 80
 STOPSIGNAL SIGTERM
 
-ENTRYPOINT exec gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:8015 config.wsgi:application
+ENTRYPOINT exec gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:80 config.wsgi:application
