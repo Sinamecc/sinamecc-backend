@@ -1355,7 +1355,6 @@ class PpcnService():
                     for carbon_offset in ppcn.organization_classification.carbon_offset.all():
                         ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
                 
-                ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
                 ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
                 ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
@@ -1490,22 +1489,6 @@ class PpcnService():
 
 
 
-
-
-    def next_action(self, ppcn):
-
-        result = {'states': False, 'required_comments': False}
-        # change for transitions method available for users
-        transitions = ppcn.get_available_fsm_state_transitions()
-        states = [{'state':transition.target, 'label': FSM_STATES.get(transition.target, transition.target)} for transition in  transitions]
-  
-        result['states'] = states if len(states) else False
-        result['required_comments'] = True if len(states) > 1 else False
-            
-        return result
-
-
-
     def get(self, id ,language = 'en'):
         context = {'language': language}
         try:
@@ -1533,7 +1516,6 @@ class PpcnService():
                 for carbon_offset in ppcn.organization_classification.carbon_offset.all():
                     ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
                     
-            ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
             ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
             ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
