@@ -185,7 +185,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='classifier',
-            field=models.ManyToManyField(related_name='indicator', to='mitigation_action.Classifier'),
+            field=models.ManyToManyField(blank=True, related_name='indicator', to='mitigation_action.Classifier'),
         ),
         migrations.AddField(
             model_name='indicator',

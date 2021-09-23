@@ -514,7 +514,7 @@ class Indicator(models.Model):
     ## thematic categorization
     type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
     other_type_of_data = models.CharField(max_length=255, null=True)
-    classifier = models.ManyToManyField(Classifier, related_name='indicator')
+    classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
     other_classifier = models.CharField(max_length=255, null=True)
 
     ## contact
