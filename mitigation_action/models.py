@@ -612,7 +612,7 @@ class Finance(models.Model):
 
     status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
     administration = models.TextField(null=True)
-    source = models.ForeignKey(FinanceSourceType, related_name='finance', null=True, on_delete=models.CASCADE)
+    source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
     source_description = models.CharField(max_length=255, null=True)
     reference_year =models.IntegerField(null=True, validators=[validate_year])
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)

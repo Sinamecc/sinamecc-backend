@@ -26,8 +26,9 @@ class Migration(migrations.Migration):
                 ('executing_entity', models.CharField(max_length=255, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('source', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='finance', to='mitigation_action.financesourcetype')),
+                ('source', models.ManyToManyField(blank=True, related_name='finance', to='mitigation_action.financesourcetype')),
                 ('status', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='finance', to='mitigation_action.financestatus')),
+                
             ],
             options={
                 'verbose_name': 'Finance',
@@ -38,5 +39,6 @@ class Migration(migrations.Migration):
             model_name='mitigationaction',
             name='finance',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mitigation_action', to='mitigation_action.finance'),
+            
         ),
     ]
