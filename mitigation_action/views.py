@@ -65,3 +65,14 @@ def upload_file_from_mitigation_action(request, mitigation_action_id, model_type
     if request.method == 'PUT':
         result = view_helper.execute_by_name("upload_file_from_mitigation_action", request, mitigation_action_id, model_type)
     return result
+
+## Permission!!!!
+@api_view(['GET'])
+def get_comments(request, mitigation_action_id, fsm_state=False, review_number=False):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, mitigation_action_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, mitigation_action_id, fsm_state, review_number)
+
+    return result

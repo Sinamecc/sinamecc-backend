@@ -390,7 +390,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
         fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
-                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 
+                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 'review_count', 
                     'user', 'created', 'updated')
     
     def _get_fsm_state_info(self, instance):

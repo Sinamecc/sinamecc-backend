@@ -642,6 +642,11 @@ class MitigationAction(models.Model):
     
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
+
+    ## comments
+    review_count = models.IntegerField(null=True, blank=True, default=0)
+    comments = models.ManyToManyField(Comment, blank=True)
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
