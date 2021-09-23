@@ -473,10 +473,13 @@ class MitigationActionService():
 
         indicator_list = monitoring_information.indicator.all()
 
-        result_status, result_data = self._get_indicators_for_updating_creating(indicator_list, data, monitoring_information)
+        ## in this part we are going to get the indicators to update or create
+        ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_obj_from_DB_with_id_2> }, {...}, ... ]
+        ## and if the indicator json data has not id, we are going to create it , not update it
+        indicator_list_status, indicator_list_data = self._get_indicators_for_updating_creating(indicator_list, data, monitoring_information)
         indicator_list = []
-        if result_status:
-            for indicator_data in result_data:
+        if indicator_list_status:
+            for indicator_data in indicator_list_data:
                 indicator = indicator_data.pop('object', None)
                 indicator_status, indicator_data = self._create_update_indicator(indicator_data, indicator)
                 if not indicator_status:
@@ -488,7 +491,7 @@ class MitigationActionService():
                 result = (True, indicator_list)
 
         else:
-            result = (False, result_data)
+            result = (False, indicator_list_data)
         
         return result
 
