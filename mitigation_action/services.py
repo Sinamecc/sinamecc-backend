@@ -40,6 +40,7 @@ class MitigationActionService():
         self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
         self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
         self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
+        self.INDICATOR_ERROR = "The  indicator could not be saved"
 
 
     # auxiliary functions
@@ -636,44 +637,61 @@ class MitigationActionService():
 
         return result
 
+    def _create_update_indicator_from_validation_dict(self, data, indicator=None):
+
+        change_log = data.get('change_log', None)
+
+        serialized_indicator = self._get_serialized_indicator(data, indicator)
+        if serialized_indicator.is_valid():
+            indicator = serialized_indicator.save()
+            if change_log:
+                change_log['indicator'] = indicator.id
+                change_log_status, change_log_data = self._create_update_indicator_change_log(change_log)
+                if change_log_status:
+                    indicator.indicator_change_log.add(change_log_data)
+                    indicator.save()
+                    result = (True, indicator)
+
+                else:
+                    result = (change_log_status, change_log_data)
+            else:
+                result = (False, self.INDICATOR_CHANGE_LOG_ERROR)
+
+        else:
+            result = (False, serialized_indicator.errors)
+        
+        return result
+
+
     def _create_update_indicator(self, data, indicator=None):
 
         validation_dict = {}
         field_list = ['contact', 'information_source'] 
-        
-        for field in field_list:
-            if data.get(field, False):
-                record_status, record_data = self._create_sub_record(data.get(field), field) if not indicator \
-                                             else self._create_or_update_record(indicator, field, data.get(field))
-                if record_status:
-                    data[field] = record_data.id
-                    
-                dict_data = record_data if isinstance(record_data, list) else [record_data]
-                validation_dict.setdefault(record_status,[]).extend(dict_data)
-        if all(validation_dict):
-            change_log = data.get('change_log', None)
-            serialized_indicator = self._get_serialized_indicator(data, indicator)
-            if serialized_indicator.is_valid():
-                indicator = serialized_indicator.save()
-                if change_log:
-                    change_log['indicator'] = indicator.id
-                    change_log_status, change_log_data = self._create_update_indicator_change_log(change_log)
-                    if change_log_status:
-                        indicator.indicator_change_log.add(change_log_data)
-                        indicator.save()
-                        result = (True, indicator)
+        try:
+            for field in field_list:
+                if data.get(field, False):
+                    record_status, record_data = self._create_sub_record(data.get(field), field) if not indicator \
+                                                else self._create_or_update_record(indicator, field, data.get(field))
+                    if record_status:
+                        data[field] = record_data.id
+                        
+                    dict_data = record_data if isinstance(record_data, list) else [record_data]
+                    validation_dict.setdefault(record_status,[]).extend(dict_data)
 
-                    else:
-                        result = (change_log_status, change_log_data)
-                else:
-                    result = (False, self.INDICATOR_CHANGE_LOG_ERROR)
+            if all(validation_dict):
+                indicator_status, indicator_data = self._create_update_indicator_from_validation_dict(data, indicator)
+                result = ( indicator_status, indicator_data)
 
             else:
-                result = (False, serialized_indicator.errors)
-        else:
-            result = (False, validation_dict.get(False))
+                result = (False, validation_dict.get(False))
+        
+        ## we need to define a specific error message for this
+        except Exception as e:
+            result = (False, self.INDICATOR_ERROR)
+        
+        finally:
 
-        return result
+            return result
 
 
     ## helpers functions for uploading files
