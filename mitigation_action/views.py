@@ -26,6 +26,13 @@ def get_indicator_from_mitigation_action(request, mitigation_action_id=False):
     if request.method == 'GET':
         result = view_helper.execute_by_name("get_indicator_from_mitigation_action", request, mitigation_action_id)
     return result
+## Permission!!!!
+@api_view(['DELETE'])
+def delete_indicator_from_mitigation_action(request, mitigation_action_id=None, indicator_id=None):
+
+    if request.method == 'DELETE':
+        result = view_helper.execute_by_name("delete_indicator_from_mitigation_action", request, mitigation_action_id, indicator_id)
+    return result
 
 
 ## Permission!!!!
