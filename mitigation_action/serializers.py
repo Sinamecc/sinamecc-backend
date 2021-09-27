@@ -6,12 +6,12 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard
-
+    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog
 
 ##
 ## Auxiliar Class Serializer
 ##
+
 class GenericListSerializer(serializers.ListSerializer):
     def update(self, instance, validated_data):
         # Maps for id->instance and id->data item.
@@ -151,6 +151,22 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = ('id', 'code', 'status')
 
 
+class InformationSourceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InformationSourceType
+        fields = ('id', 'code', 'name')
+
+
+class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ThematicCategorizationType
+        fields = ('id', 'code', 'name')
+
+class ClassifierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classifier
+        fields = ('id', 'code', 'name')
+        
 ##
 ## Finish Catalogs Serializers
 ##
@@ -189,21 +205,44 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField()
     class Meta:
         model = MonitoringIndicator
         fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'updated_data', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
-        list_serializer_class = GenericListSerializer
+        
+
+
+class IndicatorChangeLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorChangeLog
+        fields = ('id', 'indicator', 'update_date', 'changes', 'changes_description', 'author')
+
 
 
 class IndicatorSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField()
     class Meta:
         model = Indicator
-        fields = ('id', 'name', 'description', 'type', 'unit' , 'methodological_detail', 'reporting_periodicity', 'data_generating_institution',\
-                    'reporting_institution', 'measurement_start_date', 'additional_information', 'monitoring_information')
-        list_serializer_class = GenericListSerializer
+
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
+                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'additional_information', 'additional_information_file', 'comments',
+                'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'monitoring_information')
+    
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['contact'] = ContactSerializer(instance.contact).data
+        data['information_source'] = InformationSourceSerializer(instance.information_source).data
+        data['change_log'] = IndicatorChangeLogSerializer(instance.indicator_change_log.all(), many=True).data
+        ## push the indicator_id to the indicator_change_log
+        return data
+
+
+class InformationSourceSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = InformationSource
+        fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation')
 
 
 class MonitoringInformationSerializer(serializers.ModelSerializer):
@@ -368,7 +407,7 @@ class ContactSerializer(serializers.ModelSerializer):
         model = Contact
         fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')
 
-
+    
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
@@ -391,7 +430,6 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
 
         return data
-
 
 
 
