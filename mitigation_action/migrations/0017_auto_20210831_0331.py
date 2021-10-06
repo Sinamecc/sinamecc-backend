@@ -136,17 +136,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indicator',
             name='other_classifier',
-            field=models.CharField(max_length=255, null=True),
+            field=models.CharField(max_length=255, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='indicator',
             name='other_geographic_coverage',
-            field=models.CharField(max_length=255, null=True),
+            field=models.CharField(max_length=255, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='indicator',
             name='other_type_of_data',
-            field=models.CharField(max_length=255, null=True),
+            field=models.CharField(max_length=255, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='monitoringindicator',

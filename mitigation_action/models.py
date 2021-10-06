@@ -496,7 +496,7 @@ class Indicator(models.Model):
     available_time_end_date = models.DateField(null=True)
 
     geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
-    other_geographic_coverage = models.CharField(max_length=255, null=True)
+    other_geographic_coverage = models.CharField(max_length=255, blank=True, null=True)
     
     disaggregation = models.TextField(null=True)
 
@@ -513,9 +513,9 @@ class Indicator(models.Model):
     
     ## thematic categorization
     type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
-    other_type_of_data = models.CharField(max_length=255, null=True)
+    other_type_of_data = models.CharField(max_length=255, blank=True, null=True)
     classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
-    other_classifier = models.CharField(max_length=255, null=True)
+    other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
