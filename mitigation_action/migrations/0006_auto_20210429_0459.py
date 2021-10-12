@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import general.storages
+import mitigation_action.models
 
 
 class Migration(migrations.Migration):
@@ -18,6 +20,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=500, null=True)),
                 ('objective', models.TextField(null=True)),
                 ('description', models.TextField(null=True)),
+                ('description_file',models.FileField(null=True, storage=general.storages.PrivateMediaStorage(), upload_to=mitigation_action.models.directory_path)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('initiative_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='initiative', to='mitigation_action.initiativetype')),
@@ -89,13 +92,14 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('location', models.CharField(max_length=254, null=True)),
+                ('location_file',models.FileField(null=True, storage=general.storages.PrivateMediaStorage(), upload_to=mitigation_action.models.directory_path)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('geographic_scale', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='geographic_location', to='mitigation_action.geographicscale')),
             ],
             options={
-                'verbose_name': 'Initiative',
-                'verbose_name_plural': 'Initiative',
+                'verbose_name': 'Geographic Location', 
+                'verbose_name_plural': 'Geographic Locations'
             },
         ),
         migrations.AddField(

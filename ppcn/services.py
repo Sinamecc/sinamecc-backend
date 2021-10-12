@@ -1360,7 +1360,7 @@ class PpcnService():
                 
                 ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
-                ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
+                ppcn_data['file']= self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
                 ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
                 ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
@@ -1538,7 +1538,7 @@ class PpcnService():
                     
             ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
-            ppcn_data['file']: self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
+            ppcn_data['file'] = self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
             ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
             ppcn_data['comments'] = CommentSerializer(ppcn.comments.all(), many=True).data
 
