@@ -4,7 +4,7 @@ from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
     InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics, \
-    ImpactCategory, SustainableDevelopmentGoals, GHGImpactSector
+    ImpactCategory, SustainableDevelopmentGoals, GHGImpactSector, Classifier, ThematicCategorizationType, InformationSourceType
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
@@ -39,7 +39,9 @@ class MitigationActionService():
         self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
         self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
         self.CHANGE_LOG_NOT_FOUND = "Change log not found"
-
+        self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
+        self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
+        self.INDICATOR_ERROR = "The  indicator could not be saved"
 
 
     # auxiliary functions
@@ -123,6 +125,18 @@ class MitigationActionService():
 
         return serializer
     
+    def _get_serialized_indicator_change_log(self, data, indicator_change_log=None, partial=None):
+        
+        serializer = self._serialize_helper.get_serialized_record(IndicatorChangeLogSerializer, data, record=indicator_change_log, partial=partial)
+
+        return serializer
+    
+    def _get_serialized_information_source(self, data, information_source=None, partial=None):
+
+        serializer = self._serialize_helper.get_serialized_record(InformationSourceSerializer, data, record=information_source, partial=True)
+
+        return serializer
+    
 
     def _get_serialized_ghg_information(self, data, ghg_information = False, partial=False):
 
@@ -199,6 +213,12 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(CategorizationSerializer, data, record=categorization, partial=True)
 
         return serializer
+    
+    def _get_serialized_indicator(self, data, indicator = False):
+      
+        serializer = self._serialize_helper.get_serialized_record(IndicatorSerializer, data, record=indicator, partial=True)
+
+        return serializer
 
 
     def _get_serialized_initiative_goal_list(self, data, initiative_goal_list, initiative_id):
@@ -219,14 +239,6 @@ class MitigationActionService():
         return serializer
 
     
-    def _get_serialized_indicator_list(self, data, indicator_list, monitoring_information_id):
-        
-        data = [{**indicator, 'monitoring_information': monitoring_information_id}  for indicator in data ]
- 
-        serializer = self._serialize_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_list, many=True,  partial=True)
-
-        return serializer
-
     
     def _get_serialized_monitoring_indicator_list(self, data, monitoring_indicator_list, monitoring_reporting_indicator_id):
         
@@ -235,6 +247,24 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(MonitoringIndicatorSerializer, data, record=monitoring_indicator_list, many=True,  partial=True)
 
         return serializer
+
+
+    ## auxiliar function for create and update record
+    def _get_indicators_for_updating_creating(self, indicator_list, indicator_data_list, monitoring_information):
+        ## added object attribute if the indicator data has an indicator id
+        for indicator_data in indicator_data_list:
+            indicator_data_id = indicator_data.get('id', None)
+            if indicator_data_id:
+                obj = next(filter(lambda x: x.id == indicator_data_id, indicator_list), None)
+                if obj: indicator_data['object'] = obj
+                else:
+                    result = (False, 'Indicator with id {} not found'.format(indicator_data_id))
+            else:
+                indicator_data['monitoring_information'] =  monitoring_information.id
+
+        result = (True, indicator_data_list)
+
+        return result        
 
 
     ## update and create function
@@ -269,6 +299,77 @@ class MitigationActionService():
 
         else:
             result = (False, serialized_change_log.errors)
+
+        return result
+
+        
+    def _create_update_indicator_change_log(self, data, indicator_change_log=None):
+        
+        if indicator_change_log:
+            serialized_indicator_change_log = self._get_serialized_indicator_change_log(data, indicator_change_log, partial=True)
+
+        else:
+            serialized_indicator_change_log = self._get_serialized_indicator_change_log(data, partial=True)
+            
+        if serialized_indicator_change_log.is_valid():
+
+            indicator_change_log = serialized_indicator_change_log.save()
+            result = (True, indicator_change_log)
+
+        else:
+            result = (False, serialized_indicator_change_log.errors)
+            
+        return result
+
+    
+    def _create_update_information_source(self, data, information_source=None):
+        
+        if information_source:
+            serialized_information_source = self._get_serialized_information_source(data, information_source)
+            
+        else:
+            serialized_information_source = self._get_serialized_information_source(data, partial=True)
+        
+        if serialized_information_source.is_valid():
+            information_source = serialized_information_source.save()
+            result = (True, information_source)
+
+        else:
+            result = (False, serialized_information_source.errors)
+
+        return result
+
+    def _create_update_ghg_information(self, data, ghg_information=None):
+        
+        if ghg_information:
+            serialized_ghg_information = self._get_serialized_ghg_information(data, ghg_information)
+
+        else:
+            serialized_ghg_information = self._get_serialized_ghg_information(data)
+        
+        if serialized_ghg_information.is_valid():
+            ghg_information = serialized_ghg_information.save()
+            result = (True, ghg_information)
+
+        else:
+            result = (False, serialized_ghg_information.errors)
+
+        return result
+
+    def _create_update_finance(self, data, finance=None):
+        
+        if finance:
+            serialized_finance = self._get_serialized_finance(data, finance)
+
+        else:
+            serialized_finance = self._get_serialized_finance(data)
+        
+        if serialized_finance.is_valid():
+            finance = serialized_finance.save()
+            result = (True, finance)
+
+        else:
+            result = (False, serialized_finance.errors)
 
         return result
 
@@ -408,27 +509,33 @@ class MitigationActionService():
         return result
 
     
-    def _create_update_indicator(self, data, monitoring_information):
+    def _create_update_indicator_list(self, data, monitoring_information):
 
-        result = (True, [])
-        
-        if isinstance(data, list):
-            indicator_list = monitoring_information.indicator.all() 
-            serializer = self._get_serialized_indicator_list(data, indicator_list, monitoring_information.id)
-            
-            if serializer.is_valid():
-                
-                indicator = serializer.save()
+        indicator_list = monitoring_information.indicator.all()
 
-                result = (True, indicator)
+        ## in this part we are going to get the indicators to update or create
+        ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_obj_from_DB_with_id_2> }, {...}, ... ]
+        ## and if the indicator json data has not id, we are going to create it , not update it
+        indicator_list_status, indicator_list_data = self._get_indicators_for_updating_creating(indicator_list, data, monitoring_information)
+        indicator_list = []
+        if indicator_list_status:
+            for indicator_data in indicator_list_data:
+                indicator = indicator_data.pop('object', None)
+                indicator_status, indicator_data = self._create_update_indicator(indicator_data, indicator)
+                if not indicator_status:
+                    result = (indicator_status, indicator_data) 
+                    break
+                indicator_list.append(indicator_data)
 
-            else: 
-                result = (False, serializer.errors)
+            else:
+                result = (True, indicator_list)
 
         else:
-            result = (False, self.LIST_ERROR.format('indicator'))
-            
+            result = (False, indicator_list_data)
+        
         return result
+
+        
 
 
     def _create_update_monitoring_indicator(self, data, monitoring_reporting_indicator):
@@ -525,7 +632,7 @@ class MitigationActionService():
             monitoring_information = serialized_monitoring_information.save()
 
             indicator_data = data.get("indicator", [])
-            serialized_indicator_status, serialized_indicator_data = self._create_update_indicator(indicator_data, monitoring_information)
+            serialized_indicator_status, serialized_indicator_data = self._create_update_indicator_list(indicator_data, monitoring_information)
 
             if serialized_indicator_status:
                 result = (True, monitoring_information)
@@ -569,8 +676,65 @@ class MitigationActionService():
 
         return result
 
+    def _create_update_indicator_from_validation_dict(self, data, indicator=None):
+
+        change_log = data.get('change_log', None)
+
+        serialized_indicator = self._get_serialized_indicator(data, indicator)
+        if serialized_indicator.is_valid():
+            indicator = serialized_indicator.save()
+            if change_log:
+                change_log['indicator'] = indicator.id
+                change_log_status, change_log_data = self._create_update_indicator_change_log(change_log)
+                if change_log_status:
+                    indicator.indicator_change_log.add(change_log_data)
+                    indicator.save()
+                    result = (True, indicator)
+
+                else:
+                    result = (change_log_status, change_log_data)
+            else:
+                result = (False, self.INDICATOR_CHANGE_LOG_ERROR)
+
+        else:
+            result = (False, serialized_indicator.errors)
+        
+        return result
+
+
+    def _create_update_indicator(self, data, indicator=None):
+
+        validation_dict = {}
+        field_list = ['contact', 'information_source'] 
+        try:
+            for field in field_list:
+                if data.get(field, False):
+                    record_status, record_data = self._create_sub_record(data.get(field), field) if not indicator \
+                                                else self._create_or_update_record(indicator, field, data.get(field))
+                    if record_status:
+                        data[field] = record_data.id
+                        
+                    dict_data = record_data if isinstance(record_data, list) else [record_data]
+                    validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+            if all(validation_dict):
+                indicator_status, indicator_data = self._create_update_indicator_from_validation_dict(data, indicator)
+                result = ( indicator_status, indicator_data)
+
+            else:
+                result = (False, validation_dict.get(False))
+        
+        ## we need to define a specific error message for this
+        except Exception as e:
+            result = (False, self.INDICATOR_ERROR)
+        
+        finally:
+
+            return result
+
+
     ## helpers functions for uploading files
-    
+    #     
     def _upload_file_to_initiative(self, data, mitigation_action):
         ## This function uploads to description files to the initiative
         file_data = {"description_file": data.get("file", None)}
@@ -840,6 +1004,33 @@ class MitigationActionService():
 
         return result
 
+    def delete_indicator_from_mitigation_action(self, request, mitigation_action_id, indicator_id):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+        if mitigation_action_status:
+            monitoring_information = mitigation_action_data.monitoring_information
+            
+            if monitoring_information:
+                indicator_list = monitoring_information.indicator.filter(id=indicator_id)
+                if indicator_list:
+                    indicator = indicator_list.first()
+                    indicator.delete()
+                    result = (True, {"id": indicator_id})
+                else:
+                    result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+
+            else:
+                result = (False, self.MITIGATION_ACTION_NO_INDICATOR.format(mitigation_action_data.id))
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+
+        return result
+
+
+
+
 
     def get_catalog_data(self, request):
         
@@ -858,6 +1049,9 @@ class MitigationActionService():
             'ghg_impact_sector': (GHGImpactSector, GHGImpactSectorSerializer),
             'carbon_deposit': (CarbonDeposit, CarbonDepositSerializer),
             'standard': (Standard, StandardSerializer),
+            'classifier': (Classifier, ClassifierSerializer),
+            'information_source_type': (InformationSourceType, InformationSourceTypeSerializer),
+            'thematic_categorization_type': (ThematicCategorizationType, ThematicCategorizationTypeSerializer),
         }
 
         data = {}
