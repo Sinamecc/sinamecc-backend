@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
+from django.db.models import manager
 
-from django.db.models.fields import BLANK_CHOICE_DASH, related
+from django.db.models.fields import BLANK_CHOICE_DASH, CharField, related
+from django.db.models.query import QuerySet
+from rest_framework import fields
 from users.serializers import NewCustomUserSerializer
 from django.conf import settings
 
@@ -18,6 +21,8 @@ from mitigation_action.email_services import MitigationActionEmailServices
 from general.services import EmailServices
 from general.permissions import PermissionsHelper
 from general.helpers.validators import validate_year
+from time import gmtime, strftime
+
 
 
 User =  get_user_model()
@@ -29,11 +34,185 @@ CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')
 ##
 ## Start Catalogs
 ##
+def directory_path(instance, filename): 
+    path = "mitigation_action/{0}/{1}/{2}/"
+
+    return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
+
+
+class CarbonDeposit(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Carbon Deposit')
+        verbose_name_plural = _('Carbon Deposits')
+
+
+class Standard(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Standar')
+        verbose_name_plural = _('Standars')
+
+
+class SustainableDevelopmentGoals(models.Model): 
+    code = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Sustainable Development Goal")
+        verbose_name_plural = _("Sustainable Development Goals")
+
+
+class GHGImpactSector(models.Model):
+
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("GHG Impact Sector")
+        verbose_name_plural = _("GHG Impact Sectors")
+
+
+class ActionAreas(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False)
+    code = models.CharField(max_length=3, null=False, blank=False)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Action Area')
+        verbose_name_plural = _('Action Areas')
+
+
+class ActionGoals(models.Model):
+
+    goal = models.TextField()
+    code = models.CharField(max_length=3, null=False, blank=False)
+    area = models.ForeignKey(ActionAreas, null=False, related_name='goal', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Action Goal')
+        verbose_name_plural = _('Action Goals')
+
+
+class DescarbonizationAxis(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Descarbonization Axis')
+        verbose_name_plural = _('Descarbonization Axes')
+
+
+class TransformationalVisions(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+    axis = models.ForeignKey(DescarbonizationAxis, null=False, related_name='transformational_vision', on_delete=models.CASCADE)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Transformational Vision')
+        verbose_name_plural = _('Transformational Visions')
+
+
+class Topics(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Topic')
+        verbose_name_plural = _('Topics')
+
+
+class SubTopics(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    topic = models.ForeignKey(Topics, null=False, related_name='sub_topic', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Sub Topic')
+        verbose_name_plural = _('Sub Topics')
+
+
+class Activity(models.Model):
+
+    code = models.CharField(max_length=3, null=False, blank=False)
+    description = models.TextField()
+    sub_topic = models.ForeignKey(SubTopics, null=False, related_name='activity', on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Activity')
+        verbose_name_plural = _('Activities')
+
+
+class ImpactCategory(models.Model):
+
+    code = models.CharField(max_length=255, null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Impact Category')
+        verbose_name_plural =  _('Impact Categories')
+
 
 class InitiativeType(models.Model):
 
     name = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
+    type = models.CharField(max_length=2, blank=False, null=False)
      
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -113,6 +292,45 @@ class Status(models.Model):
         return smart_unicode(self.status)
 
 
+## section 5 new
+class ThematicCategorizationType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Thematic Categorization Type")
+        verbose_name_plural = _("Thematic Categorization Types")
+
+## section 5 new
+class InformationSourceType(models.Model):
+    name = models.CharField(max_length=500, null=True)
+    code = models.CharField(max_length=500, null=True)
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source Type")
+        verbose_name_plural = _("Information Source Types")
+
+## section 5 new
+class Classifier(models.Model):
+    code = models.CharField(max_length=255, null=True)
+    name = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Classifier")
+        verbose_name_plural = _("Classifiers")
+
 
 
 ##
@@ -123,13 +341,278 @@ class Status(models.Model):
 ## Extra models
 ##
 
+class Contact(models.Model):
+
+    institution = models.CharField(max_length=500, null=True)
+    full_name = models.CharField(max_length=100, blank=False, null=True)
+    job_title = models.CharField(max_length=100, blank=False, null=True)
+    email = models.EmailField(max_length=254, blank=False, null=True)
+    phone = models.CharField(max_length=100, blank=False, null=True)
+
+    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Contact")
+        verbose_name_plural = _("Contacts")
+
+    def __unicode__(self):
+        return smart_unicode(self.full_name)
+
+
+
+## section 5
+
+class MonitoringReportingIndicator(models.Model):
+
+    progress_in_monitoring = models.BooleanField(null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring and Reporting Indicators")
+        verbose_name_plural = _("Monitoring and Reporting Indicators")
+
+
+class MonitoringInformation(models.Model):
+    
+    ## TODO 
+    ## This model is necessary, at the moment will be empty
+    ## missing attributes that are not defined 
+    code = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Information")
+        verbose_name_plural = _("Monitoring Information")
+
+    
+    def __str__(self):
+        return smart_unicode(self.id)
+
+
+class ImpactDocumentation(models.Model):
+    ## TODO: Missing. catalogs emission sources and gases
+    ## missing file for documentation of calculations estimate 
+    estimate_reduction_co2 = models.TextField(null=True)
+    period_potential_reduction =models.TextField(null=True)
+    ##catalog
+    carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    base_line_definition = models.TextField(null=True)
+    calculation_methodology = models.TextField(null=True)
+    estimate_calculation_documentation = models.TextField(null=True)
+    estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    mitigation_action_in_inventory = models.BooleanField(null=True)
+
+
+    ## Section 4.3
+    ## TODO: Missing. catalogs standar to apply
+    standard = models.ForeignKey(Standard, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    other_standard = models.TextField(null=True)
+    carbon_international_commerce = models.BooleanField(null=True)
+    methodologies_to_use = models.TextField(null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Information")
+        verbose_name_plural = _("Monitoring Information")
+
+## missing Serializer
+class Categorization(models.Model):
+    
+    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization', blank=True)
+    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization', blank=True)
+    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization', blank=True)
+    activities = models.ManyToManyField(Activity, related_name='categorization', blank=True)
+
+    ## can be select more than one
+    impact_categories = models.ManyToManyField(ImpactCategory, related_name='categorization', blank=True)
+    is_part_to_another_mitigation_action = models.BooleanField(null=True)
+    relation_description = models.CharField(max_length=255, null=True)
+
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Categorization")
+        verbose_name_plural = _("Categorization")
+
+
+## section 5 new
+class InformationSource(models.Model):
+    responsible_institution = models.CharField(max_length=500, null=True)
+    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    other_type = models.CharField(max_length=500, null=True)
+    statistical_operation = models.CharField(max_length=500, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source")
+        verbose_name_plural = _("Information Sources")
+
+
+## section 5 new
+class Indicator(models.Model):
+    PERIODICITY = [
+        ('YEARLY', 'Yearly'),
+        ('BIANNUAL', 'Biannual'),
+        ('QUARTERLY', 'Quartely')
+    ]
+    GEOGRAPHIC = [
+        ('NATIONAL', 'National'),
+        ('REGIONAL', 'Regional'),
+        ('PROVINCIAL', 'Provincial'),
+        ('CANTONAL', 'Cantonal'),
+        ('OTHER', 'Other')
+    ]
+
+    ## TODO: Missing. catalogs for type 
+    ## missing file for detail
+    ## missing file for additional information
+
+    name = models.CharField(max_length=255, null=True)
+    description = models.TextField(null=True)
+    unit = models.CharField(max_length=255, null=True)
+    methodological_detail = models.TextField(null=True)
+    ## need to endpoint to upload file
+    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
+    
+    available_time_start_date = models.DateField(null=True)
+    available_time_end_date = models.DateField(null=True)
+
+    geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
+    other_geographic_coverage = models.CharField(max_length=255, blank=True, null=True)
+    
+    disaggregation = models.TextField(null=True)
+
+    limitation = models.TextField(null=True)
+
+    ## ensure sustainability
+    additional_information = models.TextField(null=True)
+    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+
+    comments = models.TextField(null=True)
+    ## FK
+    ## information source
+    information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator', on_delete=models.SET_NULL)
+    
+    ## thematic categorization
+    type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
+    other_type_of_data = models.CharField(max_length=255, blank=True, null=True)
+    classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
+    other_classifier = models.CharField(max_length=255, blank=True, null=True)
+
+    ## contact
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
+    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
+
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Indicator")
+        verbose_name_plural = _("Indicator")
+    
+
+    def __str__(self):
+
+        return smart_unicode(self.name)
+
+    def delete(self, *args, **kwargs):
+        delete_field = ['contact', 'information_source']
+        for field in delete_field:
+            if hasattr(self, field):
+                getattr(self, field).delete()
+
+        super(Indicator, self).delete(*args, **kwargs)
+
+
+
+## section 5 new
+class IndicatorChangeLog(models.Model):
+
+    indicator = models.ForeignKey(Indicator, related_name='indicator_change_log', on_delete=models.CASCADE)
+    update_date = models.DateTimeField(auto_now=True)
+    changes = models.TextField(null=True)
+    changes_description = models.TextField(null=True)
+    author = models.CharField(max_length=500, null=True)
+    
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+class MonitoringIndicator(models.Model):
+
+    ## TODO: Missing.
+    ## missing file for updated data
+    initial_date_report_period = models.DateField(null=True)
+    final_date_report_period = models.DateField(null=True)
+    data_updated_date = models.DateField(null=True)
+    updated_data = models.CharField(max_length=150, null=True)
+    updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    progress_report = models.TextField(null=True)
+
+    ## FK 
+    indicator = models.ForeignKey(Indicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+    monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Monitoring Indicator")
+        verbose_name_plural = _("Monitoring Indicator")
+
+    def __str__(self):
+        return smart_unicode(self.status)
+
+
+class QAQCReductionEstimateQuestion(models.Model):
+
+    code = models.CharField(max_length=5, null=True)
+    question = models.TextField(null=True)
+    check = models.BooleanField(null=True)
+    detail = models.TextField(null=True)
+    
+    ## FK
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='question', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Impact Documentation")
+        verbose_name_plural = _("Impact Documentation")
+
+    def __str__(self):
+        return smart_unicode(self.status)
 
 
 class Finance(models.Model):
 
     status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
     administration = models.TextField(null=True)
-    source = models.ForeignKey(FinanceSourceType, related_name='finance', null=True, on_delete=models.CASCADE)
+    source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
     source_description = models.CharField(max_length=255, null=True)
     reference_year =models.IntegerField(null=True, validators=[validate_year])
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
@@ -150,30 +633,27 @@ class Finance(models.Model):
 
 
 class GeographicLocation(models.Model):
-    ## TODO: Missing File field for location
 
     geographic_scale = models.ForeignKey(GeographicScale, related_name='geographic_location', null=True, on_delete=models.CASCADE)
     location = models.CharField(max_length=254, null=True)
-
+    location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Initiative")
-        verbose_name_plural = _("Initiative")
+        verbose_name = _("Geographic Location")
+        verbose_name_plural = _("Geographic Locations")
 
     def __unicode__(self):
         return smart_unicode(self.name)
 
 
-
 class Initiative(models.Model):
-    ## TODO : Missing file field  for description
-
+    
     name = models.CharField(max_length=500, null=True)
     objective = models.TextField(null=True)
     description = models.TextField(null=True)
-
+    description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     initiative_type = models.ForeignKey(InitiativeType, related_name='initiative', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -227,24 +707,6 @@ class MitigationActionStatus(models.Model):
 ## Finish extra model
 ##
 
-class Contact(models.Model):
-
-    institution = models.CharField(max_length=500, null=True)
-    full_name = models.CharField(max_length=100, blank=False, null=True)
-    job_title = models.CharField(max_length=100, blank=False, null=True)
-    email = models.EmailField(max_length=254, blank=False, null=True)
-    phone = models.CharField(max_length=100, blank=False, null=True)
-
-    user = models.ForeignKey(User, related_name='contact_registered', on_delete=models.CASCADE, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Contact")
-        verbose_name_plural = _("Contacts")
-
-    def __unicode__(self):
-        return smart_unicode(self.full_name)
 
 ## Greenhouse gases(GHG) - Gases de efectos invernadero (GEI)
 class GHGInformation(models.Model): 
@@ -252,11 +714,11 @@ class GHGInformation(models.Model):
     ## TODO missing file to graphic description 
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
+    graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    impact_sector = models.ManyToManyField(GHGImpactSector, related_name='ghg_information', blank=True)
+    goals = models.ManyToManyField(SustainableDevelopmentGoals, related_name='ghg_information', blank=True)
 
-    ##TODO missing 2 fields with catalogs
-    ##sector
-    ##perliminar something
-
+    ##logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -275,9 +737,20 @@ class MitigationAction(models.Model):
     initiative = models.ForeignKey(Initiative, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     status_information = models.ForeignKey(MitigationActionStatus, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     geographic_location = models.ForeignKey(GeographicLocation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     finance = models.ForeignKey(Finance, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
     ghg_information = models.ForeignKey(GHGInformation, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
+    
+    ## section 4
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
+    
+    ## section 5
+    monitoring_information = models.ForeignKey(MonitoringInformation, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
 
+    ## section 6
+
+    monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='mitigation_action', null=True, on_delete=models.SET_NULL)
+    
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)

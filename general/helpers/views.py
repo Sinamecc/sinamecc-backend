@@ -48,7 +48,7 @@ class ViewHelper():
         method_to_call = getattr(self.service, args[0])
         result_status, result_data = method_to_call(*args[1:])
         if result_status:
-            result = Response(result_data)
+            result = Response(result_data, status=status.HTTP_200_OK)
         else:
             result = Response(result_data, status=status.HTTP_400_BAD_REQUEST)
         return result

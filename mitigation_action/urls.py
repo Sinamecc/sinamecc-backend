@@ -25,12 +25,33 @@ urlpatterns = [
         views.get_post_put_patch_delete,
         name='get_put_patch_delete_mitigation_action'
     ),
-     # ID 1
+
     path(
         'api/v1/mitigation-action/data/',
         views.get_catalog_data,
         name='get_catalog_data',
     ),
+    path(
+        'api/v1/mitigation-action/data/<str:parent>/<int:parent_id>/<str:child>/',
+        views.get_catalog_data,
+        name='get_child_data_catalog_by_parent_id',
+    ),
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/indicator/',
+        views.get_indicator_from_mitigation_action,
+        name='get_indicator_from_mitigation_action'
+    ),
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/indicator/<int:indicator_id>/',
+        views.delete_indicator_from_mitigation_action,
+        name='delete_indicator_from_mitigation_action'
+    ),
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/file/<str:model_type>/',
+        views.upload_file_from_mitigation_action,
+        name='upload_file_from_mitigation_action'
+    ),
+
 ]
 
 urlpatterns.extend(urlpatterns_to_delete)
