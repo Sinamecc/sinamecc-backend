@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('is_part_to_another_mitigation_action', models.BooleanField(null=True)),
-                ('relation_description', models.CharField(max_length=255, null=True)),
+                ('relation_description', models.CharField(max_length=255, blank=True, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('action_goal', models.ManyToManyField(blank=True, related_name='categorization', to='mitigation_action.ActionGoals')),

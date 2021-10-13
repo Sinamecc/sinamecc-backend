@@ -435,7 +435,7 @@ class Categorization(models.Model):
     ## can be select more than one
     impact_categories = models.ManyToManyField(ImpactCategory, related_name='categorization', blank=True)
     is_part_to_another_mitigation_action = models.BooleanField(null=True)
-    relation_description = models.CharField(max_length=255, null=True)
+    relation_description = models.CharField(max_length=255, blank=True, null=True)
 
 
     ## Logs
