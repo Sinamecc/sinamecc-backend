@@ -1,5 +1,6 @@
 
 from functools import partial
+from workflow.serializers import CommentSerializer
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
@@ -98,6 +99,9 @@ class MitigationActionService():
         return result
 
     ## auxiliar function
+    def _increase_review_counter(self, mitigation_action):
+        mitigation_action.review_count += 1
+        mitigation_action.save()
 
     def _serialize_change_log_data(self, user, mitigation_action, previous_status):
         
@@ -960,6 +964,7 @@ class MitigationActionService():
         ## missing review and comments here!!
         data = request.data
         next_state, user = data.pop('fsm_state', None), request.user
+        comment_list = data.pop('comments', [])
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
@@ -968,10 +973,13 @@ class MitigationActionService():
             mitigation_action = mitigation_action_data
             if next_state:
                 update_status, update_data = self._update_fsm_state(next_state, mitigation_action, user)
-
                 if update_status:
-                    result = (update_status, MitigationActionSerializer(mitigation_action).data)
+                    self._increase_review_counter(mitigation_action)
+                    assign_status, assign_data = self._assign_comment(comment_list, mitigation_action, user)
 
+                    if assign_status: result = (True, MitigationActionSerializer(mitigation_action).data)
+                    else: result = (assign_status, assign_data)
+                
                 else:
                     result = (update_status, update_data)
             else:
@@ -980,7 +988,6 @@ class MitigationActionService():
             result = (mitigation_action_status, mitigation_action_data)
         
         return result
-
 
 
 
@@ -1135,6 +1142,59 @@ class MitigationActionService():
 
         return result
     
+    def _assign_comment(self, comment_list, mitigation_action, user):
+
+        data = [{**comment, 'fsm_state': mitigation_action.fsm_state, 'user': user.id, 'review_number': mitigation_action.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            mitigation_action.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+        
+        else:
+            result = (False, comment_list_data)
+
+        return result
+
+
+    def get_current_comments(self, request, mitigation_action_id):
+
+        ## get one mitgate_action
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        if mitigation_action_status:
+            review_number = mitigation_action_data.review_count
+            fsm_state = mitigation_action_data.fsm_state
+            commet_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, mitigation_action_data)
+
+        return result
+    
+    def get_comments_by_fsm_state_or_review_number(self, request, mitigation_action_id, fsm_state=False, review_number=False):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if mitigation_action_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = mitigation_action_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, mitigation_action_data)
+
+        return result
+
+
     def get_change_log_from_mitigation_action(self, request, mitigation_action_id):
         result = (False, self.CHANGE_LOG_NOT_FOUND)
         mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
