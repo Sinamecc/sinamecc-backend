@@ -27,7 +27,7 @@ class MitigationActionEmailServices():
         context = {'lang': 'es'} 
 
         ## change this here 
-        email = 'izcar@grupoincocr.com'
+        email = 'sinamec@grupoincocr.com'
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
 
@@ -89,7 +89,7 @@ class MitigationActionEmailServices():
         context = {'lang': 'es'} 
 
         ## change this here
-        email = 'izcar@grupoincocr.com'
+        email = 'sinamec@grupoincocr.com'
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
 
