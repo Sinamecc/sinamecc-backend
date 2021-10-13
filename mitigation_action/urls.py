@@ -41,6 +41,11 @@ urlpatterns = [
         name='get_indicator_from_mitigation_action'
     ),
     path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/indicator/<int:indicator_id>/',
+        views.delete_indicator_from_mitigation_action,
+        name='delete_indicator_from_mitigation_action'
+    ),
+    path(
         'api/v1/mitigation-action/<uuid:mitigation_action_id>/file/<str:model_type>/',
         views.upload_file_from_mitigation_action,
         name='upload_file_from_mitigation_action'
