@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from mitigation_action.models import Contact
 
 from general.storages import PrivateMediaStorage
 User =  get_user_model()
@@ -12,6 +13,10 @@ User =  get_user_model()
 class ReportFile(models.Model):
     user = models.ForeignKey(User, related_name='report_file', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, blank=False, null=False)
+
+    ## FK
+    contact = models.ForeignKey(Contact, related_name='report_file', null=True, on_delete=models.CASCADE)
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
