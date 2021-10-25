@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.urls import path, re_path
 from report_data import views
 
 
@@ -22,5 +23,11 @@ urlpatterns = [
         r'^api/v1/report-data/report/$',
         views.get_post_report_data,
         name='get_post_report_data'
-    )
+    ),
+    path(
+        'api/v1/report-data/data/', 
+        views.get_catalog_data, 
+        name='get_catalog_data'
+    ),
+
 ]

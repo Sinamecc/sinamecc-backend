@@ -1,10 +1,11 @@
 from general.storages import S3Storage
+from mitigation_action.models import Classifier, ThematicCategorizationType
 from report_data.models import ReportData, ReportFile
 from django.urls import reverse
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from report_data.serializers import ReportDataSerializer
-from mitigation_action.serializers import ContactSerializer
+from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, ThematicCategorizationTypeSerializer
 import datetime
 import os
 import json
@@ -142,7 +143,25 @@ class ReportDataService():
     def upload_report_file_list(self, request, report_data_id):
         ...
 
+    def get_catalog_data(self, request):
+    
+        catalog = {
+            'classifier': (Classifier, ClassifierSerializer),
+            'thematic_categorization_type': (ThematicCategorizationType, ThematicCategorizationTypeSerializer),
+        }
+        data = {}
+        for name , (_model, _serializer) in catalog.items():
+            result_status, result_data = self._service_helper.get_all(_model)
+
+            if not result_status:
+                result = (False, result_data)
+                return result
+            
+            data = {**data, **{name: _serializer(result_data, many=True).data}}
         
+        result = (True, data)
+        
+        return result
 
 
   

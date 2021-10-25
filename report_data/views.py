@@ -50,3 +50,11 @@ def get_report_file_version_url(request, report_file_id, report_file_version_id)
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
     return view_helper.error_message("Unsupported METHOD for get_report_file_version_url view")
+
+
+@api_view(['GET'])
+def get_catalog_data(request): ## We need delete *args this parametes is temp at the moment to refactor MA
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_catalog_data", request)
+    
+    return result
