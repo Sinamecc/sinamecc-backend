@@ -43,7 +43,6 @@ class ReportData(models.Model):
     quality_element_description = models.TextField(blank=True, null=True)
     transfer_data_with_sinamecc = models.BooleanField(default=False)
     transfer_data_with_sinamecc_description = models.TextField(blank=True, null=True)
-    report = models.ForeignKey('Report', related_name='report_data', null=True, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, related_name='report_data', null=True, on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -60,8 +59,12 @@ class ReportData(models.Model):
 
 class Report(models.Model):
     user = models.ForeignKey(User, related_name='report', on_delete=models.CASCADE)
+    report_data = models.ForeignKey(ReportData, related_name='report', on_delete=models.CASCADE)
     version = models.CharField(max_length=100, unique=True, blank=False, null=False)
     active = models.BooleanField(blank=False, null=False)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Report")
@@ -74,8 +77,10 @@ class Report(models.Model):
 class ReportFile(models.Model):
 
     slug = models.SlugField(max_length=100, unique=True, blank=False, null=False)
-    file = models.FileField(blank=False, null=False, upload_to=directory_path, storage=PrivateMediaStorage())
     report_file = models.ForeignKey(Report, related_name='report_file', on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Report File")
@@ -92,3 +97,41 @@ class ReportFile(models.Model):
             self.slug = self._create_slug()
         
         super(ReportFile, self).save(*args, **kwargs)
+
+
+class ReportFileVersion(models.Model):
+
+    report_file = models.ForeignKey(ReportFile, related_name='file_version', on_delete=models.CASCADE)
+    version = models.CharField(max_length=100, blank=False, null=False)
+    file = models.FileField(upload_to=directory_path, storage=PrivateMediaStorage(), blank=True, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Report File Version")
+        verbose_name_plural = _("Report File Versions")
+        ordering = ('created',)
+
+    def _create_version(self):
+        return unique_field_value_generator(self, 20, 'file_version')
+
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+            self.version = self._create_version()
+        
+        super(ReportFileVersion, self).save(*args, **kwargs)
+
+
+
+class ReportFileMetadata(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    value = models.CharField(max_length=100, blank=False, null=False)
+    report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Report File Metadata")
+        verbose_name_plural = _("Report FileMetadata")
