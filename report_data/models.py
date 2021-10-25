@@ -33,9 +33,10 @@ class ReportData(models.Model):
     description = models.TextField(blank=True, null=True)
     source =models.TextField(blank=True, null=True)
     source_file = models.FileField(upload_to=directory_path, storage=PrivateMediaStorage(), blank=True, null=True)
-    thematic_categorization = models.CharField(max_length=350, blank=True, null=True)
     data_type = models.ForeignKey(ThematicCategorizationType, related_name='report_data', null=True, on_delete=models.CASCADE)
+    other_data_type = models.CharField(max_length=255, blank=True, null=True)
     classifier = models.ForeignKey(Classifier, related_name='report_data', null=True, on_delete=models.CASCADE)
+    other_classifier = models.CharField(max_length=255, blank=True, null=True)
     report_information = models.CharField(max_length=100, choices=REPORT_TYPE_CHOICES, blank=False, null=False)
     have_line_base = models.BooleanField(default=False)
     
@@ -123,7 +124,6 @@ class ReportFileVersion(models.Model):
             self.version = self._create_version()
         
         super(ReportFileVersion, self).save(*args, **kwargs)
-
 
 
 class ReportFileMetadata(models.Model):
