@@ -1,5 +1,5 @@
 from general.storages import S3Storage
-from report_data.models import ReportFile, ReportFileVersion
+from report_data.models import ReportFile
 from report_data.serializers import ReportFileSerializer, ReportFileVersionSerializer,ReportFileMetadataSerializer
 from django.urls import reverse
 import datetime

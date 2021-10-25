@@ -19,7 +19,7 @@ urlpatterns = [
         name='get_report_file_version_url'
     ),
     url(
-        r'^api/v1/report_file/$',
+        r'^api/v1/report-data/report/$',
         views.get_post_report_files,
         name='get_post_report_files'
     )
