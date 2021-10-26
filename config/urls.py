@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^', include('report_data.urls')),
     url(r'^', include('mitigation_action.workflow_steps.urls')),
     url(r'^', include('mitigation_action.urls')),
+    url(r'^', include('adaptation_action.urls')),
     url(r'^', include('workflow.urls')),
     url(r'^', include('mccr.workflow_steps.urls')),
     url(r'^', include('mccr.urls')),

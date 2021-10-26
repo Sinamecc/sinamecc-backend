@@ -37,3 +37,57 @@ class BaseWorkflowStepFile(models.Model):
 
     def __unicode__(self):
         return smart_unicode("{} - {}".format(self.workflow_step.name, self.file.name))
+
+class Province(models.Model):
+    #Generar predeterminado
+    name = models.CharField(max_length=25, null=True)
+    code = models.CharField(max_length=3, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Province")
+        verbose_name_plural = _("Provinces")
+
+class Canton(models.Model):
+    #Generar predeterminado
+    name = models.CharField(max_length=100, null=True)
+    code = models.CharField(max_length=3, null=True)
+    
+    province = models.ForeignKey(Province, related_name="canton", null=True, on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Canton")
+        verbose_name_plural = _("Cantons")
+
+class District(models.Model):
+    #Generar predeterminado
+    name = models.CharField(max_length=100, null=True)
+    code = models.CharField(max_length=3, null=True)
+    
+    canton = models.ForeignKey(Canton, related_name="district", null=True, on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("District")
+        verbose_name_plural = _("Districts")
+
+class Address(models.Model):
+
+    description = models.CharField(max_length=3000, null=True)
+    GIS = models.CharField(max_length=200, null=True)
+
+    district = models.ForeignKey(District, related_name="address", null=True, on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Address")
+        verbose_name_plural = ("Addresses")
