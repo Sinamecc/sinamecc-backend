@@ -4,7 +4,7 @@ from report_data.models import ReportData, ReportFile
 from django.urls import reverse
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
-from report_data.serializers import ReportDataSerializer
+from report_data.serializers import ReportDataSerializer, ReportDataChangeLogSerializer
 from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, ThematicCategorizationTypeSerializer
 import datetime
 import os
@@ -25,6 +25,13 @@ class ReportDataService():
         serializer = self._serializer_helper.get_serialized_record(ReportDataSerializer, data, record=report_data, partial=partial)
 
         return serializer
+    
+
+    def _get_serialized_report_data_change_log(self, data, report_data_change_log=None, partial=None):
+
+        serializer = self._serializer_helper.get_serialized_record(ReportDataChangeLogSerializer, data, record=report_data_change_log, partial=partial)
+
+        return serializer
 
 
     def _get_serialized_contact(self,  data, contact=None, partial=None):
@@ -32,6 +39,17 @@ class ReportDataService():
         serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact, partial=partial)
 
         return serializer
+
+
+    def _get_report_data_change_log_data(self, data, user):
+
+        data = {
+            'author': user.id,
+            'changes': data.get('changes', None),
+            'change_description': data.get('change_description', None),
+        }
+
+        return data
 
 
     def _create_update_contact(self, data, contact=None):
@@ -48,6 +66,24 @@ class ReportDataService():
 
         else:
             result = (False, serialized_contact.errors)
+
+        return result
+
+
+    def _create_update_report_data_change_log(self, data, report_data_change_log=None):
+            
+        if report_data_change_log:
+            serialized_report_data_change_log = self._get_serialized_report_data_change_log(data, report_data_change_log)
+
+        else:
+            serialized_report_data_change_log = self._get_serialized_report_data_change_log(data)
+        
+        if serialized_report_data_change_log.is_valid():
+            report_data_change_log = serialized_report_data_change_log.save()
+            result = (True, report_data_change_log)
+
+        else:
+            result = (False, serialized_report_data_change_log.errors)
 
         return result
 
@@ -82,20 +118,23 @@ class ReportDataService():
         validation_dict, errors = {}, []
         data = request.data.copy()
         data['user'] = request.user.id
-
+        
         field_list = ['contact']
 
         validation_dict = self._service_helper.create_or_update_record(field_list, data)
 
         if all(validation_dict):
+            serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
             serialized_report_data = self._get_serialized_report_data(data, partial=True)
 
-            if serialized_report_data.is_valid():
+            if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
                 report_data = serialized_report_data.save()
+                report_data_change_log = serialized_report_data_change_log.save()
+                report_data.report_data_change_log.add(report_data_change_log)
                 result = (True, ReportDataSerializer(report_data).data)
   
             else:
-                errors.append(serialized_report_data.errors)
+                errors.append(serialized_report_data.errors.extend(serialized_report_data_change_log.errors))
                 result = (False, errors)
         else:
             result = (False, validation_dict.get(False))
@@ -108,6 +147,7 @@ class ReportDataService():
         validation_dict, errors = {}, []
         data = request.data.copy()
         data['user'] = request.user.id
+        data['report_data_change_log'] = self._get_report_data_change_log_data(data.get('report_data_change_log', {}), request.user)
 
         field_list = ['contact']
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
@@ -116,10 +156,14 @@ class ReportDataService():
             validation_dict = self._service_helper.create_or_update_record(field_list, data, report_data_details)
 
             if all(validation_dict):
+                serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
                 serialized_report_data = self._get_serialized_report_data(data, report_data=report_data_details, partial=True)
 
-                if serialized_report_data.is_valid():
+                if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
                     report_data = serialized_report_data.save()
+                    report_data_change_log = serialized_report_data_change_log.save()
+                    report_data.report_data_change_log.add(report_data_change_log)
+                    
                     result = (True, ReportDataSerializer(report_data).data)
     
                 else:

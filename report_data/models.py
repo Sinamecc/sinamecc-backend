@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from typing import Tuple
 from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
@@ -135,3 +136,17 @@ class ReportFileMetadata(models.Model):
     class Meta:
         verbose_name = _("Report File Metadata")
         verbose_name_plural = _("Report FileMetadata")
+
+
+class ReportDataChangeLog(models.Model):
+
+    report_data = models.ForeignKey(ReportData, related_name='report_data_change_log', null=True, blank=True, on_delete=models.CASCADE)
+    changes = models.TextField(null=True, blank=True)
+    change_description = models.TextField(null=True, blank=True)
+    author = models.ForeignKey(User, related_name='report_data_change_log', on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        verbose_name = _("Report Data Changelog")
+        verbose_name_plural = _("Report Data Changelogs")
