@@ -2,13 +2,19 @@
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import AdaptationAction, AdaptationActionInformation, AdaptationActionType, ClimateThreat, Implementation, Instrument, ReportOrganization, Topics, SubTopics, Activity, TypeClimatedThreat
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat
+
+class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReportOrganizationType
+        fields = ('id', 'code', 'entity_type', 'created', 'updated')
 
 class ReportOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportOrganization
-        fields = ('id', 'entity_type', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'contact', 'created', 'updated')
+        fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type','contact', 'created', 'updated')
 
 class AdaptationActionTypeSerializer(serializers.ModelSerializer):
     
@@ -16,11 +22,17 @@ class AdaptationActionTypeSerializer(serializers.ModelSerializer):
         model = AdaptationActionType
         fields = ('id', 'name', 'created', 'updated')
 
+class ODSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ODS
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
 class AdaptationActionInformationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationActionInformation
-        fields = ('id', 'name', 'objective', 'description', 'meta','created', 'updated')
+        fields = ('id', 'name', 'objective', 'description', 'meta', 'adaptation_action_type', 'ods', 'created', 'updated')
 
 class TopicsSerializer(serializers.ModelSerializer):
 
@@ -32,13 +44,50 @@ class SubTopicsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubTopics
+        fields = ('id', 'code', 'name', 'topic', 'created', 'updated')
+
+class AdaptationAxisSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationAxis
+        fields = ('id', 'code', 'description', 'created', 'updated')
+
+class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationAxis
+        fields = ('id', 'code', 'name', 'adaptation_axis', 'created', 'updated')
+
+class AdaptatitionGuidelineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationGuideline
         fields = ('id', 'code', 'name', 'created', 'updated')
+
+class AdaptatitionGuidelineMetaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationGuideline
+        fields = ('id', 'code', 'meta', 'adaptation_guideline', 'created', 'updated')
+
+class NDCAreaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NDCArea
+        fields = ('id', 'code', 'description', 'created', 'updated')
+
+class NDCContributionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NDCContribution
+        fields = ('id', 'code', 'description', 'ndc_area', 'created', 'updated')
+
 
 class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ('id', 'code', 'description', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'sub_topic', 'adaptation_guideline_meta', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
@@ -68,10 +117,16 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'report_organization', 'address', 'activity', 'created', 'updated')
+        fields = ('id', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
+        #data['address'] = 
+        data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
+        data['activity'] = ActivitySerializer(instance.activity).data
+        data['instrument'] = InstrumentSerializer(instance.instrument).data
+        data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
+        data['implementation'] = ImplementationSerializer(instance.implementation).data
         return data
 

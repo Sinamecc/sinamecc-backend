@@ -72,6 +72,7 @@ class AdaptationActionInformation(models.Model):
     meta = models.CharField(max_length=3000, null=True)
 
     adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
+    ods = models.ForeignKey(ODS, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -125,12 +126,27 @@ class AdaptationAxis(models.Model):
         verbose_name = _('Adaptation Axis')
         verbose_name_plural = _('Adaptation Axis')
 
+
+class AdaptationAxisGuideline(models.Model):
+
+    code = models.CharField(max_length=3, null=False)
+    name = models.CharField(max_length=500, null=False)
+
+    adaptation_axis = models.ForeignKey(AdaptationAxis, null=False, related_name="adaptation_axis_guideline", on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Adaptation Axis Guideline')
+        verbose_name_plural = _('Adaptation Axis Guidelines')
+
+
 class AdaptationGuideline(models.Model):
 
     code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=500, null=False)
-
-    adaptation_axis = models.ForeignKey(AdaptationAxis, null=False, related_name="adaptation_guideline", on_delete=models.CASCADE)
+    name = models.CharField(max_length=500, null=False)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -139,6 +155,21 @@ class AdaptationGuideline(models.Model):
     class Meta:
         verbose_name = _('Adaptation Guideline')
         verbose_name_plural = _('Adaptation Guidelines')
+
+class AdaptationGuidelineMeta(models.Model):
+
+    code = models.CharField(max_length=3, null=False)
+    meta = models.CharField(max_length=500, null=False)
+
+    adaptation_guideline = models.ForeignKey(AdaptationGuideline, null=False, related_name="adaptation_guideline_meta", on_delete=models.CASCADE)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Adaptation Guideline Meta')
+        verbose_name_plural = _('Adaptation Guideline Meta')
 
 class NDCArea(models.Model):
 
@@ -170,12 +201,13 @@ class NDCContribution(models.Model):
 
 class Activity(models.Model):
 
-    code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.CharField()
+    code = models.CharField(max_length=3, null=True)
+    description = models.CharField(max_length=250, null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
-    adaptation_guideline = models.ForeignKey(AdaptationGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
+    adaptation_guideline_meta = models.ForeignKey(AdaptationGuidelineMeta, null=False, related_name="activity", on_delete=models.CASCADE)
     ndc_contribution = models.ForeignKey(NDCContribution, null=False, related_name="activity", on_delete=models.CASCADE)
+    adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -245,6 +277,7 @@ class AdaptationAction(models.Model):
     report_organization = models.ForeignKey(ReportOrganization, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     #Section 2
     address = models.ForeignKey(Address, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    adaptation_action_information = models.ForeignKey(AdaptationActionInformation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     activity = models.ForeignKey(Activity, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     instrument = models.ForeignKey(Instrument, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     climate_threat = models.ForeignKey(ClimateThreat, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
