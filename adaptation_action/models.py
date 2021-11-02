@@ -6,7 +6,7 @@ from django.db.models.deletion import CASCADE
 from django.db.models.fields.related import ForeignKey
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.fields import flatten_choices_dict
-from mitigation_action.models import Contact, Finance, Indicator, MonitoringIndicator
+from mitigation_action.models import Contact
 from general.models import Address
 
 # Create your models here.
@@ -270,6 +270,190 @@ class Implementation(models.Model):
         verbose_name = _("Implementation")
         verbose_name_plural = _("Implementations")
 
+
+class FinanceStatus(models.Model):
+
+    name = models.CharField(max_length=100, null=False)
+    code = models.CharField(max_length=100, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Status")
+        verbose_name_plural = _("Finance Status")
+
+class FinanceSourceType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+     
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Source Type")
+        verbose_name_plural = _("Finance Source Types")
+
+class FinanceInstrument(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+     
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Instrument")
+        verbose_name_plural = _("Finance Instruments")
+
+class Mideplan(models.Model):
+
+    registry = models.CharField(max_length=2, null=True)
+    name = models.CharField(max_length=300, null=True)
+    entity = models.CharField(max_length=200, null=True)
+
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Mideplan")
+        verbose_name_plural = _("Mideplan")
+
+class FinanceAdaptation(models.Model):
+
+    administration = models.TextField(max_length=500 ,null=True)
+    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+
+    status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
+    source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
+    finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
+    mideplan = models.ForeignKey(Mideplan, related_name="finance_adaptation", null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Adaptation")
+        verbose_name_plural = _("Finance Adaptations")
+
+class InformationSourceType(models.Model):
+    name = models.CharField(max_length=500, null=True)
+    code = models.CharField(max_length=500, null=True)
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source Type")
+        verbose_name_plural = _("Information Source Types")
+
+
+class InformationSource(models.Model):
+    responsible_institution = models.CharField(max_length=500, null=True)
+    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    other_type = models.CharField(max_length=500, null=True)
+    statistical_operation = models.CharField(max_length=500, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Information Source")
+        verbose_name_plural = _("Information Sources")
+
+class ThematicCategorizationType(models.Model):
+
+    name = models.CharField(max_length=100, blank=False, null=False)
+    code = models.CharField(max_length=100, blank=False, null=False)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Thematic Categorization Type")
+        verbose_name_plural = _("Thematic Categorization Types")
+
+class Classifier(models.Model):
+    code = models.CharField(max_length=255, null=True)
+    name = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Classifier")
+        verbose_name_plural = _("Classifiers")
+
+
+class IndicatorAdaptation(models.Model):
+    PERIODICITY = [
+        ('YEARLY', 'Yearly'),
+        ('BIANNUAL', 'Biannual'),
+        ('QUARTERLY', 'Quartely')
+    ]
+    GEOGRAPHIC = [
+        ('NATIONAL', 'National'),
+        ('REGIONAL', 'Regional'),
+        ('PROVINCIAL', 'Provincial'),
+        ('CANTONAL', 'Cantonal'),
+        ('OTHER', 'Other')
+    ]
+
+    name = models.CharField(max_length=255, null=True)
+    description = models.TextField(null=True)
+    unit = models.CharField(max_length=255, null=True)
+    methodological_detail = models.TextField(null=True)
+    ## need to endpoint to upload file
+    #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
+    
+    available_time_start_date = models.DateField(null=True)
+    available_time_end_date = models.DateField(null=True)
+
+    geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
+    other_geographic_coverage = models.CharField(max_length=255, blank=True, null=True)
+    
+    disaggregation = models.TextField(null=True)
+
+    limitation = models.TextField(null=True)
+
+    ## ensure sustainability
+    additional_information = models.TextField(null=True)
+    #additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+
+    comments = models.TextField(null=True)
+    ## FK
+    ## information source
+    information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    
+    ## thematic categorization
+    type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator_adaptation', on_delete=models.PROTECT)
+    other_type_of_data = models.CharField(max_length=255, blank=True, null=True)
+    classifier = models.ManyToManyField(Classifier, related_name='indicator_adaptation', blank=True)
+    other_classifier = models.CharField(max_length=255, blank=True, null=True)
+
+    ## contact
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Indicator Adaptation")
+        verbose_name_plural = _("Indicator Adaptation")
+    
+
 class AdaptationAction(models.Model):
     #Section 1
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -282,6 +466,12 @@ class AdaptationAction(models.Model):
     instrument = models.ForeignKey(Instrument, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     climate_threat = models.ForeignKey(ClimateThreat, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     implementation = models.ForeignKey(Implementation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+
+    #Section 3
+    finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    
+    #Section 4
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
 
     created = models.DateTimeField(auto_now_add=True)

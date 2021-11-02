@@ -1,8 +1,10 @@
 
+from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, Classifier
+
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -112,6 +114,64 @@ class ImplementationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Implementation
         fields = ('id', 'start_date', 'end_date', 'duration', 'responsible_entity', 'other_entity', 'action_code', 'created', 'updated')
+
+#Serializer section 3-4
+
+class FinanceStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinanceStatus
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class FinanceSourceTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinanceSourceType
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class MideplanSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Mideplan
+        fields = ('id', 'registry', 'name', 'entity', 'created', 'updated')
+
+class FinanceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinanceAdaptation
+        fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'mideplan', 'created', 'updated')
+
+class InformationSourceTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InformationSourceType
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class InformationSourceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InformationSource
+        fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation', 'created', 'updated')
+
+class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ThematicCategorizationType
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class Classifier(serializers.ModelSerializer):
+
+    class Meta:
+        model = Classifier
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class IndicatorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorAdaptation
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'geographic_coverage', 'other_geographic_coverage',
+         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
+
 
 class AdaptationActionSerializer(serializers.ModelSerializer):
 
