@@ -39,7 +39,7 @@ class BaseWorkflowStepFile(models.Model):
         return smart_unicode("{} - {}".format(self.workflow_step.name, self.file.name))
 
 class Province(models.Model):
-    #Generar predeterminado
+
     name = models.CharField(max_length=25, null=True)
     code = models.CharField(max_length=3, null=True)
 
@@ -65,7 +65,7 @@ class Canton(models.Model):
         verbose_name_plural = _("Cantons")
 
 class District(models.Model):
-    #Generar predeterminado
+    
     name = models.CharField(max_length=100, null=True)
     code = models.CharField(max_length=3, null=True)
     

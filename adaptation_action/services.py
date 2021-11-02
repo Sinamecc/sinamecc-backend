@@ -11,8 +11,7 @@ class AdaptationActionServices():
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
-        ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
-        pass
+        self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -160,7 +159,6 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         field_list = ['report_organization']
-        print(adaptation_action_id)
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
