@@ -1,0 +1,598 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-02 18:58+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: general/models.py:20 mitigation_action/workflow_steps/models.py:29
+msgid "Workflow Step"
+msgstr ""
+
+#: general/models.py:21 mitigation_action/workflow_steps/models.py:30
+msgid "Workflow Steps"
+msgstr ""
+
+#: general/models.py:34 mitigation_action/workflow_steps/models.py:45
+msgid "Workflow Step File"
+msgstr ""
+
+#: general/models.py:35 mitigation_action/workflow_steps/models.py:46
+msgid "Workflow Step Files"
+msgstr ""
+
+#: mccr/models.py:21
+msgid "MCCRUserType"
+msgstr ""
+
+#: mccr/models.py:22
+msgid "MCCRUserTypes"
+msgstr ""
+
+#: mccr/models.py:39
+msgid "MCCRRegistry"
+msgstr ""
+
+#: mccr/models.py:40
+msgid "MCCRRegistries"
+msgstr ""
+
+#: mccr/models.py:818 mitigation_action/models.py:1386 ppcn/models.py:694
+msgid "ChangeLog"
+msgstr ""
+
+#: mccr/models.py:819 mitigation_action/models.py:1387 ppcn/models.py:695
+msgid "ChangeLogs"
+msgstr ""
+
+#: mccr/models.py:835
+msgid "MCCRFile"
+msgstr ""
+
+#: mccr/models.py:836
+msgid "MCCRFiles"
+msgstr ""
+
+#: mccr/models.py:849
+msgid "Organismo Validador Verifador"
+msgstr ""
+
+#: mccr/models.py:850
+msgid "Organismos Validadores Verificadores"
+msgstr ""
+
+#: mccr/models.py:863
+msgid "MCCR OVV Relation"
+msgstr ""
+
+#: mccr/models.py:864
+msgid "MCCR OVV Relations"
+msgstr ""
+
+#: mitigation_action/models.py:33
+msgid "Costa Rican colon"
+msgstr ""
+
+#: mitigation_action/models.py:33 ppcn/models.py:23
+msgid "United States dollar"
+msgstr ""
+
+#: mitigation_action/models.py:52
+msgid "Carbon Deposit"
+msgstr ""
+
+#: mitigation_action/models.py:53
+msgid "Carbon Deposits"
+msgstr ""
+
+#: mitigation_action/models.py:65
+msgid "Standar"
+msgstr ""
+
+#: mitigation_action/models.py:66
+msgid "Standars"
+msgstr ""
+
+#: mitigation_action/models.py:78
+msgid "Sustainable Development Goal"
+msgstr ""
+
+#: mitigation_action/models.py:79
+msgid "Sustainable Development Goals"
+msgstr ""
+
+#: mitigation_action/models.py:92
+msgid "GHG Impact Sector"
+msgstr ""
+
+#: mitigation_action/models.py:93
+msgid "GHG Impact Sectors"
+msgstr ""
+
+#: mitigation_action/models.py:105
+msgid "Action Area"
+msgstr ""
+
+#: mitigation_action/models.py:106
+msgid "Action Areas"
+msgstr ""
+
+#: mitigation_action/models.py:120
+msgid "Action Goal"
+msgstr ""
+
+#: mitigation_action/models.py:121
+msgid "Action Goals"
+msgstr ""
+
+#: mitigation_action/models.py:134
+msgid "Descarbonization Axis"
+msgstr ""
+
+#: mitigation_action/models.py:135
+msgid "Descarbonization Axes"
+msgstr ""
+
+#: mitigation_action/models.py:149
+msgid "Transformational Vision"
+msgstr ""
+
+#: mitigation_action/models.py:150
+msgid "Transformational Visions"
+msgstr ""
+
+#: mitigation_action/models.py:163
+msgid "Topic"
+msgstr ""
+
+#: mitigation_action/models.py:164
+msgid "Topics"
+msgstr ""
+
+#: mitigation_action/models.py:178
+msgid "Sub Topic"
+msgstr ""
+
+#: mitigation_action/models.py:179
+msgid "Sub Topics"
+msgstr ""
+
+#: mitigation_action/models.py:193
+msgid "Activity"
+msgstr ""
+
+#: mitigation_action/models.py:194
+msgid "Activities"
+msgstr ""
+
+#: mitigation_action/models.py:207
+msgid "Impact Category"
+msgstr ""
+
+#: mitigation_action/models.py:208
+msgid "Impact Categories"
+msgstr ""
+
+#: mitigation_action/models.py:222
+msgid "Initiative Type"
+msgstr ""
+
+#: mitigation_action/models.py:223
+msgid "Initiative Types"
+msgstr ""
+
+#: mitigation_action/models.py:239
+msgid "Geographic Scale"
+msgstr ""
+
+#: mitigation_action/models.py:240
+msgid "Geographic Scales"
+msgstr ""
+
+#: mitigation_action/models.py:256
+msgid "Finance Source Type"
+msgstr ""
+
+#: mitigation_action/models.py:257
+msgid "Finance Source Types"
+msgstr ""
+
+#: mitigation_action/models.py:272
+msgid "Finance Status"
+msgstr ""
+
+#: mitigation_action/models.py:273
+msgid "Finance Statuses"
+msgstr ""
+
+#: mitigation_action/models.py:288
+msgid "Status"
+msgstr ""
+
+#: mitigation_action/models.py:289
+msgid "Statuses"
+msgstr ""
+
+#: mitigation_action/models.py:306
+msgid "Thematic Categorization Type"
+msgstr ""
+
+#: mitigation_action/models.py:307
+msgid "Thematic Categorization Types"
+msgstr ""
+
+#: mitigation_action/models.py:318
+msgid "Information Source Type"
+msgstr ""
+
+#: mitigation_action/models.py:319
+msgid "Information Source Types"
+msgstr ""
+
+#: mitigation_action/models.py:331
+msgid "Classifier"
+msgstr ""
+
+#: mitigation_action/models.py:332
+msgid "Classifiers"
+msgstr ""
+
+#: mitigation_action/models.py:357
+msgid "Contact"
+msgstr ""
+
+#: mitigation_action/models.py:358
+msgid "Contacts"
+msgstr ""
+
+#: mitigation_action/models.py:376 mitigation_action/models.py:377
+msgid "Monitoring and Reporting Indicators"
+msgstr ""
+
+#: mitigation_action/models.py:392 mitigation_action/models.py:393
+#: mitigation_action/models.py:426 mitigation_action/models.py:427
+msgid "Monitoring Information"
+msgstr ""
+
+#: mitigation_action/models.py:448 mitigation_action/models.py:449
+msgid "Categorization"
+msgstr ""
+
+#: mitigation_action/models.py:464
+msgid "Information Source"
+msgstr ""
+
+#: mitigation_action/models.py:465
+msgid "Information Sources"
+msgstr ""
+
+#: mitigation_action/models.py:530 mitigation_action/models.py:531
+msgid "Indicator"
+msgstr ""
+
+#: mitigation_action/models.py:582 mitigation_action/models.py:583
+msgid "Monitoring Indicator"
+msgstr ""
+
+#: mitigation_action/models.py:604 mitigation_action/models.py:605
+msgid "Impact Documentation"
+msgstr ""
+
+#: mitigation_action/models.py:628 mitigation_action/models.py:629
+msgid "Finance"
+msgstr ""
+
+#: mitigation_action/models.py:644
+msgid "Geographic Location"
+msgstr ""
+
+#: mitigation_action/models.py:645
+msgid "Geographic Locations"
+msgstr ""
+
+#: mitigation_action/models.py:662 mitigation_action/models.py:663
+msgid "Initiative"
+msgstr ""
+
+#: mitigation_action/models.py:678 mitigation_action/models.py:679
+msgid "Initiative Goal"
+msgstr ""
+
+#: mitigation_action/models.py:698 mitigation_action/models.py:699
+msgid "Mitigation Action Status"
+msgstr ""
+
+#: mitigation_action/models.py:726 mitigation_action/models.py:727
+msgid "GHG Informaction"
+msgstr ""
+
+#: mitigation_action/models.py:760
+msgid "Mitigation Action"
+msgstr ""
+
+#: mitigation_action/models.py:761
+msgid "Mitigation Actions"
+msgstr ""
+
+#: ppcn/models.py:23
+msgid "Costa Rican colón"
+msgstr ""
+
+#: ppcn/models.py:24
+msgid "CER"
+msgstr ""
+
+#: ppcn/models.py:24
+msgid "VER"
+msgstr ""
+
+#: ppcn/models.py:24
+msgid "Unidades de Compesnsacion de Carbono"
+msgstr ""
+
+#: ppcn/models.py:36
+msgid "Removal Project"
+msgstr ""
+
+#: ppcn/models.py:37
+msgid "Removal Projects"
+msgstr ""
+
+#: ppcn/models.py:48
+msgid "InventoryMethodology"
+msgstr ""
+
+#: ppcn/models.py:49
+msgid "InventoryMethodologies"
+msgstr ""
+
+#: ppcn/models.py:60
+msgid "PlusAction"
+msgstr ""
+
+#: ppcn/models.py:61
+msgid "PlusActions"
+msgstr ""
+
+#: ppcn/models.py:71
+msgid "PotentialGlobalWarming"
+msgstr ""
+
+#: ppcn/models.py:72
+msgid "PotentialGlobalWarmings"
+msgstr ""
+
+#: ppcn/models.py:83
+msgid "EmissionFactor"
+msgstr ""
+
+#: ppcn/models.py:84
+msgid "EmissionFactors"
+msgstr ""
+
+#: ppcn/models.py:95
+msgid "GeographicLevel"
+msgstr ""
+
+#: ppcn/models.py:96
+msgid "GeographicLevels"
+msgstr ""
+
+#: ppcn/models.py:108
+msgid "RequiredLevel"
+msgstr ""
+
+#: ppcn/models.py:109
+msgid "RequiredLevels"
+msgstr ""
+
+#: ppcn/models.py:121
+msgid "RecognitionType"
+msgstr ""
+
+#: ppcn/models.py:122
+msgid "RecognitionTypes"
+msgstr ""
+
+#: ppcn/models.py:144 ppcn/models.py:145
+msgid "Organization Classification"
+msgstr ""
+
+#: ppcn/models.py:168
+msgid "Carbon Offset"
+msgstr ""
+
+#: ppcn/models.py:169
+msgid "Carbon Offsets"
+msgstr ""
+
+#: ppcn/models.py:192
+msgid "Reduction"
+msgstr ""
+
+#: ppcn/models.py:193
+msgid "Reductions"
+msgstr ""
+
+#: ppcn/models.py:213
+msgid "Organization Category"
+msgstr ""
+
+#: ppcn/models.py:214
+msgid "Organization Categories"
+msgstr ""
+
+#: ppcn/models.py:237
+msgid "Organization"
+msgstr ""
+
+#: ppcn/models.py:238
+msgid "Organizations"
+msgstr ""
+
+#: ppcn/models.py:252
+msgid "CIIU Code"
+msgstr ""
+
+#: ppcn/models.py:253
+msgid "CIIU Codes"
+msgstr ""
+
+#: ppcn/models.py:264
+msgid "Sector"
+msgstr ""
+
+#: ppcn/models.py:265
+msgid "Sectors"
+msgstr ""
+
+#: ppcn/models.py:277
+msgid "SubSector"
+msgstr ""
+
+#: ppcn/models.py:278
+msgid "SubSectors"
+msgstr ""
+
+#: ppcn/models.py:290
+msgid "Biogenic Emission"
+msgstr ""
+
+#: ppcn/models.py:291
+msgid "Biogenic Emissions"
+msgstr ""
+
+#: ppcn/models.py:307 ppcn/models.py:308
+msgid "Gas Report"
+msgstr ""
+
+#: ppcn/models.py:319
+msgid "Gas Scope"
+msgstr ""
+
+#: ppcn/models.py:320
+msgid "Gas Scopes"
+msgstr ""
+
+#: ppcn/models.py:332
+msgid "Quantified Gas"
+msgstr ""
+
+#: ppcn/models.py:333
+msgid "Quantified Gases"
+msgstr ""
+
+#: ppcn/models.py:350 ppcn/models.py:351
+msgid "GeiOrganization"
+msgstr ""
+
+#: ppcn/models.py:365
+msgid "Gei Activity Type"
+msgstr ""
+
+#: ppcn/models.py:366
+msgid "Gei Activity Types"
+msgstr ""
+
+#: ppcn/models.py:381 ppcn/models.py:382
+msgid "Number of Request per Year"
+msgstr ""
+
+#: ppcn/models.py:392
+msgid "Confidential"
+msgstr ""
+
+#: ppcn/models.py:393
+msgid "No Confidential"
+msgstr ""
+
+#: ppcn/models.py:394
+msgid "Partially Confidential"
+msgstr ""
+
+#: ppcn/models.py:414
+msgid "PPCN"
+msgstr ""
+
+#: ppcn/models.py:415
+msgid "PPCNs"
+msgstr ""
+
+#: ppcn/models.py:710
+msgid "ppcn_file"
+msgstr ""
+
+#: ppcn/models.py:711
+msgid "ppcn_files"
+msgstr ""
+
+#: ppcn/models.py:729
+msgid "Gas Removal"
+msgstr ""
+
+#: ppcn/models.py:730
+msgid "Gas Remals"
+msgstr ""
+
+#: report_data/models.py:19
+msgid "ReportFile"
+msgstr ""
+
+#: report_data/models.py:20
+msgid "ReportFiles"
+msgstr ""
+
+#: report_data/models.py:34
+msgid "ReportFileVersion"
+msgstr ""
+
+#: report_data/models.py:35
+msgid "ReportFileVersions"
+msgstr ""
+
+#: report_data/models.py:47 report_data/models.py:48
+msgid "ReportFileMetadata"
+msgstr ""
+
+#: workflow/models.py:13
+msgid "Resolved"
+msgstr ""
+
+#: workflow/models.py:13
+msgid "Pending"
+msgstr ""
+
+#: workflow/models.py:30
+msgid "Comment"
+msgstr ""
+
+#: workflow/models.py:31
+msgid "Comments"
+msgstr ""
+
+#: workflow/models.py:40
+msgid "ReviewStatus"
+msgstr ""
+
+#: workflow/models.py:41
+msgid "ReviewStatuses"
+msgstr ""
+
+#~ msgid "test"
+#~ msgstr "wapo"
+
+#~ msgid "Policy Instrument"
+#~ msgstr "Khe"

@@ -1,9 +1,9 @@
 from .base import *
-
+from django.utils.translation import gettext_lazy as _
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'sinamecc-dev',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
@@ -31,3 +31,9 @@ PRIVATE_FILE_STORAGE = 'general.storages.PrivateMediaStorage'
 AWS_QUERYSTRING_AUTH = True
 
 ALLOWED_HOSTS = ['*']
+
+
+
+LANGUAGE_CODE = "en-US"
+
+USE_I18N = True

@@ -1,6 +1,7 @@
 from django.db.models import manager
 from general import models
-from django.utils.translation import override
+from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext 
 from rest_framework import serializers
 from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
@@ -125,6 +126,13 @@ class InitiativeTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativeType
         fields = ('id', 'code', 'name', 'type')
+
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['name'] =  gettext_lazy(instance.name)
+        print(ret)
+        return ret
 
 
 class GeographicScaleSerializer(serializers.ModelSerializer):

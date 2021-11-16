@@ -17,6 +17,8 @@ env.read_env() ## load variable env config/settings/.env
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+LOCALE_PATHS = [os.path.join(BASE_DIR, '../locale')]
+print(os.path.join(BASE_DIR, '../locale'))
 
 BASE_DIR_FRONTEND = "http://localhost:4200"
 # Quick-start development settings - unsuitable for production
@@ -62,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
