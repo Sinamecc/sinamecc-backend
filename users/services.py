@@ -510,7 +510,8 @@ class UserService():
         rand_len =  int(get_random_string(1, "3456789"))
         list_to_encode_id = ["{0}{1}".format(x, y) for x, y in zip((list(get_random_string(rand_len - 1)) + [str(hex(user_id + rand_len)[2:])]) , \
                                                                     [str(rand_len)] + list(get_random_string(rand_len-1)))]
-        user_b64 = str(urlsafe_base64_encode(force_bytes("".join(list_to_encode_id))), encoding)
+
+        user_b64 = urlsafe_base64_encode(force_bytes(''.join(list_to_encode_id)))
 
         return True , user_b64
 
