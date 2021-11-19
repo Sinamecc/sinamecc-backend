@@ -72,7 +72,7 @@ class AdaptationActionInformation(models.Model):
     meta = models.CharField(max_length=3000, null=True)
 
     adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
-    ods = models.ForeignKey(ODS, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
+    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", null=True, blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -175,6 +175,7 @@ class NDCArea(models.Model):
 
     code = models.CharField(max_length=3, null=False)
     description = models.CharField(max_length=500, null=False)
+    other = models.CharField(max_length=500, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -188,6 +189,7 @@ class NDCContribution(models.Model):
 
     code = models.CharField(max_length=3, null=False)
     description = models.CharField(max_length=500, null=False)
+    other = models.CharField(max_length=500, null=True)
 
     ndc_area = models.ForeignKey(NDCArea, null=False, related_name="ndc_contribution", on_delete=models.CASCADE)
 
@@ -206,7 +208,7 @@ class Activity(models.Model):
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
     adaptation_guideline_meta = models.ForeignKey(AdaptationGuidelineMeta, null=False, related_name="activity", on_delete=models.CASCADE)
-    ndc_contribution = models.ForeignKey(NDCContribution, null=False, related_name="activity", on_delete=models.CASCADE)
+    ndc_contribution = models.ManyToManyField(NDCContribution, null=False, related_name="activity", blank=True)
     adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
 
     ## logs

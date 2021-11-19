@@ -74,13 +74,13 @@ class NDCAreaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCArea
-        fields = ('id', 'code', 'description', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'other', 'created', 'updated')
 
 class NDCContributionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCContribution
-        fields = ('id', 'code', 'description', 'ndc_area', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'other', 'ndc_area', 'created', 'updated')
 
 
 class ActivitySerializer(serializers.ModelSerializer):
