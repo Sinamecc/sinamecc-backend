@@ -2192,7 +2192,7 @@ _canton_01 = [
     },
     {
         'code':'09',
-        'name':'Santa Anada',
+        'name':'Santa Ana',
         'district':_district_01_09
     },
     {
@@ -2378,52 +2378,52 @@ _canton_04 = [
     {
         'code':'01',
         'name':'Heredia',
-        'canton':_district_04_01
+        'district':_district_04_01
     },
     {
         'code':'02',
         'name':'Barva',
-        'canton':_district_04_02
+        'district':_district_04_02
     },
     {
         'code':'03',
         'name':'Santa Domingo',
-        'canton':_district_04_03
+        'district':_district_04_03
     },
     {
         'code':'04',
         'name':'Santa Barbara',
-        'canton':_district_04_04
+        'district':_district_04_04
     },
     {
         'code':'05',
         'name':'San Rafael',
-        'canton':_district_04_05
+        'district':_district_04_05
     },
     {
         'code':'06',
         'name':'San Isidro',
-        'canton':_district_04_06
+        'district':_district_04_06
     },
     {
         'code':'07',
         'name':'Belén',
-        'canton':_district_04_07
+        'district':_district_04_07
     },
     {
         'code':'08',
         'name':'Flores',
-        'canton':_district_04_08
+        'district':_district_04_08
     },
     {
         'code':'09',
         'name':'San Pablo',
-        'canton':_district_04_09
+        'district':_district_04_09
     },
     {
         'code':'10',
         'name':'Sarapiquí',
-        'canton':_district_04_10
+        'district':_district_04_10
     }
     
 ]
@@ -2432,57 +2432,57 @@ _canton_05 = [
     {
         'code':'01',
         'name':'Liberia',
-        'canton':_district_05_01
+        'district':_district_05_01
     },
     {
         'code':'02',
         'name':'Nicoya',
-        'canton':_district_05_02
+        'district':_district_05_02
     },
     {
         'code':'03',
         'name':'Santa Cruz',
-        'canton':_district_05_03
+        'district':_district_05_03
     },
     {
         'code':'04',
         'name':'Bagaces',
-        'canton':_district_05_04
+        'district':_district_05_04
     },
     {
         'code':'05',
         'name':'Carrillo',
-        'canton':_district_05_05
+        'district':_district_05_05
     },
     {
         'code':'06',
         'name':'Cañas',
-        'canton':_district_05_06
+        'district':_district_05_06
     },
     {
         'code':'07',
         'name':'Abangares',
-        'canton':_district_05_07
+        'district':_district_05_07
     },
     {
         'code':'08',
         'name':'Tilarán',
-        'canton':_district_05_08
+        'district':_district_05_08
     },
     {
         'code':'09',
         'name':'Nandayure',
-        'canton':_district_05_09
+        'district':_district_05_09
     },
     {
         'code':'10',
         'name':'La Cruz',
-        'canton':_district_05_10
+        'district':_district_05_10
     },
     {
         'code':'11',
         'name':'Hojancha',
-        'canton':_district_05_11
+        'district':_district_05_11
     },
 ]
 
@@ -2490,57 +2490,57 @@ _canton_06 = [
     {
         'code':'01',
         'name':'Puntarenas',
-        'canton':_district_06_01
+        'district':_district_06_01
     },
     {
         'code':'02',
         'name':'Esparza',
-        'canton':_district_06_02
+        'district':_district_06_02
     },
     {
         'code':'03',
         'name':'Buenos Aires',
-        'canton':_district_06_03
+        'district':_district_06_03
     },
     {
         'code':'04',
         'name':'Montes de Oro',
-        'canton':_district_06_04
+        'district':_district_06_04
     },
     {
         'code':'05',
         'name':'Osa',
-        'canton':_district_06_05
+        'district':_district_06_05
     },
     {
         'code':'06',
         'name':'Aguirre',
-        'canton':_district_06_06
+        'district':_district_06_06
     },
     {
         'code':'07',
         'name':'Golfito',
-        'canton':_district_06_07
+        'district':_district_06_07
     },
     {
         'code':'08',
         'name':'Coto Brus',
-        'canton':_district_06_08
+        'district':_district_06_08
     },
     {
         'code':'09',
         'name':'Parrita',
-        'canton':_district_06_09
+        'district':_district_06_09
     },
     {
         'code':'10',
         'name':'Corredores',
-        'canton':_district_06_10
+        'district':_district_06_10
     },
     {
         'code':'11',
         'name':'Garabito',
-        'canton':_district_06_11
+        'district':_district_06_11
     }
 ]
 
@@ -2548,32 +2548,32 @@ _canton_07 = [
     {
         'code':'01',
         'name':'Limón',
-        'canton':_district_07_01
+        'district':_district_07_01
     },
     {
         'code':'02',
         'name':'Pococí',
-        'canton':_district_07_02
+        'district':_district_07_02
     },
     {
         'code':'03',
         'name':'Siquirres',
-        'canton':_district_07_03
+        'district':_district_07_03
     },
     {
         'code':'04',
         'name':'Talamanca',
-        'canton':_district_07_04
+        'district':_district_07_04
     },
     {
         'code':'05',
         'name':'Matina',
-        'canton':_district_07_05
+        'district':_district_07_05
     },
     {
         'code':'06',
         'name':'Guacimo',
-        'canton':_district_07_06
+        'district':_district_07_06
     }
 ]
 
