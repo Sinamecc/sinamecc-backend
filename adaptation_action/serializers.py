@@ -2,7 +2,7 @@
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat, AdaptationGuidelineMeta, AdaptationAxisGuideline
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat, AdaptationAxisGuideline
 from general.serializers import AddressSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
@@ -58,18 +58,6 @@ class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdaptationAxisGuideline
         fields = ('id', 'code', 'name', 'adaptation_axis', 'created', 'updated')
-
-class AdaptationGuidelineSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = AdaptationGuideline
-        fields = ('id', 'code', 'name', 'created', 'updated')
-
-class AdaptationGuidelineMetaSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = AdaptationGuidelineMeta
-        fields = ('id', 'code', 'meta', 'adaptation_guideline', 'created', 'updated')
 
 class NDCAreaSerializer(serializers.ModelSerializer):
 

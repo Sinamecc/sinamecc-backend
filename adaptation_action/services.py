@@ -123,18 +123,6 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(AdaptationAxisGuidelineSerializer, data, record=adaptation_axis_guideline)
 
         return serializer
-
-    def _get_serialized_adaptation_guideline(self, data, adaptation_guideline = False):
-
-        serializer = self._serializer_helper.get_serialized_record(AdaptationGuidelineSerializer, data, record=adaptation_guideline)
-
-        return serializer
-    
-    def _get_serialized_adaptation_guideline_meta(self, data, adaptation_guideline_meta = False):
-
-        serializer = self._serializer_helper.get_serialized_record(AdaptationGuidelineMetaSerializer, data, record=adaptation_guideline_meta)
-
-        return serializer
     
     def _get_serialized_NDC_area(self, data, NDC_area = False):
 
@@ -328,40 +316,6 @@ class AdaptationActionServices():
             
             else:
                 result = (False, serialized_adaptation_axis_guideline.errors)
-            
-            return result
-    
-    def _create_update_adaptation_guideline(self, data, adaptation_guideline = False):
-            
-            if adaptation_guideline:
-                serialized_adaptation_guideline = self._get_serialized_adaptation_guideline(data, adaptation_guideline)
-            
-            else:
-                serialized_adaptation_guideline = self._get_serialized_adaptation_guideline(data)
-            
-            if serialized_adaptation_guideline.is_valid():
-                adaptation_guideline = serialized_adaptation_guideline.save()
-                result = (True, adaptation_guideline)
-            
-            else:
-                result = (False, serialized_adaptation_guideline.errors)
-            
-            return result
-    
-    def _create_update_adaptation_guideline_meta(self, data, adaptation_guideline_meta = False):
-            
-            if adaptation_guideline_meta:
-                serialized_adaptation_guideline_meta = self._get_serialized_adaptation_guideline_meta(data, adaptation_guideline_meta)
-            
-            else:
-                serialized_adaptation_guideline_meta = self._get_serialized_adaptation_guideline_meta(data)
-            
-            if serialized_adaptation_guideline_meta.is_valid():
-                adaptation_guideline_meta = serialized_adaptation_guideline_meta.save()
-                result = (True, adaptation_guideline_meta)
-            
-            else:
-                result = (False, serialized_adaptation_guideline_meta.errors)
             
             return result
     

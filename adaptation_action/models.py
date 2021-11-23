@@ -143,34 +143,6 @@ class AdaptationAxisGuideline(models.Model):
         verbose_name_plural = _('Adaptation Axis Guidelines')
 
 
-class AdaptationGuideline(models.Model):
-
-    code = models.CharField(max_length=3, null=False)
-    name = models.CharField(max_length=500, null=False)
-
-    ## logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _('Adaptation Guideline')
-        verbose_name_plural = _('Adaptation Guidelines')
-
-class AdaptationGuidelineMeta(models.Model):
-
-    code = models.CharField(max_length=3, null=False)
-    meta = models.CharField(max_length=500, null=False)
-
-    adaptation_guideline = models.ForeignKey(AdaptationGuideline, null=False, related_name="adaptation_guideline_meta", on_delete=models.CASCADE)
-
-    ## logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _('Adaptation Guideline Meta')
-        verbose_name_plural = _('Adaptation Guideline Meta')
-
 class NDCArea(models.Model):
 
     code = models.CharField(max_length=3, null=False)
@@ -207,7 +179,6 @@ class Activity(models.Model):
     description = models.CharField(max_length=250, null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
-    adaptation_guideline_meta = models.ForeignKey(AdaptationGuidelineMeta, null=False, related_name="activity", on_delete=models.CASCADE)
     ndc_contribution = models.ManyToManyField(NDCContribution, null=False, related_name="activity", blank=True)
     adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
 

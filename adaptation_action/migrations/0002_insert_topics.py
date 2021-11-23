@@ -19,9 +19,11 @@ def insert_topics(apps, schema_editor):
             sub_topic_record = SubTopics(topic = topic_record, **sub_topic)
             sub_topic_record.save()
 
+            """
             for activity in _activity:
                 activity_record = Activity(sub_topic = sub_topic_record, **activity)
                 activity_record.save()
+            """
 
 
 class Migration(migrations.Migration):
