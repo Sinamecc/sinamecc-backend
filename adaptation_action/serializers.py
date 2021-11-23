@@ -2,7 +2,8 @@
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, Implementation, Instrument, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, Topics, SubTopics, Activity, TypeClimatedThreat, AdaptationGuidelineMeta, AdaptationAxisGuideline
+from general.serializers import AddressSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -55,19 +56,19 @@ class AdaptationAxisSerializer(serializers.ModelSerializer):
 class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = AdaptationAxis
+        model = AdaptationAxisGuideline
         fields = ('id', 'code', 'name', 'adaptation_axis', 'created', 'updated')
 
-class AdaptatitionGuidelineSerializer(serializers.ModelSerializer):
+class AdaptationGuidelineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationGuideline
         fields = ('id', 'code', 'name', 'created', 'updated')
 
-class AdaptatitionGuidelineMetaSerializer(serializers.ModelSerializer):
+class AdaptationGuidelineMetaSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = AdaptationGuideline
+        model = AdaptationGuidelineMeta
         fields = ('id', 'code', 'meta', 'adaptation_guideline', 'created', 'updated')
 
 class NDCAreaSerializer(serializers.ModelSerializer):
@@ -122,7 +123,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
-        #data['address'] = 
+        data['address'] = AddressSerializer(instance.address).data
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
         data['activity'] = ActivitySerializer(instance.activity).data
         data['instrument'] = InstrumentSerializer(instance.instrument).data
