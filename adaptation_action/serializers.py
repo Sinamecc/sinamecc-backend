@@ -3,7 +3,10 @@ from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, Classifier
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, \
+     FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
+         NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, \
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact
 
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
@@ -172,12 +175,57 @@ class IndicatorSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'geographic_coverage', 'other_geographic_coverage',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
 
+#Serializer section 5-6
+
+
+class ProgressLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProgressLog
+        fields = ('id', 'action_status', 'progress_monitoring', 'created', 'updated')
+
+class IndicatorSourceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorSource
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
+class IndicatorMonitoringSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorMonitoring
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicador_source', 'indicator', 'created', 'updated')
+
+class GeneralReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GeneralReport
+        fields = ('id', 'start_date', 'end_date', 'description', 'created', 'updated')
+
+class GeneralImpact(serializers.ModelSerializer):
+
+    class Meta:
+        model = GeneralImpact
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
+class TemporalityImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TemporalityImpact
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
+class ActionImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ActionImpact
+        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'created', 'updated')
+
 
 class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'created', 'updated')
+        fields = ('id', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -188,5 +236,11 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['instrument'] = InstrumentSerializer(instance.instrument).data
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data
+        data['finance'] = FinanceSerializer(instance.finance).data
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['progress_log'] = ProgressLogSerializer(instance.progress_log).data
+        data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
+        data['general_report'] = GeneralReportSerializer(instance.general_report).data
+        data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
         return data
 

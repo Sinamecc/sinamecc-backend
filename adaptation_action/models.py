@@ -3,10 +3,11 @@ from django.db import models
 from django.db.models.aggregates import Max
 from django.db.models.base import Model
 from django.db.models.deletion import CASCADE
+from django.db.models.fields import CharField
 from django.db.models.fields.related import ForeignKey
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.fields import flatten_choices_dict
-from mitigation_action.models import Contact
+from mitigation_action.models import Contact, Indicator
 from general.models import Address
 
 # Create your models here.
@@ -453,6 +454,105 @@ class IndicatorAdaptation(models.Model):
         verbose_name = _("Indicator Adaptation")
         verbose_name_plural = _("Indicator Adaptation")
     
+class ProgressLog(models.Model):
+
+    action_status = models.CharField(max_length=25, null=True)
+    progress_monitoring = models.CharField(max_length=5, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Progress Log")
+        verbose_name_plural = _("Progress Logs")
+
+class IndicatorSource(models.Model):
+
+    code = models.CharField(max_length=255, null=True)
+    name = models.TextField(null=True)
+    
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Indicator Source")
+        verbose_name_plural = _("Indicator Source")
+
+class IndicatorMonitoring(models.Model):
+
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+    update_date = models.DateField(null=True)
+    data_to_update = models.CharField(max_length=300, null=True)
+    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+
+    ## FK
+    indicator_source = models.ManyToManyField(IndicatorSource, related_name='indicator_monitoring', blank=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Indicator Monitoring")
+        verbose_name_plural = _("Indicator Monitoring")
+
+class GeneralReport(models.Model):
+
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+    description = models.CharField(max_length=3000, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("General Report")
+        verbose_name_plural = _("General Report")
+
+class GeneralImpact(models.Model):
+
+    code = models.CharField(max_length=2, null=True)
+    name = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("General Impact")
+        verbose_name_plural = _("General Impact")
+
+class TemporalityImpact(models.Model):
+
+    code = models.CharField(max_length=2, null=True)
+    name = models.CharField(max_length=255, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Temporality Impact")
+        verbose_name_plural = _("Temporality Impact")
+
+
+class ActionImpact(models.Model):
+
+    gender_equality = models.CharField(max_length=3, null=True)
+    gender_equality_description = models.CharField(max_length=3000, null=True)
+    unwanted_action = models.CharField(max_length=3, null=True)
+    unwanted_action_description = models.CharField(max_length=3000, null=True)
+    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+
+    ## FK
+    general_impact = models.ForeignKey(GeneralImpact, null=True, related_name='action_impact', on_delete=models.CASCADE)
+    temporality_impact = models.ManyToManyField(TemporalityImpact, related_name='action_impact', blank=True)
+    ods = models.ManyToManyField(ODS, related_name='action_impact', blank=True)
 
 class AdaptationAction(models.Model):
     #Section 1
@@ -473,6 +573,13 @@ class AdaptationAction(models.Model):
     #Section 4
     indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
+    #Section 5
+    progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    indicator_monitoring = models.ForeignKey(IndicatorMonitoring, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    general_report = models.ForeignKey(GeneralReport, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+
+    #Section 6
+    action_impact = models.ForeignKey(ActionImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
