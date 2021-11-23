@@ -207,9 +207,9 @@ class Activity(models.Model):
     description = models.CharField(max_length=250, null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
-    adaptation_guideline_meta = models.ForeignKey(AdaptationGuidelineMeta, null=True, related_name="activity", on_delete=models.CASCADE)
-    ndc_contribution = models.ManyToManyField(NDCContribution, null=True, related_name="activity", blank=True)
-    adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=True, related_name="activity", on_delete=models.CASCADE)
+    adaptation_guideline_meta = models.ForeignKey(AdaptationGuidelineMeta, null=False, related_name="activity", on_delete=models.CASCADE)
+    ndc_contribution = models.ManyToManyField(NDCContribution, null=False, related_name="activity", blank=True)
+    adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
