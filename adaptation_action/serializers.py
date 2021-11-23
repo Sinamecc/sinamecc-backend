@@ -76,7 +76,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ('id', 'code', 'description', 'sub_topic', 'adaptation_guideline_meta', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'sub_topic', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
