@@ -10,7 +10,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOW_ALL_ORIGINS = True
-
+BASE_DIR_FRONTEND = 'app.devel.sinamecc.go.cr'
 MEDIA_ROOT = "/var/www/app/sinamecc-uploads"
 
 AWS_STORAGE_BUCKET_NAME = 'sinamecc-dev'
