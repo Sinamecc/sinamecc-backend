@@ -58,11 +58,6 @@ class AdaptationAxisSerializer(serializers.ModelSerializer):
         model = AdaptationAxis
         fields = ('id', 'code', 'description', 'created', 'updated')
 
-class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = AdaptationAxisGuideline
-        fields = ('id', 'code', 'name', 'adaptation_axis', 'created', 'updated')
 
 class NDCAreaSerializer(serializers.ModelSerializer):
 

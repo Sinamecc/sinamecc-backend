@@ -45,8 +45,7 @@ def insert_adaptation_action_type_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('adaptation_action', '0001_initial'),
-        ('general', '0002_initial'),
+        ('adaptation_action', '0002_auto_20211102_1437'),
     ]
 
     operations = [

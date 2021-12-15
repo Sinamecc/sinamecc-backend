@@ -29,7 +29,7 @@ def insert_topics(apps, schema_editor):
 class Migration(migrations.Migration):
     
         dependencies = [
-            ('adaptation_action', '0002_catalogs_adaptation'),
+            ('adaptation_action', '0003_catalogs_adaptation'),
         ]
     
         operations = [
