@@ -174,6 +174,368 @@ class AdaptationActionServices():
 
         return result
 
+    def _get_serialized_report_organization_type(self, data, report_organization_type = False):
+
+        serializers = self._serializer_helper.get_serialized_record(ReportOrganizationTypeSerializer, data, record=report_organization_type)
+
+        return serializers
+    
+    def _get_serialized_adaptation_action_type(self, data, adaptation_action_type = False):
+
+        serializers = self._serializer_helper.get_serialized_record(AdaptationActionTypeSerializer, data, record=adaptation_action_type)
+
+        return serializers
+    
+    def _get_serialized_ODS(self, data, ODS=False):
+
+        serializer = self._serializer_helper.get_serialized_record(ODSSerializer, data, record=ODS)
+
+        return serializer
+    
+    def _get_serialized_adaptation_action_information(self, data, adaptation_action_information = False):
+
+        serializer = self._serializer_helper.get_serialized_record(AdaptationActionInformationSerializer, data, record=adaptation_action_information)
+
+        return serializer
+    
+    def _get_serialized_topics(self, data, topics = False):
+
+        serializer = self._serializer_helper.get_serialized_record(TopicsSerializer, data, record=topics)
+
+        return serializer
+    
+    def _get_serialized_sub_topics(self, data, subtopics = False):
+
+        serializer = self._serializer_helper.get_serialized_record(SubTopicsSerializer, data, record=subtopics)
+
+        return serializer
+    
+    def _get_serialized_adaptation_axis(self, data, adaptation_axis = False):
+
+        serializer = self._serializer_helper.get_serialized_record(AdaptationAxisSerializer, data, record=adaptation_axis)
+
+        return serializer
+    
+    def _get_serialized_adaptation_axis_guideline(self, data, adaptation_axis_guideline = False):
+
+        serializer = self._serializer_helper.get_serialized_record(AdaptationAxisGuidelineSerializer, data, record=adaptation_axis_guideline)
+
+        return serializer
+    
+    def _get_serialized_NDC_area(self, data, NDC_area = False):
+
+        serializer = self._serializer_helper.get_serialized_record(NDCAreaSerializer, data, record=NDC_area)
+
+        return serializer
+    
+    def _get_serialized_NDC_contribution(self, data, NDC_contribution = False):
+
+        serializer = self._serializer_helper.get_serialized_record(NDCContributionSerializer, data, record=NDC_contribution)
+
+        return serializer
+    
+    def _get_serialized_activity(self, data, activity = False):
+
+        serializer = self._serializer_helper.get_serialized_record(ActivitySerializer, data, record=activity)
+
+        return serializer
+    
+    def _get_serialized_instrument(self, data, instrument = False):
+
+        serializer = self._serializer_helper.get_serialized_record(InstrumentSerializer, data, record=instrument)
+
+        return serializer
+    
+    def _get_serialized_type_climated_threat(self, data, type_climated_threat = False):
+
+        serializer = self._serializer_helper.get_serialized_record(TypeClimatedThreatSerializer, data, record=type_climated_threat)
+
+        return serializer
+    
+    def _get_serialized_climate_threat(self, data, climate_threat = False):
+
+        serializer = self._serializer_helper.get_serialized_record(ClimateThreatSerializer, data, record=climate_threat)
+
+        return serializer
+    
+    def _get_serialized_implementation(self, data, implementation = False):
+
+        serializer = self._serializer_helper.get_serialized_record(ImplementationSerializer, data, record=implementation)
+
+        return serializer
+
+    def _create_update_report_organization_type(self, data, report_organization_type = False):
+
+        if report_organization_type:
+            serialized_report_organization_type = self._get_serialized_report_organization_type(data, report_organization_type)
+        
+        else:
+            serialized_report_organization_type = self._get_serialized_report_organization_type(data)
+        
+        if serialized_report_organization_type.is_valid():
+            report_organization_type = serialized_report_organization_type.save()
+            result = (True, report_organization_type)
+        
+        else:
+            result = (False, serialized_report_organization_type.errors)
+        
+        return result
+    
+    def _create_update_adaptation_action_type(self, data, adaptation_action_type = False):
+
+        if adaptation_action_type:
+            serialized_adaptation_action_type = self._get_serialized_adaptation_action_type(data, adaptation_action_type)
+        
+        else:
+            serialized_adaptation_action_type = self._get_serialized_adaptation_action_type(data)
+        
+        if serialized_adaptation_action_type.is_valid():
+            adaptation_action_type = serialized_adaptation_action_type.save()
+            result = (True, adaptation_action_type)
+        
+        else:
+            result = (False, serialized_adaptation_action_type.errors)
+        
+        return result
+
+    def _create_update_ODS(self, data, ODS=False):
+            
+            if ODS:
+                serialized_ODS = self._get_serialized_ODS(data, ODS)
+            
+            else:
+                serialized_ODS = self._get_serialized_ODS(data)
+            
+            if serialized_ODS.is_valid():
+                ODS = serialized_ODS.save()
+                result = (True, ODS)
+            
+            else:
+                result = (False, serialized_ODS.errors)
+            
+            return result
+    
+    def _create_update_adaptation_action_information(self, data, adaptation_action_information = False):
+            
+            if adaptation_action_information:
+                serialized_adaptation_action_information = self._get_serialized_adaptation_action_information(data, adaptation_action_information)
+            
+            else:
+                serialized_adaptation_action_information = self._get_serialized_adaptation_action_information(data)
+            
+            if serialized_adaptation_action_information.is_valid():
+                adaptation_action_information = serialized_adaptation_action_information.save()
+                result = (True, adaptation_action_information)
+            
+            else:
+                result = (False, serialized_adaptation_action_information.errors)
+            
+            return result
+    
+    def _create_update_adaptation_action_information(self, data, adaptation_action_information = False):
+            
+            if adaptation_action_information:
+                serialized_adaptation_action_information = self._get_serialized_adaptation_action_information(data, adaptation_action_information)
+            
+            else:
+                serialized_adaptation_action_information = self._get_serialized_adaptation_action_information(data)
+            
+            if serialized_adaptation_action_information.is_valid():
+                adaptation_action_information = serialized_adaptation_action_information.save()
+                result = (True, adaptation_action_information)
+            
+            else:
+                result = (False, serialized_adaptation_action_information.errors)
+            
+            return result
+    
+    def _create_update_topics(self, data, topic = False):
+            
+            if topic:
+                serialized_topic = self._get_serialized_topic(data, topic)
+            
+            else:
+                serialized_topic = self._get_serialized_topic(data)
+            
+            if serialized_topic.is_valid():
+                topic = serialized_topic.save()
+                result = (True, topic)
+            
+            else:
+                result = (False, serialized_topic.errors)
+            
+            return result
+    
+    def _create_update_sub_topics(self, data, sub_topic = False):
+            
+            if sub_topic:
+                serialized_sub_topic = self._get_serialized_sub_topic(data, sub_topic)
+            
+            else:
+                serialized_sub_topic = self._get_serialized_sub_topic(data)
+            
+            if serialized_sub_topic.is_valid():
+                sub_topic = serialized_sub_topic.save()
+                result = (True, sub_topic)
+            
+            else:
+                result = (False, serialized_sub_topic.errors)
+            
+            return result
+    
+    def _create_update_adaptation_axis(self, data, adaptation_axis = False):
+            
+            if adaptation_axis:
+                serialized_adaptation_axis = self._get_serialized_adaptation_axis(data, adaptation_axis)
+            
+            else:
+                serialized_adaptation_axis = self._get_serialized_adaptation_axis(data)
+            
+            if serialized_adaptation_axis.is_valid():
+                adaptation_axis = serialized_adaptation_axis.save()
+                result = (True, adaptation_axis)
+            
+            else:
+                result = (False, serialized_adaptation_axis.errors)
+            
+            return result
+    
+    def _create_update_adaptation_axis_guideline(self, data, adaptation_axis_guideline = False):
+            
+            if adaptation_axis_guideline:
+                serialized_adaptation_axis_guideline = self._get_serialized_adaptation_axis_guideline(data, adaptation_axis_guideline)
+            
+            else:
+                serialized_adaptation_axis_guideline = self._get_serialized_adaptation_axis_guideline(data)
+            
+            if serialized_adaptation_axis_guideline.is_valid():
+                adaptation_axis_guideline = serialized_adaptation_axis_guideline.save()
+                result = (True, adaptation_axis_guideline)
+            
+            else:
+                result = (False, serialized_adaptation_axis_guideline.errors)
+            
+            return result
+    
+    def _create_update_NDC_area(self, data, NDC_area = False):
+            
+            if NDC_area:
+                serialized_NDC_area = self._get_serialized_NDC_area(data, NDC_area)
+            
+            else:
+                serialized_NDC_area = self._get_serialized_NDC_area(data)
+            
+            if serialized_NDC_area.is_valid():
+                NDC_area = serialized_NDC_area.save()
+                result = (True, NDC_area)
+            
+            else:
+                result = (False, serialized_NDC_area.errors)
+            
+            return result
+    
+    def _create_update_NDC_contribution(self, data, NDC_contribution = False):
+            
+            if NDC_contribution:
+                serialized_NDC_contribution = self._get_serialized_NDC_contribution(data, NDC_contribution)
+            
+            else:
+                serialized_NDC_contribution = self._get_serialized_NDC_contribution(data)
+            
+            if serialized_NDC_contribution.is_valid():
+                NDC_contribution = serialized_NDC_contribution.save()
+                result = (True, NDC_contribution)
+            
+            else:
+                result = (False, serialized_NDC_contribution.errors)
+            
+            return result
+    
+    def _create_update_activity(self, data, activity = False):
+            
+            if activity:
+                serialized_activity = self._get_serialized_activity(data, activity)
+            
+            else:
+                serialized_activity = self._get_serialized_activity(data)
+            
+            if serialized_activity.is_valid():
+                activity = serialized_activity.save()
+                result = (True, activity)
+            
+            else:
+                result = (False, serialized_activity.errors)
+            
+            return result
+    
+    def _create_update_instrument(self, data, instrument = False):
+            
+            if instrument:
+                serialized_instrument = self._get_serialized_instrument(data, instrument)
+            
+            else:
+                serialized_instrument = self._get_serialized_instrument(data)
+            
+            if serialized_instrument.is_valid():
+                instrument = serialized_instrument.save()
+                result = (True, instrument)
+            
+            else:
+                result = (False, serialized_instrument.errors)
+            
+            return result
+    
+    def _create_update_type_climate_threat(self, data, type_climate_threat = False):
+            
+            if type_climate_threat:
+                serialized_type_climate_threat = self._get_serialized_type_climate_threat(data, type_climate_threat)
+            
+            else:
+                serialized_type_climate_threat = self._get_serialized_type_climate_threat(data)
+            
+            if serialized_type_climate_threat.is_valid():
+                type_climate_threat = serialized_type_climate_threat.save()
+                result = (True, type_climate_threat)
+            
+            else:
+                result = (False, serialized_type_climate_threat.errors)
+            
+            return result
+    
+    def _create_update_climate_threat(self, data, climate_threat = False):
+            
+            if climate_threat:
+                serialized_climate_threat = self._get_serialized_climate_threat(data, climate_threat)
+            
+            else:
+                serialized_climate_threat = self._get_serialized_climate_threat(data)
+            
+            if serialized_climate_threat.is_valid():
+                climate_threat = serialized_climate_threat.save()
+                result = (True, climate_threat)
+            
+            else:
+                result = (False, serialized_climate_threat.errors)
+            
+            return result
+    
+    def _create_update_implementation(self, data, implementation = False):
+            
+            if implementation:
+                serialized_implementation = self._get_serialized_implementation(data, implementation)
+            
+            else:
+                serialized_implementation = self._get_serialized_implementation(data)
+            
+            if serialized_implementation.is_valid():
+                implementation = serialized_implementation.save()
+                result = (True, implementation)
+            
+            else:
+                result = (False, serialized_implementation.errors)
+            
+            return result
+
     def _create_update_report_organization(self, data, report_organization=False):
 
         if report_organization:
@@ -224,7 +586,7 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization']
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation']
 
         for field in field_list:
             if data.get(field, False):

@@ -3,11 +3,12 @@ from django.db import models
 from django.db.models import fields
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, AdaptationGuideline, ClimateThreat, \
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact
 
+from general.serializers import AddressSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -60,39 +61,27 @@ class AdaptationAxisSerializer(serializers.ModelSerializer):
 class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = AdaptationAxis
+        model = AdaptationAxisGuideline
         fields = ('id', 'code', 'name', 'adaptation_axis', 'created', 'updated')
-
-class AdaptatitionGuidelineSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = AdaptationGuideline
-        fields = ('id', 'code', 'name', 'created', 'updated')
-
-class AdaptatitionGuidelineMetaSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = AdaptationGuideline
-        fields = ('id', 'code', 'meta', 'adaptation_guideline', 'created', 'updated')
 
 class NDCAreaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCArea
-        fields = ('id', 'code', 'description', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'other', 'created', 'updated')
 
 class NDCContributionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCContribution
-        fields = ('id', 'code', 'description', 'ndc_area', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'other', 'ndc_area', 'created', 'updated')
 
 
 class ActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Activity
-        fields = ('id', 'code', 'description', 'sub_topic', 'adaptation_guideline_meta', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'sub_topic', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
@@ -230,7 +219,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
-        #data['address'] = 
+        data['address'] = AddressSerializer(instance.address).data
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
         data['activity'] = ActivitySerializer(instance.activity).data
         data['instrument'] = InstrumentSerializer(instance.instrument).data
