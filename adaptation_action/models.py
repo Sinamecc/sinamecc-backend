@@ -1,14 +1,9 @@
 import uuid
 from django.db import models
-from django.db.models.aggregates import Max
-from django.db.models.base import Model
-from django.db.models.deletion import CASCADE
-from django.db.models.fields import CharField
-from django.db.models.fields.related import ForeignKey
 from django.utils.translation import ugettext_lazy as _
-from rest_framework.fields import flatten_choices_dict
 from mitigation_action.models import Contact, Indicator
 from general.models import Address
+from django_fsm import FSMField, transition
 
 # Create your models here.
 
@@ -528,9 +523,10 @@ class ActionImpact(models.Model):
     ods = models.ManyToManyField(ODS, related_name='action_impact', blank=True)
 
 class AdaptationAction(models.Model):
+    
     #Section 1
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+    fsm_state = FSMField(default='new', protected=True, max_length=100)
     report_organization = models.ForeignKey(ReportOrganization, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     #Section 2
     address = models.ForeignKey(Address, related_name="adaptation_action", null=True, on_delete=models.CASCADE)

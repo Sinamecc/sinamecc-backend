@@ -209,10 +209,33 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'created', 'updated')
+        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'created', 'updated')
+
+    def _get_fsm_state_info(self, instance):
+        
+        data = {
+            'state': instance.fsm_state,
+            'label':  f'{transition.target} label'
+        }
+        return data
+    
+    def _next_action(self, instance):
+        
+        transitions = instance.get_available_fsm_state_transitions()
+        result = [
+                    {
+                        'state':transition.target, 
+                        'label': f'{transition.target} label', 
+                        'required_comments': True
+                    } for transition in transitions
+                ]
+        return result
+
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data['fsm_state'] = self._get_fsm_state_info(instance)
+        data['next_state'] = self._next_action(instance)
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
         data['address'] = AddressSerializer(instance.address).data
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
