@@ -68,7 +68,7 @@ class AdaptationActionInformation(models.Model):
     meta = models.CharField(max_length=3000, null=True)
 
     adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
-    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", null=True, blank=True)
+    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -175,7 +175,7 @@ class Activity(models.Model):
     description = models.CharField(max_length=250, null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
-    ndc_contribution = models.ManyToManyField(NDCContribution, null=False, related_name="activity", blank=True)
+    ndc_contribution = models.ManyToManyField(NDCContribution,related_name="activity", blank=True)
     adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
 
     ## logs

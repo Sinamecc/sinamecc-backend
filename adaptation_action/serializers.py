@@ -178,7 +178,7 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicador_source', 'indicator', 'created', 'updated')
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'created', 'updated')
 
 class GeneralReportSerializer(serializers.ModelSerializer):
 
@@ -202,7 +202,7 @@ class ActionImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActionImpact
-        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'created', 'updated')
+        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact')
 
 
 class AdaptationActionSerializer(serializers.ModelSerializer):
@@ -215,7 +215,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         
         data = {
             'state': instance.fsm_state,
-            'label':  f'{transition.target} label'
+            'label':  f'{instance.fsm_state} label'
         }
         return data
     

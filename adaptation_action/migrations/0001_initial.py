@@ -248,7 +248,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('adaptation_action_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='adaptation_action_information', to='adaptation_action.adaptationactiontype')),
-                ('ods', models.ManyToManyField(blank=True, null=True, related_name='adaptation_action_information', to='adaptation_action.ODS')),
+                ('ods', models.ManyToManyField(blank=True, related_name='adaptation_action_information', to='adaptation_action.ODS')),
             ],
             options={
                 'verbose_name': 'Adaptation Action Information',
