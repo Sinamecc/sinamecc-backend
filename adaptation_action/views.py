@@ -13,7 +13,7 @@ view_helper = ViewHelper(service)
 
 
 ## Permission!!!!
-@api_view(['GET', 'POST', 'PUT'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH'])
 def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and adaptation_action_id:
@@ -27,5 +27,8 @@ def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need d
 
     elif request.method == 'PUT' and adaptation_action_id:
         result = view_helper.put(request, adaptation_action_id)
+        
+    elif request.method == 'PATCH' and adaptation_action_id:
+        result = view_helper.patch(request, adaptation_action_id)
 
     return result

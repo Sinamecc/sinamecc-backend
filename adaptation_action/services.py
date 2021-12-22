@@ -1,5 +1,7 @@
 
 from os import error
+
+from django_fsm import has_transition_perm
 from adaptation_action.models import ReportOrganization, AdaptationAction
 from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
@@ -12,6 +14,8 @@ class AdaptationActionServices():
         self._serializer_helper = SerializersHelper()
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
+        self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
+        self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -553,6 +557,50 @@ class AdaptationActionServices():
 
         return result
 
+
+    ## auxiliar function
+    def _increase_review_counter(self, mitigation_action):
+        mitigation_action.review_count += 1
+        mitigation_action.save()
+    
+    
+    def _update_fsm_state(self, next_state, adaptation_action, user):
+
+        result = (False, self.INVALID_STATUS_TRANSITION)
+        # --- Transition ---
+        # source -> target
+
+        transitions = adaptation_action.get_available_fsm_state_transitions()
+        states = {}
+        for transition in  transitions:
+            states[transition.target] = transition
+
+        states_keys = states.keys()
+        if len(states_keys) <= 0: result = (False, self.STATE_HAS_NO_AVAILABLE_TRANSITIONS)
+
+        if next_state in states_keys:
+            state_transition= states[next_state]
+            transition_function = getattr(adaptation_action ,state_transition.method.__name__)
+            previous_state = adaptation_action.fsm_state
+
+            if has_transition_perm(transition_function, user):
+                transition_function()
+                adaptation_action.save()
+                
+                ##change_log_data = self._serialize_change_log_data(user, adaptation_action, previous_state)
+                ##serialized_change_log = self._get_serialized_change_log(change_log_data)
+                ##if serialized_change_log.is_valid():
+                ##serialized_change_log.save()
+                result = (True, adaptation_action)
+
+                ##else:
+                ##    result = (False, serialized_change_log.errors)
+
+            else: result = (False, self.INVALID_USER_TRANSITION)
+
+        return result
+    
+    
     def get(self, request, adaptation_action_id):
         
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
@@ -650,4 +698,35 @@ class AdaptationActionServices():
             result = (adaptation_action_status, adaptation_action_data)
 
 
+        return result
+    
+    
+    def patch(self, request, adaptation_action_id):
+        ## missing review and comments here!!
+        data = request.data
+        next_state, user = data.pop('fsm_state', None), request.user
+        comment_list = data.pop('comments', [])
+
+        adaptation_action_status, adaptation_action_data = \
+            self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            adaptation_action = adaptation_action_data
+            if next_state:
+                update_status, update_data = self._update_fsm_state(next_state, adaptation_action, user)
+                if update_status:
+                    self._increase_review_counter(adaptation_action)
+                    ##assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
+
+                    ##if assign_status: 
+                    result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    ##else: result = (assign_status, assign_data)
+                
+                else:
+                    result = (update_status, update_data)
+            else:
+                result = (False, self.INVALID_STATUS_TRANSITION)
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
         return result
