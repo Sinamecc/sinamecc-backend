@@ -118,7 +118,7 @@ class ReportDataService():
         validation_dict, errors = {}, []
         data = request.data.copy()
         data['user'] = request.user.id
-        
+        data['report_data_change_log'] = self._get_report_data_change_log_data(data.get('report_data_change_log', {}), request.user)
         field_list = ['contact']
 
         validation_dict = self._service_helper.create_or_update_record(field_list, data)
