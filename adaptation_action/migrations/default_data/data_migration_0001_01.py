@@ -612,18 +612,24 @@ _activities_sub_topics_1_6 = [
     },
     {
         'code':'5',
-        'description':'Diseñar e implementar estrategias para acelerar la eliminación de los vehículos de combustión interna en el país'
+        'description':'Diseñar e implementar estrategias para acelerar la eliminación de los vehículos de combustión interna en el país',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['13.10']
     }
 ]
 
 _activities_sub_topics_1_7 = [
     {
         'code':'1',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de transporte y movilidad sostenible, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de transporte y movilidad sostenible, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'2',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de transporte y movilidad sostenible para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de transporte y movilidad sostenible para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
@@ -715,22 +721,30 @@ _activities_sub_topics_2_4 = [
     },
     {
         'code':'3',
-        'description':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sector energético hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.'
+        'description':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sector energético hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['3.2']
     },
     {
         'code':'4',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de energía, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de energía, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'5',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de energía para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de energía para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_3_1 = [ 
     {
         'code':'1',
-        'description':'Diseñar e implementar instrumentos basados en el uso del suelo para el financiamiento de la mitigación y/o adaptación al cambio climático en ciudades (urbanísticos o tributarios).'
+        'description':'Diseñar e implementar instrumentos basados en el uso del suelo para el financiamiento de la mitigación y/o adaptación al cambio climático en ciudades (urbanísticos o tributarios).',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.3']
     },
     {
         'code':'2',
@@ -738,54 +752,77 @@ _activities_sub_topics_3_1 = [
     },
     {
         'code':'3',
-        'description':'Incorporar información sobre riesgos asociados al clima y medidas de adaptación dentro de la planificación territorial a nivel cantonal, regional, sectorial o nacional.'
+        'description':'Incorporar información sobre riesgos asociados al clima y medidas de adaptación dentro de la planificación territorial a nivel cantonal, regional, sectorial o nacional.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['2.1']
     },
     {
         'code':'4',
-        'description':'Realizar la reubicación o reasentamiento físico o económico de personas, comunidades, infraestructura o actividades productivas ubicadas en zonas de alto riesgo ante eventos asociados a la variabilidad y el cambio climático.'
+        'description':'Realizar la reubicación o reasentamiento físico o económico de personas, comunidades, infraestructura o actividades productivas ubicadas en zonas de alto riesgo ante eventos asociados a la variabilidad y el cambio climático.',
+        'adaptation_axis':'2.3',
+        'ndc_contribution':['2.1']
     },
     {
         'code':'5',
-        'description':'Implementar acciones para la recuperación de espacios públicos en zonas de riesgo climático.'
+        'description':'Implementar acciones para la recuperación de espacios públicos en zonas de riesgo climático.',
+        'adaptation_axis':'2.3',
+        'ndc_contribution':['2.1']
     },
     {
         'code':'6',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático asociados al ordenamiento y desarrollo territorial, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático asociados al ordenamiento y desarrollo territorial, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'7',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de ordenamiento territorial, para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de ordenamiento territorial, para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_4_1 = [
     {
         'code':'1',
-        'description':'Usar mejores técnicas y materiales para el diseño y construcción arquitectónico que permitan la reducción de emisiones de GEI (ej. energía renovable o sistemas de ahorro de agua, posición estratégica de la obra, materiales eficientes, materiales sostenibles, iluminación y ventilación natural, entre otros) para nuevas construcciones o durante la renovación y adaptación de estructuras existentes'
+        'description':'Usar mejores técnicas y materiales para el diseño y construcción arquitectónico que permitan la reducción de emisiones de GEI (ej. energía renovable o sistemas de ahorro de agua, posición estratégica de la obra, materiales eficientes, materiales sostenibles, iluminación y ventilación natural, entre otros) para nuevas construcciones o durante la renovación y adaptación de estructuras existentes',
+        'ndc_contribution':['4.1', '4.2']
     },
     {
         'code':'2',
-        'description':'Desarrollar y/o implementar regulaciones, lineamientos, normas o estándares locales/regionales/nacionales para la incorporación de criterios de sostenibilidad y resiliencia en la construcción, adecuación o mejoramiento de obras civiles públicas o privadas.'
+        'description':'Desarrollar y/o implementar regulaciones, lineamientos, normas o estándares locales/regionales/nacionales para la incorporación de criterios de sostenibilidad y resiliencia en la construcción, adecuación o mejoramiento de obras civiles públicas o privadas.',
+        'adaptation_axis':'4.1',
+        'ndc_contribution':['4.2']
     },
     {
         'code':'3',
-        'description':'Incorporar criterios de adaptación al cambio climático en normas y lineamientos para la inversión pública, de manera que se asegure su robustez ante impactos climáticos.'
+        'description':'Incorporar criterios de adaptación al cambio climático en normas y lineamientos para la inversión pública, de manera que se asegure su robustez ante impactos climáticos.',
+        'adaptation_axis':'4.1',
+        'ndc_contribution':['4.3']
     },
     {
         'code':'4',
-        'description':'Construir, mejorar o habilitar infraestructura vital (salud, educación, vivienda, almacenamiento, comunicación,  agua y saneamiento, energía, transporte, entre otros) con criterios de resiliencia climática y sostenibilidad.'
+        'description':'Construir, mejorar o habilitar infraestructura vital (salud, educación, vivienda, almacenamiento, comunicación,  agua y saneamiento, energía, transporte, entre otros) con criterios de resiliencia climática y sostenibilidad.',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['4.4']
     },
     {
         'code':'5',
-        'description':'Construir o mejorar obras de infraestructura pública o privada para incrementar su resiliencia ante potenciales eventos asociados a la variabilidad y el cambio climático.'
+        'description':'Construir o mejorar obras de infraestructura pública o privada para incrementar su resiliencia ante potenciales eventos asociados a la variabilidad y el cambio climático.',
+        'adaptation_axis':'4.2',
+        'ndc_contribution':['4.2']
     },
     {
         'code':'6',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de infraestructura, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector de infraestructura, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'7',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al infraestructura, para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al infraestructura, para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
@@ -796,11 +833,15 @@ _activities_sub_topics_5_1 = [
     },
     {
         'code':'2',
-        'description':'Implementar tecnologías para el ahorro y uso eficiente del agua, la energía y recursos naturales, a nivel industrial, comercial o de las cadenas de abastecimiento y distribución.'
+        'description':'Implementar tecnologías para el ahorro y uso eficiente del agua, la energía y recursos naturales, a nivel industrial, comercial o de las cadenas de abastecimiento y distribución.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['5.5']
     },
     {
         'code':'3',
-        'description':'Adaptar tecnologías y procesos que incrementen la resiliencia climática de las cadenas de abastecimiento y distribución en procesos industriales.'
+        'description':'Adaptar tecnologías y procesos que incrementen la resiliencia climática de las cadenas de abastecimiento y distribución en procesos industriales.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['5.5']
     },
     {
         'code':'4',
@@ -812,50 +853,69 @@ _activities_sub_topics_5_1 = [
     },
     {
         'code':'6',
-        'description':'Implementar o participar de un sistema de certificación de sostenibilidad/carbono neutralidad/resiliencia (Programa País Carbono Neutralidad, Programa de País de Adaptación Climática, Programa Bandera Azul Ecológica, certificaciones de resiliencia climática, entre otros).'
+        'description':'Implementar o participar de un sistema de certificación de sostenibilidad/carbono neutralidad/resiliencia (Programa País Carbono Neutralidad, Programa de País de Adaptación Climática, Programa Bandera Azul Ecológica, certificaciones de resiliencia climática, entre otros).',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['5.3']
     },
     {
         'code':'7',
-        'description':'Implementar actividades relacionadas a la incorporación de criterios de adaptación y mitigación al cambio climático dentro de los protocolos de certificación o licenciamiento de productos.'
+        'description':'Implementar actividades relacionadas a la incorporación de criterios de adaptación y mitigación al cambio climático dentro de los protocolos de certificación o licenciamiento de productos.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['5.5']
     },
     {
         'code':'8',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático de procesos industriales, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático de procesos industriales, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'9',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados a procesos industriales para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados a procesos industriales para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_6_1 = [ 
     {
         'code':'1',
-        'description':'Mejorar y optimizar la gestión integral de residuos sólidos (logística de transporte de recolección, recolección, reutilización, separación, valorización y disposición final) e implementación de tecnologías para reducir emisiones de GEI.'
+        'description':'Mejorar y optimizar la gestión integral de residuos sólidos (logística de transporte de recolección, recolección, reutilización, separación, valorización y disposición final) e implementación de tecnologías para reducir emisiones de GEI.',
+        'adaptation_axis':'2.3',
+        'ndc_contribution':['6.5']
     },
     {
         'code':'2',
-        'description':'Implementar tecnologías de captura y aprovechamiento de metano en rellenos sanitarios y/o plantas de tratamiento de aguas residuales.'
+        'description':'Implementar tecnologías de captura y aprovechamiento de metano en rellenos sanitarios y/o plantas de tratamiento de aguas residuales.',
+        'ndc_contribution':['6.3']
     },
     {
         'code':'3',
-        'description':'Implementar actividades para aumentar la cobertura del alcantarillado sanitario.'
+        'description':'Implementar actividades para aumentar la cobertura del alcantarillado sanitario.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['6.2']
     },
     {
         'code':'4',
-        'description':'Implementar actividades para el tratamiento de las aguas residuales.'
+        'description':'Implementar actividades para el tratamiento de las aguas residuales.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['6.3']
     },
     {
         'code':'5',
-        'description':'Implementar actividades para promover e implementar el aprovechamiento/valorización de residuos orgánicos.'
+        'description':'Implementar actividades para promover e implementar el aprovechamiento/valorización de residuos orgánicos.',
+        'adaptation_axis':'2.3',
+        'ndc_contribution':['6.1']
     },
     {
         'code':'6',
-        'description':'Reducir residuos en actividades productivas (RAO: residuos agrícolas orgánicos) e industriales mediante modelos de economía circular.'
+        'description':'Reducir residuos en actividades productivas (RAO: residuos agrícolas orgánicos) e industriales mediante modelos de economía circular.',
+        'ndc_contribution':['6.4']
     },
     {
         'code':'7',
-        'description':'Crear demanda y fortalecimiento de mercado de residuos valorizables.'
+        'description':'Crear demanda y fortalecimiento de mercado de residuos valorizables.',
+
     },
     {
         'code':'8',
@@ -863,22 +923,30 @@ _activities_sub_topics_6_1 = [
     },
     {
         'code':'9',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/del sector residuos o la influencia en la vulnerabilidad y riesgo climático de los territorios, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/del sector residuos o la influencia en la vulnerabilidad y riesgo climático de los territorios, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'10',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de residuos para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de residuos para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_7_1 = [ 
     {
         'code':'1',
-        'descripttion':'Implementar actividades para el impulso de un sistema de economía circular en fincas agropecuarias considerando la biodigestión y la recarbonización del suelo.'
+        'descripttion':'Implementar actividades para el impulso de un sistema de economía circular en fincas agropecuarias considerando la biodigestión y la recarbonización del suelo.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.2']
     },
     {
         'code':'2',
-        'description':'Implementar actividades asociadas a la ganadería baja en emisiones, adaptada y resiliente.'
+        'description':'Implementar actividades asociadas a la ganadería baja en emisiones, adaptada y resiliente.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.3']
     },
     {
         'code':'3',
@@ -890,178 +958,264 @@ _activities_sub_topics_7_1 = [
     },
     {
         'code':'5',
-        'description':'Ejecutar actividades asociadas a la prevención, conservación, restauración o rehabilitación de suelos degradados por actividades agropecuarias (por ejemplo, implementación de canales/zanjas de drenaje o de infiltración, implementación de cultivo en terrazas, labranza conservacionista, uso de microorganismos benéficos, barreras vivas, coberturas vegetales, rotación de cultivos, entre otros).'
+        'description':'Ejecutar actividades asociadas a la prevención, conservación, restauración o rehabilitación de suelos degradados por actividades agropecuarias (por ejemplo, implementación de canales/zanjas de drenaje o de infiltración, implementación de cultivo en terrazas, labranza conservacionista, uso de microorganismos benéficos, barreras vivas, coberturas vegetales, rotación de cultivos, entre otros).',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'6',
-        'description':'Desarrollar actividades asociadas a la implementación de sistemas agroforestales o agrosilvopastoriles en fincas agropecuarias.'
+        'description':'Desarrollar actividades asociadas a la implementación de sistemas agroforestales o agrosilvopastoriles en fincas agropecuarias.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['8.7']
     },
     {
         'code':'7',
-        'description':'Desarrollar actividades asociadas al establecimiento de cercas vivas en fincas.'
+        'description':'Desarrollar actividades asociadas al establecimiento de cercas vivas en fincas.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'8',
-        'description':'Desarrollar actividades asociadas al establecimiento de barreras o cortinas rompevientos en fincas.'
+        'description':'Desarrollar actividades asociadas al establecimiento de barreras o cortinas rompevientos en fincas.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'9',
-        'description':'Desarrollar actividades relacionadas a la diversificación e intercalación de cultivos.'
+        'description':'Desarrollar actividades relacionadas a la diversificación e intercalación de cultivos.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'10',
-        'description':'Desarrollar actividades asociadas a la producción en ambientes protegidos en fincas.'
+        'description':'Desarrollar actividades asociadas a la producción en ambientes protegidos en fincas.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'11',
-        'description':'Desarrollar actividades asociadas al aumento de la cobertura forestal en fincas agropecuarias.'
+        'description':'Desarrollar actividades asociadas al aumento de la cobertura forestal en fincas agropecuarias.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['8.4']
     },
     {
         'code':'12',
-        'description':'Desarrollar y fortalecer programas sociales de alimentación y seguridad alimentaria para responder ante eventos climáticos extremos.'
+        'description':'Desarrollar y fortalecer programas sociales de alimentación y seguridad alimentaria para responder ante eventos climáticos extremos.',
+        'adaptation_axis':'5.1',
+        'ndc_contribution':['7.8']
     },
     {
         'code':'13',
-        'description':'Ejecutar actividades de agroecología, permacultura, agricultura urbana y periurbana.'
+        'description':'Ejecutar actividades de agroecología, permacultura, agricultura urbana y periurbana.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['8.6']
     },
     {
         'code':'14',
-        'description':'Implementar sistemas, tecnologías o prácticas de ahorro, uso eficiente, reúso, reutilización, reciclaje o tratamiento de agua en actividades agropecuarias.'
+        'description':'Implementar sistemas, tecnologías o prácticas de ahorro, uso eficiente, reúso, reutilización, reciclaje o tratamiento de agua en actividades agropecuarias.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']  
     },
     {
         'code':'15',
-        'description':'Implementar reservorios de agua o sistemas de cosecha de agua de lluvia.'
+        'description':'Implementar reservorios de agua o sistemas de cosecha de agua de lluvia.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'16',
-        'description':'Implementar actividades relacionadas con el buen manejo de los pastos.'
+        'description':'Implementar actividades relacionadas con el buen manejo de los pastos.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.6']
     },
     {
         'code':'17',
-        'description':'Desarrollar cartografía de Zonificación Agroecológica (ZAE) considerando escenarios climáticos futuros, para la adaptación de cultivos agrícolas'
+        'description':'Desarrollar cartografía de Zonificación Agroecológica (ZAE) considerando escenarios climáticos futuros, para la adaptación de cultivos agrícolas',
+        'adaptation_axis':'5.3',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'18',
-        'description':'Implementar actividades asociadas al manejo integrado, control y seguimiento de plagas agropecuarias relacionadas con los cambios de condiciones derivadas de la variabilidad y el cambio climático.'
+        'description':'Implementar actividades asociadas al manejo integrado, control y seguimiento de plagas agropecuarias relacionadas con los cambios de condiciones derivadas de la variabilidad y el cambio climático.',
+        'adaptation_axis':'4.4',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'19',
-        'description':'Ejecutar actividades relacionadas al aprovechamiento del estiércol y otros residuos sólidos agropecuarios para compost y lombricompost, así como biodigestores para generar electricidad, biogás domiciliario y bioinsumos.'
+        'description':'Ejecutar actividades relacionadas al aprovechamiento del estiércol y otros residuos sólidos agropecuarios para compost y lombricompost, así como biodigestores para generar electricidad, biogás domiciliario y bioinsumos.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'20',
-        'description':'Implementar actividades relacionadas al rescate y uso de semillas locales.'
+        'description':'Implementar actividades relacionadas al rescate y uso de semillas locales.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'21',
-        'description':'Desarrollar actividades para la promoción de producción orgánica y agroecológica en fincas agropecuarias.'
+        'description':'Desarrollar actividades para la promoción de producción orgánica y agroecológica en fincas agropecuarias.',
+        'adaptation_axis':'5.3',
+        'ndc_contribution':['8.6']
     },
     {
         'code':'22',
-        'description':'Desarrollar lineamientos técnicos, normas, y/o certificaciones para la incorporación de prácticas adaptativas, resilientes y bajas en emisiones en sistemas productivos.'
+        'description':'Desarrollar lineamientos técnicos, normas, y/o certificaciones para la incorporación de prácticas adaptativas, resilientes y bajas en emisiones en sistemas productivos.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'23',
-        'description':'Desarrollar o adquirir seguros ante riesgos climáticos en el sector agropecuario y de pesca.'
+        'description':'Desarrollar o adquirir seguros ante riesgos climáticos en el sector agropecuario y de pesca.',
+        'adaptation_axis':'6.3',
+        'ndc_contribution':['12.4']
     },
     {
         'code':'24',
-        'description':'Desarrollar o adquirir incentivos económicos para la implementación de medidas de adaptación y mitigación al cambio climático en el sector agropecuario y de pesca.'
+        'description':'Desarrollar o adquirir incentivos económicos para la implementación de medidas de adaptación y mitigación al cambio climático en el sector agropecuario y de pesca.',
+        'adaptation_axis':'6.1',
+        'ndc_contribution':['12.3']
     },
     {
         'code':'25',
-        'description':'Diseñar e implementar políticas, planes o estrategias sectoriales para un sector agropecuario y de pesca adaptado, resiliente, bajo en emisiones y con un enfoque comunitario.'
+        'description':'Diseñar e implementar políticas, planes o estrategias sectoriales para un sector agropecuario y de pesca adaptado, resiliente, bajo en emisiones y con un enfoque comunitario.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['7.5']
     },
     {
         'code':'26',
-        'description':'Desarrollar actividades relacionadas a la promoción de la pesca sostenible, incluidos esquemas de maricultura, de valor agregado de la pesca artesanal y tradicional y de ordenamiento espacial marino para impulsar el desarrollo de una economía azul'
+        'description':'Desarrollar actividades relacionadas a la promoción de la pesca sostenible, incluidos esquemas de maricultura, de valor agregado de la pesca artesanal y tradicional y de ordenamiento espacial marino para impulsar el desarrollo de una economía azul',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['9.12']
     },
     {
         'code':'27',
-        'description':'Implementar actividades de investigación y desarrollo de organismos genéticamente mejorados que sean más resilientes ante condiciones climáticas extremas.'
+        'description':'Implementar actividades de investigación y desarrollo de organismos genéticamente mejorados que sean más resilientes ante condiciones climáticas extremas.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'28',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector agropecuario y de pesca, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector agropecuario y de pesca, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['7.4']
     },
     {
         'code':'29',
-        'description':'Diseñar o implementar sistemas de alerta temprana (incluyendo recolección, procesamiento y divulgación de información), de origen público o privado, con enfoque en la reducción del riesgo de la actividad agropecuaria y la pesca, ante eventos asociados a la variabilidad climática y cambio climático.'
+        'description':'Diseñar o implementar sistemas de alerta temprana (incluyendo recolección, procesamiento y divulgación de información), de origen público o privado, con enfoque en la reducción del riesgo de la actividad agropecuaria y la pesca, ante eventos asociados a la variabilidad climática y cambio climático.',
+        'adaptation_axis':'1.1',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'30',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector agropecuario y de pesca para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector agropecuario y de pesca para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_8_1 = [ 
     {
         'code':'1',
-        'description':'Implementar actividades asociadas al manejo de paisajes productivos sostenibles.'
+        'description':'Implementar actividades asociadas al manejo de paisajes productivos sostenibles.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.4', '8.6']
     },
     {
         'code':'2',
-        'description':'Diseñar, implementar o fortalecer instrumentos financieros para la protección, conservación, recuperación o manejo sostenible de recursos naturales, incluida la aplicación del modelo de ecosistemas terrestres de Pago por Servicios de los Ecosistemas mejorado, integrando de manera prioritaria los ecosistemas marino-costeros, suelos, turberas, y demás ecosistemas con alto potencial de secuestro de carbono. '
+        'description':'Diseñar, implementar o fortalecer instrumentos financieros para la protección, conservación, recuperación o manejo sostenible de recursos naturales, incluida la aplicación del modelo de ecosistemas terrestres de Pago por Servicios de los Ecosistemas mejorado, integrando de manera prioritaria los ecosistemas marino-costeros, suelos, turberas, y demás ecosistemas con alto potencial de secuestro de carbono.',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['8.3', '9.10']
     },
     {
         'code':'3',
-        'description':'Implementar actividades asociadas a la silvicultura urbana con elemento climáticos definidos. '
+        'description':'Implementar actividades asociadas a la silvicultura urbana con elemento climáticos definidos.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.6']
     },
     {
         'code':'4',
-        'description':'Implementar actividades de control y monitoreo de los ecosistemas terrestres frente a potenciales amenazas como la degradación, deforestación, caza ilegal e incendios forestales.'
+        'description':'Implementar actividades de control y monitoreo de los ecosistemas terrestres frente a potenciales amenazas como la degradación, deforestación, caza ilegal e incendios forestales.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.5', '8.8']
     },
     {
         'code':'5',
-        'description':'Implementar actividades de control y monitoreo de los ecosistemas marino-costeros frente a potenciales amenazas como la degradación, deforestación, extracción ilegal de especies, entre otros.'
+        'description':'Implementar actividades de control y monitoreo de los ecosistemas marino-costeros frente a potenciales amenazas como la degradación, deforestación, extracción ilegal de especies, entre otros.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['9.6', '9.7', '9.9']
     },
     {
         'code':'6',
-        'description':'Implementar actividades asociadas la prevención, atención y recuperación ante incendios forestales.'
+        'description':'Implementar actividades asociadas la prevención, atención y recuperación ante incendios forestales.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.8']
     },
     {
         'code':'7',
-        'description':'Implementar actividades para la acción frente a la degradación, deforestación, caza ilegal y/o extracción ilegal de especies en ecosistemas terrestres y/o marino-costeros.'
+        'description':'Implementar actividades para la acción frente a la degradación, deforestación, caza ilegal y/o extracción ilegal de especies en ecosistemas terrestres y/o marino-costeros.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.1', '8.8']
     },
     {
         'code':'8',
-        'description':'Implementar actividades asociadas a la protección, conservación, manejo y/o restauración de ecosistemas terrestres y sus servicios ecosistémicos.'
+        'description':'Implementar actividades asociadas a la protección, conservación, manejo y/o restauración de ecosistemas terrestres y sus servicios ecosistémicos.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.6', '8.8']
     },
     {
         'code':'9',
-        'description':'Implementar actividades asociadas a la protección, conservación, manejo y/o restauración de ecosistemas marino-costeros y sus servicios ecosistémicos.'
+        'description':'Implementar actividades asociadas a la protección, conservación, manejo y/o restauración de ecosistemas marino-costeros y sus servicios ecosistémicos.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.6', '9.1', '9.4', '9.5', '9.8']
     },
     {
         'code':'10',
-        'description':'Implementar actividades asociadas a la protección y conservación de la vida silvestre.'
+        'description':'Implementar actividades asociadas a la protección y conservación de la vida silvestre.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.1', '9.1']
     },
     {
         'code':'11',
-        'description':'Implementar actividades asociadas al control y manejo de especies invasoras.'
+        'description':'Implementar actividades asociadas al control y manejo de especies invasoras.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.1']
     },
     {
         'code':'12',
-        'description':'Implementar actividades asociadas al resguardo de los refugios climáticos.'
+        'description':'Implementar actividades asociadas al resguardo de los refugios climáticos.',
+        'adaptation_axis':'3.2',
+        'ndc_contribution':['8.1']
     },
     {
         'code':'13',
-        'description':'Implementar actividades de planificación y ordenamiento espacial a nivel de paisaje terrestre y marino-costero asociadas a la protección y construcción de resiliencia de los ecosistemas. '
+        'description':'Implementar actividades de planificación y ordenamiento espacial a nivel de paisaje terrestre y marino-costero asociadas a la protección y construcción de resiliencia de los ecosistemas.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['8.9', '9.9', '9.12']
     },
     {
         'code':'14',
-        'description':'Implementar actividades asociadas a la construcción o el mantenimiento de infraestructura verde.'
+        'description':'Implementar actividades asociadas a la construcción o el mantenimiento de infraestructura verde.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.6']
     },
     {
         'code':'15',
-        'description':'Implementar actividades asociadas a la investigación, identificación o creación de conocimiento sobre el comportamiento, dinámicas y técnicas de restauración de los ecosistemas terrestres, marino-costeros y altos en carbono, biodiversidad, así como los servicios ecosistémicos que brindan.'
+        'description':'Implementar actividades asociadas a la investigación, identificación o creación de conocimiento sobre el comportamiento, dinámicas y técnicas de restauración de los ecosistemas terrestres, marino-costeros y altos en carbono, biodiversidad, así como los servicios ecosistémicos que brindan.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['9.3']
     },
     {
         'code':'16',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático de los ecosistemas, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático de los ecosistemas, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'17',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de ecosistemas para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector de ecosistemas para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
@@ -1072,43 +1226,63 @@ _activities_sub_topics_9_1 = [
     },
     {
         'code':'2',
-        'description':'Diseñar y/o ejecutar actividades de planificación u ordenamiento del recurso hídrico a nivel de nacional, subnacional, o a nivel de cuenca, que consideren riesgos climáticos e integren medidas de adaptación ante la variabilidad y el cambio climático.'
+        'description':'Diseñar y/o ejecutar actividades de planificación u ordenamiento del recurso hídrico a nivel de nacional, subnacional, o a nivel de cuenca, que consideren riesgos climáticos e integren medidas de adaptación ante la variabilidad y el cambio climático.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['2.1']
     },
     {
         'code':'3',
-        'description':'Desarrollar estudios técnicos sobre calidad, continuidad, cantidad, escasez, acceso, impactos o demás relacionados a la gestión del recurso hídrico considerando riesgos asociados al clima.'
+        'description':'Desarrollar estudios técnicos sobre calidad, continuidad, cantidad, escasez, acceso, impactos o demás relacionados a la gestión del recurso hídrico considerando riesgos asociados al clima.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'4',
-        'description':'Implementar instrumentos financieros para proteger el recurso hídrico (establecimiento de tarifa de protección hídrica, fidecomisos, entre otros).'
+        'description':'Implementar instrumentos financieros para proteger el recurso hídrico (establecimiento de tarifa de protección hídrica, fidecomisos, entre otros).',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.4']
     },
     {
         'code':'5',
-        'description':'Instalar o poner en marcha equipos, sistemas o herramientas para la medición, monitoreo, modelación y/o registro de variables asociadas a la gestión integral del recurso hídrico considerando riesgos asociados al clima.'
+        'description':'Instalar o poner en marcha equipos, sistemas o herramientas para la medición, monitoreo, modelación y/o registro de variables asociadas a la gestión integral del recurso hídrico considerando riesgos asociados al clima.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'6',
-        'description':'Construir, mejorar o implementar sistemas individuales, comunales o municipales de recuperación y almacenamiento de aguas de lluvias o cosecha de agua de lluvia en zonas con riesgo de escasez o sometidas a estrés hídrico.'
+        'description':'Construir, mejorar o implementar sistemas individuales, comunales o municipales de recuperación y almacenamiento de aguas de lluvias o cosecha de agua de lluvia en zonas con riesgo de escasez o sometidas a estrés hídrico.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'7',
-        'description':'Implementar actividades de manejo integrado y adecuado de cuencas hidrográficas.'
+        'description':'Implementar actividades de manejo integrado y adecuado de cuencas hidrográficas.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'8',
-        'description':'Implementar actividades de protección de fuentes de agua, nacientes, aguas subterráneas o cuerpos de agua superficial del sistema hidrológico local, regional o nacional.'
+        'description':'Implementar actividades de protección de fuentes de agua, nacientes, aguas subterráneas o cuerpos de agua superficial del sistema hidrológico local, regional o nacional.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'9',
-        'description':'Implementar actividades asociadas a la mejora en las redes de distribución del recurso hídrico.'
+        'description':'Implementar actividades asociadas a la mejora en las redes de distribución del recurso hídrico.',
+        'adaptation_axis':'3.3',
+        'ndc_contribution':['9.2']
     },
     {
         'code':'10',
         'description':'Desarrollar estudios e investigación sobre la vulnerabilidad y riesgo climático del recurso hídrico, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'10',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías para la gestión integral del recurso hídrico (por ejemplo, de ahorro y uso eficiente) con actores claves asociados a la gestión del recurso hídrico para responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías para la gestión integral del recurso hídrico (por ejemplo, de ahorro y uso eficiente) con actores claves asociados a la gestión del recurso hídrico para responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
@@ -1116,98 +1290,138 @@ _activities_sub_topics_9_1 = [
 _activities_sub_topics_10_1 = [ 
     {
         'code':'1',
-        'description':'Realizar acciones para prevenir, controlar, intervenir o dar seguimiento epidemiológico a enfermedades transmisibles por vectores sensibles al cambio climático u otros impactos a la salud asociados a los efectos e impactos asociados a la variabilidad y el cambio climático.'
+        'description':'Realizar acciones para prevenir, controlar, intervenir o dar seguimiento epidemiológico a enfermedades transmisibles por vectores sensibles al cambio climático u otros impactos a la salud asociados a los efectos e impactos asociados a la variabilidad y el cambio climático.',
+        'adaptation_axis':'4.4',
+        'ndc_contribution':['11.9']
     },
     {
         'code':'2',
-        'description':'Implementar actividades de planificación asociadas a la construcción de resiliencia en el sector salud.'
+        'description':'Implementar actividades de planificación asociadas a la construcción de resiliencia en el sector salud.',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['2.1']
     },
     {
         'code':'3',
-        'description':'Desarrollar estudios e investigación sobre la vulnerabilidad y riesgo climático del sector salud, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación del sector.'
+        'description':'Desarrollar estudios e investigación sobre la vulnerabilidad y riesgo climático del sector salud, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'4',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector salud para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector salud para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_10_2 = [
     {
         'code':'1',
-        'description':'Implementar actividades de monitoreo y vigilancia de la salud ante efectos e impactos asociados a la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de monitoreo y vigilancia de la salud ante efectos e impactos asociados a la variabilidad y el cambio climático.',
+        'adaptation_axis':'4.4',
+        'ndc_contribution':['11.9']
     }
 ]
 
 _activities_sub_topics_11_1 = [ 
     {
         'code':'1',
-        'description':'Implementar actividades de construcción de resiliencia en áreas turísticas.'
+        'description':'Implementar actividades de construcción de resiliencia en áreas turísticas.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['8.1']
     },
     {
         'code':'2',
-        'description':'Implementar actividades de protección, restauración y/o recuperación de áreas turísticas degradadas.'
+        'description':'Implementar actividades de protección, restauración y/o recuperación de áreas turísticas degradadas.',
+        'adaptation_axis':'3.1',
+        'ndc_contribution':['8.1']
     },
     {
         'code':'3',
-        'description':'Implementar y/o participar en sistemas de certificación para la sostenibilidad turística que incorporen criterios de acción climática.'
+        'description':'Implementar y/o participar en sistemas de certificación para la sostenibilidad turística que incorporen criterios de acción climática.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['5.5']
     },
     {
         'code':'4',
-        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector turismo, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre las emisiones de GEI y/o la vulnerabilidad y riesgo climático del sector turismo, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'5',
-        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector turismo para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.'
+        'description':'Implementar actividades de sensibilización, comunicación, fortalecimiento de capacidades y/o transferencia de tecnologías con actores claves asociados al sector turismo para reducir emisiones de GEI y/o responder ante potenciales efectos e impactos ocasionados por la variabilidad y el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.5']
     }
 ]
 
 _activities_sub_topics_12_1 = [
     {
         'code':'1',
-        'description':'Desarrollar políticas, planes, programas o proyectos asociados a la gestión del cambio climático en los territorios indígenas realizados en conjunto con las comunidades indígenas costarricenses.'
+        'description':'Desarrollar políticas, planes, programas o proyectos asociados a la gestión del cambio climático en los territorios indígenas realizados en conjunto con las comunidades indígenas costarricenses.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['8.9']
     },
     {
         'code':'2',
-        'description':'Desarrollar y articular reglamentos, políticas o planes locales, cantonales, regionales o nacionales de acción climática. '
+        'description':'Desarrollar y articular reglamentos, políticas o planes locales, cantonales, regionales o nacionales de acción climática.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['13.7', '13.9', '13.11']
     },
     {
         'code':'3',
-        'description':'Incorporar información sobre riesgos asociados al clima y medidas de adaptación dentro de la planificación estratégica a nivel cantonal, regional o nacional.'
+        'description':'Incorporar información sobre riesgos asociados al clima y medidas de adaptación dentro de la planificación estratégica a nivel cantonal, regional o nacional.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['13.10']
     },
     {
         'code':'4',
-        'description':'Ejecutar acuerdos o alianzas público-privadas para el desarrollo de acciones en adaptación y/o mitigación frente al cambio climático.'
+        'description':'Ejecutar acuerdos o alianzas público-privadas para el desarrollo de acciones en adaptación y/o mitigación frente al cambio climático.',
+        'adaptation_axis':'5.3',
+        'ndc_contribution':['10.6']
     },
     {
         'code':'5',
-        'description':'Fortalecer la articulación interinstitucional y las capacidades de instituciones u organismos a nivel nacional, regional y/o cantonal para la gobernanza climática.'
+        'description':'Fortalecer la articulación interinstitucional y las capacidades de instituciones u organismos a nivel nacional, regional y/o cantonal para la gobernanza climática.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.6']
     },
     {
         'code':'6',
-        'description':'Incorporar amenazas asociadas al clima en las políticas y planes de gestión de riesgo y atención de emergencias a nivel nacional y/o subnacional. '
+        'description':'Incorporar amenazas asociadas al clima en las políticas y planes de gestión de riesgo y atención de emergencias a nivel nacional y/o subnacional. ',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['13.8']
     }
 ]
 
 _activities_sub_topics_12_2 = [
     {
         'code':'1',
-        'description':'Diseñar, implementar y/o operar herramientas y sistemas de información, monitoreo, reporte, verificación, evaluación, entre otras, de datos climáticos, de adaptación y mitigación al cambio climático.'
+        'description':'Diseñar, implementar y/o operar herramientas y sistemas de información, monitoreo, reporte, verificación, evaluación, entre otras, de datos climáticos, de adaptación y mitigación al cambio climático.',
+        'adaptation_axis':'1.1',
+        'ndc_contribution':['5.3', '11.1', '11.5', '11.9', '11.10']
     },
     {
         'code':'2',
-        'description':'Compilar y construir reportes nacionales e internacionales sobre cambio climático y acción climática.'
+        'description':'Compilar y construir reportes nacionales e internacionales sobre cambio climático y acción climática.',
+        'adaptation_axis':'1.1',
+        'ndc_contribution':['11.2', '11.6']
     },
     {
         'code':'3',
-        'description':'Generar datos, análisis y modelación relacionados con cambio climático, sus impactos y la acción climática.'
+        'description':'Generar datos, análisis y modelación relacionados con cambio climático, sus impactos y la acción climática.',
+        'adaptation_axis':'1.1',
+        'ndc_contribution':['11.3', '11.4', '11.7', '11.8']
     }
 ]
 
 _activities_sub_topics_12_3 = [
     {
         'code':'1',
-        'description':'Diseñar e implementar instrumentos, reglamentos e incentivos y/o desincentivos económicos para la adaptación en diversos sectores.'
+        'description':'Diseñar e implementar instrumentos, reglamentos e incentivos y/o desincentivos económicos para la adaptación en diversos sectores.',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.3']
     },
     {
         'code':'2',
@@ -1219,77 +1433,111 @@ _activities_sub_topics_12_3 = [
     },
     {
         'code':'4',
-        'description':'Diseñar e implementar instrumentos y mecanismos financieros (fondos, préstamos tradicionales y concesionales, subsidios, garantías, bonos, fideicomisos, canjes de deuda, entre otros) provenientes de fuentes públicas o privadas, nacionales para la ejecución de acciones de adaptación.'
+        'description':'Diseñar e implementar instrumentos y mecanismos financieros (fondos, préstamos tradicionales y concesionales, subsidios, garantías, bonos, fideicomisos, canjes de deuda, entre otros) provenientes de fuentes públicas o privadas, nacionales para la ejecución de acciones de adaptación.',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.3', '13.4']
     },
     {
         'code':'5',
-        'description':'Desarrollar herramientas, instrumentos, reglamentos e incentivos para acompañar al sector financiero en el análisis, revelación y gestión de los riesgos e impactos del cambio climático en su sector.'
+        'description':'Desarrollar herramientas, instrumentos, reglamentos e incentivos para acompañar al sector financiero en el análisis, revelación y gestión de los riesgos e impactos del cambio climático en su sector.',
+        'adaptation_axis':'6.3',
+        'ndc_contribution':['12.2']
     },
     {
         'code':'6',
-        'description':'Fortalecer instrumentos financieros tales como pago de servicios ecosistémicos, cánones y otros instrumentos de precio al carbono, así como seguros e instrumentos tarifarios y fiscales, para financiar las necesidades de adaptación y mitigación.'
+        'description':'Fortalecer instrumentos financieros tales como pago de servicios ecosistémicos, cánones y otros instrumentos de precio al carbono, así como seguros e instrumentos tarifarios y fiscales, para financiar las necesidades de adaptación y mitigación.',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.4']
     },
     {
         'code':'7',
-        'description':'Integrar acciones climáticas en los ejercicios presupuestarios anuales, en especial mediante la matriz plan-presupuesto de las instituciones públicas.'
+        'description':'Integrar acciones climáticas en los ejercicios presupuestarios anuales, en especial mediante la matriz plan-presupuesto de las instituciones públicas.',
+        'adaptation_axis':'6.1',
+        'ndc_contribution':['12.5']  
     },
     {
         'code':'8',
-        'description':'Incluir análisis de riesgos climáticos y de emisiones de GEI en procesos de valoración para entidades financieras, considerando tanto enfoques operativos como de transición de las carteras financieras.'
+        'description':'Incluir análisis de riesgos climáticos y de emisiones de GEI en procesos de valoración para entidades financieras, considerando tanto enfoques operativos como de transición de las carteras financieras.',
+        'adaptation_axis':'6.3',
+        'ndc_contribution':['12.3']
     },
     {
         'code':'9',
-        'description':'Implementar instrumentos de transferencia de riesgos asociado a eventos climáticos (seguros y reaseguros).'
+        'description':'Implementar instrumentos de transferencia de riesgos asociado a eventos climáticos (seguros y reaseguros).',
+        'adaptation_axis':'6.3',
+        'ndc_contribution':['12.2']
     },
     {
         'code':'10',
-        'description':'Elaaborar análisis de inversión y factibilidad financiera de las acciones de mitigación y adaptación al cambio climático.'
+        'description':'Elaborar análisis de inversión y factibilidad financiera de las acciones de mitigación y adaptación al cambio climático.',
+        'adaptation_axis':'6.2',
+        'ndc_contribution':['12.6']
     }
 ]
 
 _activities_sub_topics_12_4 = [
     {
         'code':'1',
-        'description':'Elaborar estudios asociados a los riesgos e impactos de cambio climático en poblaciones vulnerables.'
+        'description':'Elaborar estudios asociados a los riesgos e impactos de cambio climático en poblaciones vulnerables.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'2',
-        'description':'Elaborar análisis asociados a los costos de la inacción ante el cambio climático.'
+        'description':'Elaborar análisis asociados a los costos de la inacción ante el cambio climático.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     },
     {
         'code':'3',
-        'description':'Desarrollar estudios e investigación de fenómenos climáticos como islas de calor, olas de calor y aumento del nivel del mar.'
+        'description':'Desarrollar estudios e investigación de fenómenos climáticos como islas de calor, olas de calor y aumento del nivel del mar.',
+        'adaptation_axis':'1.2',
+        'ndc_contribution':['11.7']
     }
 ]
 
 _activities_sub_topics_12_5 = [
     {
         'code':'1',
-        'description':'Fortalecer las capacidades de actores del sector público, privado y de sociedad civil para comprender el abordaje del cambio climático y la importancia y necesidad de implementar acciones de mitigación y/o adaptación ante el cambio climático.'
+        'description':'Fortalecer las capacidades de actores del sector público, privado y de sociedad civil para comprender el abordaje del cambio climático y la importancia y necesidad de implementar acciones de mitigación y/o adaptación ante el cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.1', '10.5', '10.6']
     },
     {
         'code':'2',
-        'description':'Incorporar material educativo sobre el cambio climático en los niveles de educación formal, informal y no formal.'
+        'description':'Incorporar material educativo sobre el cambio climático en los niveles de educación formal, informal y no formal.',
+        'adaptation_axis':'1.3',
+        'ndc_contribution':['10.2']
     },
     {
         'code':'3',
-        'description':'Promover la formación de técnicos/tecnólogos/profesionales con conocimientos en los temas de cambio climático.'
+        'description':'Promover la formación de técnicos/tecnólogos/profesionales con conocimientos en los temas de cambio climático.',
+        'adaptation_axis':'1.3',
+        'ndc_contribution':['10.2']
     },
     {
         'code':'4',
-        'description':'Desarrollar herramientas que promuevan el aprendizaje sobre cambio climático en grupos con mayores condiciones de vulnerabilidad (niñez, juventudes, comunidad afrodescendiente, población indígena, personas con discapacidad, población trans, mujeres, entre otras).'
+        'description':'Desarrollar herramientas que promuevan el aprendizaje sobre cambio climático en grupos con mayores condiciones de vulnerabilidad (niñez, juventudes, comunidad afrodescendiente, población indígena, personas con discapacidad, población trans, mujeres, entre otras).',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':'10.3'
     },
     {
         'code':'5',
-        'description':'Implementar estrategias de sensibilización, comunicación y difusión sobre la temática del cambio climático.'
+        'description':'Implementar estrategias de sensibilización, comunicación y difusión sobre la temática del cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.1']
     },
     {
         'code':'6',
-        'description':'Diseñar e implementar estrategias para aumentar participación comunitaria en la toma de decisiones climáticas, el acceso de información y el accionar climático.'
+        'description':'Diseñar e implementar estrategias para aumentar participación comunitaria en la toma de decisiones climáticas, el acceso de información y el accionar climático.',
+        'adaptation_axis':'2.3',
+        'ndc_contribution':['10.4', '10.7']
     },
     {
         'code':'7',
-        'description':'Fomentar la inclusión de grupos con mayores condiciones de vulnerabilidad (niñez, juventudes, comunidad afrodescendiente, población indígena, personas con discapacidad, población trans, mujeres, entre otras) en procesos de toma de decisión y/o en la ejecución de actividades relacionadas con cambio climático.'
+        'description':'Fomentar la inclusión de grupos con mayores condiciones de vulnerabilidad (niñez, juventudes, comunidad afrodescendiente, población indígena, personas con discapacidad, población trans, mujeres, entre otras) en procesos de toma de decisión y/o en la ejecución de actividades relacionadas con cambio climático.',
+        'adaptation_axis':'1.4',
+        'ndc_contribution':['10.9', '10.10', '10.11']
     }
 ]
 
