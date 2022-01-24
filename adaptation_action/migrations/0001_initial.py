@@ -147,7 +147,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='TypeClimatedThreat',
+            name='TypeClimateThreat',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=2, null=True)),
@@ -156,8 +156,8 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Type Climated Threat',
-                'verbose_name_plural': 'Type Climated Threats',
+                'verbose_name': 'Type Climate Threat',
+                'verbose_name_plural': 'Type Climate Threats',
             },
         ),
         migrations.CreateModel(
@@ -215,11 +215,11 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('type_climated_threat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='climate_threat', to='adaptation_action.typeclimatedthreat')),
+                ('type_climate_threat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='climate_threat', to='adaptation_action.typeclimatethreat')),
             ],
             options={
-                'verbose_name': 'Type Climated Threat',
-                'verbose_name_plural': 'Type Climated Threats',
+                'verbose_name': 'Type Climate Threat',
+                'verbose_name_plural': 'Type Climate Threats',
             },
         ),
         migrations.CreateModel(

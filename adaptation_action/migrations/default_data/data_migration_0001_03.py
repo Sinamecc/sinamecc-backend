@@ -35,7 +35,7 @@ _adaptation_action_type = [
     }
 ]
 
-_type_climated_threat = [ 
+_type_climate_threat = [ 
     {
         'name': 'Deslizamiento',
         'code': '1'

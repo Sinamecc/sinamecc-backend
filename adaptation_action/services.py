@@ -252,9 +252,9 @@ class AdaptationActionServices():
 
         return serializer
     
-    def _get_serialized_type_climated_threat(self, data, type_climated_threat = False):
+    def _get_serialized_type_climate_threat(self, data, type_climate_threat = False):
 
-        serializer = self._serializer_helper.get_serialized_record(TypeClimatedThreatSerializer, data, record=type_climated_threat)
+        serializer = self._serializer_helper.get_serialized_record(TypeClimateThreatSerializer, data, record=type_climate_threat)
 
         return serializer
     
@@ -702,15 +702,15 @@ class AdaptationActionServices():
 
         return result
 
-    def _get_all_type_climated_threat(self, request):
+    def _get_all_type_climate_threat(self, request):
 
-        climated_status, climated_data = self._service_helper.get_all(TypeClimatedThreat)
+        climate_status, climate_data = self._service_helper.get_all(TypeClimateThreat)
 
-        if climated_status:
-            result = (climated_status, TypeClimatedThreatSerializer(climated_data, many=True).data)
+        if climate_status:
+            result = (climate_status, TypeClimateThreatSerializer(climate_data, many=True).data)
         
         else:
-            result = (climated_status, climated_data)
+            result = (climate_status, climate_data)
         
         return result
     

@@ -34,13 +34,13 @@ def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need d
     return result
 
 @api_view(['GET'])
-def get_type_climated_threat(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
+def get_type_climate_threat(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and adaptation_action_id:
         result = view_helper.get_one(request, adaptation_action_id)
     
     elif request.method == 'GET' and not adaptation_action_id:
-        result = view_helper.execute_by_name("_get_all_type_climated_threat", request)
+        result = view_helper.execute_by_name("_get_all_type_climate_threat", request)
 
     return result
 

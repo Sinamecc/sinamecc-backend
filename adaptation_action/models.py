@@ -199,7 +199,7 @@ class Instrument(models.Model):
         verbose_name_plural = _("Instruments")
 
 
-class TypeClimatedThreat(models.Model):
+class TypeClimateThreat(models.Model):
     
     code = models.CharField(max_length=2, null=True)
     name = models.CharField(max_length=3000, null=True)
@@ -208,20 +208,20 @@ class TypeClimatedThreat(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Type Climated Threat")
-        verbose_name_plural = _("Type Climated Threats")
+        verbose_name = _("Type Climate Threat")
+        verbose_name_plural = _("Type Climate Threats")
 
 class ClimateThreat(models.Model):
 
     #archivo 
-    type_climated_threat = models.ForeignKey(TypeClimatedThreat, related_name="climate_threat", null=True, on_delete=models.CASCADE)
+    type_climate_threat = models.ForeignKey(TypeClimateThreat, related_name="climate_threat", null=True, on_delete=models.CASCADE)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Type Climated Threat")
-        verbose_name_plural = _("Type Climated Threats")
+        verbose_name = _("Type Climate Threat")
+        verbose_name_plural = _("Type Climate Threats")
 
 class Implementation(models.Model):
     

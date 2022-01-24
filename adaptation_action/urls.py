@@ -13,9 +13,9 @@ urlpatterns = [
             name='get_put_patch_delete_adaptation_action'
         ),
     path(
-            'api/v1/adaptation-action/type_climated_threat/',
-            views.get_type_climated_threat,
-            name='get_type_climated_threat'
+            'api/v1/adaptation-action/type_climate_threat/',
+            views.get_type_climate_threat,
+            name='get_type_climate_threat'
     ),
     path(
             'api/v1/adaptation-action/get_ods/',

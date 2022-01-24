@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
-         NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, \
+         NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact
 
 from general.serializers import AddressSerializer
@@ -100,17 +100,17 @@ class InstrumentSerializer(serializers.ModelSerializer):
         model = Instrument
         fields = ('id', 'name', 'description', 'created', 'updated')
 
-class TypeClimatedThreatSerializer(serializers.ModelSerializer):
+class TypeClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = TypeClimatedThreat
+        model = TypeClimateThreat
         fields = ('id', 'code', 'name', 'created', 'updated')
 
 class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climated_threat', 'created', 'updated')
+        fields = ('id', 'type_climate_threat', 'created', 'updated')
 
 class ImplementationSerializer(serializers.ModelSerializer):
 

@@ -1,6 +1,6 @@
 from django.db import migrations
 from adaptation_action.migrations.default_data.data_migration_0001_02 import _province
-from adaptation_action.migrations.default_data.data_migration_0001_03 import _report_organization_type, _type_climated_threat, _adaptation_action_type, \
+from adaptation_action.migrations.default_data.data_migration_0001_03 import _report_organization_type, _type_climate_threat, _adaptation_action_type, \
     _ODS_data, _finance_source, _instrument_detail, _source_type, _thematic_data, _classifier_sinamecc
 from adaptation_action.models import FinanceInstrument
 
@@ -32,11 +32,11 @@ def insert_report_organization_type_data(apps, schema_editor):
         report_organization_type_record = ReportOrganizationType(**_data)
         report_organization_type_record.save()
 
-def insert_type_climated_threat_data(apps, schema_editor):
-    TypeClimatedThreat = apps.get_model('adaptation_action', 'TypeClimatedThreat')
-    for _data in _type_climated_threat:
-        type_climated_threat_record = TypeClimatedThreat(**_data)
-        type_climated_threat_record.save()
+def insert_type_climate_threat_data(apps, schema_editor):
+    TypeClimateThreat = apps.get_model('adaptation_action', 'TypeClimateThreat')
+    for _data in _type_climate_threat:
+        type_climate_threat_record = TypeClimateThreat(**_data)
+        type_climate_threat_record.save()
 
 def insert_adaptation_action_type_data(apps, schema_editor):
     AdaptationActionType = apps.get_model('adaptation_action', 'AdaptationActionType')
@@ -96,7 +96,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(insert_province_data, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(insert_report_organization_type_data, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(insert_type_climated_threat_data, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(insert_type_climate_threat_data, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(insert_adaptation_action_type_data, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(insert_ODS_data, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(insert_finance_source, reverse_code=migrations.RunPython.noop),
