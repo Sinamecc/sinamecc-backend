@@ -183,10 +183,28 @@ class ReportDataService():
     def upload_source_file(self, request, report_data_id):
         ...
 
+
     
     def upload_report_file_list(self, request, report_data_id):
         ...
 
+
+    
+    ## upload files in the models
+    def upload_file_to_(self, request, report_data_id):
+
+        data = request.data
+
+        report_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
+
+        
+       
+        
+        return ""
+    
+    
+    
+    
     def get_catalog_data(self, request):
     
         catalog = {
