@@ -43,9 +43,14 @@ urlpatterns = [
             name='get_information_source_type'
     ),
     path(
+            'api/v1/adaptation-action/get_temporality_impact/',
+            views.get_temporality_impact,
+            name='get_temporality_impact'
+    ),
+    path(
             'api/v1/adaptation-action/get_general_impact/',
             views.get_general_impact,
             name='get_general_impact'
-    ),
+    )
 
 ]

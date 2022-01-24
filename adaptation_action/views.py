@@ -120,3 +120,14 @@ def get_temporality_impact(request, temporality_impact_id=False):
         result = view_helper.execute_by_name("_get_temporality_impact_by_id", request, temporality_impact_id)
     
     return result
+
+@api_view(['GET'])
+def get_general_impact(request, general_impact_id=False):
+
+    if request.method == 'GET' and not general_impact_id:
+        result = view_helper.execute_by_name("_get_all_general_impact", request)
+    
+    elif request.method == 'GET' and general_impact_id:
+        result = view_helper.execute_by_name("_get_general_impact_by_id", request, general_impact_id)
+    
+    return result
