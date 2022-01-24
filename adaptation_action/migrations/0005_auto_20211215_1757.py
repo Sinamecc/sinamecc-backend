@@ -111,6 +111,8 @@ class Migration(migrations.Migration):
                 ('general_impact', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='action_impact', to='adaptation_action.generalimpact')),
                 ('ods', models.ManyToManyField(blank=True, related_name='action_impact', to='adaptation_action.ODS')),
                 ('temporality_impact', models.ManyToManyField(blank=True, related_name='action_impact', to='adaptation_action.TemporalityImpact')),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.AddField(

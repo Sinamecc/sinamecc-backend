@@ -51,7 +51,7 @@ class Province(models.Model):
         verbose_name_plural = _("Provinces")
 
 class Canton(models.Model):
-    #Generar predeterminado
+    
     name = models.CharField(max_length=100, null=True)
     code = models.CharField(max_length=3, null=True)
     

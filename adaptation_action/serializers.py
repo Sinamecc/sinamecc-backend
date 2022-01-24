@@ -1,9 +1,10 @@
 
 from django.db import models
 from django.db.models import fields
+from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationActionType, AdaptationAxis, ClimateThreat, \
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimatedThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact
@@ -58,6 +59,12 @@ class AdaptationAxisSerializer(serializers.ModelSerializer):
         model = AdaptationAxis
         fields = ('id', 'code', 'description', 'created', 'updated')
 
+class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationAxisGuideline
+        fields = ('id', 'code', 'adaptation_axis', 'created', 'updated')
+
 
 class NDCAreaSerializer(serializers.ModelSerializer):
 
@@ -77,6 +84,15 @@ class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
         fields = ('id', 'code', 'description', 'sub_topic', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
+
+        def to_representation(self, instance):
+
+            data = super.to_representation(instance)
+            data['sub_topic'] = SubTopicsSerializer(instance.sub_topic).data
+            data['ndc_contribution'] = NDCContributionSerializer(instance.ndc_contribution).data
+            data['adaptation_axis_guideline'] = AdaptationAxisGuidelineSerializer(instance.adaptation_axis_guideline.all(), many=True).data
+
+            return data
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
@@ -122,6 +138,24 @@ class MideplanSerializer(serializers.ModelSerializer):
         model = Mideplan
         fields = ('id', 'registry', 'name', 'entity', 'created', 'updated')
 
+class StatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinanceStatus
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class InformationSourceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InformationSource
+        fields = ('id', 'responsible_insttution', 'type_information', 'other_type', 'statistical_operation', 'created', 'updated')
+
+class GeneralImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GeneralImpact
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
 class FinanceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -138,7 +172,7 @@ class InformationSourceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InformationSource
-        fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation', 'created', 'updated')
+        fields = ('id', 'responsible_institution', 'type_information', 'other_type', 'statistical_operation', 'created', 'updated')
 
 class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
 
@@ -156,7 +190,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'geographic_coverage', 'other_geographic_coverage',
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
 
 #Serializer section 5-6
@@ -202,8 +236,7 @@ class ActionImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActionImpact
-        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact')
-
+        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'created', 'updated')
 
 class AdaptationActionSerializer(serializers.ModelSerializer):
 

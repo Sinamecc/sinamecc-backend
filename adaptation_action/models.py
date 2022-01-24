@@ -8,7 +8,7 @@ from django_fsm import FSMField, transition
 # Create your models here.
 
 class ReportOrganizationType(models.Model): 
-    #Generar data por defecto!
+    
     code = models.CharField(max_length=3, null=True)
     entity_type = models.CharField(max_length=100, null=True)
 
@@ -142,7 +142,7 @@ class AdaptationAxisGuideline(models.Model):
 class NDCArea(models.Model):
 
     code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=500, null=False)
+    description = models.CharField(max_length=2500, null=False)
     other = models.CharField(max_length=500, null=True)
 
     ## logs
@@ -156,7 +156,7 @@ class NDCArea(models.Model):
 class NDCContribution(models.Model):
 
     code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=500, null=False)
+    description = models.CharField(max_length=2500, null=False)
     other = models.CharField(max_length=500, null=True)
 
     ndc_area = models.ForeignKey(NDCArea, null=False, related_name="ndc_contribution", on_delete=models.CASCADE)
@@ -172,11 +172,11 @@ class NDCContribution(models.Model):
 class Activity(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    description = models.CharField(max_length=250, null=True)
+    description = models.TextField(null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
     ndc_contribution = models.ManyToManyField(NDCContribution,related_name="activity", blank=True)
-    adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=False, related_name="activity", on_delete=models.CASCADE)
+    adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=True, related_name="activity", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -200,7 +200,7 @@ class Instrument(models.Model):
 
 
 class TypeClimatedThreat(models.Model):
-    #Generar data por defecto
+    
     code = models.CharField(max_length=2, null=True)
     name = models.CharField(max_length=3000, null=True)
 
@@ -325,7 +325,7 @@ class InformationSourceType(models.Model):
 
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type_information = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -521,6 +521,14 @@ class ActionImpact(models.Model):
     general_impact = models.ForeignKey(GeneralImpact, null=True, related_name='action_impact', on_delete=models.CASCADE)
     temporality_impact = models.ManyToManyField(TemporalityImpact, related_name='action_impact', blank=True)
     ods = models.ManyToManyField(ODS, related_name='action_impact', blank=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Action Impact")
+        verbose_name_plural = _("Action Impact")
 
 class AdaptationAction(models.Model):
     

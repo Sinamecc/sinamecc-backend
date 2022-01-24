@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
                 ('statistical_operation', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='information_source', to='adaptation_action.informationsourcetype')),
+                ('type_information', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='information_source', to='adaptation_action.informationsourcetype')),
             ],
             options={
                 'verbose_name': 'Information Source',

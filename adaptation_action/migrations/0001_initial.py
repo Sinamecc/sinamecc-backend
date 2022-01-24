@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('description', models.CharField(max_length=250, null=True)),
+                ('description', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('description', models.CharField(max_length=500)),
+                ('description', models.CharField(max_length=2500)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -198,7 +198,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('description', models.CharField(max_length=500)),
+                ('description', models.CharField(max_length=2500)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -277,12 +277,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activity',
             name='adaptation_axis_guideline',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity', to='adaptation_action.adaptationaxisguideline'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity', to='adaptation_action.adaptationaxisguideline', null=True),
         ),
         migrations.AddField(
             model_name='activity',
             name='ndc_contribution',
-            field=models.ManyToManyField(blank=True, related_name='activity', to='adaptation_action.NDCContribution'),
+            field=models.ManyToManyField(blank=True, related_name='activity', to='adaptation_action.NDCContribution', null=True),
         ),
         migrations.AddField(
             model_name='activity',

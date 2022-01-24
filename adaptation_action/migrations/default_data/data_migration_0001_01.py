@@ -204,6 +204,10 @@ ndc_contribution_10 = [
         'description':'10.6. Al 2030, se habrán incorporado acciones de sensibilización y creación de capacidades para personas tomadoras de decisiones con un énfasis en el modelo de innovación de triple hélice para promover el desarrollo económico y social a través de la interacción del sector empresarial, el sector público, la academia para el desarrollo de una economía inclusiva, descarbonizada y resiliente.'
     },
     {
+        'code': '7',
+        'description':'10.7. Al 2030, se habrá impulsado la gestión y participación comunitaria en la adaptación para reducir la vulnerabilidad de las comunidades al cambio climático de manera apropiada a las realidades y cosmovisiones de las distintas comunidades.'
+    },
+    {
         'code': '9',
         'description':'10.9. A partir del 2021, el país desarrollará espacios de diálogo y participación, tanto virtuales como presenciales para grupos particularmente vulnerabilizados ante el cambio climático, incluyendo a la comunidad Afrodescendiente, grupos organizados de mujeres, juventudes, comunidad transexual, Pueblos Indígenas, personas con discapacidad y personas adultas mayores de manera apropiada y accesible a las realidades, cosmovisiones y tradiciones de las distintas comunidades y poblaciones.'
     },
@@ -310,7 +314,7 @@ ndc_contribution_13 = [
     }
 ]
 
-ndc_area = [
+_ndc_area = [
     {
         'code': '2',
         'description': '2. Desarrollo y ordenamiento territorial',
@@ -938,7 +942,7 @@ _activities_sub_topics_6_1 = [
 _activities_sub_topics_7_1 = [ 
     {
         'code':'1',
-        'descripttion':'Implementar actividades para el impulso de un sistema de economía circular en fincas agropecuarias considerando la biodigestión y la recarbonización del suelo.',
+        'description':'Implementar actividades para el impulso de un sistema de economía circular en fincas agropecuarias considerando la biodigestión y la recarbonización del suelo.',
         'adaptation_axis':'5.2',
         'ndc_contribution':['7.2']
     },
@@ -1274,7 +1278,7 @@ _activities_sub_topics_9_1 = [
     },
     {
         'code':'10',
-        'description':'Desarrollar estudios e investigación sobre la vulnerabilidad y riesgo climático del recurso hídrico, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.'
+        'description':'Desarrollar estudios e investigación sobre la vulnerabilidad y riesgo climático del recurso hídrico, y/o para el desarrollo de nuevas tecnologías y soluciones innovadoras de adaptación y mitigación del sector.',
         'adaptation_axis':'1.2',
         'ndc_contribution':['11.7']
     },
@@ -1519,7 +1523,7 @@ _activities_sub_topics_12_5 = [
         'code':'4',
         'description':'Desarrollar herramientas que promuevan el aprendizaje sobre cambio climático en grupos con mayores condiciones de vulnerabilidad (niñez, juventudes, comunidad afrodescendiente, población indígena, personas con discapacidad, población trans, mujeres, entre otras).',
         'adaptation_axis':'1.4',
-        'ndc_contribution':'10.3'
+        'ndc_contribution':['10.3']
     },
     {
         'code':'5',

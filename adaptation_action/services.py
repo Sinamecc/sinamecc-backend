@@ -1,4 +1,5 @@
 
+from asyncio import start_unix_server
 from os import error
 
 from django_fsm import has_transition_perm
@@ -6,6 +7,7 @@ from adaptation_action.models import ReportOrganization, AdaptationAction
 from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
+from general.serializers import DistrictSerializer
 
 class AdaptationActionServices():
     def __init__(self) -> None:
@@ -14,7 +16,7 @@ class AdaptationActionServices():
         self._serializer_helper = SerializersHelper()
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
-        self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
+        self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
 
 
@@ -267,6 +269,52 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(ImplementationSerializer, data, record=implementation)
 
         return serializer
+
+    def _get_serialized_finance_adaptation(self, data, finance = False):
+
+        serializer = self._serializer_helper.get_serialized_record(FinanceSerializer, data, record=finance)
+
+        return serializer
+    
+    def _get_serialized_status(self, data, status=False):
+
+        serializer = self._serializer_helper.get_serialized_record(StatusSerializer, data, record=status)
+
+        return serializer
+    
+    def _get_serialized_mideplan(self, data, mideplan=False):
+
+        serializer = self._serializer_helper.get_serialized_record(MideplanSerializer, data, record=mideplan)
+
+        return serializer
+    
+    def _get_serialized_information_source(self, data, information_source=False):
+
+        serializer = self._serializer_helper.get_serialized_record(InformationSourceSerializer, data, record=information_source)
+        
+        return serializer
+
+    def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=False):
+
+        serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
+
+        return serializer
+    
+    def _create_update_address(self, data, address=False):
+        
+        if address:
+            serializer = self._serializer_helper.get_serialized_record(AddressSerializer, data, record=address)
+        else:
+            serializer = self._serializer_helper.get_serialized_record(AddressSerializer, data)
+
+        if serializer.is_valid():
+            address = serializer.save()
+            result = (True, address)
+        
+        else:
+            result = (False, serializer.errors)
+
+        return result
 
     def _create_update_report_organization_type(self, data, report_organization_type = False):
 
@@ -539,6 +587,103 @@ class AdaptationActionServices():
                 result = (False, serialized_implementation.errors)
             
             return result
+    
+    def _create_update_finance(self, data, finance_adaptation = False):
+        
+        _status = data.pop('status', None)
+        _mideplan = data.pop('mideplan', None)
+
+        if(_status):
+
+            serialized_status = self._get_serialized_status(_status)
+
+            if(serialized_status.is_valid()):
+                status = serialized_status.save()
+                data['status'] = status.id
+
+        if(_mideplan):
+
+            serialized_mideplan = self._get_serialized_mideplan(_mideplan)
+
+            if(serialized_mideplan.is_valid()):
+                mideplan = serialized_mideplan.save()
+                data['mideplan'] = mideplan.id
+
+        if finance_adaptation:
+            serialized_finance = self._get_serialized_finance_adaptation(data, finance_adaptation)
+        
+        else:
+            serialized_finance = self._get_serialized_finance_adaptation(data)
+        
+        if serialized_finance.is_valid():
+            finance_adaptation = serialized_finance.save()
+            result = (True, finance_adaptation)
+        
+        else:
+            result = (False, serialized_finance.errors)
+        
+        return result
+    
+    def _create_update_status(self, data, status = False):
+
+        if status:
+            serialized_status = self._get_serialized_status(data, status)
+        
+        else:
+            serialized_status = self._get_serialized_status(data)
+        
+        if serialized_status.is_valid():
+            status = serialized_status.save()
+            result = (True, status)
+        
+        else:
+            result = (False, serialized_status.errors)
+        
+        return result
+            
+    def _create_update_information_source(self, data, information_source=False):
+
+        if information_source:
+            serialized_information_source = self._get_serialized_information_source(data, information_source)
+        
+        else:
+            serialized_information_source = self._get_serialized_information_source(data)
+        
+        if serialized_information_source.is_valid():
+            information_source = serialized_information_source.save()
+            result = (True, information_source)
+        
+        else:
+            result = (False, serialized_information_source.errors)
+        
+        return result
+
+    def _create_update_indicator(self, data, indicator_adaptation=False):
+
+        _information_source = data.pop('information_source', None)
+
+        if(_information_source):
+                
+            serialized_information_source = self._get_serialized_information_source(_information_source)
+
+            if(serialized_information_source.is_valid()):
+                information_source = serialized_information_source.save()
+                data['information_source'] = information_source.id
+
+        if indicator_adaptation:
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+        
+        else:
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data)
+        
+        if serialized_indicator_adaptation.is_valid():
+            indicator_adaptation = serialized_indicator_adaptation.save()
+            result = (True, indicator_adaptation)
+        
+        else:
+            result = (False, serialized_indicator_adaptation.errors)
+        
+        return result
 
     def _create_update_report_organization(self, data, report_organization=False):
 
@@ -557,6 +702,179 @@ class AdaptationActionServices():
 
         return result
 
+    def _get_all_type_climated_threat(self, request):
+
+        climated_status, climated_data = self._service_helper.get_all(TypeClimatedThreat)
+
+        if climated_status:
+            result = (climated_status, TypeClimatedThreatSerializer(climated_data, many=True).data)
+        
+        else:
+            result = (climated_status, climated_data)
+        
+        return result
+    
+    def _get_all_ods(self, request):
+
+        ods_status, ods_data = self._service_helper.get_all(ODS)
+
+        if ods_status:
+            result = (ods_status, ODSSerializer(ods_data, many=True).data)
+        
+        else:
+            result = (ods_status, ods_data)
+        
+        return result
+    
+    def _get_all_topic(self, request):
+
+        topic_status, topic_data = self._service_helper.get_all(Topics)
+
+        if topic_status:
+            result = (topic_status, TopicsSerializer(topic_data, many=True).data)
+        
+        else:
+            result = (topic_status, topic_data)
+        
+        return result
+
+    def _get_topic_by_id(self, request):
+        
+        topic_id = request.GET.get('topic_id')
+        topic_status, topic_data = self._service_helper.get_by_id(topic_id, Topics)
+
+        if topic_status:
+            result = (topic_status, TopicsSerializer(topic_data).data)
+        
+        else:
+            result = (topic_status, topic_data)
+        
+        return result
+    
+    def _get_all_subtopic(self, request):
+
+        subtopic_status, subtopic_data = self._service_helper.get_all(SubTopics)
+
+        if subtopic_status:
+            result = (subtopic_status, SubTopicsSerializer(subtopic_data, many=True).data)
+        
+        else:
+            result = (subtopic_status, subtopic_data)
+        
+        return result
+    
+    def _get_subtopic_by_id(self, request):
+
+        subtopic_id = request.GET.get('subtopic_id')
+        subtopic_status, subtopic_data = self._service_helper.get_by_id(subtopic_id, SubTopics)
+
+        if subtopic_status:
+            result = (subtopic_status, SubTopicsSerializer(subtopic_data).data)
+        
+        else:
+            result = (subtopic_status, subtopic_data)
+        
+        return result
+    
+    def _get_all_activity(self, request):
+
+        activity_status, activity_data = self._service_helper.get_all(Activity)
+
+        if activity_status:
+            result = (activity_status, ActivitySerializer(activity_data, many=True).data)
+        
+        else:
+            result = (activity_status, activity_data)
+        
+        return result
+    
+    def _get_activity_by_id(self, request):
+
+        activity_id = request.GET.get('activity_id')
+        activity_status, activity_data = self._service_helper.get_by_id(activity_id, Activity)
+
+        if activity_status:
+            result = (activity_status, ActivitySerializer(activity_data).data)
+        
+        else:
+            result = (activity_status, activity_data)
+        
+        return result
+    
+    def _get_all_information_source_type(self, request):
+
+        information_source_type_status, information_source_type_data = self._service_helper.get_all(InformationSourceType)
+
+        if information_source_type_status:
+            result = (information_source_type_status, InformationSourceTypeSerializer(information_source_type_data, many=True).data)
+        
+        else:
+            result = (information_source_type_status, information_source_type_data)
+        
+        return result
+    
+    def _get_information_source_type_by_id(self, request):
+
+        information_source_type_id = request.GET.get('information_source_type_id')
+        information_source_type_status, information_source_type_data = self._service_helper.get_by_id(information_source_type_id, InformationSourceType)
+
+        if information_source_type_status:
+            result = (information_source_type_status, InformationSourceTypeSerializer(information_source_type_data).data)
+        
+        else:
+            result = (information_source_type_status, information_source_type_data)
+        
+        return result
+
+    def _get_all_general_impact(self, request):
+
+        general_impact_status, general_impact_data = self._service_helper.get_all(GeneralImpact)
+
+        if general_impact_status:
+            result = (general_impact_status, GeneralImpactSerializer(general_impact_data, many=True).data)
+        
+        else:
+            result = (general_impact_status, general_impact_data)
+        
+        return result
+    
+    def _get_general_impact_by_id(self, request):
+
+        general_impact_id = request.GET.get('general_impact_id')
+        general_impact_status, general_impact_data = self._service_helper.get_by_id(general_impact_id, GeneralImpact)
+
+        if general_impact_status:
+            result = (general_impact_status, GeneralImpactSerializer(general_impact_data).data)
+        
+        else:
+            result = (general_impact_status, general_impact_data)
+        
+        return result
+
+    def _get_all_temporality_impact(self, request):
+
+        temporality_impact_status, temporality_impact_data = self._service_helper.get_all(TemporalityImpact)
+
+        if temporality_impact_status:
+            result = (temporality_impact_status, TemporalityImpactSerializer(temporality_impact_data, many=True).data)
+        
+        else:
+            result = (temporality_impact_status, temporality_impact_data)
+        
+        return result
+
+    def _get_temporality_impact_by_id(self, request):
+
+        temporality_impact_id = request.GET.get('temporality_impact_id')
+        temporality_impact_status, temporality_impact_data = self._service_helper.get_by_id(temporality_impact_id, TemporalityImpact)
+
+        if temporality_impact_status:
+            result = (temporality_impact_status, TemporalityImpactSerializer(temporality_impact_data).data)
+        
+        else:
+            result = (temporality_impact_status, temporality_impact_data)
+        
+        return result
 
     ## auxiliar function
     def _increase_review_counter(self, mitigation_action):
@@ -634,12 +952,13 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation']
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
 
         for field in field_list:
             if data.get(field, False):
                 record_status, record_data = self._create_sub_record(data.get(field), field)
-
+                
                 if record_status:
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
