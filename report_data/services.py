@@ -19,6 +19,7 @@ class ReportDataService():
     def __init__(self):
         self._service_helper = ServiceHelper(self)
         self._serializer_helper = SerializersHelper()
+        self._storage = S3Storage()
         self.FUNCTION_INSTANCE_ERROR = 'Error Mitigation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
 
@@ -212,7 +213,6 @@ class ReportDataService():
         data = {'report_data': report_data.id, 'report_type': type}
         data = self._get_report_file_data(data, file)
         report_file = report_data.report_file.filter(report_type=type).first()
-        print(report_file)
         serialized_report_file = ReportFileSerializer(report_file, data=data, partial=True)
         
         if serialized_report_file.is_valid():
@@ -265,6 +265,39 @@ class ReportDataService():
     
     
     
+    def _get_content_file(self, path):
+
+        path, filename = os.path.split(path)
+        
+        result = (filename, BytesIO(self._storage.get_file(path)))
+        
+        return result
+    
+    
+    def download_report_file(self, request, report_file_id):
+        
+        report_file_status, report_file_data = self._service_helper.get_one(ReportFile, report_file_id)
+        
+        if report_file_status:
+            
+            s3_path = report_file_data.file.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (report_file_status, report_file_data)
+
+        return result
+    
+    
+    def download_source_file():
+        ...
+    
+    
+    
     def get_catalog_data(self, request):
     
         catalog = {
@@ -284,6 +317,8 @@ class ReportDataService():
         result = (True, data)
         
         return result
+    
+    
 
 
   
