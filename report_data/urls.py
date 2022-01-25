@@ -39,6 +39,10 @@ urlpatterns = [
         views.get_file_to_report_data, 
         name='get_file_to_report_data'
     ),
-
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/source-file/',
+        views.get_source_file_to_report_data, 
+        name='get_source_file_to_report_data'
+    ),
 
 ]

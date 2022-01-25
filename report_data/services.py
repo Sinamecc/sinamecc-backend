@@ -293,9 +293,23 @@ class ReportDataService():
         return result
     
     
-    def download_source_file():
-        ...
-    
+    def download_source_file(self, request, report_data_id):
+        
+        report_data_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
+        
+        if report_data_status:
+            s3_path = report_data.source_file.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (report_data_status, report_data)
+
+        return result
     
     
     def get_catalog_data(self, request):

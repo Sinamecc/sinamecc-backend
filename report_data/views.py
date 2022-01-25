@@ -76,3 +76,9 @@ def get_file_to_report_data(request, report_file_id):
 
         return result
 
+@api_view(['GET'])
+def get_source_file_to_report_data(request, report_data_id):
+    if request.method == 'GET':
+        result = view_helper.call_download_file_method('download_source_file', request, report_data_id)
+
+        return result
