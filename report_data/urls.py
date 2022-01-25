@@ -29,5 +29,11 @@ urlpatterns = [
         views.get_catalog_data, 
         name='get_catalog_data'
     ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/file/',
+        views.upload_file_to_report_data, 
+        name='upload_file_to_report_data'
+    ),
+
 
 ]

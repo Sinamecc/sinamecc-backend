@@ -92,8 +92,8 @@ class ReportFile(models.Model):
 
     slug = models.SlugField(max_length=100, unique=True, blank=False, null=False)
     file = models.FileField(upload_to=directory_path, storage=PrivateMediaStorage(), blank=True, null=True)
-    report_data = models.ForeignKey(ReportData, related_name='report_file', on_delete=models.CASCADE)
-    report_type = models.CharField(max_length=100, blank=False, null=False) ## base_line_indicator | report_data
+    report_data = models.ForeignKey(ReportData, related_name='report_file', on_delete=models.CASCADE, null=True)
+    report_type = models.CharField(max_length=100, null=True) ## base_line_indicator | report_data
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

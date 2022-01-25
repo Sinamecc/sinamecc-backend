@@ -1,3 +1,5 @@
+from functools import partial
+from unittest import result
 from general.storages import S3Storage
 from mitigation_action.models import Classifier, ThematicCategorizationType
 from report_data.models import ReportData, ReportFile
@@ -180,27 +182,67 @@ class ReportDataService():
         
 
 
-    def upload_source_file(self, request, report_data_id):
-        ...
+    def upload_source_file(self, data, report_data):
+        
+        serialized_report_data = ReportDataSerializer(report_data, data={'source_file': data}, partial=True)
+        
+        if serialized_report_data.is_valid():
+            saved_report_data = serialized_report_data.save()
+            result = (True, ReportDataSerializer(saved_report_data).data)
+            
+        else:
+            result = (False, serialized_report_data.errors)
+            
+        return result
 
 
     
-    def upload_report_file_list(self, request, report_data_id):
+    def upload_report_file(self, data, report_data):
+        ...
+
+    
+    def upload_base_line_report_file(self, data, report_data):
         ...
 
 
     
     ## upload files in the models
-    def upload_file_to_(self, request, report_data_id):
+    def upload_file_to(self, request, report_data_id):
 
-        data = request.data
-
-        report_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
-
+        files_type = {
+            'source_file': self.upload_source_file,
+            'report_file': self.upload_report_file,
+            'base_line_report': self.upload_base_line_report_file 
+        }
         
+        data = request.data
+        
+        report_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
+        
+        status_upload_files = {}
+        if report_status:
+            
+            for k, v in data.items():
+                
+                if k in files_type:
+                    result_status, result_data = files_type.get(k)(v, report_data)
+                    status_upload_files.setdefault(result_status, []).append(result_data)
+            
+            if all(status_upload_files) and  status_upload_files:
+                files_list = status_upload_files.get(True)
+                result = (True, status_upload_files)
+            
+            else:
+                error_list = status_upload_files.get(False)
+                result = (False, error_list)
+            
+            
+        else:
+            
+            result = (report_status, report_data)
        
         
-        return ""
+        return result
     
     
     
