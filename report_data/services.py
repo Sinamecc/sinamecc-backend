@@ -2,11 +2,12 @@ from functools import partial
 from unittest import result
 from general.storages import S3Storage
 from mitigation_action.models import Classifier, ThematicCategorizationType
+from report_data import serializers
 from report_data.models import ReportData, ReportFile
 from django.urls import reverse
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
-from report_data.serializers import ReportDataSerializer, ReportDataChangeLogSerializer
+from report_data.serializers import ReportDataSerializer, ReportDataChangeLogSerializer, ReportFileSerializer
 from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, ThematicCategorizationTypeSerializer
 import datetime
 import os
@@ -49,6 +50,16 @@ class ReportDataService():
             'author': user.id,
             'changes': data.get('changes', None),
             'change_description': data.get('change_description', None),
+        }
+
+        return data
+    
+    def _get_report_file_data(self, data, file):
+        
+        data = {
+            'file': file,
+            'report_data': data.get('report_data', None),
+            'report_type': data.get('report_type', None),
         }
 
         return data
@@ -182,7 +193,7 @@ class ReportDataService():
         
 
 
-    def upload_source_file(self, data, report_data):
+    def upload_source_file(self, data, report_data, type=None):
         
         serialized_report_data = ReportDataSerializer(report_data, data={'source_file': data}, partial=True)
         
@@ -197,22 +208,30 @@ class ReportDataService():
 
 
     
-    def upload_report_file(self, data, report_data):
-        ...
+    def upload_report_file(self, file, report_data, type=None):
+        data = {'report_data': report_data.id, 'report_type': type}
+        data = self._get_report_file_data(data, file)
+        report_file = report_data.report_file.filter(report_type=type).first()
+        print(report_file)
+        serialized_report_file = ReportFileSerializer(report_file, data=data, partial=True)
+        
+        if serialized_report_file.is_valid():
+            saved_report_file = serialized_report_file.save()
+            result = (True, ReportFileSerializer(saved_report_file).data)
+            
+        else:
+            result = (False, serialized_report_file.errors)
+            
+        return result
+        
 
-    
-    def upload_base_line_report_file(self, data, report_data):
-        ...
-
-
-    
     ## upload files in the models
     def upload_file_to(self, request, report_data_id):
 
         files_type = {
             'source_file': self.upload_source_file,
             'report_file': self.upload_report_file,
-            'base_line_report': self.upload_base_line_report_file 
+            'base_line_report': self.upload_report_file
         }
         
         data = request.data
@@ -225,12 +244,12 @@ class ReportDataService():
             for k, v in data.items():
                 
                 if k in files_type:
-                    result_status, result_data = files_type.get(k)(v, report_data)
+                    result_status, result_data = files_type.get(k)(v, report_data, k)
                     status_upload_files.setdefault(result_status, []).append(result_data)
             
             if all(status_upload_files) and  status_upload_files:
                 files_list = status_upload_files.get(True)
-                result = (True, status_upload_files)
+                result = (True, ReportDataSerializer(report_data).data)
             
             else:
                 error_list = status_upload_files.get(False)
@@ -243,7 +262,6 @@ class ReportDataService():
        
         
         return result
-    
     
     
     

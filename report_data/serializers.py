@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import report_data
 from report_data.models import ReportData, Report, ReportFile, ReportDataChangeLog
 from mitigation_action.serializers import ContactSerializer
 from users.serializers import CustomUserSerializer
@@ -30,6 +31,7 @@ class ReportDataSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['contact'] = ContactSerializer(instance.contact).data
         data['report_data_change_log'] = ReportDataChangeLogSerializer(instance.report_data_change_log.all().order_by('-id'), many=True).data
+        data['files'] = ReportFileSerializer(instance.report_file.all(), many=True).data
 
         return data
 
@@ -43,5 +45,5 @@ class ReportSerializer(serializers.ModelSerializer):
 class ReportFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFile
-        fields = ('id', 'slug', 'report_file')
+        fields = ('id', 'slug', 'file', 'report_data', 'report_type')
 

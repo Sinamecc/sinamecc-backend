@@ -16,7 +16,7 @@ User =  get_user_model()
 
 
 def directory_path(instance, filename): 
-    path = "mitigation_action/{0}/{1}/{2}/"
+    path = "report_data/{0}/{1}/{2}/"
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
 
