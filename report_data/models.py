@@ -9,6 +9,7 @@ from general.storages import PrivateMediaStorage
 from general.utils import unique_field_value_generator
 from time import gmtime, strftime
 import string
+from django_fsm import FSMField, transition
 
 import report_data
 
@@ -119,6 +120,7 @@ class ReportFileMetadata(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     value = models.CharField(max_length=100, blank=False, null=False)
     report_file = models.ForeignKey(ReportFile, on_delete=models.CASCADE)
+    fsm_state = FSMField(default='new', protected=True, max_length=100)
 
     class Meta:
         verbose_name = _("Report File Metadata")
@@ -137,3 +139,97 @@ class ReportDataChangeLog(models.Model):
     class Meta:
         verbose_name = _("Report Data Changelog")
         verbose_name_plural = _("Report Data Changelogs")
+
+    # FSM Annotated Methods (Transitions) and Ordinary Conditions
+    # --- Transition ---
+    def can_submit(self):
+        ## check all field are filled !!
+        ## check current status is new
+        return self.fsm_state in ['new','updating_by_request_DCC']
+  
+    def can_evaluate_by_DCC(self):
+        ## check current status is submitted
+        return self.fsm_state == 'submitted'
+
+    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
+    def can_rejected_by_DCC(self):
+        ## check current status is submitted
+        return self.fsm_state == 'in_evaluation_by_DCC'
+    
+    def can_request_changes_by_DCC(self):
+        ## check current status is submitted
+        return self.fsm_state == 'in_evaluation_by_DCC'
+    
+    def can_acception_by_DCC(self):
+        ## check current status is submitted
+        return self.fsm_state == 'in_evaluation_by_DCC'
+
+    def can_update_by_DCC_request(self):
+        ## check current status is submitted
+        return self.fsm_state == 'requested_changes_by_DCC'
+
+    @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
+    def submit(self):
+        # new --> submitted        
+        # send email to user that submitted the action
+        print(f'The report data is transitioning from <{self.fsm_state}> to <submitted>')
+        ...
+        ## maybe raise exception
+
+    
+    @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
+    def evaluate_by_DCC(self):
+        # submitted --> in_evaluation_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <submitted> to <in_evaluation_by_DCC>')
+        ...
+        ## maybe raise exception
+
+    ##
+    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
+    ##
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_rejected_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    def evaluate_by_DCC_rejected(self):
+        # in_evaluation_by_DCC --> rejected_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
+        ...
+        ## maybe raise exception
+    
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='requested_changes_by_DCC', conditions=[can_request_changes_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    def evaluate_by_DCC_requested_changes(self):
+        # in_evaluation_by_DCC --> requested_changes_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
+        ...
+    
+    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    def evaluate_by_DCC_accepted(self):
+        # in_evaluation_by_DCC --> accepted_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
+        ...
+            ## maybe raise exception
+    
+    ## rejected by DCC to end
+    @transition(field='fsm_state', source='rejected_by_DCC', target='end', conditions=[], on_error='rejected_by_DCC', permission='')
+    def rejected_by_DCC_to_end(self):
+        # rejected_by_DCC --> rejected_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <rejected_by_DCC> to <end>')
+        ...
+    
+    @transition(field='fsm_state', source='requested_changes_by_DCC', target='updating_by_request_DCC', conditions=[can_update_by_DCC_request], on_error='requested_changes_by_DCC', permission='')
+    def update_by_DCC_request(self):
+        # requested_changes_by_DCC --> updating_by_request_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
+        ...
+    
+    ## accepted_by_DCC to	registered_by_DCC
+    @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')
+    def registered_by_DCC(self):
+        # accepted_by_DCC --> registered_by_DCC
+        # send email to user that submitted the action
+        print('The report data is transitioning from <accepted_by_DCC> to <registered_by_DCC>')
+        ...
