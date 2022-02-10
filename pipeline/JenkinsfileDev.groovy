@@ -30,6 +30,9 @@ pipeline {
                   echo "Step: Updating requirements"
                   sh 'pip install -r requirements.txt'
 
+                  echo "Step: Running Purge Migrations"
+                  sh 'python manage.py shell < purge_app.py'
+
                   echo "Step: Running Migrations"
                   sh 'python manage.py migrate'
                 }
