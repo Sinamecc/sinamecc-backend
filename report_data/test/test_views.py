@@ -3,8 +3,6 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
-from report_data.models import ReportFile, ReportFileVersion
-from report_data.serializers import ReportFileSerializer
 from users.models import CustomUser
 
 # initialize the APIClient app
