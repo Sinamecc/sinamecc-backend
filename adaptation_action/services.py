@@ -985,7 +985,8 @@ class AdaptationActionServices():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['report_organization']
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
