@@ -58,3 +58,27 @@ def get_catalog_data(request): ## We need delete *args this parametes is temp at
         result = view_helper.execute_by_name("get_catalog_data", request)
     
     return result
+
+
+@api_view(['POST'])
+@parser_classes((MultiPartParser, FormParser, JSONParser,))
+def upload_file_to_report_data(request, report_data_id):
+    if request.method == 'POST':
+        result = view_helper.execute_by_name('upload_file_to',request, report_data_id)
+
+    return result
+
+
+@api_view(['GET'])
+def get_file_to_report_data(request, report_file_id):
+    if request.method == 'GET':
+        result = view_helper.call_download_file_method('download_report_file', request, report_file_id)
+
+        return result
+
+@api_view(['GET'])
+def get_source_file_to_report_data(request, report_data_id):
+    if request.method == 'GET':
+        result = view_helper.call_download_file_method('download_source_file', request, report_data_id)
+
+        return result
