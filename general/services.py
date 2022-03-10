@@ -233,13 +233,11 @@ class GeneralService():
             body = json.loads(request.body.decode('utf-8'))
             canton_list = body.get('canton_list', [])
             response = []
-    
             if canton_list:
                 for _canton in canton_list:
                     code_canton = _canton.get('code_canton', None)
                     code_province = _canton.get('code_province', None)
-                    district_status, district_data = self._service_helper.get_all(District, canton__code = code_canton, canton__province__code = code_province)  
-    
+                    district_status, district_data = self._service_helper.get_all(District, canton__code = code_canton, canton__province__code = code_province)
                     if district_status:
                         result_status, result_data = (district_status, DistrictSerializer(district_data, many=True).data)
             

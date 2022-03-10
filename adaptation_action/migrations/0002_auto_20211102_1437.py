@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
             name='FinanceInstrument',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=100)),
+                ('name', models.CharField(max_length=100, null=True)),
+                ('code', models.CharField(max_length=100, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -44,8 +44,8 @@ class Migration(migrations.Migration):
             name='FinanceSourceType',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=100)),
+                ('name', models.CharField(max_length=100, null=True)),
+                ('code', models.CharField(max_length=100, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -58,8 +58,8 @@ class Migration(migrations.Migration):
             name='FinanceStatus',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=100)),
+                ('name', models.CharField(max_length=100, null=True)),
+                ('code', models.CharField(max_length=100, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -101,8 +101,8 @@ class Migration(migrations.Migration):
             name='ThematicCategorizationType',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=100)),
+                ('name', models.CharField(max_length=100, null=True)),
+                ('code', models.CharField(max_length=100, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],

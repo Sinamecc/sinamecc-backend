@@ -95,10 +95,10 @@ class Topics(models.Model):
 
 class SubTopics(models.Model):
 
-    code = models.CharField(max_length=3, null=False)
-    name = models.CharField(max_length=255, null=False)
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=255, null=True)
     
-    topic = models.ForeignKey(Topics, null=False, related_name="sub_topics", on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topics, null=True, related_name="sub_topics", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -111,8 +111,8 @@ class SubTopics(models.Model):
 
 class AdaptationAxis(models.Model):
 
-    code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=500, null=False)
+    code = models.CharField(max_length=3, null=True)
+    description = models.CharField(max_length=500, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -125,10 +125,10 @@ class AdaptationAxis(models.Model):
 
 class AdaptationAxisGuideline(models.Model):
 
-    code = models.CharField(max_length=3, null=False)
-    name = models.CharField(max_length=500, null=False)
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=500, null=True)
 
-    adaptation_axis = models.ForeignKey(AdaptationAxis, null=False, related_name="adaptation_axis_guideline", on_delete=models.CASCADE)
+    adaptation_axis = models.ForeignKey(AdaptationAxis, null=True, related_name="adaptation_axis_guideline", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -141,8 +141,8 @@ class AdaptationAxisGuideline(models.Model):
 
 class NDCArea(models.Model):
 
-    code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=2500, null=False)
+    code = models.CharField(max_length=3, null=True)
+    description = models.CharField(max_length=2500, null=True)
     other = models.CharField(max_length=500, null=True)
 
     ## logs
@@ -155,11 +155,11 @@ class NDCArea(models.Model):
 
 class NDCContribution(models.Model):
 
-    code = models.CharField(max_length=3, null=False)
-    description = models.CharField(max_length=2500, null=False)
+    code = models.CharField(max_length=3, null=True)
+    description = models.CharField(max_length=2500, null=True)
     other = models.CharField(max_length=500, null=True)
 
-    ndc_area = models.ForeignKey(NDCArea, null=False, related_name="ndc_contribution", on_delete=models.CASCADE)
+    ndc_area = models.ForeignKey(NDCArea, null=True, related_name="ndc_contribution", on_delete=models.CASCADE)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -174,7 +174,7 @@ class Activity(models.Model):
     code = models.CharField(max_length=3, null=True)
     description = models.TextField(null=True)
     
-    sub_topic = models.ForeignKey(SubTopics, null=False, related_name="activity", on_delete=models.CASCADE)
+    sub_topic = models.ForeignKey(SubTopics, null=True, related_name="activity", on_delete=models.CASCADE)
     ndc_contribution = models.ManyToManyField(NDCContribution,related_name="activity", blank=True)
     adaptation_axis_guideline = models.ForeignKey(AdaptationAxisGuideline, null=True, related_name="activity", on_delete=models.CASCADE)
 
@@ -242,8 +242,8 @@ class Implementation(models.Model):
 
 class FinanceStatus(models.Model):
 
-    name = models.CharField(max_length=100, null=False)
-    code = models.CharField(max_length=100, null=False)
+    name = models.CharField(max_length=100, null=True)
+    code = models.CharField(max_length=100, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -255,8 +255,8 @@ class FinanceStatus(models.Model):
 
 class FinanceSourceType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
-    code = models.CharField(max_length=100, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=True)
+    code = models.CharField(max_length=100, blank=False, null=True)
      
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -268,8 +268,8 @@ class FinanceSourceType(models.Model):
 
 class FinanceInstrument(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
-    code = models.CharField(max_length=100, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=True)
+    code = models.CharField(max_length=100, blank=False, null=True)
      
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -339,8 +339,8 @@ class InformationSource(models.Model):
 
 class ThematicCategorizationType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
-    code = models.CharField(max_length=100, blank=False, null=False)
+    name = models.CharField(max_length=100, blank=False, null=True)
+    code = models.CharField(max_length=100, blank=False, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)

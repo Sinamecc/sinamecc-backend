@@ -114,6 +114,10 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
+            options={
+                'verbose_name': 'Action Impact',
+                'verbose_name_plural': 'Action Impact'
+            },
         ),
         migrations.AddField(
             model_name='adaptationaction',

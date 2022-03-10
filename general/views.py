@@ -27,7 +27,7 @@ def get_post_province(request, province_id=False):
     view_helper = ViewHelper(service)
 
     if request.method == 'GET' and not province_id:
-        result = service.get_all(request)        
+        result = view_helper.get_all(request)        
     
     elif request.method == 'GET' and province_id:
         result = view_helper.get_one(request, province_id)

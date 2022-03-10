@@ -47,8 +47,8 @@ class Migration(migrations.Migration):
             name='AdaptationAxis',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=3)),
-                ('description', models.CharField(max_length=500)),
+                ('code', models.CharField(max_length=3, null=True)),
+                ('description', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -93,8 +93,8 @@ class Migration(migrations.Migration):
             name='NDCArea',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=3)),
-                ('description', models.CharField(max_length=2500)),
+                ('code', models.CharField(max_length=3, null=True)),
+                ('description', models.CharField(max_length=2500, null=True)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -164,11 +164,11 @@ class Migration(migrations.Migration):
             name='SubTopics',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=3)),
-                ('name', models.CharField(max_length=255)),
+                ('code', models.CharField(max_length=3, null=True)),
+                ('name', models.CharField(max_length=255, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('topic', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sub_topics', to='adaptation_action.topics')),
+                ('topic', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='sub_topics', to='adaptation_action.topics')),
             ],
             options={
                 'verbose_name': 'Sub Topic',
@@ -197,12 +197,12 @@ class Migration(migrations.Migration):
             name='NDCContribution',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=3)),
-                ('description', models.CharField(max_length=2500)),
+                ('code', models.CharField(max_length=3, null=True)),
+                ('description', models.CharField(max_length=2500, null=True)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('ndc_area', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ndc_contribution', to='adaptation_action.ndcarea')),
+                ('ndc_area', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='ndc_contribution', to='adaptation_action.ndcarea')),
             ],
             options={
                 'verbose_name': 'NDC Contribution',
@@ -226,11 +226,11 @@ class Migration(migrations.Migration):
             name='AdaptationAxisGuideline',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=3)),
-                ('name', models.CharField(max_length=500)),
+                ('code', models.CharField(max_length=3, null=True)),
+                ('name', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('adaptation_axis', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='adaptation_axis_guideline', to='adaptation_action.adaptationaxis')),
+                ('adaptation_axis', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='adaptation_axis_guideline', to='adaptation_action.adaptationaxis')),
             ],
             options={
                 'verbose_name': 'Adaptation Axis Guideline',
@@ -282,11 +282,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activity',
             name='ndc_contribution',
-            field=models.ManyToManyField(blank=True, related_name='activity', to='adaptation_action.NDCContribution', null=True),
+            field=models.ManyToManyField(blank=True, related_name='activity', to='adaptation_action.NDCContribution'),
         ),
         migrations.AddField(
             model_name='activity',
             name='sub_topic',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity', to='adaptation_action.subtopics'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity', to='adaptation_action.subtopics', null=True),
         ),
     ]
