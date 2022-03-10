@@ -7,7 +7,7 @@ from rest_framework import serializers
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
-             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument
 
 from general.serializers import AddressSerializer
 
@@ -22,6 +22,12 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportOrganization
         fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type','contact', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['report_organization_type'] = ReportOrganizationTypeSerializer(instance.report_organization_type).data
+
+        return data
 
 class AdaptationActionTypeSerializer(serializers.ModelSerializer):
     
@@ -41,6 +47,13 @@ class AdaptationActionInformationSerializer(serializers.ModelSerializer):
         model = AdaptationActionInformation
         fields = ('id', 'name', 'objective', 'description', 'meta', 'adaptation_action_type', 'ods', 'created', 'updated')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['adaptation_action_type'] = AdaptationActionTypeSerializer(instance.adaptation_action_type).data
+        data['ods'] = ODSSerializer(instance.ods.all(), many = True).data
+
+        return data
+
 class TopicsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -52,6 +65,12 @@ class SubTopicsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTopics
         fields = ('id', 'code', 'name', 'topic', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['topic'] = TopicsSerializer(instance.topic).data
+
+        return data
 
 class AdaptationAxisSerializer(serializers.ModelSerializer):
 
@@ -64,7 +83,12 @@ class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdaptationAxisGuideline
         fields = ('id', 'code', 'adaptation_axis', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['adaptation_axis'] = AdaptationAxisSerializer(instance.adaptation_axis).data
 
+        return data
 
 class NDCAreaSerializer(serializers.ModelSerializer):
 
@@ -77,7 +101,12 @@ class NDCContributionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NDCContribution
         fields = ('id', 'code', 'description', 'other', 'ndc_area', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['ndc_area'] = NDCAreaSerializer(instance.ndc_area).data
 
+        return data
 
 class ActivitySerializer(serializers.ModelSerializer):
 
@@ -85,14 +114,13 @@ class ActivitySerializer(serializers.ModelSerializer):
         model = Activity
         fields = ('id', 'code', 'description', 'sub_topic', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
 
-        def to_representation(self, instance):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['sub_topic'] = SubTopicsSerializer(instance.sub_topic).data
+        data['ndc_contribution'] = NDCContributionSerializer(instance.ndc_contribution.all(), many=True).data
+        data['adaptation_axis_guideline'] = AdaptationAxisGuidelineSerializer(instance.adaptation_axis_guideline).data
 
-            data = super.to_representation(instance)
-            data['sub_topic'] = SubTopicsSerializer(instance.sub_topic).data
-            data['ndc_contribution'] = NDCContributionSerializer(instance.ndc_contribution).data
-            data['adaptation_axis_guideline'] = AdaptationAxisGuidelineSerializer(instance.adaptation_axis_guideline.all(), many=True).data
-
-            return data
+        return data
 
 class InstrumentSerializer(serializers.ModelSerializer):
 
@@ -111,6 +139,12 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClimateThreat
         fields = ('id', 'type_climate_threat', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat).data
+
+        return data
 
 class ImplementationSerializer(serializers.ModelSerializer):
 
@@ -130,6 +164,12 @@ class FinanceSourceTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinanceSourceType
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
+class FinanceInstrumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinanceInstrument
         fields = ('id', 'name', 'code', 'created', 'updated')
 
 class MideplanSerializer(serializers.ModelSerializer):
@@ -162,6 +202,15 @@ class FinanceSerializer(serializers.ModelSerializer):
         model = FinanceAdaptation
         fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'mideplan', 'created', 'updated')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['status'] = FinanceStatusSerializer(instance.status).data
+        data['source'] = FinanceSourceTypeSerializer(instance.source.all(), many=True).data
+        data['finance_instrument'] = FinanceInstrumentSerializer(instance.finance_instrument.all(), many=True).data
+        data['mideplan'] = MideplanSerializer(instance.mideplan).data
+    
+        return data
+
 class InformationSourceTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -173,6 +222,12 @@ class InformationSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InformationSource
         fields = ('id', 'responsible_institution', 'type_information', 'other_type', 'statistical_operation', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['type_information'] = InformationSourceTypeSerializer(instance.type_information).data
+        
+        return data
 
 class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
 
@@ -192,6 +247,14 @@ class IndicatorSerializer(serializers.ModelSerializer):
         model = IndicatorAdaptation
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['information_source'] = InformationSourceSerializer(instance.information_source).data
+        data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
+        data['classifier'] = Classifier(instance.classifier.all(), many=True).data
+
+        return data
 
 #Serializer section 5-6
 
@@ -214,6 +277,13 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
         model = IndicatorMonitoring
         fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'created', 'updated')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['indicator_source'] = IndicatorSourceSerializer(instance.indicator_source.all(), many=True).data
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
+
+        return data
+
 class GeneralReportSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -231,6 +301,14 @@ class ActionImpactSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActionImpact
         fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['general_impact'] = GeneralImpactSerializer(instance.general_impact).data
+        data['temporality_impact'] = TemporalityImpactSerializer(instance.temporality_impact.all(), many=True).data
+        data['ods'] = ODSSerializer(instance.ods.all(), many=True).data
+
+        return data
 
 class AdaptationActionSerializer(serializers.ModelSerializer):
 

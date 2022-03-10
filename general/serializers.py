@@ -22,15 +22,35 @@ class CantonSerializer(serializers.ModelSerializer):
         model = Canton
         fields = ('id', 'code', 'name', 'province', 'created', 'updated')
 
+    def to_representation(self, instance):
+        
+        data = super().to_representation(instance)
+        data['province'] = ProvinceSerializer(instance.province).data
+
+        return data
+
 class DistrictSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = District
         fields = ('id', 'code', 'name', 'canton', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        
+        data = super().to_representation(instance)
+        data['canton'] = CantonSerializer(instance.canton).data
+
+        return data
 
 class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
         fields = ('id', 'description', 'GIS', 'district', 'created', 'updated')
-        
+    
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+        data['district'] = DistrictSerializer(instance.district).data
+
+        return data
