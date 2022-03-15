@@ -379,7 +379,7 @@ class IndicatorAdaptation(models.Model):
 
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
-    unit = models.CharField(max_length=255, null=True)
+    unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())

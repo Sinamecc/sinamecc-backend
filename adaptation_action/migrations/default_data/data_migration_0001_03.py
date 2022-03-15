@@ -214,20 +214,24 @@ _instrument_detail = [
         'code': '4'
     },
     {
-        'name': 'Garatnías.',
+        'name': 'Garantías.',
         'code': '5'
     },
     {
-        'name': 'Fideicomisos.',
+        'name': 'Bonos.',
         'code': '6'
     },
     {
-        'name': 'Canjes de deuda.',
+        'name': 'Fideicomisos.',
         'code': '7'
     },
     {
-        'name': 'Otros.',
+        'name':'Canjes de deuda.',
         'code': '8'
+    },
+    {
+        'name': 'Otros.',
+        'code': '9'
     }
 ]
 
@@ -241,7 +245,7 @@ _source_type = [
         'code': '2'
     },
     {
-        'name': 'Combinación de censos y muestreos',
+        'name': 'Combinación de censo y muestreo',
         'code': '3'
     },
     {
@@ -253,7 +257,7 @@ _source_type = [
         'code': '5'
     },
     {
-        'name': 'Sistema de Monitorio',
+        'name': 'Sistema de Monitoreo',
         'code': '6'
     },
     {
@@ -261,20 +265,8 @@ _source_type = [
         'code': '7'
     },
     {
-        'name': 'Actas',
-        'code': '8'
-    },
-    {
-        'name': 'Lista de asistencia',
-        'code': '9'
-    },
-    {
-        'name': 'Mapas',
-        'code': '10'
-    },
-    {
         'name': 'Otro',
-        'code': '11'
+        'code': '8'
     }
 ]
 
