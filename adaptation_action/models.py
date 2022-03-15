@@ -11,6 +11,7 @@ class ReportOrganizationType(models.Model):
     
     code = models.CharField(max_length=3, null=True)
     entity_type = models.CharField(max_length=100, null=True)
+    other = models.TextField(null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -21,7 +22,7 @@ class ReportOrganizationType(models.Model):
 
 class ReportOrganization(models.Model):
 
-    responsible_entity = models.CharField(max_length=200, null=True)
+    responsible_entity = models.CharField(max_length=250, null=True)
     legal_identification = models.CharField(max_length=50, null=True)
     elaboration_date = models.DateField(null=True)
     entity_address = models.CharField(max_length=250, null=True)

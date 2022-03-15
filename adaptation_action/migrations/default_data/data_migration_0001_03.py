@@ -26,11 +26,11 @@ _adaptation_action_type = [
         'code': '1'
     },
     {
-        'name': 'Tipo B - Proyecto y programas',
+        'name': 'Tipo B - Proyectos y programas',
         'code': '2'
     },
     {
-        'name': 'Tipo C - Actividad',
+        'name': 'Tipo C - Actividades',
         'code': '3'
     }
 ]
@@ -45,7 +45,7 @@ _type_climate_threat = [
         'code': '2'
     },
     {
-        'name': 'Avenida torrencial',
+        'name': 'Ondas tropicales',
         'code': '3'
     },
     {
@@ -73,7 +73,7 @@ _type_climate_threat = [
         'code': '9'
     },
     {
-        'name': 'Vendavales',
+        'name': 'Tormentas tropicales',
         'code': '10'
     },
     {
@@ -101,7 +101,7 @@ _type_climate_threat = [
         'code': '16'
     },
     {
-        'name': 'Otros',
+        'name': 'Otra',
         'code': '17'
     }
 ]
@@ -109,71 +109,71 @@ _type_climate_threat = [
 _ODS_data = [
     {
         'code': '1',
-        'name': 'Fin de la pobreza.',
+        'name': '1. Fin de la pobreza.',
     },
     {
         'code': '2',
-        'name': 'Hambre cero.',
+        'name': '2. Hambre cero.',
     },
     {
         'code': '3',
-        'name': 'Salud y bienestar.',
+        'name': '3. Salud y bienestar.',
     },
     {
         'code': '4',
-        'name': 'Educación de calidad.',
+        'name': '4.Educación de calidad.',
     },
     {
         'code': '5',
-        'name': 'Igualdad de género.',
+        'name': '5. Igualdad de género.',
     },
     {
         'code': '6',
-        'name': 'Agua limpia y saneamiento.',
+        'name': '6. Agua limpia y saneamiento.',
     },
     {
         'code': '7',
-        'name': 'Energía asequible y no contaminante.',
+        'name': '7. Energía asequible y no contaminante.',
     },
     {
         'code': '8',
-        'name': 'Trabajo decente y crecimiento económico.',
+        'name': '8. Trabajo decente y crecimiento económico.',
     },
     {
         'code': '9',
-        'name': 'Industria, innovación e infraestructura.',
+        'name': '9. Industria, innovación e infraestructura.',
     },
     {
         'code': '10',
-        'name': 'Reducción de las desigualdades.',
+        'name': '10. Reducción de las desigualdades.',
     },
     {
         'code': '11',
-        'name': 'Ciudades y comunidades sostenibles.',
+        'name': '11. Ciudades y comunidades sostenibles.',
     },
     {
         'code': '12',
-        'name': 'Producción y consumo responsable.',
+        'name': '12. Producción y consumo responsable.',
     },
     {
         'code': '13',
-        'name': 'Acción por el clima.',
+        'name': '13. Acción por el clima.',
     },
     {
         'code': '14',
-        'name': 'Vida submarina.',
+        'name': '14. Vida submarina.',
     },
     {
         'code': '15',
-        'name': 'Vida de ecosistemas terrestres.',
+        'name': '15. Vida de ecosistemas terrestres.',
     },
     {
         'code': '16',
-        'name': 'Paz, justicia e instituciones sólidas.',
+        'name': '16. Paz, justicia e instituciones sólidas.',
     },
     {
         'code': '17',
-        'name': 'Alianzas para lograr los objetivos.',
+        'name': '17. Alianzas para lograr los objetivos.',
     }
 ]
 
