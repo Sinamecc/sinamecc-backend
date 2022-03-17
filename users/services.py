@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
+from general.helpers.services import ServiceHelper
+from general.models import User
 from .models import CustomUser, ProfilePicture
 from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
     GroupSerializer, ProfilePictureSerializer
@@ -59,6 +62,7 @@ class UserService():
         self.storage = S3Storage()
         self.email_services = UserEmailServices(ses_service)
         self.token_generator = PasswordResetTokenGenerator()
+        self._service_helper = ServiceHelper()
 
     def get_serialized_profile_picture(self, request):
         version_str_format = '%Y%m%d_%H%M%S.%f'
@@ -282,6 +286,22 @@ class UserService():
 
         return result
 
+    
+    def delete(self, request, user_id):
+        
+        user_status, user_data = self._service_helper.get_one(User, user_id)
+        if user_status:
+            serialized_user = CustomUserSerializer(user_data).data
+            user_data.delete()
+            
+            result = (True, serialized_user)
+        
+        else:
+            result = (False, user_data)
+        
+        return result
+    
+    
     def update_password(self, request, user_id):
         errors = []
         UserModel = get_user_model()
