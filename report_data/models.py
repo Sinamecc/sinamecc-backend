@@ -79,9 +79,9 @@ class ReportData(models.Model):
     ###
     # sec 1.2 
     report_information = models.CharField(max_length=100, choices=REPORT_TYPE_CHOICES, blank=False, null=False)
-    have_line_base = models.BooleanField(default=False)
-    line_base_type = models.CharField(max_length=100,choices=REPORT_DATA_TYPE_CHOICES, blank=True, null=True)
-    line_base_report = models.TextField(blank=True, null=True) ## can be used for the line base report or url 
+    have_base_line = models.BooleanField(default=False)
+    base_line_type = models.CharField(max_length=100,choices=REPORT_DATA_TYPE_CHOICES, blank=True, null=True)
+    base_line_report = models.TextField(blank=True, null=True) ## can be used for the line base report or url 
     have_quality_element = models.BooleanField(default=False)
     quality_element_description = models.TextField(blank=True, null=True)
     transfer_data_with_sinamecc = models.BooleanField(default=False)

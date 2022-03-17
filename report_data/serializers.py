@@ -21,7 +21,8 @@ class ReportDataChangeLogSerializer(serializers.ModelSerializer):
 class ReportDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportData
-        fields = ('__all__')
+        fields = ('id', 'fsm_state', 'user', 'name', 'description', 'unit', 'calculation_methodology', 'measurement_frequency', 'from_date', 'to_date', 'geographic_coverage', 'disaggregation', 'limitation', 'additional_information', 'information_source', 'statistical_operation', 'contact', 'contact_annotation', 'data_type', 'other_data_type', 'classifier', 'other_classifier', 'report_information', 'have_base_line', 
+        'base_line_type', 'base_line_report', 'have_quality_element', 'quality_element_description', 'transfer_data_with_sinamecc', 'transfer_data_with_sinamecc_description', 'report_data_type', 'individual_report_data', 'created', 'updated')
         
  
     def to_representation(self, instance):
