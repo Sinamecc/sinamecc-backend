@@ -15,7 +15,7 @@ class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportOrganizationType
-        fields = ('id', 'code', 'entity_type', 'created', 'updated')
+        fields = ('id', 'code', 'entity_type', 'other', 'created', 'updated')
 
 class ReportOrganizationSerializer(serializers.ModelSerializer):
 
