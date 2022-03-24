@@ -11,7 +11,6 @@ class ReportOrganizationType(models.Model):
     
     code = models.CharField(max_length=3, null=True)
     entity_type = models.CharField(max_length=100, null=True)
-    other = models.TextField(null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -28,6 +27,7 @@ class ReportOrganization(models.Model):
     entity_address = models.CharField(max_length=250, null=True)
     
     report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)
+    other_report_organization_type = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name="report_organization", null=True, on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)

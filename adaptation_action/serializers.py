@@ -15,13 +15,13 @@ class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportOrganizationType
-        fields = ('id', 'code', 'entity_type', 'other', 'created', 'updated')
+        fields = ('id', 'code', 'entity_type', 'created', 'updated')
 
 class ReportOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportOrganization
-        fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type','contact', 'created', 'updated')
+        fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type', 'other_report_organization_type','contact', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
