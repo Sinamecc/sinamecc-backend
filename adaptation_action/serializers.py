@@ -235,7 +235,7 @@ class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
         model = ThematicCategorizationType
         fields = ('id', 'name', 'code', 'created', 'updated')
 
-class Classifier(serializers.ModelSerializer):
+class ClassifierSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Classifier
@@ -252,7 +252,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
-        data['classifier'] = Classifier(instance.classifier.all(), many=True).data
+        data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
 
         return data
 

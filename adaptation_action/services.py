@@ -851,6 +851,31 @@ class AdaptationActionServices():
         
         return result
 
+    def _get_all_classifier(self, request):
+
+        classifier_status, classifier_data = self._service_helper.get_all(Classifier)
+
+        if classifier_status:
+            result = (classifier_status, ClassifierSerializer(classifier_data, many=True).data)
+        
+        else:
+            result = (classifier_status, classifier_data)
+        
+        return result
+
+    def _get_classifier_by_id(self, request):
+    
+        classifier_id = request.GET.get('classifier_id')
+        classifier_status, classifier_data = self._service_helper.get_by_id(classifier_id, Classifier)
+
+        if classifier_status:
+            result = (classifier_status, ClassifierSerializer(classifier_data).data)
+        
+        else:
+            result = (classifier_status, classifier_data)
+        
+        return result
+
     def _get_all_temporality_impact(self, request):
 
         temporality_impact_status, temporality_impact_data = self._service_helper.get_all(TemporalityImpact)
