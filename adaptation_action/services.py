@@ -775,6 +775,31 @@ class AdaptationActionServices():
             result = (subtopic_status, subtopic_data)
         
         return result
+
+    def _get_all_source_type(self, request):
+            
+        source_type_status, source_type_data = self._service_helper.get_all(InformationSourceType)
+
+        if source_type_status:
+            result = (source_type_status, InformationSourceTypeSerializer(source_type_data, many=True).data)
+        
+        else:
+            result = (source_type_status, source_type_data)
+        
+        return result
+    
+    def _get_source_type_by_id(self, request):
+
+        source_type_id = request.GET.get('source_type_id')
+        source_type_status, source_type_data = self._service_helper.get_by_id(source_type_id, InformationSourceType)
+
+        if source_type_status:
+            result = (source_type_status, InformationSourceTypeSerializer(source_type_data).data)
+        
+        else:
+            result = (source_type_status, source_type_data)
+        
+        return result
     
     def _get_all_activity(self, request):
 

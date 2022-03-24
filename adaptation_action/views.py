@@ -140,5 +140,15 @@ def get_classifiers(request, classifier_id=False):
     
     elif request.method == 'GET' and classifier_id:
         result = view_helper.execute_by_name("_get_classifier_by_id", request, classifier_id)
+
+    return result
+    
+def get_source_type(request, source_type_id=False):
+
+    if request.method == 'GET' and not source_type_id:
+        result = view_helper.execute_by_name("_get_all_source_type", request)
+    
+    elif request.method == 'GET' and source_type_id:
+        result = view_helper.execute_by_name("_get_source_type_by_id", request, source_type_id)
     
     return result
