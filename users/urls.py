@@ -28,8 +28,8 @@ urlpatterns = [
     ),
     url(
         r'^api/v1/user/(?P<user_id>[0-9]+)/*$',
-        views.put_user,
-        name='put_user'
+        views.put_delete_user,
+        name='put_delete_user'
     ),
     url(
         r'^api/v1/user/password/(?P<user_id>[0-9]+)/*$',

@@ -1,12 +1,13 @@
 from django.conf.urls import url
+from django.urls import path, re_path
 from report_data import views
 
 
 urlpatterns = [
     url(
-        r'^api/v1/report_file/(?P<pk>[0-9]+)$',
-        views.get_delete_update_report_file,
-        name='get_delete_update_report_file'
+        r'^api/v1/report-data/report/(?P<pk>[0-9]+)/*$',
+        views.get_delete_update_report_data,
+        name='get_delete_update_report_data'
     ),
     url(
         r'^api/v1/report_file/(?P<pk>[0-9]+)/versions$',
@@ -19,8 +20,29 @@ urlpatterns = [
         name='get_report_file_version_url'
     ),
     url(
-        r'^api/v1/report_file/$',
-        views.get_post_report_files,
-        name='get_post_report_files'
-    )
+        r'^api/v1/report-data/report/$',
+        views.get_post_report_data,
+        name='get_post_report_data'
+    ),
+    path(
+        'api/v1/report-data/data/', 
+        views.get_catalog_data, 
+        name='get_catalog_data'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/file/',
+        views.upload_file_to_report_data, 
+        name='upload_file_to_report_data'
+    ),
+    path(
+        'api/v1/report-data/report/file/<int:report_file_id>/',
+        views.get_file_to_report_data, 
+        name='get_file_to_report_data'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/source-file/',
+        views.get_source_file_to_report_data, 
+        name='get_source_file_to_report_data'
+    ),
+
 ]

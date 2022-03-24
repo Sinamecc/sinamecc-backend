@@ -29,8 +29,8 @@ class ViewHelper():
     def get_form_data(self, *args):
         return self.get_by_name("get_form_data", *args)
 
-    def delete(self, id):
-        result_status, result_data = self.service.delete(id)
+    def delete(self, *args):
+        result_status, result_data = self.service.delete(*args)
         if result_status:
             result = Response({"id": id}, status=status.HTTP_200_OK)
         else:
@@ -44,6 +44,24 @@ class ViewHelper():
         response.setdefault('Content-Disposition', attachment_file_name_value)
         return response
 
+    
+    def call_download_file_method(self, method, *args, **kwargs):
+        
+        method_to_call = getattr(self.service, method)
+        result_status, result_data = method_to_call(*args, **kwargs)
+        if result_status:
+            filename = result_data[0]
+            content = result_data[1]
+            attachment_file_name_value = "attachment; filename=\"{}\"".format(filename)
+            result = FileResponse(content,content_type='application/octet-stream')
+            result.setdefault('Content-Disposition', attachment_file_name_value)
+
+        else:
+            result = self.error_message(result_data)
+        
+        return result
+    
+    
     def execute_by_name(self, *args):
         method_to_call = getattr(self.service, args[0])
         result_status, result_data = method_to_call(*args[1:])
