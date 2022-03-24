@@ -16,7 +16,7 @@ client = Client()
 class MitigationActionFSMTest(TestCase):
 
     def setUp(self):
-        self.superUser = CustomUser.objects.get_or_create(username='test_super_user', email='izcar@grupoincocr.com', is_superuser=True)[0]
+        self.superUser = CustomUser.objects.get_or_create(username='test_super_user', email='izcar1@grupoincocr.com', is_superuser=True)[0]
         self.user = CustomUser.objects.get_or_create(username='admin')[0]
         self.group_list = Group.objects.filter(name__in=['dcc_mitigation_action_responsible', 'dcc_executive_secretary', 'mitigation_action_provider']).all()
         self.mitigation_service = MitigationActionService()
