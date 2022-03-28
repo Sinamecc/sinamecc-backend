@@ -70,7 +70,7 @@ class ReportData(models.Model):
     sustainable = models.TextField(null=True)
     ## information source 
     responsible_institution = models.CharField(max_length=500, blank=True, null=True)
-    information_source = models.ForeignKey(InformationSourceType, related_name='report_data', on_delete=models.DO_NOTHING, null=True)
+    information_source = models.ManyToManyField(InformationSourceType, related_name='report_data')
     statistical_operation = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name='report_data', null=True, on_delete=models.CASCADE)
     contact_annotation = models.TextField(null=True)
