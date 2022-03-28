@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from pyexpat import model
 from typing import Tuple
 from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
@@ -38,7 +39,8 @@ class ReportData(models.Model):
     PERIODICITY = (
         ('yearly', 'Yearly'),
         ('biannual', 'Biannual'),
-        ('quartely', 'Quartely')
+        ('quartely', 'Quartely'),
+        ('other', 'Other'),
     )
     
     GEOGRAPHIC = (
@@ -58,14 +60,18 @@ class ReportData(models.Model):
     unit = models.CharField(max_length=100, blank=True, null=True)
     calculation_methodology = models.CharField(max_length=1000, blank=True, null=True)
     measurement_frequency = models.CharField(max_length=100, choices=PERIODICITY, blank=True, null=True)
+    measurement_frequency_other = models.CharField(max_length=255, blank=True, null=True)
     ## available time field
     from_date = models.DateField(blank=True, null=True)
     to_date = models.DateField(blank=True, null=True)
     geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, null=True)
+    geographic_coverage_other = models.CharField(max_length=255, blank=True, null=True)
     disaggregation = models.TextField(null=True)
     limitation = models.TextField(null=True)
     additional_information = models.TextField(null=True)
+    sustainable = models.TextField(null=True)
     ## information source 
+    responsible_institution = models.CharField(max_length=500, blank=True, null=True)
     information_source = models.ForeignKey(InformationSourceType, related_name='report_data', on_delete=models.DO_NOTHING, null=True)
     statistical_operation = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name='report_data', null=True, on_delete=models.CASCADE)
