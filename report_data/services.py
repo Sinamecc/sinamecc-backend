@@ -141,14 +141,15 @@ class ReportDataService():
             serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
             serialized_report_data = self._get_serialized_report_data(data, partial=True)
             
-            if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
+            if all([serialized_report_data.is_valid(), serialized_report_data_change_log.is_valid()]):
                 report_data = serialized_report_data.save()
                 report_data_change_log = serialized_report_data_change_log.save()
                 report_data.report_data_change_log.add(report_data_change_log)
                 result = (True, ReportDataSerializer(report_data).data)
   
             else:
-                errors.append(serialized_report_data.errors.extend(serialized_report_data_change_log.errors))
+                
+                errors.append({**serialized_report_data.errors ,**serialized_report_data_change_log.errors})
                 result = (False, errors)
         else:
             result = (False, validation_dict.get(False))
