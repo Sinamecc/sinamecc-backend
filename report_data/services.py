@@ -248,6 +248,20 @@ class ReportDataService():
         return result
     
     
+    def delete(self, report_data_id):
+        
+        report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
+
+        if report_data_status:
+            serialized_report_data = ReportDataSerializer(report_data_details).data
+            report_data_details.delete()
+            result = (True, serialized_report_data)
+        
+        else: 
+            result = (report_data_status, report_data_details)
+        
+        return result
+            
     
     def _get_content_file(self, path):
 
