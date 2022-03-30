@@ -21,7 +21,7 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportOrganization
-        fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type','contact', 'created', 'updated')
+        fields = ('id', 'responsible_entity', 'legal_identification', 'elaboration_date', 'entity_address', 'report_organization_type', 'other_report_organization_type','contact', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -235,7 +235,7 @@ class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
         model = ThematicCategorizationType
         fields = ('id', 'name', 'code', 'created', 'updated')
 
-class Classifier(serializers.ModelSerializer):
+class ClassifierSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Classifier
@@ -252,7 +252,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
-        data['classifier'] = Classifier(instance.classifier.all(), many=True).data
+        data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
 
         return data
 

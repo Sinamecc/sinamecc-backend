@@ -775,6 +775,31 @@ class AdaptationActionServices():
             result = (subtopic_status, subtopic_data)
         
         return result
+
+    def _get_all_source_type(self, request):
+            
+        source_type_status, source_type_data = self._service_helper.get_all(InformationSourceType)
+
+        if source_type_status:
+            result = (source_type_status, InformationSourceTypeSerializer(source_type_data, many=True).data)
+        
+        else:
+            result = (source_type_status, source_type_data)
+        
+        return result
+    
+    def _get_source_type_by_id(self, request):
+
+        source_type_id = request.GET.get('source_type_id')
+        source_type_status, source_type_data = self._service_helper.get_by_id(source_type_id, InformationSourceType)
+
+        if source_type_status:
+            result = (source_type_status, InformationSourceTypeSerializer(source_type_data).data)
+        
+        else:
+            result = (source_type_status, source_type_data)
+        
+        return result
     
     def _get_all_activity(self, request):
 
@@ -848,6 +873,31 @@ class AdaptationActionServices():
         
         else:
             result = (general_impact_status, general_impact_data)
+        
+        return result
+
+    def _get_all_classifier(self, request):
+
+        classifier_status, classifier_data = self._service_helper.get_all(Classifier)
+
+        if classifier_status:
+            result = (classifier_status, ClassifierSerializer(classifier_data, many=True).data)
+        
+        else:
+            result = (classifier_status, classifier_data)
+        
+        return result
+
+    def _get_classifier_by_id(self, request):
+    
+        classifier_id = request.GET.get('classifier_id')
+        classifier_status, classifier_data = self._service_helper.get_by_id(classifier_id, Classifier)
+
+        if classifier_status:
+            result = (classifier_status, ClassifierSerializer(classifier_data).data)
+        
+        else:
+            result = (classifier_status, classifier_data)
         
         return result
 

@@ -21,12 +21,13 @@ class ReportOrganizationType(models.Model):
 
 class ReportOrganization(models.Model):
 
-    responsible_entity = models.CharField(max_length=200, null=True)
+    responsible_entity = models.CharField(max_length=250, null=True)
     legal_identification = models.CharField(max_length=50, null=True)
     elaboration_date = models.DateField(null=True)
     entity_address = models.CharField(max_length=250, null=True)
     
     report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)
+    other_report_organization_type = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name="report_organization", null=True, on_delete=models.CASCADE)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -379,7 +380,7 @@ class IndicatorAdaptation(models.Model):
 
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
-    unit = models.CharField(max_length=255, null=True)
+    unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())

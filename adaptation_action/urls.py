@@ -51,6 +51,15 @@ urlpatterns = [
             'api/v1/adaptation-action/get_general_impact/',
             views.get_general_impact,
             name='get_general_impact'
+    ),
+    path(
+            'api/v1/adaptation-action/get_classifiers/',
+            views.get_classifiers,
+            name='get_classifiers'
+    ),
+    path(
+            'api/v1/adaptation-action/get_source_type/',
+            views.get_source_type,
+            name='get_source_type'
     )
-
 ]
