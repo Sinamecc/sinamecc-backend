@@ -368,7 +368,8 @@ class IndicatorAdaptation(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
         ('BIANNUAL', 'Biannual'),
-        ('QUARTERLY', 'Quartely')
+        ('QUARTERLY', 'Quartely'),
+        ('OTHER', 'Other'),
     ]
     GEOGRAPHIC = [
         ('NATIONAL', 'National'),
