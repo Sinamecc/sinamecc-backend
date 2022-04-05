@@ -8,6 +8,7 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
+from mitigation_action.serializers import ContactSerializer
 
 class AdaptationActionServices():
     def __init__(self) -> None:
@@ -658,9 +659,26 @@ class AdaptationActionServices():
         
         return result
 
+    def _get_serialized_contact(self, data, contact=False):
+        
+        if contact:
+            serialized_contact = ContactSerializer(contact, data=data, partial=True)
+        else:
+            serialized_contact = ContactSerializer(data=data)
+        return serialized_contact
+
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
         _information_source = data.pop('information_source', None)
+        _contact = data.pop('contact', None)
+
+        if(_contact):
+
+            serialized_contact = self._get_serialized_contact(_contact)
+
+            if(serialized_contact.is_valid()):
+                contact = serialized_contact.save()
+                data['contact'] = contact.id
 
         if(_information_source):
                 
@@ -686,6 +704,16 @@ class AdaptationActionServices():
         return result
 
     def _create_update_report_organization(self, data, report_organization=False):
+
+        _contact = data.pop('contact', None)
+
+        if(_contact):
+
+            serialized_contact = self._get_serialized_contact(_contact)
+
+            if(serialized_contact.is_valid()):
+                contact = serialized_contact.save()
+                data['contact'] = contact.id
 
         if report_organization:
             serialized_report_organization = self._get_serialized_report_organization(data, report_organization)

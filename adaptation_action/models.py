@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact, Indicator
+from mitigation_action.models import Contact
 from general.models import Address
 from django_fsm import FSMField, transition
 
@@ -231,7 +231,7 @@ class Implementation(models.Model):
     duration = models.CharField(max_length=20, null=True)
     responsible_entity = models.CharField(max_length=50, null=True)
     other_entity = models.CharField(max_length=250, null=True)
-    action_code = models.CharField(max_length=3, null=True)
+    action_code = models.TextField(null=True)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -296,7 +296,7 @@ class Mideplan(models.Model):
 
 class FinanceAdaptation(models.Model):
 
-    administration = models.TextField(max_length=500 ,null=True)
+    administration = models.TextField(max_length=500, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
 
     status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
@@ -385,6 +385,7 @@ class IndicatorAdaptation(models.Model):
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
+    other_reporting_periodicity = models.TextField(null=True)
     
     available_time_start_date = models.DateField(null=True)
     available_time_end_date = models.DateField(null=True)

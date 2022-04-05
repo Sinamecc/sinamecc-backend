@@ -612,7 +612,9 @@ _activities_sub_topics_1_6 = [
     },
     {
         'code':'4',
-        'description':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sistema de transporte hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.'
+        'description':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sistema de transporte hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.',
+        'adaptation_axis':'2.1',
+        'ndc_contribution':['13.10'],
     },
     {
         'code':'5',
@@ -640,27 +642,37 @@ _activities_sub_topics_1_7 = [
 _activities_sub_topics_2_1 = [
     {
         'code':'1',
-        'description':'Producción sostenible de energía renovable.'
+        'description':'Producción sostenible de energía renovable.',
     },
     {
         'code':'2',
-        'description':'Producción de energía con fuentes renovables no convencionales'
+        'description':'Producción de energía con fuentes renovables no convencionales para la diversificación de la matriz.',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['3.2']
     },
     {
         'code':'3',
-        'description':'Implementar sistemas de almacenamiento que faciliten la integración o producción de energías renovables.'
+        'description':'Implementar sistemas de almacenamiento que faciliten la integración o producción de energías renovables.',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['3.2']
     },
     {
         'code':'4',
-        'description':'Construir, mantener y optimizar sistemas de transmisión y distribución para  aprovechamiento de fuentes renovables de energía. '
+        'description':'Construir, mantener y optimizar sistemas de transmisión y distribución para  aprovechamiento de fuentes renovables de energía.',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['3.2']
     },
     {
         'code':'5',
-        'description':'Construir redes inteligentes o mini red (smart grid/mini grid y sus derivaciones). '
+        'description':'Construir redes inteligentes o mini red (smart grid/mini grid y sus derivaciones).',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['3.2']
     },
     {
         'code':'6',
-        'description':'Instalar sistemas de generación distribuida con fuentes renovables'
+        'description':'Instalar sistemas de generación distribuida con fuentes renovables',
+        'adaptation_axis':'4.3',
+        'ndc_contribution':['3.2']
     }
 ]
 
@@ -954,7 +966,9 @@ _activities_sub_topics_7_1 = [
     },
     {
         'code':'3',
-        'description':'Sustituir fertilizantes químicos por orgánicos, biológicos o de liberación lenta.'
+        'description':'Sustituir fertilizantes químicos por orgánicos, biológicos o de liberación lenta.',
+        'adaptation_axis':'5.2',
+        'ndc_contribution':['7.7']
     },
     {
         'code':'4',
@@ -1578,7 +1592,7 @@ _sub_topics_data_1 = [
     },
     {
         'code':'7',
-        'name':'Innovación, investigación y comunicación ',
+        'name':'Innovación, investigación y comunicación',
         'activities':_activities_sub_topics_1_7
     }
 ]
@@ -1725,7 +1739,7 @@ _topics_data = [
     },
     {
         'code': '3',
-        'name': 'Desarrollo Urbano y Ordenamiento Territorial',
+        'name': 'Desarrollo y Ordenamiento Territorial',
         'sub_topic': _sub_topics_data_3,
     },
 
