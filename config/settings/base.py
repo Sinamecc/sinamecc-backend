@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_fsm',
     'rolepermissions', 
     'users',
+    'adaptation_action',
 ]
 
 MIDDLEWARE = [
