@@ -75,11 +75,15 @@ def assign_user_to_permission(request, username):
         result = view_helper.execute_by_name('unassign_user_to_permission', request, username)
     return result
 
-@api_view(['PUT'])
+@api_view(['PUT', 'DELETE'])
 @csrf_exempt
-def put_user(request, user_id):
+def put_delete_user(request, user_id):
     if request.method == 'PUT':
         result = view_helper.put(request, user_id)
+        
+    elif request.method == 'DELETE':
+        result = view_helper.execute_by_name('delete', request, user_id)
+        
     return result
 
 @api_view(['PUT'])
