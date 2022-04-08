@@ -295,6 +295,26 @@ class AdaptationActionServices():
         
         return serializer
 
+    def _get_serialized_change_log(self, data, change_log=False, partial=False):
+    
+        serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
+
+        return serializer
+    
+    
+    def _serialize_change_log_data(self, user, adaptation_action, previous_status):
+
+        data = {
+            'adaptation_action': adaptation_action.id,
+            'user': user.id,
+            'current_status': adaptation_action.fsm_state,
+            'previous_status': previous_status
+        }
+
+        return data
+    
+    
+    
     def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=False):
 
         serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
@@ -983,14 +1003,14 @@ class AdaptationActionServices():
                 transition_function()
                 adaptation_action.save()
                 
-                ##change_log_data = self._serialize_change_log_data(user, adaptation_action, previous_state)
-                ##serialized_change_log = self._get_serialized_change_log(change_log_data)
-                ##if serialized_change_log.is_valid():
-                ##serialized_change_log.save()
-                result = (True, adaptation_action)
+                change_log_data = self._serialize_change_log_data(user, adaptation_action, previous_state)
+                serialized_change_log = self._get_serialized_change_log(change_log_data)
+                if serialized_change_log.is_valid():
+                    serialized_change_log.save()
+                    result = (True, adaptation_action)
 
-                ##else:
-                ##    result = (False, serialized_change_log.errors)
+                else:
+                    result = (False, serialized_change_log.errors)
 
             else: result = (False, self.INVALID_USER_TRANSITION)
 

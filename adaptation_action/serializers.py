@@ -4,7 +4,7 @@ from django.db.models import fields
 from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ClimateThreat, \
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument
@@ -309,7 +309,15 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         data['ods'] = ODSSerializer(instance.ods.all(), many=True).data
 
         return data
+    
+    
+class ChangeLogSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = ChangeLog
+        fields = ('id', 'date', 'adaptation_action', 'previous_status', 'current_status', 'user')
+        
+        
 class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -354,5 +362,6 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
+        data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
         return data
 
