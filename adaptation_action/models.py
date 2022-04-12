@@ -551,7 +551,7 @@ class AdaptationAction(models.Model):
     finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     
     #Section 4
-    indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    indicator = models.ManyToManyField(IndicatorAdaptation, related_name="adaptation_action", blank=True)
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)

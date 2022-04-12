@@ -357,7 +357,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data
         data['finance'] = FinanceSerializer(instance.finance).data
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator'] = IndicatorSerializer(instance.indicator.all(), many=True).data
         data['progress_log'] = ProgressLogSerializer(instance.progress_log).data
         data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data

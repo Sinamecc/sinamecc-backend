@@ -1,6 +1,7 @@
 
 from asyncio import start_unix_server
 from os import error
+from unittest import result
 
 from django_fsm import has_transition_perm
 from adaptation_action.models import ReportOrganization, AdaptationAction
@@ -21,9 +22,9 @@ class AdaptationActionServices():
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
 
 
-    def _create_sub_record(self, data, sub_record_name):
+    def _create_sub_record(self, data, sub_record_name, is_list=False):
         
-        create_function = f'_create_update_{sub_record_name}'
+        create_function = f'_create_update_list_{sub_record_name}' if is_list else f'_create_update_{sub_record_name}'
 
         if hasattr(self, create_function):
             function = getattr(self, create_function)
@@ -34,10 +35,10 @@ class AdaptationActionServices():
             raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
         return result
-    
-    def _update_sub_record(self, sub_record_name, record_for_updating, data):
+
+    def _update_sub_record(self, sub_record_name, record_for_updating, data, is_list=False):
         
-        update_function = f'_create_update_{sub_record_name}'
+        update_function = f'_create_update_list_{sub_record_name}' if is_list else f'_create_update_{sub_record_name}'
         
         if hasattr(self, update_function):
           
@@ -52,17 +53,17 @@ class AdaptationActionServices():
 
         return result
 
-    def _create_or_update_record(self, instance, field, data):
+    def _create_or_update_record(self, instance, field, data, is_list=False):
 
         result = (False, [])
         if hasattr(instance, field):
             if getattr(instance, field) == None:
-                record_status, record_data = self._create_sub_record(data, field) ## field = sub_record_name
+                record_status, record_data = self._create_sub_record(data, field, is_list) ## field = sub_record_name
 
             else:
                 ## change field(string) to object(model instance)
                 record_for_updating = getattr(instance, field) 
-                record_status, record_data = self._update_sub_record(field, record_for_updating, data)
+                record_status, record_data = self._update_sub_record(field, record_for_updating, data, is_list)
             
             result = (record_status, record_data)
         else:
@@ -687,6 +688,7 @@ class AdaptationActionServices():
             serialized_contact = ContactSerializer(data=data)
         return serialized_contact
 
+
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
         _information_source = data.pop('information_source', None)
@@ -717,10 +719,25 @@ class AdaptationActionServices():
         if serialized_indicator_adaptation.is_valid():
             indicator_adaptation = serialized_indicator_adaptation.save()
             result = (True, indicator_adaptation)
-        
+
         else:
             result = (False, serialized_indicator_adaptation.errors)
-        
+    
+        return result
+
+    def _create_update_list_indicator(self, data, indicator_adaptation=False):
+
+        result_list = []
+        result = (True, result_list)
+
+        for field in data:
+            _indicator_status, _indicator_data = self._create_update_indicator(field, indicator_adaptation=indicator_adaptation)
+            if _indicator_status:
+                result_list.append(_indicator_data.id)
+            else:
+                result = (_indicator_status, _indicator_data)
+                break
+
         return result
 
     def _create_update_report_organization(self, data, report_organization=False):
@@ -1051,7 +1068,9 @@ class AdaptationActionServices():
 
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+
+        many_field_list = ['indicator']
 
         for field in field_list:
             if data.get(field, False):
@@ -1059,6 +1078,15 @@ class AdaptationActionServices():
                 
                 if record_status:
                     data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+        for field in many_field_list:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field, is_list=True)
+                
+                if record_status:
+                    data[field] = record_data
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
         
@@ -1084,7 +1112,10 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+
+        many_field_list = ['indicator']
+
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
@@ -1094,6 +1125,16 @@ class AdaptationActionServices():
             for field in field_list:
                 if data.get(field, False):
                     record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field))
+                    
+                    if record_status:
+                        data[field] = record_data.id
+                        
+                    dict_data = record_data if isinstance(record_data, list) else [record_data]
+                    validation_dict.setdefault(record_status,[]).extend(dict_data)
+            
+            for field in many_field_list:
+                if data.get(field, False):
+                    record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field), is_list=True)
                     
                     if record_status:
                         data[field] = record_data.id
