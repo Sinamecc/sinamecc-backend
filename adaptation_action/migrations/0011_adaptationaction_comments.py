@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('workflow', '0004_auto_20201028_1950'),
-        ('adaptation_action', '0009_changelog'),
+        ('adaptation_action', '0010_auto_20220413_1808'),
     ]
 
     operations = [
