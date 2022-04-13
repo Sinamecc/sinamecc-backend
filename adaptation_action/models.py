@@ -5,6 +5,8 @@ from mitigation_action.models import Contact
 from general.models import Address, User
 from django_fsm import FSMField, transition
 
+from workflow.models import Comment
+
 # Create your models here.
 
 class ReportOrganizationType(models.Model): 
@@ -561,6 +563,7 @@ class AdaptationAction(models.Model):
     #Section 6
     action_impact = models.ForeignKey(ActionImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
+    comments = models.ManyToManyField(Comment, blank=True)
     review_count = models.IntegerField(null=True, blank=True, default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

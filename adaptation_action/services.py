@@ -9,12 +9,14 @@ from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
 from mitigation_action.serializers import ContactSerializer
+from workflow.services import WorkflowService
 
 class AdaptationActionServices():
     def __init__(self) -> None:
 
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
+        self._workflow_service = WorkflowService()
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
@@ -975,9 +977,24 @@ class AdaptationActionServices():
         return result
 
     ## auxiliar function
-    def _increase_review_counter(self, mitigation_action):
-        mitigation_action.review_count += 1
-        mitigation_action.save()
+    def _increase_review_counter(self, adaptation_action):
+        adaptation_action.review_count += 1
+        adaptation_action.save()
+    
+    
+    def _assign_comment(self, comment_list, adaptation_action, user):
+
+        data = [{**comment, 'fsm_state': adaptation_action.fsm_state, 'user': user.id, 'review_number': adaptation_action.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = self._workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            adaptation_action.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+        
+        else:
+            result = (False, comment_list_data)
+
+        return result
     
     
     def _update_fsm_state(self, next_state, adaptation_action, user):
@@ -1134,11 +1151,13 @@ class AdaptationActionServices():
                 update_status, update_data = self._update_fsm_state(next_state, adaptation_action, user)
                 if update_status:
                     self._increase_review_counter(adaptation_action)
-                    ##assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
+                    assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
 
-                    ##if assign_status: 
-                    result = (True, AdaptationActionSerializer(adaptation_action).data)
-                    ##else: result = (assign_status, assign_data)
+                    if assign_status: 
+                        result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    
+                    else: 
+                        result = (assign_status, assign_data)
                 
                 else:
                     result = (update_status, update_data)
