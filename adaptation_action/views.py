@@ -142,7 +142,8 @@ def get_classifiers(request, classifier_id=False):
         result = view_helper.execute_by_name("_get_classifier_by_id", request, classifier_id)
 
     return result
-    
+
+@api_view(['GET'])
 def get_source_type(request, source_type_id=False):
 
     if request.method == 'GET' and not source_type_id:
@@ -151,4 +152,14 @@ def get_source_type(request, source_type_id=False):
     elif request.method == 'GET' and source_type_id:
         result = view_helper.execute_by_name("_get_source_type_by_id", request, source_type_id)
     
+    return result
+
+@api_view(['GET'])
+def get_comments(request, adaptation_action_id, fsm_state=None, review_number=None):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, adaptation_action_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, adaptation_action_id, fsm_state, review_number)
+        
     return result

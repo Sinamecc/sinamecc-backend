@@ -61,5 +61,13 @@ urlpatterns = [
             'api/v1/adaptation-action/get_source_type/',
             views.get_source_type,
             name='get_source_type'
-    )
+    ),
+    path('api/v1/adaptation-action/<uuid:adaptation_action_id>/<str:fsm_state>/comments/',
+        views.get_comments,
+        name='get_comments'
+    ),
+    path('api/v1/adaptation-action/<uuid:adaptation_action_id>/<str:fsm_state>/review/<int:review_number>/comments/',
+        views.get_comments,
+        name='get_comments'
+    ),
 ]

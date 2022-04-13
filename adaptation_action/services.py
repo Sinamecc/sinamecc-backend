@@ -1167,3 +1167,39 @@ class AdaptationActionServices():
             result = (adaptation_action_status, adaptation_action_data)
         
         return result
+    
+    
+    def get_current_comments(self, request, adaptation_action_id):
+
+        adap_action_status, adap_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adap_action_status:
+            review_number = adap_action_data.review_count
+            fsm_state = adap_action_data.fsm_state
+            commet_list = adap_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, adap_action_data)
+
+        return result
+    
+    def get_comments_by_fsm_state_or_review_number(self, request, adaptation_action_id, fsm_state=None, review_number=None):
+        adap_action_status, adap_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if adap_action_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = adap_action_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, adap_action_data)
+
+        return result
