@@ -1,14 +1,14 @@
 from functools import partial
 from unittest import result
 from general.storages import S3Storage
-from mitigation_action.models import Classifier, ThematicCategorizationType
+from mitigation_action.models import Classifier, InformationSourceType, ThematicCategorizationType
 from report_data import serializers
 from report_data.models import ReportData, ReportFile
 from django.urls import reverse
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from report_data.serializers import ReportDataSerializer, ReportDataChangeLogSerializer, ReportFileSerializer
-from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, ThematicCategorizationTypeSerializer
+from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, InformationSourceTypeSerializer, ThematicCategorizationTypeSerializer
 import datetime
 import os
 import json
@@ -140,15 +140,16 @@ class ReportDataService():
         if all(validation_dict):
             serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
             serialized_report_data = self._get_serialized_report_data(data, partial=True)
-
-            if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
+            
+            if all([serialized_report_data.is_valid(), serialized_report_data_change_log.is_valid()]):
                 report_data = serialized_report_data.save()
                 report_data_change_log = serialized_report_data_change_log.save()
                 report_data.report_data_change_log.add(report_data_change_log)
                 result = (True, ReportDataSerializer(report_data).data)
   
             else:
-                errors.append(serialized_report_data.errors.extend(serialized_report_data_change_log.errors))
+                
+                errors.append({**serialized_report_data.errors ,**serialized_report_data_change_log.errors})
                 result = (False, errors)
         else:
             result = (False, validation_dict.get(False))
@@ -191,22 +192,6 @@ class ReportDataService():
             result = (False, report_data_details)
             
         return result
-        
-
-
-    def upload_source_file(self, data, report_data, type=None):
-        
-        serialized_report_data = ReportDataSerializer(report_data, data={'source_file': data}, partial=True)
-        
-        if serialized_report_data.is_valid():
-            saved_report_data = serialized_report_data.save()
-            result = (True, ReportDataSerializer(saved_report_data).data)
-            
-        else:
-            result = (False, serialized_report_data.errors)
-            
-        return result
-
 
     
     def upload_report_file(self, file, report_data, type=None):
@@ -229,7 +214,6 @@ class ReportDataService():
     def upload_file_to(self, request, report_data_id):
 
         files_type = {
-            'source_file': self.upload_source_file,
             'report_file': self.upload_report_file,
             'base_line_report': self.upload_report_file
         }
@@ -264,6 +248,20 @@ class ReportDataService():
         return result
     
     
+    def delete(self, report_data_id):
+        
+        report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
+
+        if report_data_status:
+            serialized_report_data = ReportDataSerializer(report_data_details).data
+            report_data_details.delete()
+            result = (True, serialized_report_data)
+        
+        else: 
+            result = (report_data_status, report_data_details)
+        
+        return result
+            
     
     def _get_content_file(self, path):
 
@@ -317,6 +315,7 @@ class ReportDataService():
         catalog = {
             'classifier': (Classifier, ClassifierSerializer),
             'thematic_categorization_type': (ThematicCategorizationType, ThematicCategorizationTypeSerializer),
+            'information_source_type': (InformationSourceType, InformationSourceTypeSerializer),
         }
         data = {}
         for name , (_model, _serializer) in catalog.items():

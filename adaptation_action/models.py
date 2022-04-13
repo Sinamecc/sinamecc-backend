@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from mitigation_action.models import Contact
-from general.models import Address
+from general.models import Address, User
 from django_fsm import FSMField, transition
 
 # Create your models here.
@@ -663,3 +663,18 @@ class AdaptationAction(models.Model):
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <accepted_by_DCC> to <registered_by_DCC>')
         ...
+
+
+class ChangeLog(models.Model):
+    date = models.DateTimeField(auto_now_add=True, null=False)
+    # Foreign Keys
+    adaptation_action = models.ForeignKey(AdaptationAction, related_name='change_log', on_delete=models.CASCADE)
+    previous_status = models.CharField(max_length=100, null=True)
+    current_status = models.CharField(max_length=100)
+    
+    user = models.ForeignKey(User, related_name='adaptation_action_change_log', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("ChangeLog")
+        verbose_name_plural = _("ChangeLogs")
+        ordering = ('date',)
