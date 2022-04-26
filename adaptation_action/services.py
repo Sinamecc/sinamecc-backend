@@ -691,24 +691,18 @@ class AdaptationActionServices():
 
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
-        _information_source = data.pop('information_source', None)
-        _contact = data.pop('contact', None)
+        fields = ['information_source', 'contact']
 
-        if(_contact):
+        for _field in fields:
+            _data = data.pop(_field, None)
+            if _data:
+                _create_function = f'_get_serialized_{_field}'
+                _function = getattr(self, _create_function)
+                serialized_data = _function(_data)
 
-            serialized_contact = self._get_serialized_contact(_contact)
-
-            if(serialized_contact.is_valid()):
-                contact = serialized_contact.save()
-                data['contact'] = contact.id
-
-        if(_information_source):
-                
-            serialized_information_source = self._get_serialized_information_source(_information_source)
-
-            if(serialized_information_source.is_valid()):
-                information_source = serialized_information_source.save()
-                data['information_source'] = information_source.id
+                if(serialized_data.is_valid()):
+                    field_data = serialized_data.save()
+                    data[_field] = field_data.id
 
         if indicator_adaptation:
             serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
