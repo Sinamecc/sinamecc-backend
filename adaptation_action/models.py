@@ -514,9 +514,9 @@ class TemporalityImpact(models.Model):
 
 class ActionImpact(models.Model):
 
-    gender_equality = models.CharField(max_length=3, null=True)
+    gender_equality = models.TextField(null=True)
     gender_equality_description = models.CharField(max_length=3000, null=True)
-    unwanted_action = models.CharField(max_length=3, null=True)
+    unwanted_action = models.TextField(null=True)
     unwanted_action_description = models.CharField(max_length=3000, null=True)
     ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
