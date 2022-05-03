@@ -13,6 +13,7 @@ from general.services import EmailServices
 from general.permissions import PermissionsHelper
 from general.helpers.validators import validate_year
 from time import gmtime, strftime
+from django.db import transaction
 
 
 
@@ -204,6 +205,7 @@ class InitiativeType(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
     type = models.CharField(max_length=2, blank=False, null=False)
+    count = models.IntegerField(default=0)
      
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -327,6 +329,7 @@ class Classifier(models.Model):
 ##
 ## Finish Catalogs
 ##
+
 
 ##
 ## Extra models
@@ -722,6 +725,7 @@ class GHGInformation(models.Model):
 class MitigationAction(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=255, null=True, unique=True)
     fsm_state = FSMField(default='new', protected=True, max_length=100)
     # Foreign Key
     contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
@@ -752,6 +756,22 @@ class MitigationAction(models.Model):
         verbose_name_plural = _("Mitigation Actions")
         ordering = ('created',)
 
+    
+    def create_code(self):
+        ##
+        ## format code: AM{initiative_type}-{0000}
+        ##
+        if not (self.initiative is None or self.initiative.initiative_type is None):
+            with transaction.atomic():
+                initiative_type = InitiativeType.objects.select_for_update().get(pk=self.initiative.initiative_type.id)
+                self.code = f'AM{initiative_type.type}-{initiative_type.count:0>4}'
+                self.initiative.initiative_type.count += 1
+                
+                self.save()
+                self.initiative.initiative_type.save()
+            
+    
+    
     # FSM Annotated Methods (Transitions) and Ordinary Conditions
     # --- Transition ---
     # new -> submitted

@@ -862,7 +862,7 @@ class MitigationActionService():
             serialized_mitigation_action = self._get_serialized_mitigation_action(data)
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
-                
+                mitigation_action.create_code()    
                 result = (True, MitigationActionSerializer(mitigation_action).data)
   
             else:

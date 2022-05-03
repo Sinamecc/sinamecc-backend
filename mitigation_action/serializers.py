@@ -411,9 +411,14 @@ class ContactSerializer(serializers.ModelSerializer):
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
-        fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
+        fields = ('id', 'code', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
                     'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 
                     'user', 'created', 'updated')
+        # only read code kwargs
+        extra_kwargs = {
+            'code': {'read_only': True}
+        }
+          
     
     def to_representation(self, instance):
 
