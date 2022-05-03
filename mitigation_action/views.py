@@ -8,6 +8,17 @@ service = MitigationActionService()
 view_helper = ViewHelper(service)
 
 
+@api_view(['PUT'])
+def send_to_review(request, mitigation_action_id):
+    """
+    Send mitigation action to review
+    """
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name('sent_to_review', request, mitigation_action_id)
+        
+    return result
+
+
 ## Permission!!!!
 @api_view(['GET'])
 def get_catalog_data(request, parent=None, parent_id=None, child=None, **kwargs): ## We need delete *args this parametes is temp at the moment to refactor MA

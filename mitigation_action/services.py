@@ -1031,7 +1031,7 @@ class MitigationActionService():
         return result
 
 
-    def update_fsm_state(self, next_state, mitigation_action,user):
+    def update_fsm_state(self, next_state, mitigation_action, user):
 
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
@@ -1056,6 +1056,20 @@ class MitigationActionService():
             else: result = (False, self.INVALID_USER_TRANSITION)
 
         return result    
+
+    
+    def sent_to_review(self, request, mitigation_action_id):
+        
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        SUBMITTED_STATE = 'submitted'
+        if mitigation_action_status:
+            user = request.user
+            result = self.update_fsm_state(SUBMITTED_STATE, mitigation_action_data, user)
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+        
+        return result
 
 
 
