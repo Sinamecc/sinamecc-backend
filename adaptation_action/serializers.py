@@ -10,6 +10,7 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument
 
 from general.serializers import AddressSerializer
+from workflow.serializers import CommentSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -322,7 +323,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'created', 'updated')
+        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         
@@ -363,5 +364,9 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
+        data['comments'] = CommentSerializer(instance.comments.filter(
+            fsm_state=instance.fsm_state, review_number=instance.review_count
+        ), many=True).data
+        
         return data
 
