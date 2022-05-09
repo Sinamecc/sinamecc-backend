@@ -1,17 +1,14 @@
-from functools import partial
-from unittest import result
 from general.storages import S3Storage
 from mitigation_action.models import Classifier, InformationSourceType, ThematicCategorizationType
-from report_data import serializers
 from report_data.models import ReportData, ReportFile
-from django.urls import reverse
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
-from report_data.serializers import ReportDataSerializer, ReportDataChangeLogSerializer, ReportFileSerializer
+from report_data.serializers import ChangeLogSerializer, ReportDataSerializer, ReportDataChangeLogSerializer, ReportFileSerializer
 from mitigation_action.serializers import ClassifierSerializer, ContactSerializer, InformationSourceTypeSerializer, ThematicCategorizationTypeSerializer
-import datetime
+from workflow.serializers import CommentSerializer
+from workflow.services import WorkflowService
 import os
-import json
+from django_fsm import has_transition_perm
 from io import BytesIO
 
 # TODO: Add exception handling
@@ -19,9 +16,12 @@ class ReportDataService():
     def __init__(self):
         self._service_helper = ServiceHelper(self)
         self._serializer_helper = SerializersHelper()
+        self._workflow_service = WorkflowService()
         self._storage = S3Storage()
         self.FUNCTION_INSTANCE_ERROR = 'Error Mitigation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
+        self.INVALID_STATUS_TRANSITION = "Invalid report data state transition."
+        self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
 
 
     def _get_serialized_report_data(self,  data, report_data=None, partial=None):
@@ -66,6 +66,24 @@ class ReportDataService():
         return data
 
 
+    def _get_serialized_change_log(self, data, change_log=False, partial=False):
+    
+        serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
+
+        return serializer
+    
+    
+    def _serialize_change_log_data(self, user, report_data, previous_status):
+
+        data = {
+            'report_data': report_data.id,
+            'user': user.id,
+            'current_status': report_data.fsm_state,
+            'previous_status': previous_status
+        }
+
+        return data
+    
     def _create_update_contact(self, data, contact=None):
         
         if contact:
@@ -101,7 +119,65 @@ class ReportDataService():
 
         return result
 
+    ## aux function
+        ## auxiliar function
+    def _increase_review_counter(self, report_data):
+        report_data.review_count += 1
+        report_data.save()
 
+
+    def _assign_comment(self, comment_list, report_data, user):
+
+        data = [{**comment, 'fsm_state': report_data.fsm_state, 'user': user.id, 'review_number': report_data.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = self._workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            report_data.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+
+        else:
+            result = (False, comment_list_data)
+
+        return result
+
+    
+    def _update_fsm_state(self, next_state, report_data, user):
+
+        result = (False, self.INVALID_STATUS_TRANSITION)
+        # --- Transition ---
+        # source -> target
+
+        transitions = report_data.get_available_fsm_state_transitions()
+        states = {}
+        for transition in  transitions:
+            states[transition.target] = transition
+
+        states_keys = states.keys()
+        if len(states_keys) <= 0: result = (False, self.STATE_HAS_NO_AVAILABLE_TRANSITIONS)
+
+        if next_state in states_keys:
+            state_transition= states[next_state]
+            transition_function = getattr(report_data ,state_transition.method.__name__)
+            previous_state = report_data.fsm_state
+
+            if has_transition_perm(transition_function, user):
+                transition_function()
+                report_data.save()
+                
+                change_log_data = self._serialize_change_log_data(user, report_data, previous_state)
+                serialized_change_log = self._get_serialized_change_log(change_log_data)
+                if serialized_change_log.is_valid():
+                    serialized_change_log.save()
+                    result = (True, report_data)
+
+                else:
+                    result = (False, serialized_change_log.errors)
+
+            else: result = (False, self.INVALID_USER_TRANSITION)
+
+        return result
+    
+    
     def get(self, request, report_data_id):
         
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
@@ -261,7 +337,38 @@ class ReportDataService():
             result = (report_data_status, report_data_details)
         
         return result
-            
+    
+    def patch(self, request, report_data_id):
+        ## missing review and comments here!!
+        data = request.data
+        next_state, user = data.pop('fsm_state', None), request.user
+        comment_list = data.pop('comments', [])
+
+        report_data_status, report_data = \
+            self._service_helper.get_one(ReportData, report_data_id)
+
+        if report_data_status:
+            if next_state:
+                update_status, update_data = self._update_fsm_state(next_state, report_data, user)
+                if update_status:
+                    self._increase_review_counter(report_data)
+                    assign_status, assign_data = self._assign_comment(comment_list, report_data, user)
+
+                    if assign_status: 
+                        result = (True, ReportDataSerializer(report_data).data)
+                    
+                    else: 
+                        result = (assign_status, assign_data)
+                
+                else:
+                    result = (update_status, update_data)
+            else:
+                result = (False, self.INVALID_STATUS_TRANSITION)
+        else:
+            result = (report_data_status, report_data)
+        
+        return result
+    
     
     def _get_content_file(self, path):
 
@@ -332,6 +439,39 @@ class ReportDataService():
         return result
     
     
+    def get_current_comments(self, request, report_data_id):
 
+        report_data_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
 
-  
+        if report_data_status:
+            review_number = report_data.review_count
+            fsm_state = report_data.fsm_state
+            commet_list = report_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+
+        else:
+            result = (report_data_status, report_data)
+
+        return result
+
+    def get_comments_by_fsm_state_or_review_number(self, request, report_data_id, fsm_state=None, review_number=None):
+        
+        report_data_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if report_data_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = report_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+
+        else:
+            result = (report_data_status, report_data)
+
+        return result
+
