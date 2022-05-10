@@ -389,7 +389,7 @@ _ndc_area = [
     {
         'code': '2',
         'description_es': '2. Desarrollo y ordenamiento territorial',
-        'description_en': '2. Territorial development and planning'
+        'description_en': '2. Territorial development and planning',
         'ndc_contribution': ndc_contribution_02
     },
     {
@@ -720,7 +720,7 @@ _activities_sub_topics_1_6 = [
     {
         'code':'4',
         'description_es':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sistema de transporte hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.',
-        'description_en':'Design policies, plans, regulations, among others, to strengthen the governance and planning of the transportation system towards models that are sustainable, low in emissions and resilient to climate change.'
+        'description_en':'Design policies, plans, regulations, among others, to strengthen the governance and planning of the transportation system towards models that are sustainable, low in emissions and resilient to climate change.',
         'adaptation_axis':'2.1',
         'ndc_contribution':['13.10'],
     },
@@ -757,7 +757,7 @@ _activities_sub_topics_2_1 = [
     {
         'code':'2',
         'description_es':'Producción de energía con fuentes renovables no convencionales para la diversificación de la matriz.',
-        'description_en':'Energy production with non-conventional renewable sources for the diversification of the matrix.'
+        'description_en':'Energy production with non-conventional renewable sources for the diversification of the matrix.',
         'adaptation_axis':'4.3',
         'ndc_contribution':['3.2']
     },
@@ -853,7 +853,7 @@ _activities_sub_topics_2_4 = [
     {
         'code':'3',
         'description_es':'Diseñar políticas, planes, normas, entre otros, para fortalecer la gobernanza y planificación del sector energético hacia modelos sostenibles, bajos en emisiones y resilientes al cambio climático.',
-        'description_en':'Design policies, plans, regulations, among others, to strengthen the governance and planning of the energy sector towards sustainable models, low in emissions and resilient to climate change.'
+        'description_en':'Design policies, plans, regulations, among others, to strengthen the governance and planning of the energy sector towards sustainable models, low in emissions and resilient to climate change.',
         'adaptation_axis':'2.1',
         'ndc_contribution':['3.2']
     },
@@ -1433,7 +1433,7 @@ _activities_sub_topics_9_1 = [
     {
         'code':'2',
         'description_es':'Diseñar y/o ejecutar actividades de planificación u ordenamiento del recurso hídrico a nivel de nacional, subnacional, o a nivel de cuenca, que consideren riesgos climáticos e integren medidas de adaptación ante la variabilidad y el cambio climático.',
-        'description_en':'Design and/or execute water resource planning or management activities at the national, subnational, or basin level, that consider climate risks and integrate adaptation measures to climate variability and change.'
+        'description_en':'Design and/or execute water resource planning or management activities at the national, subnational, or basin level, that consider climate risks and integrate adaptation measures to climate variability and change.',
         'adaptation_axis':'2.1',
         'ndc_contribution':['2.1']
     },
