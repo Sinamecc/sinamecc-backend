@@ -341,7 +341,7 @@ ndc_contribution_12 = [
     },
     {
         'code': '5',
-        'description_es': '12.5. Costa Rica se compromete a identificar acciones climáticas en los ejercicios presupuestarios anuales, con el fin de contar con medidas de protección financiera ante impactos de la variabilidad y cambio climático.'
+        'description_es': '12.5. Costa Rica se compromete a identificar acciones climáticas en los ejercicios presupuestarios anuales, con el fin de contar con medidas de protección financiera ante impactos de la variabilidad y cambio climático.',
         'description_en': '12.5. Costa Rica is committed to identifying climate actions in the annual budget exercises, in order to have financial protection measures against the impacts of climate variability and change.'
     },
     {
