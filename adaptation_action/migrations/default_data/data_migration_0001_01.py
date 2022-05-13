@@ -1844,6 +1844,7 @@ _sub_topics_data_2 = [
     {
         'code':'1',
         'description_es':'Energías renovables',
+        'description_en':'Renewable energies',
         'activities':_activities_sub_topics_2_1
     },
     {
@@ -1859,6 +1860,7 @@ _sub_topics_data_2 = [
     {
         'code':'4',
         'description_es':'Políticas, leyes e investigación para la transición energética',
+        'description_en':'Policies, laws and research for the energy transition',
         'activities':_activities_sub_topics_2_4
     }
 ]
@@ -1867,6 +1869,7 @@ _sub_topics_data_3 = [
     {
         'code':'1',
         'description_es':'Desarrollo y Ordenamiento Territorial',
+        'description_en':'Land development and management',
         'activities':_activities_sub_topics_3_1
     }
 ]
@@ -1875,6 +1878,7 @@ _sub_topics_data_4 = [
     {
         'code':'1',
         'description_es':'Construcción sostenible y resiliente',
+        'description_en':'Sustainable and resilient construction',
         'activities':_activities_sub_topics_4_1
     }
 ]
@@ -1883,6 +1887,7 @@ _sub_topics_data_5 = [
     {
         'code':'1',
         'description_es':'Procesos Industriales',
+        'description_en':'Industrial processes',
         'activities':_activities_sub_topics_5_1
     }
 ]
@@ -1891,6 +1896,7 @@ _sub_topics_data_6 = [
     {
         'code':'1',
         'description_es':'Aprovechamiento, reúso y gestión de residuos',
+        'description_en':'Use, reuse and waste management',
         'activities':_activities_sub_topics_6_1
     }
 ]
@@ -1899,6 +1905,7 @@ _sub_topics_data_7 = [
     {
         'code':'1',
         'description_es':'Gestión de actitividades agropecuarias y pesca',
+        'description_en':'Management of agricultural and fishing activities',
         'activities':_activities_sub_topics_7_1
     }
 ]
@@ -1907,6 +1914,7 @@ _sub_topics_data_8 = [
     {
         'code':'1',
         'description_es':'Biodiversidad',
+        'description_en':'Biodiversity',
         'activities':_activities_sub_topics_8_1
     }
 ]
@@ -1915,6 +1923,7 @@ _sub_topics_data_9 = [
     {
         'code':'1',
         'description_es':'Gestión integral del recurso hídrico',
+        'description_en':'Comprehensive management of water resources',
         'activities':_activities_sub_topics_9_1
     }
 ]
@@ -1923,11 +1932,13 @@ _sub_topics_data_10 = [
     {
         'code':'1',
         'description_es':'Control y atención de la salud',
+        'description_en':'Health monitoring and care',
         'activities':_activities_sub_topics_10_1
     },
     {
         'code':'2',
         'description_es':'Vigilanca de la salud',
+        'description_en':'Health surveillance',
         'activities':_activities_sub_topics_10_2
     }
 ]
@@ -1936,6 +1947,7 @@ _sub_topics_data_11 = [
     {
         'code':'1',
         'description_es':'Turismo resiliente',
+        'description_en':'Resilient tourism',
         'activities':_activities_sub_topics_11_1
     }
 ]
@@ -1944,26 +1956,31 @@ _sub_topics_data_12 = [
     {
         'code':'1',
         'description_es':'Planificación y gobernanza',
+        'description_en':'Planning and governance',
         'activities':_activities_sub_topics_12_1
     },
     {
         'code':'2',
         'description_es':'Monitoreo y transparencia',
+        'description_en':'Monitoring and transparency',
         'activities':_activities_sub_topics_12_2
     },
     {
         'code':'3',
         'description_es':'Financiamiento y herramientas de mercado',
+        'description_en':'Financing and market tools',
         'activities':_activities_sub_topics_12_3
     },
     {
         'code':'4',
         'description_es':'Investigación',
+        'description_en':'Research',
         'activities':_activities_sub_topics_12_4
     },
     {
         'code':'5',
         'description_es':'Educación y empoderamiento climático',
+        'description_en':'Climate education and empowerment',
         'activities':_activities_sub_topics_12_5
     },
 ]
@@ -1972,63 +1989,75 @@ _topics_data = [
     {
         'code': '1', 
         'description_es': 'Transporte y movilidad sostenible',
+        'description_en': 'Transport and sustainable mobility',
         'sub_topic': _sub_topics_data_1,
     },
     {
         'code': '2',
         'description_es': 'Energía',
+        'description_en': 'Energy',
         'sub_topic': _sub_topics_data_2,
     },
     {
         'code': '3',
         'description_es': 'Desarrollo y Ordenamiento Territorial',
+        'description_en': 'Land Development and Management',
         'sub_topic': _sub_topics_data_3,
     },
 
     {
         'code': '4',
         'description_es': 'Infraestructura',
+        'description_en': 'Infrastructure',
         'sub_topic': _sub_topics_data_4,
     },
     {
         'code': '5',
         'description_es': 'Industria',
+        'description_en': 'Industry',
         'sub_topic': _sub_topics_data_5,
     },
     {
         'code': '6',
         'description_es': 'Residuos',
+        'description_en': 'Waste',
         'sub_topic': _sub_topics_data_6,
     },
     {
         'code': '7',
         'description_es': 'Agropecuario y pesca',
+        'description_en': 'Agriculture and fishing',
         'sub_topic': _sub_topics_data_7,
     },
 
     {
         'code': '8',
         'description_es': 'Biodiversidad',
+        'description_en': 'Biodiversity',
         'sub_topic': _sub_topics_data_8,
     },
     {
         'code': '9',
         'description_es': 'Recurso hídrico',
+        'description_en': 'Hidric resource',
         'sub_topic': _sub_topics_data_9,
     },
     {
         'code': '10',
         'description_es': 'Salud',
+        'description_en': 'Health',
         'sub_topic': _sub_topics_data_10,
     },
     {
         'code': '11',
         'description_es': 'Turismo',
+        'description_en': 'Tourism',
         'sub_topic': _sub_topics_data_11,
     },
     {
         'code': '12',
         'description_es': 'Transversal',
+        'description_en': 'Transversal',
         'sub_topic': _sub_topics_data_12,
     },
 ]
