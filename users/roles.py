@@ -3,6 +3,9 @@ from ppcn.permissions.permissions import *
 from mitigation_action.permissions.permissions import *
 from mccr.permissions.permissions import  *
 from users.permissions.permissions import *  
+from adaptation_action.permissions.permissions import *
+from report_data.permissions.permissions import *
+
 class Admin(AbstractUserRole):
 
     role = 'Administrator'
@@ -15,31 +18,39 @@ class Admin(AbstractUserRole):
         **permission_mitigation_action_reviewer, 
         **permission_mccr, 
         **permission_mccr_reviewer,
-        **permission_users
+        **permission_users,
+        **permission_adaptation_action,
+        **permission_adaptation_action_reviewer,
+        **permission_report_data,
+        **permission_report_data_reviewer,
     }
     
 
 class Reviewer(AbstractUserRole):
     
     role = 'Reviewer'
-    app = ['ppcn', 'ma', 'mccr']
+    app = ['ppcn', 'ma', 'mccr', 'aa', 'rd']
     type = 'reviewer'
     available_permissions = {
         **permission_ppcn_reviewer,
         **permission_mitigation_action_reviewer,
         **permission_mccr_reviewer,
+        **permission_adaptation_action_reviewer,
+        **permission_report_data_reviewer,
     }
 
 
 class InformationProvider(AbstractUserRole):
 
     role = 'Information Provider'
-    app = ['ppcn', 'ma', 'mccr']
+    app = ['ppcn', 'ma', 'mccr', 'aa', 'rd']
     type = 'provider'
     available_permissions = {
         **permission_ppcn,
         **permission_mitigation_action,
-        **permission_mccr
+        **permission_mccr,
+        **permission_adaptation_action,
+        **permission_report_data,
     }
 
 ## PPCN Roles
@@ -101,4 +112,44 @@ class InformationProviderMCCR(AbstractUserRole):
     type = 'provider'
     available_permissions = {
         **permission_mccr
+    }
+
+## Adaptation Action Roles
+class ReviewerAdaptationAction(AbstractUserRole):
+
+    role = 'Reviewer Adaptation Action'
+    app = 'aa'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_adaptation_action,
+        **permission_adaptation_action_reviewer,
+    }
+
+class InformationProviderAdaptationAction(AbstractUserRole):
+
+    role = 'Information Provider Adaptation Action'
+    app = 'aa'
+    type = 'provider'
+    available_permissions = {
+        **permission_adaptation_action
+    }
+
+## Report Data Roles
+class ReviewerReportData(AbstractUserRole):
+
+    role = 'Reviewer Report Data'
+    app = 'rd'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_report_data,
+        **permission_report_data_reviewer,
+    }
+
+class InformationProviderReportData(AbstractUserRole):
+    
+    role = 'Information Provider Report Data'
+    app = 'rd'
+    type = 'provider'
+    available_permissions = {
+        **permission_report_data
     }
