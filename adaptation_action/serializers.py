@@ -289,7 +289,7 @@ class GeneralReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GeneralReport
-        fields = ('id', 'start_date', 'end_date', 'description', 'created', 'updated')
+        fields = ('id', 'description', 'created', 'updated')
 
 class TemporalityImpactSerializer(serializers.ModelSerializer):
 
