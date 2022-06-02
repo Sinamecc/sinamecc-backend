@@ -864,7 +864,7 @@ class AdaptationActionServices():
     
     def _get_activity_by_id(self, request, activity_id):
 
-        activity_status, activity_data = self._service_helper.get_all(Activity, sub_topic__code=activity_id)
+        activity_status, activity_data = self._service_helper.get_all(Activity, sub_topic__id=activity_id)
 
         if activity_status:
             result = (activity_status, ActivitySerializer(activity_data, many=True).data)
