@@ -813,13 +813,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_subtopic_by_id(self, request):
+    def _get_subtopic_by_id(self, request, subtopic_id):
 
-        subtopic_id = request.GET.get('subtopic_id')
-        subtopic_status, subtopic_data = self._service_helper.get_by_id(subtopic_id, SubTopics)
+        subtopic_status, subtopic_data = self._service_helper.get_all(SubTopics, topic__code=subtopic_id)
 
         if subtopic_status:
-            result = (subtopic_status, SubTopicsSerializer(subtopic_data).data)
+            result = (subtopic_status, SubTopicsSerializer(subtopic_data, many=True).data)
         
         else:
             result = (subtopic_status, subtopic_data)
@@ -863,13 +862,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_activity_by_id(self, request):
+    def _get_activity_by_id(self, request, activity_id):
 
-        activity_id = request.GET.get('activity_id')
-        activity_status, activity_data = self._service_helper.get_by_id(activity_id, Activity)
+        activity_status, activity_data = self._service_helper.get_all(Activity, sub_topic__code=activity_id)
 
         if activity_status:
-            result = (activity_status, ActivitySerializer(activity_data).data)
+            result = (activity_status, ActivitySerializer(activity_data, many=True).data)
         
         else:
             result = (activity_status, activity_data)
