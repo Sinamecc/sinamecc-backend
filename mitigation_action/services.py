@@ -218,6 +218,14 @@ class MitigationActionService():
         return serializer
 
     
+    def _get_serialized_finance_information_list(self, data, finance_information_list, finance_id):
+        
+        data = [{**finance_information, 'finance': finance_id}  for finance_information in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(FinanceInformationSerializer, data, record=finance_information_list, many=True,  partial=True)
+
+        return serializer
+    
     
     def _get_serialized_monitoring_indicator_list(self, data, monitoring_indicator_list, monitoring_reporting_indicator_id):
         
@@ -317,22 +325,7 @@ class MitigationActionService():
 
         return result
 
-    def _create_update_finance(self, data, finance=None):
-        
-        if finance:
-            serialized_finance = self._get_serialized_finance(data, finance)
-
-        else:
-            serialized_finance = self._get_serialized_finance(data)
-        
-        if serialized_finance.is_valid():
-            finance = serialized_finance.save()
-            result = (True, finance)
-
-        else:
-            result = (False, serialized_finance.errors)
-
-        return result
+    
 
     ## update and create function
 
@@ -344,6 +337,7 @@ class MitigationActionService():
         else:
             serialized_ghg_information = self._get_serialized_ghg_information(data, partial=True)
         
+        
         if serialized_ghg_information.is_valid():
             ghg_information = serialized_ghg_information.save()
             result = (True, ghg_information)
@@ -354,7 +348,7 @@ class MitigationActionService():
         return result
 
 
-    def _create_update_finance(self, data, finance=False):
+    def _create_update_finance(self, data, finance=None):
         
         if finance:
             serialized_finance = self._get_serialized_finance(data, finance)
@@ -364,7 +358,15 @@ class MitigationActionService():
         
         if serialized_finance.is_valid():
             finance = serialized_finance.save()
-            result = (True, finance)
+            finance_information_data = data.get("finance_information", [])
+            print(f'DEBUGGER: finance_information_data: {finance_information_data}')
+            serialized_fi_status, serialized_fi_data = self._create_update_finance_information(finance_information_data, finance)
+
+            if serialized_fi_status:
+                result = (True, finance)
+            else:
+                result = (serialized_fi_status, serialized_fi_data)
+
 
         else:
             result = (False, serialized_finance.errors)
@@ -446,6 +448,27 @@ class MitigationActionService():
             
         return result
     
+    
+    def _create_update_finance_information(self, data, finance):
+ 
+        result = (True, [])
+        
+        if isinstance(data, list):
+            finance_information_list = finance.finance_information.all() 
+            serializer = self._get_serialized_finance_information_list(data, finance_information_list, finance.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, serializer.data)
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('Finance Information'))
+            
+        return result
+
 
     def _create_update_question(self, data, impact_documentation):
  

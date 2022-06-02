@@ -22,7 +22,7 @@ permission = PermissionsHelper()
 ##Email services, default email -> sinamec@grupoincocr.com
 ses_service = EmailServices()
 
-CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')))
+CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')),  ('EUR', 'Euro'))
 ##
 ## Start Catalogs
 ##
@@ -603,14 +603,12 @@ class QAQCReductionEstimateQuestion(models.Model):
 
 
 class Finance(models.Model):
-
+    
     status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
-    administration = models.TextField(null=True)
+    administration = models.TextField(null=True) ## !! review this
     source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
-    source_description = models.CharField(max_length=255, null=True)
+    
     reference_year =models.IntegerField(null=True, validators=[validate_year])
-    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
     mideplan_registered = models.BooleanField(null=True)
     mideplan_project = models.CharField(max_length=255, null=True) ## depend on mideplan registered
     executing_entity = models.CharField(max_length=255, null=True)
@@ -624,6 +622,20 @@ class Finance(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.administration)
+
+
+class FinanceInformation(models.Model):
+
+    source_description = models.CharField(max_length=255, null=True)
+    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    finance = models.ForeignKey(Finance, related_name='finance_information', null=True, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Information")
+        verbose_name_plural = _("Finance Information")
 
 
 class GeographicLocation(models.Model):

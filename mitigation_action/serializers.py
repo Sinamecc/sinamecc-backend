@@ -1,12 +1,10 @@
-from django.db.models import manager
-from general import models
-from django.utils.translation import override
 from rest_framework import serializers
 from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog
+    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
+    FinanceInformation
 
 ##
 ## Auxiliar Class Serializer
@@ -329,9 +327,25 @@ class GHGInformationSerializer(serializers.ModelSerializer):
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('id', 'status', 'administration', 'source', 'source_description', 'reference_year', 'budget',
-                    'currency', 'mideplan_registered', 'mideplan_project', 'executing_entity')
+        fields = ('id', 'status', 'administration', 'source', 'reference_year',
+                  'mideplan_registered', 'mideplan_project', 'executing_entity')
+        
+        
+    def to_representation(self, instance):
+        
+        data = super().to_representation(instance)
+        data['finance_information'] = FinanceInformationSerializer(instance.finance_information.all(), many=True).data
+        
+        return data
 
+
+class FinanceInformationSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = FinanceInformation
+        fields = ('id', 'source_description', 'budget', 'currency', 'finance')
+        list_serializer_class = GenericListSerializer
+        
 
 class InitiativeGoalSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
