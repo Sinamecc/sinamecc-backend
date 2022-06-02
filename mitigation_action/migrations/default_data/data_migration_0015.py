@@ -86,6 +86,10 @@ _ghg_impact_sector = [
     {
         'code': '4',
         'name': 'Residuos',
+    },
+    {
+        'code': '5',
+        'name': 'Uso de la tierra, cambio del uso de la tierra y silvicultura (UTCUTS)'
     }
 ]
 
