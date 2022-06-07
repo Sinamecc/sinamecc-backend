@@ -606,7 +606,7 @@ class Finance(models.Model):
     administration = models.TextField(null=True) ## !! review this
     source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
     
-    reference_year =models.IntegerField(null=True, validators=[validate_year])
+    reference_year =models.DateField(null=True)
     mideplan_registered = models.BooleanField(null=True)
     mideplan_project = models.CharField(max_length=255, null=True) ## depend on mideplan registered
     executing_entity = models.CharField(max_length=255, null=True)
