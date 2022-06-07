@@ -223,8 +223,8 @@ class IndicatorSerializer(serializers.ModelSerializer):
         model = Indicator
 
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
-                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'additional_information', 'additional_information_file', 'comments',
-                'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'monitoring_information')
+                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'comments',
+                'information_source', 'type_of_data', 'other_type_of_data', 'contact', 'monitoring_information')
     
 
     def to_representation(self, instance):

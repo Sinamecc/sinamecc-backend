@@ -396,13 +396,17 @@ class ImpactDocumentation(models.Model):
     ## missing file for documentation of calculations estimate 
     estimate_reduction_co2 = models.TextField(null=True)
     period_potential_reduction =models.TextField(null=True)
+    ## missing catalogs for sector and subsector
+    
+    
     ##catalog
     carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
     estimate_calculation_documentation = models.TextField(null=True)
     estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-    mitigation_action_in_inventory = models.BooleanField(null=True)
+    mitigation_action_in_inventory = models.CharField(max_length=50, null=True)
 
 
     ## Section 4.3
@@ -446,7 +450,7 @@ class Categorization(models.Model):
 ## section 5 new
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type = models.ManyToManyField(InformationSourceType, blank=True)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -496,10 +500,6 @@ class Indicator(models.Model):
 
     limitation = models.TextField(null=True)
 
-    ## ensure sustainability
-    additional_information = models.TextField(null=True)
-    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-
     comments = models.TextField(null=True)
     ## FK
     ## information source
@@ -508,8 +508,6 @@ class Indicator(models.Model):
     ## thematic categorization
     type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
     other_type_of_data = models.CharField(max_length=255, blank=True, null=True)
-    classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
-    other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
