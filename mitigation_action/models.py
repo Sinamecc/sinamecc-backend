@@ -1,14 +1,5 @@
 from __future__ import unicode_literals
-from django.db.models import manager
-
-from django.db.models.fields import BLANK_CHOICE_DASH, CharField, related
-from django.db.models.query import QuerySet
-from rest_framework import fields
-from users.serializers import NewCustomUserSerializer
-from django.conf import settings
-
 import uuid
-from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _

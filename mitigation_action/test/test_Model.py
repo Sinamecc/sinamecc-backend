@@ -1,3 +1,5 @@
+from typing import ClassVar
+from django.db.models import fields
 from django.test import TestCase, Client
 from django.utils import timezone
 from users.models import CustomUser
@@ -16,5 +18,5 @@ class MitigationActionModelTest(TestCase):
 
     def setUp(self):
 
-        pass
-      
+       ...
+    
