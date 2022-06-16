@@ -423,6 +423,7 @@ class MitigationActionService():
     def _create_update_categorization(self, data, categorization=False):
         
         action_area_selection = data.pop('action_area_selection', [])
+        topic_selection = data.pop('topic_selection', [])
         
         if categorization:
             serialized_categorization = self._get_serialized_categorization(data, categorization)
@@ -433,6 +434,7 @@ class MitigationActionService():
         if serialized_categorization.is_valid():
             categorization = serialized_categorization.save()
             serialized_action_area_selection_status, serialized_action_area_selection_data = self._create_update_action_area_selection(action_area_selection, categorization)
+            ## review this topic_selection
 
             if serialized_action_area_selection_status:
                 result = (True, categorization)

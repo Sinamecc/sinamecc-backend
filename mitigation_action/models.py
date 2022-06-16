@@ -448,6 +448,13 @@ class Categorization(models.Model):
 
 
 
+class TopicsSelection(models.Model):
+    topic = models.ForeignKey(Topics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    sub_topic = models.ManyToManyField(SubTopics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    Categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+
+
+
 class ActionAreasSelection(models.Model):
     area = models.ForeignKey(ActionAreas, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
     categorization = models.ForeignKey(Categorization, null=False, related_name='action_area_selection', on_delete=models.CASCADE)

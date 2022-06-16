@@ -1,10 +1,11 @@
+from attr import fields
 from rest_framework import serializers
 from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
     InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
-    FinanceInformation, ActionAreasSelection
+    FinanceInformation, ActionAreasSelection, TopicsSelection
 
 ##
 ## Auxiliar Class Serializer
@@ -182,6 +183,13 @@ class ActionAreasSelectionSerializer(serializers.ModelSerializer):
         fields = ('id', 'area', 'goal', 'categorization')
         list_serializer_class = GenericListSerializer
 
+
+class TopicsSelectionSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = TopicsSelection
+        fields = ('id', 'topic', 'sub_topic', 'categorization')
+        list_serializer_class = GenericListSerializer
 
 class CategorizationSerializer(serializers.ModelSerializer):
     
