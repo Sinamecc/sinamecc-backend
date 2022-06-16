@@ -450,7 +450,7 @@ class Categorization(models.Model):
 
 class TopicsSelection(models.Model):
     topic = models.ForeignKey(Topics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
-    sub_topic = models.ManyToManyField(SubTopics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    sub_topic = models.ManyToManyField(SubTopics, null=True, related_name='topics_selection')
     Categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
 
 
