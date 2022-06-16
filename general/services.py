@@ -49,7 +49,7 @@ class EmailServices():
 
         else:
 
-            return (True, response)
+            return (True, f"Email sent from {self.sender} to {' '.join(recipient_list)}")
 
     def send_status_notification(self, recipient_list, subject, message_body):
 
