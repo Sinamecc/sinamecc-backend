@@ -208,6 +208,15 @@ class MitigationActionService():
 
         return serializer
 
+    
+    def _get_serialized_action_area_selection_list(self, data, action_area_selection_list, categorization_id):
+        
+        data = [{**action_area_selection, 'categorization': categorization_id}  for action_area_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(ActionAreasSelectionSerializer, data, record=action_area_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
 
     def _get_serialized_question_list(self, data, question_list, impact_documentation_id):
         
@@ -359,7 +368,6 @@ class MitigationActionService():
         if serialized_finance.is_valid():
             finance = serialized_finance.save()
             finance_information_data = data.get("finance_information", [])
-            print(f'DEBUGGER: finance_information_data: {finance_information_data}')
             serialized_fi_status, serialized_fi_data = self._create_update_finance_information(finance_information_data, finance)
 
             if serialized_fi_status:
@@ -410,7 +418,11 @@ class MitigationActionService():
         return result
 
     
+    
+    
     def _create_update_categorization(self, data, categorization=False):
+        
+        action_area_selection = data.pop('action_area_selection', [])
         
         if categorization:
             serialized_categorization = self._get_serialized_categorization(data, categorization)
@@ -420,13 +432,42 @@ class MitigationActionService():
         
         if serialized_categorization.is_valid():
             categorization = serialized_categorization.save()
-            result = (True, categorization)
+            serialized_action_area_selection_status, serialized_action_area_selection_data = self._create_update_action_area_selection(action_area_selection, categorization)
+
+            if serialized_action_area_selection_status:
+                result = (True, categorization)
+            else:
+                result = (serialized_action_area_selection_status, serialized_action_area_selection_data)
 
         else:
             result = (False, serialized_categorization.errors)
 
         return result
 
+    
+    def _create_update_action_area_selection(self, data, categorization):
+ 
+        result = (True, [])
+        
+        if isinstance(data, list):
+            action_area_selection_list = categorization.action_area_selection.all() 
+            serializer = self._get_serialized_action_area_selection_list(data, action_area_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('action_area_selection'))
+            
+        return result
+    
+    
+    
 
     def _create_update_initiative_goal(self, data, initiative):
  
