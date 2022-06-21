@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models import fields
 from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
+from django.conf import settings
+from general.utils import get_translation_from_database as _
 
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
@@ -57,15 +59,22 @@ class AdaptationActionInformationSerializer(serializers.ModelSerializer):
 
 class TopicsSerializer(serializers.ModelSerializer):
 
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = Topics
-        fields = ('id', 'code', 'name', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'created', 'updated')
+
+    def get_description(self, instance):
+        return _(instance, 'description')
 
 class SubTopicsSerializer(serializers.ModelSerializer):
 
+    description = serializers.SerializerMethodField()
+
     class Meta:
         model = SubTopics
-        fields = ('id', 'code', 'name', 'topic', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'topic', 'created', 'updated')
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -73,31 +82,51 @@ class SubTopicsSerializer(serializers.ModelSerializer):
 
         return data
 
+    def get_description(self, instance):
+        return _(instance, 'description')
+
 class AdaptationAxisSerializer(serializers.ModelSerializer):
+
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = AdaptationAxis
         fields = ('id', 'code', 'description', 'created', 'updated')
 
+    def get_description(self, instance):
+        return _(instance, 'description')
+
 class AdaptationAxisGuidelineSerializer(serializers.ModelSerializer):
+
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = AdaptationAxisGuideline
-        fields = ('id', 'code', 'adaptation_axis', 'created', 'updated')
+        fields = ('id', 'code', 'description','adaptation_axis', 'created', 'updated')
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['adaptation_axis'] = AdaptationAxisSerializer(instance.adaptation_axis).data
 
         return data
+    
+    def get_description(self, instance):
+        return _(instance, 'description')
 
 class NDCAreaSerializer(serializers.ModelSerializer):
+
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = NDCArea
         fields = ('id', 'code', 'description', 'other', 'created', 'updated')
 
+    def get_description(self, instance):
+        return _(instance, 'description')
+
 class NDCContributionSerializer(serializers.ModelSerializer):
+
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = NDCContribution
@@ -108,9 +137,14 @@ class NDCContributionSerializer(serializers.ModelSerializer):
         data['ndc_area'] = NDCAreaSerializer(instance.ndc_area).data
 
         return data
+    
+    def get_description(self, instance):
+        return _(instance, 'description')
 
 class ActivitySerializer(serializers.ModelSerializer):
 
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = Activity
         fields = ('id', 'code', 'description', 'sub_topic', 'ndc_contribution', 'adaptation_axis_guideline', 'created', 'updated')
@@ -122,6 +156,9 @@ class ActivitySerializer(serializers.ModelSerializer):
         data['adaptation_axis_guideline'] = AdaptationAxisGuidelineSerializer(instance.adaptation_axis_guideline).data
 
         return data
+    
+    def get_description(self, instance):
+        return _(instance, 'description')
 
 class InstrumentSerializer(serializers.ModelSerializer):
 

@@ -20,7 +20,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('description', models.TextField(null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -48,7 +49,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('description', models.CharField(max_length=500, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -94,7 +96,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('description', models.CharField(max_length=2500, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -137,7 +140,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('name', models.CharField(max_length=255, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -165,7 +169,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('name', models.CharField(max_length=255, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('topic', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='sub_topics', to='adaptation_action.topics')),
@@ -198,7 +203,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('description', models.CharField(max_length=2500, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('other', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -227,7 +233,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
-                ('name', models.CharField(max_length=500, null=True)),
+                ('description_es', models.TextField(null=True)),
+                ('description_en', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('adaptation_axis', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='adaptation_axis_guideline', to='adaptation_action.adaptationaxis')),
