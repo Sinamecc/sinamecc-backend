@@ -13,7 +13,6 @@ urlpatterns_to_delete =[
 
 
 urlpatterns = [
-   
     path(
         'api/v1/mitigation-action/',
         views.get_post_put_patch_delete,
@@ -50,6 +49,27 @@ urlpatterns = [
         'api/v1/mitigation-action/<uuid:mitigation_action_id>/file/<str:model_type>/',
         views.upload_file_from_mitigation_action,
         name='upload_file_from_mitigation_action'
+    ),
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/change-log/',
+        views.get_change_log_from_mitigation_action,
+        name='get_change_log_from_mitigation_action'
+    ),
+    path('api/v1/mitigation-action/<uuid:mitigation_action_id>/comments/',
+        views.get_comments,
+        name='get_current_comments'
+    ),
+    path('api/v1/mitigation-action/<uuid:mitigation_action_id>/<str:fsm_state>/comments/',
+        views.get_comments,
+        name='get_comments_by_fsm_state'
+    ),
+    path('api/v1/mitigation-action/<uuid:mitigation_action_id>/<str:fsm_state>/review/<int:review_number>/comments/',
+        views.get_comments,
+        name='get_comments_by_fsm_state_and_review_number'
+    ),
+    path('api/v1/mitigation-action/<uuid:mitigation_action_id>/review/<int:review_number>/comments/',
+        views.get_comments,
+        name='get_comments_by_review_number'
     ),
 
 ]
