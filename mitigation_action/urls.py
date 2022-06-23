@@ -24,7 +24,11 @@ urlpatterns = [
         views.get_post_put_patch_delete,
         name='get_put_patch_delete_mitigation_action'
     ),
-
+    path(
+        'api/v1/mitigation-action/<uuid:mitigation_action_id>/sent-to-review/',
+        views.send_to_review,
+        name='send_to_review'
+    ),
     path(
         'api/v1/mitigation-action/data/',
         views.get_catalog_data,
