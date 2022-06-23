@@ -112,7 +112,6 @@ class ActionGoals(models.Model):
         verbose_name = _('Action Goal')
         verbose_name_plural = _('Action Goals')
 
-
 class DescarbonizationAxis(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
@@ -424,10 +423,11 @@ class ImpactDocumentation(models.Model):
         verbose_name = _("Monitoring Information")
         verbose_name_plural = _("Monitoring Information")
 
+
+
 ## missing Serializer
 class Categorization(models.Model):
     
-    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization', blank=True)
     transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization', blank=True)
     sub_topics = models.ManyToManyField(SubTopics, related_name='categorization', blank=True)
     activities = models.ManyToManyField(Activity, related_name='categorization', blank=True)
@@ -445,6 +445,20 @@ class Categorization(models.Model):
     class Meta:
         verbose_name = _("Categorization")
         verbose_name_plural = _("Categorization")
+
+
+
+class TopicsSelection(models.Model):
+    topic = models.ForeignKey(Topics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    sub_topic = models.ManyToManyField(SubTopics, null=True, related_name='topics_selection')
+    Categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+
+
+
+class ActionAreasSelection(models.Model):
+    area = models.ForeignKey(ActionAreas, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
+    goals = models.ManyToManyField(ActionGoals, related_name='action_area_selection', blank=True)
 
 
 ## section 5 new
