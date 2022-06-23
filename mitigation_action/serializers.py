@@ -4,7 +4,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
-    FinanceInformation
+    FinanceInformation, ActionAreasSelection, TopicsSelection
 
 ##
 ## Auxiliar Class Serializer
@@ -174,16 +174,32 @@ class ClassifierSerializer(serializers.ModelSerializer):
 ## Start Model Serializers
 ##
 ## Edit this serializers
+
+class ActionAreasSelectionSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = ActionAreasSelection
+        fields = ('id', 'area', 'goal', 'categorization')
+        list_serializer_class = GenericListSerializer
+
+
+class TopicsSelectionSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = TopicsSelection
+        fields = ('id', 'topic', 'sub_topic', 'categorization')
+        list_serializer_class = GenericListSerializer
+
 class CategorizationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Categorization
-        fields = ('id', 'action_goal', 'transformational_vision', 'sub_topics', 'activities', 'impact_categories', 'is_part_to_another_mitigation_action', 'relation_description')
+        fields = ('id', 'action_area_selection', 'transformational_vision', 'sub_topics', 'activities', 'impact_categories', 'is_part_to_another_mitigation_action', 'relation_description')
     
     def to_representation(self, instance):
         
         data = super().to_representation(instance)
-        data['action_goal'] = ActionGoalsSerializer(instance.action_goal.all(), many=True).data
+        data['action_area_selection'] = ActionAreasSelectionSerializer(instance.action_area_selection.all(), many=True).data
         data['transformational_vision'] = TransformationalVisionsSerializer(instance.transformational_vision.all(), many=True).data
         data['sub_topics'] = SubTopicsSerializer(instance.sub_topics.all(), many=True).data
         data['activities'] = ActivitySerializer(instance.activities.all(), many=True).data
