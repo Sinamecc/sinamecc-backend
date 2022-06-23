@@ -47,7 +47,16 @@ def delete_indicator_from_mitigation_action(request, mitigation_action_id=None, 
 
 
 ## Permission!!!!
-@api_view(['GET', 'POST', 'PUT'])
+@api_view(['GET'])
+def get_change_log_from_mitigation_action(request, mitigation_action_id=None):
+
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_change_log_from_mitigation_action", request, mitigation_action_id)
+    return result
+
+
+## Permission!!!!
+@api_view(['GET', 'POST', 'PUT', 'PATCH'])
 def get_post_put_patch_delete(request, mitigation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor MA
     
     if request.method == 'GET' and mitigation_action_id:
@@ -61,6 +70,9 @@ def get_post_put_patch_delete(request, mitigation_action_id=False): ## We need d
 
     elif request.method == 'PUT' and mitigation_action_id:
         result = view_helper.put(request, mitigation_action_id)
+    
+    elif request.method == 'PATCH' and mitigation_action_id:
+        result = view_helper.patch(request, mitigation_action_id)
 
     return result
 
@@ -70,4 +82,15 @@ def get_post_put_patch_delete(request, mitigation_action_id=False): ## We need d
 def upload_file_from_mitigation_action(request, mitigation_action_id, model_type):
     if request.method == 'PUT':
         result = view_helper.execute_by_name("upload_file_from_mitigation_action", request, mitigation_action_id, model_type)
+    return result
+
+## Permission!!!!
+@api_view(['GET'])
+def get_comments(request, mitigation_action_id, fsm_state=False, review_number=False):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, mitigation_action_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, mitigation_action_id, fsm_state, review_number)
+
     return result
