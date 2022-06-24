@@ -265,8 +265,20 @@ _source_type = [
         'code': '7'
     },
     {
-        'name': 'Otro',
+        'name': 'Actas',
         'code': '8'
+    },
+    {
+        'name':'Lista de asistencia',
+        'code': '9'
+    },
+    {
+        'name':'Mapas',
+        'code': '10'
+    },
+    {
+        'name': 'Otro',
+        'code': '11'
     }
 ]
 

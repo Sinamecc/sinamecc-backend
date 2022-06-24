@@ -480,8 +480,6 @@ class IndicatorMonitoring(models.Model):
 
 class GeneralReport(models.Model):
 
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
     description = models.CharField(max_length=3000, null=True)
 
     ## Logs
