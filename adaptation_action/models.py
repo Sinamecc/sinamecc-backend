@@ -216,8 +216,14 @@ class TypeClimateThreat(models.Model):
 
 class ClimateThreat(models.Model):
 
-    #archivo 
-    type_climate_threat = models.ForeignKey(TypeClimateThreat, related_name="climate_threat", null=True, on_delete=models.CASCADE)
+    type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)
+    other_type_climate_threat = models.TextField(null=True)
+    description_climate_threat = models.TextField(null=True)
+    #file_description_climate_threat = models.FileField(upload_to='climate_threat', null=True)
+    vulnerability_climate_threat = models.TextField(null=True)
+    #file_vulnerability_climate_threat = models.FileField(upload_to='climate_threat', null=True)
+    exposed_elements = models.TextField(null=True)
+    #file_exposed_elements = models.FileField(upload_to='climate_threat', null=True)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -230,7 +236,6 @@ class Implementation(models.Model):
     
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
-    duration = models.CharField(max_length=20, null=True)
     responsible_entity = models.CharField(max_length=50, null=True)
     other_entity = models.CharField(max_length=250, null=True)
     action_code = models.TextField(null=True)

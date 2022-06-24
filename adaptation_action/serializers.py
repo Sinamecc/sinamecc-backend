@@ -139,11 +139,11 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climate_threat', 'created', 'updated')
+        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements')
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat).data
+        data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat.all(), many=True).data
 
         return data
 
@@ -151,7 +151,7 @@ class ImplementationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Implementation
-        fields = ('id', 'start_date', 'end_date', 'duration', 'responsible_entity', 'other_entity', 'action_code', 'created', 'updated')
+        fields = ('id', 'start_date', 'end_date', 'responsible_entity', 'other_entity', 'action_code')
 
 #Serializer section 3-4
 
