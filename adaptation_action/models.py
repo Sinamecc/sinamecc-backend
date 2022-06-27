@@ -166,7 +166,6 @@ class NDCArea(models.Model):
     code = models.CharField(max_length=3, null=True)
     description_es = models.TextField(null=True)
     description_en = models.TextField(null=True)
-    other = models.CharField(max_length=500, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -181,7 +180,6 @@ class NDCContribution(models.Model):
     code = models.CharField(max_length=3, null=True)
     description_es = models.TextField(null=True)
     description_en = models.TextField(null=True)
-    other = models.CharField(max_length=500, null=True)
 
     ndc_area = models.ForeignKey(NDCArea, null=True, related_name="ndc_contribution", on_delete=models.CASCADE)
 
