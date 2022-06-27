@@ -7,7 +7,7 @@ from rest_framework import serializers
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
-             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact
 
 from general.serializers import AddressSerializer
 from workflow.serializers import CommentSerializer
@@ -29,6 +29,12 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
         data['report_organization_type'] = ReportOrganizationTypeSerializer(instance.report_organization_type).data
 
         return data
+
+class ContactSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Contact
+        fields = ('id', 'contact_position', 'contact_name', 'address', 'email', 'phone')
 
 class AdaptationActionTypeSerializer(serializers.ModelSerializer):
     
@@ -95,13 +101,13 @@ class NDCAreaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCArea
-        fields = ('id', 'code', 'description', 'other', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'created', 'updated')
 
 class NDCContributionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NDCContribution
-        fields = ('id', 'code', 'description', 'other', 'ndc_area', 'created', 'updated')
+        fields = ('id', 'code', 'description', 'ndc_area', 'created', 'updated')
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -201,7 +207,7 @@ class FinanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinanceAdaptation
-        fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'mideplan', 'created', 'updated')
+        fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

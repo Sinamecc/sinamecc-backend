@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact
+from mitigation_action.models import Contact as MContact
 from general.models import Address, User
 from django_fsm import FSMField, transition
 
@@ -20,6 +20,21 @@ class ReportOrganizationType(models.Model):
     class Meta:
         verbose_name = _("Report Organization Type")
         verbose_name_plural = _("Report Organization Types")
+
+class Contact(models.Model):
+
+    contact_name = models.TextField(null=True)
+    contact_position = models.TextField(null=True)
+    email = models.TextField(null=True)
+    phone = models.TextField(null=True)
+    address = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Contact")
+        verbose_name_plural = _("Contacts")
 
 class ReportOrganization(models.Model):
 
@@ -146,7 +161,6 @@ class NDCArea(models.Model):
 
     code = models.CharField(max_length=3, null=True)
     description = models.CharField(max_length=2500, null=True)
-    other = models.CharField(max_length=500, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -160,7 +174,6 @@ class NDCContribution(models.Model):
 
     code = models.CharField(max_length=3, null=True)
     description = models.CharField(max_length=2500, null=True)
-    other = models.CharField(max_length=500, null=True)
 
     ndc_area = models.ForeignKey(NDCArea, null=True, related_name="ndc_contribution", on_delete=models.CASCADE)
 
@@ -309,6 +322,7 @@ class FinanceAdaptation(models.Model):
     status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
     source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
     finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
+    instrument_name = models.TextField(null=True)
     mideplan = models.ForeignKey(Mideplan, related_name="finance_adaptation", null=True, on_delete=models.CASCADE)
 
     ## Logs
@@ -421,7 +435,7 @@ class IndicatorAdaptation(models.Model):
     other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
-    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    contact = models.ForeignKey(MContact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
 
 
     ## Logs

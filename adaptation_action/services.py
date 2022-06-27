@@ -8,7 +8,7 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer
+from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
 
 class AdaptationActionServices():
@@ -303,6 +303,13 @@ class AdaptationActionServices():
 
         return serializer
     
+    def _get_serialized_contact(self, data, contact=False):
+
+        serializers = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+
+        return serializers
+
+    
     
     def _serialize_change_log_data(self, user, adaptation_action, previous_status):
 
@@ -323,6 +330,22 @@ class AdaptationActionServices():
 
         return serializer
     
+    def _create_update_contact(self, data, contact=False):
+
+        if contact:
+            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+        else:
+            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data)
+        
+        if serializer.is_valid():
+            contact = serializer.save()
+            result = (True, contact)
+        
+        else:
+            result = (False, serializer.errors)
+        
+        return result
+
     def _create_update_address(self, data, address=False):
         
         if address:
@@ -681,14 +704,15 @@ class AdaptationActionServices():
         
         return result
 
-    def _get_serialized_contact(self, data, contact=False):
+    ##contact model from mitigation action
+    def _get_serialized_m_contact(self, data, contact=False):
         
         if contact:
-            serialized_contact = ContactSerializer(contact, data=data, partial=True)
+            serialized_contact = MContactSerializer(contact, data=data, partial=True)
         else:
-            serialized_contact = ContactSerializer(data=data)
+            serialized_contact = MContactSerializer(data=data)
         return serialized_contact
-
+        
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
         _information_source = data.pop('information_source', None)
@@ -696,7 +720,7 @@ class AdaptationActionServices():
 
         if(_contact):
 
-            serialized_contact = self._get_serialized_contact(_contact)
+            serialized_contact = self._get_serialized_m_contact(_contact)
 
             if(serialized_contact.is_valid()):
                 contact = serialized_contact.save()
