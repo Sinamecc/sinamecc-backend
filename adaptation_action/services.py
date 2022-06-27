@@ -550,7 +550,6 @@ class AdaptationActionServices():
             return result
     
     def _create_update_activity(self, data, activity = False):
-            
             if activity:
                 serialized_activity = self._get_serialized_activity(data, activity)
             
@@ -1089,7 +1088,7 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
 
         for field in field_list:
@@ -1122,7 +1121,7 @@ class AdaptationActionServices():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
