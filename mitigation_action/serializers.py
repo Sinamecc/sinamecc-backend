@@ -4,7 +4,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
-    FinanceInformation, ActionAreasSelection, TopicsSelection
+    FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog
 
 ##
 ## Auxiliar Class Serializer

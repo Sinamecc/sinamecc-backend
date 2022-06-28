@@ -7,10 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mitigation_action', '0018_auto_20220503_0140'),
+        ('mitigation_action', '0018_auto_20211013_1758'),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='initiativetype',
+            name='count',
+            field=models.IntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name='mitigationaction',
+            name='code',
+            field=models.CharField(max_length=255, null=True, unique=True),
+        ),
         migrations.RemoveField(
             model_name='finance',
             name='budget',
