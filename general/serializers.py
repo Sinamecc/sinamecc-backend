@@ -46,7 +46,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = ('id', 'description', 'GIS', 'district', 'created', 'updated')
+        fields = ('id', 'app_scale', 'description', 'GIS', 'district', 'created', 'updated')
     
     def to_representation(self, instance):
 
