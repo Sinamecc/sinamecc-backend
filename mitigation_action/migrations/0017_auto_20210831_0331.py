@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('responsible_institution', models.CharField(max_length=500, null=True)),
-                ('other_type', models.CharField(max_length=500, null=True)),
+                ('other_type', models.CharField(max_length=500, blank=True, null=True)),
                 ('statistical_operation', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),

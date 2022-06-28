@@ -9,8 +9,8 @@ service = ReportDataService()
 view_helper = ViewHelper(service)
 
 
-@api_view(['GET', 'DELETE', 'PUT'])
-def get_delete_update_report_data(request, pk):
+@api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
+def get_delete_update_patch_report_data(request, pk):
     if request.method == 'GET':
         result = view_helper.get_one(request, pk)
 
@@ -19,6 +19,10 @@ def get_delete_update_report_data(request, pk):
 
     elif request.method == 'DELETE':
         result = view_helper.delete(pk)
+        
+    elif request.method == 'PATCH':
+        result = view_helper.patch(request, pk)
+        
     return result
 
 
@@ -82,3 +86,14 @@ def get_source_file_to_report_data(request, report_data_id):
         result = view_helper.call_download_file_method('download_source_file', request, report_data_id)
 
         return result
+
+
+@api_view(['GET'])
+def get_comments(request, report_data_id, fsm_state=None, review_number=None):
+    if request.method == 'GET' and not (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_current_comments', request, report_data_id)
+
+    elif request.method == 'GET' and (fsm_state or review_number):
+        result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, report_data_id, fsm_state, review_number)
+
+    return result

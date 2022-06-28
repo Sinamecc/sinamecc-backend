@@ -5,6 +5,8 @@ from mitigation_action.models import Contact
 from general.models import Address, User
 from django_fsm import FSMField, transition
 
+from workflow.models import Comment
+
 # Create your models here.
 
 class ReportOrganizationType(models.Model): 
@@ -83,7 +85,8 @@ class AdaptationActionInformation(models.Model):
 class Topics(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=255, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
     
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -97,7 +100,8 @@ class Topics(models.Model):
 class SubTopics(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=255, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
     
     topic = models.ForeignKey(Topics, null=True, related_name="sub_topics", on_delete=models.CASCADE)
 
@@ -113,7 +117,8 @@ class SubTopics(models.Model):
 class AdaptationAxis(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    description = models.CharField(max_length=500, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -127,7 +132,8 @@ class AdaptationAxis(models.Model):
 class AdaptationAxisGuideline(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=500, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
 
     adaptation_axis = models.ForeignKey(AdaptationAxis, null=True, related_name="adaptation_axis_guideline", on_delete=models.CASCADE)
 
@@ -143,7 +149,8 @@ class AdaptationAxisGuideline(models.Model):
 class NDCArea(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    description = models.CharField(max_length=2500, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
     other = models.CharField(max_length=500, null=True)
 
     ## logs
@@ -157,7 +164,8 @@ class NDCArea(models.Model):
 class NDCContribution(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    description = models.CharField(max_length=2500, null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
     other = models.CharField(max_length=500, null=True)
 
     ndc_area = models.ForeignKey(NDCArea, null=True, related_name="ndc_contribution", on_delete=models.CASCADE)
@@ -173,7 +181,8 @@ class NDCContribution(models.Model):
 class Activity(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    description = models.TextField(null=True)
+    description_es = models.TextField(null=True)
+    description_en = models.TextField(null=True)
     
     sub_topic = models.ForeignKey(SubTopics, null=True, related_name="activity", on_delete=models.CASCADE)
     ndc_contribution = models.ManyToManyField(NDCContribution,related_name="activity", blank=True)
@@ -561,6 +570,7 @@ class AdaptationAction(models.Model):
     #Section 6
     action_impact = models.ForeignKey(ActionImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
+    comments = models.ManyToManyField(Comment, blank=True)
     review_count = models.IntegerField(null=True, blank=True, default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
