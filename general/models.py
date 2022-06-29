@@ -80,6 +80,7 @@ class District(models.Model):
 
 class Address(models.Model):
 
+    app_scale = models.TextField(null=True)
     description = models.CharField(max_length=3000, null=True)
     GIS = models.CharField(max_length=200, null=True)
 
