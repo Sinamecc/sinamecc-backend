@@ -29,6 +29,7 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['report_organization_type'] = ReportOrganizationTypeSerializer(instance.report_organization_type).data
+        data['contact'] = ContactSerializer(instance.contact).data
 
         return data
 
