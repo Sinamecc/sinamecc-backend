@@ -11,6 +11,7 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact
 
+from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from general.serializers import AddressSerializer
 from workflow.serializers import CommentSerializer
 
@@ -29,6 +30,7 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['report_organization_type'] = ReportOrganizationTypeSerializer(instance.report_organization_type).data
+        data['contact'] = ContactSerializer(instance.contact).data
 
         return data
 
@@ -297,6 +299,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
+        data['contact'] = MContactSerializer(instance.contact).data
 
         return data
 
