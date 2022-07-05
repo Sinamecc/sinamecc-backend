@@ -242,7 +242,24 @@ class MitigationActionService():
         
         return serializer
     
+    def _get_serialized_topic_selection_list(self, data, topic_selection_list, categorization_id):
+        
+        data = [{**topic_selection, 'categorization': categorization_id}  for topic_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(TopicsSelectionSerializer, data, record=topic_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
 
+    def _get_serialized_descarbonization_axis_selection_list(self, data, descarbonization_axis_selection_list, categorization_id):
+        
+        data = [{**descarbonization_axis_selection, 'categorization': categorization_id}  for descarbonization_axis_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(DescarbonizationAxisSelectionSerializer, data, record=descarbonization_axis_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
+    
     def _get_serialized_question_list(self, data, question_list, impact_documentation_id):
         
         data = [{**question, 'impact_documentation': impact_documentation_id}  for question in data ]
@@ -360,6 +377,7 @@ class MitigationActionService():
 
         return result
 
+
     def _create_update_ghg_information(self, data, ghg_information=None):
         
         if ghg_information:
@@ -466,7 +484,8 @@ class MitigationActionService():
     def _create_update_categorization(self, data, categorization=False):
         
         action_area_selection = data.pop('action_area_selection', [])
-        topic_selection = data.pop('topic_selection', [])
+        topic_selection = data.pop('topics_selection', [])
+        descarbonization_axis_selection = data.pop('descarbonization_axis_selection', [])
         
         if categorization:
             serialized_categorization = self._get_serialized_categorization(data, categorization)
@@ -476,14 +495,19 @@ class MitigationActionService():
         
         if serialized_categorization.is_valid():
             categorization = serialized_categorization.save()
-            serialized_action_area_selection_status, serialized_action_area_selection_data = self._create_update_action_area_selection(action_area_selection, categorization)
-            ## review this topic_selection
-
-            if serialized_action_area_selection_status:
+            area_selection_status, area_selection_data = self._create_update_action_area_selection(action_area_selection, categorization)
+            topic_selection_status, topic_selection_data = self._create_update_topic_selection(topic_selection, categorization)
+            desc_axis_selection_status, desc_axis_selection_data = self._create_update_descarbonization_axis_selection(descarbonization_axis_selection, categorization)
+            validation_dict = {'action_area_selection': area_selection_status, 'topic_selection': topic_selection_status, 'descarbonization_axis_selection': desc_axis_selection_status}
+            if all(validation_dict.values()):
                 result = (True, categorization)
+                
             else:
-                result = (serialized_action_area_selection_status, serialized_action_area_selection_data)
-
+               for key, value in validation_dict.items():
+                   if not value:
+                       result = (False, validation_dict)
+                       break
+                
         else:
             result = (False, serialized_categorization.errors)
 
@@ -512,8 +536,48 @@ class MitigationActionService():
         return result
     
     
-    
-
+    def _create_update_topic_selection(self, data, categorization):
+        
+        result = (True, [])
+        
+        if isinstance(data, list):
+            topic_selection_list = categorization.topics_selection.all() 
+            serializer = self._get_serialized_topic_selection_list(data, topic_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
+        else:
+            result = (False, self.LIST_ERROR.format('topic_selection'))
+        
+        return  result
+        
+        
+    def _create_update_descarbonization_axis_selection(self, data, categorization):
+        
+        result = (True, [])
+        
+        if isinstance(data, list):
+            desc_axis_selection_list = categorization.descarbonization_axis_selection.all() 
+            serializer = self._get_serialized_descarbonization_axis_selection_list(data, desc_axis_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
+        else:
+            result = (False, self.LIST_ERROR.format('descarbonization_axis_selection'))
+        
+        return result
+        
+        
     def _create_update_initiative_goal(self, data, initiative):
  
         result = (True, [])

@@ -426,15 +426,9 @@ class ImpactDocumentation(models.Model):
 ## missing Serializer
 class Categorization(models.Model):
     
-    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization', blank=True)
-    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization', blank=True)
-    activities = models.ManyToManyField(Activity, related_name='categorization', blank=True)
-
-    ## can be select more than one
-    impact_categories = models.ManyToManyField(ImpactCategory, related_name='categorization', blank=True)
+    impact_category = models.ForeignKey(ImpactCategory, related_name='categorization', blank=True, null=True, on_delete=models.PROTECT)
     is_part_to_another_mitigation_action = models.BooleanField(null=True)
-    relation_description = models.CharField(max_length=255, blank=True, null=True)
-
+    relation_description = models.TextField(max_length=255, blank=True, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -445,18 +439,36 @@ class Categorization(models.Model):
         verbose_name_plural = _("Categorization")
 
 
-
+## multiselection of the same model
+## section 1
 class TopicsSelection(models.Model):
     topic = models.ForeignKey(Topics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
-    sub_topic = models.ManyToManyField(SubTopics, null=True, related_name='topics_selection')
-    Categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    sub_topic = models.ManyToManyField(SubTopics, related_name='topics_selection')
+    categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
 
-
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
 
 class ActionAreasSelection(models.Model):
     area = models.ForeignKey(ActionAreas, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
     categorization = models.ForeignKey(Categorization, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
     goals = models.ManyToManyField(ActionGoals, related_name='action_area_selection', blank=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+
+class DescarbonizationAxisSelection(models.Model):
+    descarbonization_axis = models.ForeignKey(DescarbonizationAxis, related_name='descarbonization_axis_selection', on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, related_name='descarbonization_axis_selection', blank=True, on_delete=models.CASCADE)
+    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='descarbonization_axis_selection', blank=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 ## section 5 new
