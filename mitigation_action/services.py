@@ -1342,9 +1342,9 @@ class MitigationActionService():
         if mitigation_action_status:
             review_number = mitigation_action_data.review_count
             fsm_state = mitigation_action_data.fsm_state
-            commet_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+            comment_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
         
@@ -1360,9 +1360,9 @@ class MitigationActionService():
         if mitigation_action_status:
 
             search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
-            commet_list = mitigation_action_data.comments.filter(**search_kwargs).all()
+            comment_list = mitigation_action_data.comments.filter(**search_kwargs).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
         

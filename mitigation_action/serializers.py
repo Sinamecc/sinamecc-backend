@@ -5,6 +5,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
     FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection
+from workflow.serializers import CommentSerializer
 
 ##
 ## Auxiliar Class Serializer
@@ -469,7 +470,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
         fields = ('id', 'fsm_state','contact', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
-                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 'review_count', 
+                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 'review_count', 'comments',
                     'user', 'created', 'updated')
         
         # only read code kwargs
@@ -512,6 +513,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
+        data['comments'] = CommentSerializer(instance.comments.filter(fsm_state=instance.fsm_state, review_number=instance.review_count), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         
         return data

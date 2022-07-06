@@ -30,6 +30,60 @@ def directory_path(instance, filename):
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
 
 
+class Sector(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Sector')
+        verbose_name_plural = _('Sectors')
+
+
+class SectorIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    sector = models.ForeignKey(Sector, related_name='sector_ipcc2006', on_delete=models.CASCADE)
+    
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Sector IPCC2006')
+        verbose_name_plural = _('Sectors IPCC2006')
+
+
+class CategoryIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    sector_ipcc2006 = models.ForeignKey(SectorIPCC2006, related_name='category_ipcc2006', on_delete=models.CASCADE)
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Category IPCC2006')
+        verbose_name_plural = _('Categories IPCC2006')
+
+
+class SubCategoryIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    category_ipcc_2006 = models.ForeignKey(CategoryIPCC2006, related_name='sub_sector_ipcc2006', on_delete=models.CASCADE)
+    
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Subcategory IPCC2006')
+        verbose_name_plural = _('Subcategories IPCC2006')
+        
+
 class CarbonDeposit(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -393,7 +447,6 @@ class ImpactDocumentation(models.Model):
     ## missing file for documentation of calculations estimate 
     estimate_reduction_co2 = models.TextField(null=True)
     period_potential_reduction =models.TextField(null=True)
-    ## missing catalogs for sector and subsector
     
     
     ##catalog
@@ -404,7 +457,6 @@ class ImpactDocumentation(models.Model):
     estimate_calculation_documentation = models.TextField(null=True)
     estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     mitigation_action_in_inventory = models.CharField(max_length=50, null=True)
-
 
     ## Section 4.3
     ## TODO: Missing. catalogs standar to apply
@@ -467,6 +519,20 @@ class DescarbonizationAxisSelection(models.Model):
     transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='descarbonization_axis_selection', blank=True)
 
     ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+
+## section #4 selection of sector
+class SectorSelection(models.Model):
+    sector = models.ForeignKey(Sector, related_name='sector_selection', on_delete=models.CASCADE)
+    sector_ipcc2006 = models.ForeignKey(SectorIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    category_ipcc2006 = models.ForeignKey(CategoryIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    sub_category_ipcc2006 = models.ManyToManyField(SubCategoryIPCC2006, related_name='sector_selection')
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='sector_selection', on_delete=models.CASCADE)
+    
+    ## logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
