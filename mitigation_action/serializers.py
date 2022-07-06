@@ -441,6 +441,7 @@ class GeographicLocationSerializer(serializers.ModelSerializer):
 
 
 class ContactSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Contact
         fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')

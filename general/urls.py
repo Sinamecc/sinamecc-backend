@@ -34,7 +34,7 @@ urlpatterns = [
         name='get_post_district'
     ),
     path(
-        'api/v1/general/district/<int:canton_id>/',
+        'api/v1/general/district/<int:district_id>/',
         views.get_post_district,
         name='get_post_district'
     )

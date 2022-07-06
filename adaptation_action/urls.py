@@ -33,7 +33,17 @@ urlpatterns = [
         name='get_subtopics'
     ),
     path(
+        'api/v1/adaptation-action/get_subtopics/<int:subtopic_id>/',
+        views.get_subtopics,
+        name='get_subtopics'
+    ),
+    path(
         'api/v1/adaptation-action/get_activities/',
+        views.get_activities,
+        name='get_activities'
+    ),
+    path(
+        'api/v1/adaptation-action/get_activities/<int:activity_id>/',
         views.get_activities,
         name='get_activities'
     ),

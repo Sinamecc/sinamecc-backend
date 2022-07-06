@@ -194,10 +194,11 @@ class GeneralService():
     
     def get_canton_by_id(self, request, canton_id):
 
-        canton_status, canton_data = self._service_helper.get_one(Canton, canton_id)
+        
+        canton_status, canton_data = self._service_helper.get_all(Canton, province__id = canton_id)
 
         if canton_status:
-            result = (canton_status, CantonSerializer(canton_data).data)
+            result = (canton_status, CantonSerializer(canton_data, many=True).data)
         
         else:
             result = (canton_status, canton_data) 
@@ -218,10 +219,10 @@ class GeneralService():
     
     def get_district_by_id(self, request, district_id):
 
-        district_status, district_data = self._service_helper.get_one(District, district_id)
+        district_status, district_data = self._service_helper.get_all(District, canton_id = district_id)
 
         if district_status:
-            result = (district_status, DistrictSerializer(district_data).data)
+            result = (district_status, DistrictSerializer(district_data, many=True).data)
         
         else:
             result = (district_status, district_data) 
