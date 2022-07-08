@@ -5,9 +5,9 @@ cursor.execute("""SELECT table_name FROM information_schema.tables WHERE table_s
 rows = cursor.fetchall()
 
 for row in rows:
-    if row[0].startswith('report_data'):
+    if row[0].startswith('adaptation_action'):
         cursor.execute("DROP TABLE IF EXISTS %s CASCADE" % row[0])
         print("Delete table %s" % row[0])
 
-cursor.execute("DELETE FROM django_migrations WHERE  app='report_data';")
+cursor.execute("DELETE FROM django_migrations WHERE  app='adaptation_action';")
 print("Delete record migrations in table django_migrations")
