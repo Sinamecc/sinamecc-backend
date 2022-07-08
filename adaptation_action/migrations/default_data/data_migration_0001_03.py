@@ -17,6 +17,10 @@ _report_organization_type = [
     {
         'entity_type': 'ONG',
         'code': '4'
+    },
+    {
+        'entity_type': 'Otro',
+        'code': '5'
     }
 ]
 
