@@ -317,7 +317,7 @@ class DescarbonizationAxisSelectionSerializer(serializers.ModelSerializer):
         model = DescarbonizationAxisSelection
         fields = ('id', 'descarbonization_axis', 'categorization', 'transformational_vision')
         list_serializer_class = GenericListSerializer
-        depth = 1
+    
     
 class ActionAreasSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -325,7 +325,7 @@ class ActionAreasSelectionSerializer(serializers.ModelSerializer):
         model = ActionAreasSelection
         fields = ('id', 'area', 'goals', 'categorization')
         list_serializer_class = GenericListSerializer
-        depth = 1
+       
 
 class TopicsSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -333,7 +333,7 @@ class TopicsSelectionSerializer(serializers.ModelSerializer):
         model = TopicsSelection
         fields = ('id', 'topic', 'sub_topic', 'categorization')
         list_serializer_class = GenericListSerializer
-        depth = 1
+        
 
 class CategorizationSerializer(serializers.ModelSerializer):
     
