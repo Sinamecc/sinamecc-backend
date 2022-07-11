@@ -86,7 +86,8 @@ class SubCategoryIPCC2006(models.Model):
 
 class CarbonDeposit(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -99,7 +100,8 @@ class CarbonDeposit(models.Model):
 
 class Standard(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -112,7 +114,8 @@ class Standard(models.Model):
 
 class SustainableDevelopmentGoals(models.Model): 
     code = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    description_es = models.TextField(blank=True, null=True)
+    description_en = models.TextField(blank=True, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -126,7 +129,8 @@ class SustainableDevelopmentGoals(models.Model):
 class GHGImpactSector(models.Model):
 
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -138,7 +142,8 @@ class GHGImpactSector(models.Model):
 
 
 class ActionAreas(models.Model):
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     code = models.CharField(max_length=3, null=False, blank=False)
     
     ## logs
@@ -152,7 +157,8 @@ class ActionAreas(models.Model):
 
 class ActionGoals(models.Model):
 
-    goal = models.TextField()
+    goal_es = models.TextField()
+    goal_en = models.TextField()
     code = models.CharField(max_length=3, null=False, blank=False)
     area = models.ForeignKey(ActionAreas, null=False, related_name='goal', on_delete=models.CASCADE)
 
@@ -167,7 +173,8 @@ class ActionGoals(models.Model):
 class DescarbonizationAxis(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -181,7 +188,8 @@ class DescarbonizationAxis(models.Model):
 class TransformationalVisions(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
     axis = models.ForeignKey(DescarbonizationAxis, null=False, related_name='transformational_vision', on_delete=models.CASCADE)
     
     ## logs
@@ -196,7 +204,8 @@ class TransformationalVisions(models.Model):
 class Topics(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -210,7 +219,8 @@ class Topics(models.Model):
 class SubTopics(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     topic = models.ForeignKey(Topics, null=False, related_name='sub_topic', on_delete=models.CASCADE)
 
     ## logs
@@ -225,7 +235,8 @@ class SubTopics(models.Model):
 class Activity(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name='activity', on_delete=models.CASCADE)
 
     ## logs
@@ -240,7 +251,8 @@ class Activity(models.Model):
 class ImpactCategory(models.Model):
 
     code = models.CharField(max_length=255, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -253,7 +265,8 @@ class ImpactCategory(models.Model):
 
 class InitiativeType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
     type = models.CharField(max_length=2, blank=False, null=False)
     count = models.IntegerField(default=0)
@@ -272,7 +285,8 @@ class InitiativeType(models.Model):
 
 class GeographicScale(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
      
     ## Logs
@@ -289,7 +303,8 @@ class GeographicScale(models.Model):
 
 class FinanceSourceType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
      
     ## Logs
@@ -305,7 +320,8 @@ class FinanceSourceType(models.Model):
 
 class FinanceStatus(models.Model):
     
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -321,7 +337,8 @@ class FinanceStatus(models.Model):
 
 class Status(models.Model):
 
-    status = models.CharField(max_length=100, blank=False, null=False)
+    status_es = models.CharField(max_length=100, blank=False, null=False)
+    status_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -339,7 +356,8 @@ class Status(models.Model):
 ## section 5 new
 class ThematicCategorizationType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -352,7 +370,8 @@ class ThematicCategorizationType(models.Model):
 
 ## section 5 new
 class InformationSourceType(models.Model):
-    name = models.CharField(max_length=500, null=True)
+    name_es = models.CharField(max_length=500, null=True)
+    name_en = models.CharField(max_length=500, null=True)
     code = models.CharField(max_length=500, null=True)
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -365,7 +384,8 @@ class InformationSourceType(models.Model):
 ## section 5 new
 class Classifier(models.Model):
     code = models.CharField(max_length=255, null=True)
-    name = models.CharField(max_length=255, null=True)
+    name_es = models.CharField(max_length=255, null=True)
+    name_en = models.CharField(max_length=255, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)

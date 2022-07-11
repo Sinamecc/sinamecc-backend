@@ -6,7 +6,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
     FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection
 from workflow.serializers import CommentSerializer
-
+from general.utils import get_translation_from_database as _
 ##
 ## Auxiliar Class Serializer
 ##
@@ -50,121 +50,256 @@ class GenericListSerializer(serializers.ListSerializer):
 ## Start Catalogs Serializers
 ##
 class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
+    
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = SustainableDevelopmentGoals
         fields = ('id', 'code', 'description')
 
+    def get_description(self, instance):
+        return _(instance, 'description')
+
 
 class GHGImpactSectorSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = GHGImpactSector
         fields = ('id', 'code', 'name')
+        
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
 
 
 class CarbonDepositSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = CarbonDeposit
         fields = ('id', 'code', 'name')
+        
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
 
 
 class StandardSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = Standard
         fields = ('id', 'code', 'name')
 
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
+
 
 class ActionAreasSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = ActionAreas
         fields = ('id', 'name', 'code')
 
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
 
 class ActionGoalsSerializer(serializers.ModelSerializer):
+    
+    goal = serializers.SerializerMethodField()
+    
     class Meta:
         model = ActionGoals
         fields = ('id', 'goal', 'code', 'area')
 
+    
+    def get_goal(self, instance):
+        return _(instance, 'goal')
+    
 
 class DescarbonizationAxisSerializer(serializers.ModelSerializer):
+    
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = DescarbonizationAxis
         fields = ('id', 'description', 'code')
 
+    def  get_description(self, instance):
+        return _(instance, 'description')
+    
+    
 
 class TransformationalVisionsSerializer(serializers.ModelSerializer):
+    
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = TransformationalVisions
         fields = ('id', 'description', 'code', 'axis')
 
+    
+    def get_description(self, instance):
+        return _(instance, 'description')
+    
 
 class TopicsSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = Topics
         fields = ('id', 'name', 'code')
 
+
+    def get_name(self, instance):
+        return _(instance, 'name')
+
+
 class SubTopicsSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = SubTopics
         fields = ('id', 'name', 'code', 'topic')
 
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
+
 
 class ImpactCategorySerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = ImpactCategory
         fields = ('id', 'code', 'name')
 
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
 
 class ActivitySerializer(serializers.ModelSerializer):
+    
+    description = serializers.SerializerMethodField()
+    
     class Meta:
         model = Activity
         fields = ('id', 'description', 'code', 'sub_topic')
 
+    def  get_description(self, instance):
+        return _(instance, 'description')
+    
 
 class InitiativeTypeSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = InitiativeType
         fields = ('id', 'code', 'name', 'type')
 
 
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
+
 class GeographicScaleSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = GeographicScale
         fields = ('id', 'code', 'name')
 
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
 
 class FinanceSourceTypeSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = FinanceSourceType
         fields = ('id', 'code','name')
 
+    def get_name(self, instance):
+        return _(instance, 'name')
+
 
 class FinanceStatusSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = FinanceStatus
         fields = ('id', 'code', 'name')
 
 
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
+    
 class StatusSerializer(serializers.ModelSerializer):
+    
+    status = serializers.SerializerMethodField()
+    
     class Meta:
         model = Status
         fields = ('id', 'code', 'status')
 
+    def get_status(self, instance):
+        return _(instance, 'status')
+    
+    
 
 class InformationSourceTypeSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = InformationSourceType
         fields = ('id', 'code', 'name')
+    
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
 
 
 class ThematicCategorizationTypeSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = ThematicCategorizationType
         fields = ('id', 'code', 'name')
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
 
 class ClassifierSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
     class Meta:
         model = Classifier
         fields = ('id', 'code', 'name')
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
         
 ##
 ## Finish Catalogs Serializers
@@ -182,15 +317,15 @@ class DescarbonizationAxisSelectionSerializer(serializers.ModelSerializer):
         model = DescarbonizationAxisSelection
         fields = ('id', 'descarbonization_axis', 'categorization', 'transformational_vision')
         list_serializer_class = GenericListSerializer
-
-
+        depth = 1
+    
 class ActionAreasSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = ActionAreasSelection
         fields = ('id', 'area', 'goals', 'categorization')
         list_serializer_class = GenericListSerializer
-
+        depth = 1
 
 class TopicsSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -198,7 +333,7 @@ class TopicsSelectionSerializer(serializers.ModelSerializer):
         model = TopicsSelection
         fields = ('id', 'topic', 'sub_topic', 'categorization')
         list_serializer_class = GenericListSerializer
-
+        depth = 1
 
 class CategorizationSerializer(serializers.ModelSerializer):
     

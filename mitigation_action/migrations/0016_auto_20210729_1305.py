@@ -35,7 +35,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(blank=True, max_length=255, null=True)),
-                ('name', models.CharField(blank=True, max_length=255, null=True)),
+                ('name_es', models.CharField(blank=True, max_length=255, null=True)),
+                ('name_en', models.CharField(blank=True, max_length=255, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -49,7 +50,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(blank=True, max_length=255, null=True)),
-                ('name', models.CharField(blank=True, max_length=255, null=True)),
+                ('name_es', models.CharField(blank=True, max_length=255, null=True)),
+                ('name_en', models.CharField(blank=True, max_length=255, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
