@@ -11,6 +11,19 @@ view_helper = ViewHelper(service)
 
 # Create your views here.
 
+## Permission!!!!
+@api_view(['PUT'])
+def upload_file_from_adaptation_action(request, adaptation_action_id, model_type):
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name("upload_file_from_adaptation_action", request, adaptation_action_id, model_type)
+    return result
+
+@api_view(['GET'])
+def get_file_to_adaptation_action(request, file_id, model_type):
+    if request.method == 'GET':
+        result = view_helper.call_download_file_method('download_file', request, file_id, model_type)
+
+        return result
 
 ## Permission!!!!
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])

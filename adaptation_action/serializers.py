@@ -5,6 +5,7 @@ from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 from django.conf import settings
 from general.utils import get_translation_from_database as _
+from django.urls import reverse
 
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
@@ -184,11 +185,16 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements')
+        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat')
     
+    def _get_url(self, obj):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': obj.file_description_climate_threat.name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat.all(), many=True).data
+        data['file_description_climate_threat'] = self._get_url(instance)
 
         return data
 
@@ -399,7 +405,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
         data['address'] = AddressSerializer(instance.address).data
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
-        data['activity'] = ActivitySerializer(instance.activity).data
+        data['activity'] = ActivitySerializer(instance.activity.all(), many=True).data
         data['instrument'] = InstrumentSerializer(instance.instrument).data
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data

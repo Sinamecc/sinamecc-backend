@@ -10,10 +10,14 @@ from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
 from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
+from general.storages import S3Storage
+import os
+from io import BytesIO
 
 class AdaptationActionServices():
     def __init__(self) -> None:
 
+        self.storage = S3Storage()
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
         self._workflow_service = WorkflowService()
@@ -1054,7 +1058,100 @@ class AdaptationActionServices():
 
         return result
     
+    def _upload_file_to_climate_threat(self, data, adaptation_action):
+
+        ## This function uploads to graphic_description_file to the ghg information
+        file_data = {"file_description_climate_threat": data.get("file_description_climate_threat", None), 
+                     "file_vulnerability_climate_threat": data.get("file_vulnerability_climate_threat", None),
+                     "file_exposed_elements": data.get("file_exposed_elements", None),}
+
+        climate_threat = adaptation_action.climate_threat
+        climate_threat_status, climate_threat_data = self._create_update_climate_threat(file_data, climate_threat)
+
+        if climate_threat_status:
+            if climate_threat == None:
+                adaptation_action.climate_threat = climate_threat_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (climate_threat_status, climate_threat_data)
+            
+        return result
     
+    ## upload files in the models
+    def upload_file_from_adaptation_action(self, request, adaptation_action_id, model_type):
+
+        model_type_options = {
+            'climate_threat': self._upload_file_to_climate_threat
+        }    
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            method = model_type_options.get(model_type, False)
+            
+            if method:
+                response_status, response_data = method(data, adaptation_action_data)
+                
+                if response_status:
+                    result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                    
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(model_type))
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
+
+    def _download_description_climate_threat(self, request, file_id):
+        
+        climate_threat_status, climate_threat_data = self._service_helper.get_one(ClimateThreat, file_id)
+        
+        if climate_threat_status:
+            
+            s3_path = climate_threat_data.file_description_climate_threat.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (climate_threat_status, climate_threat_data)
+
+        return result
+
+    def download_file(self, request, model_id, file_name):
+
+        file_name_options = {
+            'file_description_climate_threat': self._download_description_climate_threat,
+        }    
+    
+        data = request.data
+
+        method = file_name_options.get(file_name, False)
+        
+        if method:
+            response_status, response_data = method(request, model_id)
+            
+            if response_status:
+                result = (response_status, response_data)
+                
+            else:
+                result = (response_status, response_data)
+        
+        else:
+            result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(file_name))
+        
+        return result
+
     def get(self, request, adaptation_action_id):
         
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
