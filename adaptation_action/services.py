@@ -1097,12 +1097,50 @@ class AdaptationActionServices():
             
         return result
 
+    def _upload_file_to_indicator_monitoring(self, data, adaptation_action):
+
+        file_data = {"data_to_update_file": data.get("data_to_update_file", None),}
+
+        indicator_monitoring = adaptation_action.indicator_monitoring
+        indicator_monitoring_status, indicator_monitoring_data = self._create_update_indicator_monitoring(file_data, indicator_monitoring)
+
+        if indicator_monitoring_status:
+            if indicator_monitoring == None:
+                adaptation_action.indicator_monitoring = indicator_monitoring_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (indicator_monitoring_status, indicator_monitoring_data)
+        
+        return result
+
+    def _upload_file_to_action_impact(self, data, adaptation_action):
+
+        file_data = {"data_to_update_file_action_impact": data.get("data_to_update_file_action_impact", None),}
+
+        action_impact = adaptation_action.action_impact
+        action_impact_status, action_impact_data = self._create_update_action_impact(file_data, action_impact)
+
+        if action_impact_status:
+            if action_impact == None:
+                adaptation_action.action_impact = action_impact_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (action_impact_status, action_impact_data)
+        
+        return result
+
     ## upload files in the models
     def upload_file_from_adaptation_action(self, request, adaptation_action_id, model_type):
 
         model_type_options = {
             'climate_threat': self._upload_file_to_climate_threat,
             'indicator': self._upload_file_to_indicator,
+            'indicator_monitoring': self._upload_file_to_indicator_monitoring,
+            'action_impact': self._upload_file_to_action_impact,
         }    
     
         data = request.data
@@ -1147,7 +1185,8 @@ class AdaptationActionServices():
             'file_exposed_elements': [ClimateThreat, lambda a: a.file_exposed_elements.name],
             'methodological_detail_file': [IndicatorAdaptation, lambda a: a.methodological_detail_file.name],
             'additional_information_file': [IndicatorAdaptation, lambda a: a.additional_information_file.name],
-
+            'data_to_update_file': [IndicatorMonitoring, lambda a: a.data_to_update_file.name],
+            'data_to_update_file_action_impact': [ActionImpact, lambda a: a.data_to_update_file_action_impact.name],
         }    
     
         method = file_name_options.get(file_name, False)
