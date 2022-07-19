@@ -551,7 +551,7 @@ class ActionImpact(models.Model):
     gender_equality_description = models.CharField(max_length=3000, null=True)
     unwanted_action = models.TextField(null=True)
     unwanted_action_description = models.CharField(max_length=3000, null=True)
-    data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    data_to_update_file_action_impact = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
     general_impact = models.ForeignKey(GeneralImpact, null=True, related_name='action_impact', on_delete=models.CASCADE)

@@ -336,12 +336,17 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'created', 'updated')
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file')
+
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['indicator_source'] = IndicatorSourceSerializer(instance.indicator_source.all(), many=True).data
         data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['data_to_update_file'] = self._get_url(instance, 'data_to_update_file')
 
         return data
 
@@ -361,13 +366,18 @@ class ActionImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActionImpact
-        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'created', 'updated')
+        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'data_to_update_file_action_impact')
     
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['general_impact'] = GeneralImpactSerializer(instance.general_impact).data
         data['temporality_impact'] = TemporalityImpactSerializer(instance.temporality_impact.all(), many=True).data
         data['ods'] = ODSSerializer(instance.ods.all(), many=True).data
+        data['data_to_update_file_action_impact'] = self._get_url(instance, 'data_to_update_file_action_impact')
 
         return data
     
