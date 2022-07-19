@@ -17,7 +17,7 @@ from io import BytesIO
 class AdaptationActionServices():
     def __init__(self) -> None:
 
-        self.storage = S3Storage()
+        self._storage = S3Storage()
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
         self._workflow_service = WorkflowService()
@@ -1060,7 +1060,6 @@ class AdaptationActionServices():
     
     def _upload_file_to_climate_threat(self, data, adaptation_action):
 
-        ## This function uploads to graphic_description_file to the ghg information
         file_data = {"file_description_climate_threat": data.get("file_description_climate_threat", None), 
                      "file_vulnerability_climate_threat": data.get("file_vulnerability_climate_threat", None),
                      "file_exposed_elements": data.get("file_exposed_elements", None),}
@@ -1079,11 +1078,31 @@ class AdaptationActionServices():
             
         return result
     
+    def _upload_file_to_indicator(self, data, adaptation_action):
+
+        file_data = {"methodological_detail_file": data.get("methodological_detail_file", None), 
+                     "additional_information_file": data.get("additional_information_file", None),}
+
+        indicator = adaptation_action.indicator
+        indicator_status, indicator_data = self._create_update_indicator(file_data, indicator)
+
+        if indicator_status:
+            if indicator == None:
+                adaptation_action.indicator = indicator_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (indicator_status, indicator_data)
+            
+        return result
+
     ## upload files in the models
     def upload_file_from_adaptation_action(self, request, adaptation_action_id, model_type):
 
         model_type_options = {
-            'climate_threat': self._upload_file_to_climate_threat
+            'climate_threat': self._upload_file_to_climate_threat,
+            'indicator': self._upload_file_to_indicator,
         }    
     
         data = request.data
@@ -1127,26 +1146,117 @@ class AdaptationActionServices():
             result = (climate_threat_status, climate_threat_data)
 
         return result
+    
+    def _download_vulnerability_climate_threat(self, request, file_id):
+        
+        climate_threat_status, climate_threat_data = self._service_helper.get_one(ClimateThreat, file_id)
+        
+        if climate_threat_status:
+            
+            s3_path = climate_threat_data.file_vulnerability_climate_threat.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (climate_threat_status, climate_threat_data)
+
+        return result
+    
+    def _download_exposed_elements(self, request, file_id):
+
+        climate_threat_status, climate_threat_data = self._service_helper.get_one(ClimateThreat, file_id)
+        
+        if climate_threat_status:
+            
+            s3_path = climate_threat_data.file_exposed_elements.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (climate_threat_status, climate_threat_data)
+
+        return result
+
+    def _download_methodological_detail_file(self, request, file_id):
+            
+            indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, file_id)
+            
+            if indicator_status:
+                
+                s3_path = indicator_data.methodological_detail_file.name
+                
+                path, filename = os.path.split(s3_path)
+            
+                file_content =  BytesIO(self._storage.get_file(s3_path))
+                result = (True, (filename, file_content))
+                
+            else:
+                result = (indicator_status, indicator_data)
+    
+            return result
+    
+    def _download_additional_information_file(self, request, file_id):
+
+        indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, file_id)
+        
+        if indicator_status:
+            
+            s3_path = indicator_data.additional_information_file.name
+            
+            path, filename = os.path.split(s3_path)
+        
+            file_content =  BytesIO(self._storage.get_file(s3_path))
+            result = (True, (filename, file_content))
+            
+        else:
+            result = (indicator_status, indicator_data)
+
+        return result
+
+    def _download(self, s3_path):
+
+        path, filename = os.path.split(s3_path)
+    
+        file_content =  BytesIO(self._storage.get_file(s3_path))
+        result = (True, (filename, file_content))    
+
+        return result
 
     def download_file(self, request, model_id, file_name):
 
         file_name_options = {
-            'file_description_climate_threat': self._download_description_climate_threat,
+            'file_description_climate_threat': [ClimateThreat, lambda a: a.file_description_climate_threat.name],
+            'file_vulnerability_climate_threat': [ClimateThreat, lambda a: a.file_vulnerability_climate_threat.name],
+            'file_exposed_elements': [ClimateThreat, lambda a: a.file_exposed_elements.name],
+            'methodological_detail_file': [IndicatorAdaptation, lambda a: a.methodological_detail_file.name],
+            'additional_information_file': [IndicatorAdaptation, lambda a: a.additional_information_file.name],
+
         }    
     
-        data = request.data
-
         method = file_name_options.get(file_name, False)
         
         if method:
-            response_status, response_data = method(request, model_id)
+            method_status, method_data = self._service_helper.get_one(method[0], model_id)
+            if method_status:
+
+                s3_path = method[1](method_data)
+
+                response_status, response_data = self._download(s3_path)
             
-            if response_status:
-                result = (response_status, response_data)
-                
+                if response_status:
+                    result = (response_status, response_data)
+                    
+                else:
+                    result = (response_status, response_data)
             else:
-                result = (response_status, response_data)
-        
+                result = (method_status, method_data)
+
         else:
             result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(file_name))
         

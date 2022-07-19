@@ -19,9 +19,9 @@ def upload_file_from_adaptation_action(request, adaptation_action_id, model_type
     return result
 
 @api_view(['GET'])
-def get_file_to_adaptation_action(request, file_id, model_type):
+def get_file_to_adaptation_action(request, model_id, file_name):
     if request.method == 'GET':
-        result = view_helper.call_download_file_method('download_file', request, file_id, model_type)
+        result = view_helper.call_download_file_method('download_file', request, model_id, file_name)
 
         return result
 

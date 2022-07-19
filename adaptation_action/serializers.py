@@ -185,16 +185,18 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat')
+        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat', 'file_vulnerability_climate_threat', 'file_exposed_elements')
     
-    def _get_url(self, obj):
+    def _get_url(self, obj, file_name):
         
-        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': obj.file_description_climate_threat.name})
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat.all(), many=True).data
-        data['file_description_climate_threat'] = self._get_url(instance)
+        data['file_description_climate_threat'] = self._get_url(instance, 'file_description_climate_threat')
+        data['file_vulnerability_climate_threat'] = self._get_url(instance, 'file_vulnerability_climate_threat')
+        data['file_exposed_elements'] = self._get_url(instance, 'file_exposed_elements')
 
         return data
 
@@ -298,14 +300,20 @@ class IndicatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndicatorAdaptation
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
-         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
+         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file')
     
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
         data['contact'] = MContactSerializer(instance.contact).data
+        data['methodological_detail_file'] = self._get_url(instance, 'methodological_detail_file')
+        data['additional_information_file'] = self._get_url(instance, 'additional_information_file')
 
         return data
 

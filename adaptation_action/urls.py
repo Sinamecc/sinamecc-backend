@@ -97,4 +97,9 @@ urlpatterns = [
         views.get_comments,
         name='get_comments'
     ),
+    path(
+        'api/v1/adaptation-action/file/<int:model_id>/filename/<str:file_name>/',
+        views.get_file_to_adaptation_action,
+        name='get_file_to_adaptation_action'
+    ),
 ]
