@@ -4,7 +4,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
     ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
     GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
-    FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection
+    FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection, Sector, SectorIPCC2006, CategoryIPCC2006, SubCategoryIPCC2006, SectorSelection
 from workflow.serializers import CommentSerializer
 from general.utils import get_translation_from_database as _
 ##
@@ -49,6 +49,7 @@ class GenericListSerializer(serializers.ListSerializer):
 ##
 ## Start Catalogs Serializers
 ##
+
 class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
     
     description = serializers.SerializerMethodField()
@@ -300,6 +301,63 @@ class ClassifierSerializer(serializers.ModelSerializer):
         
     def get_name(self, instance):
         return _(instance, 'name')
+        
+        
+ 
+class SectorSerializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Sector
+        fields = ('id', 'code', 'name')
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
+
+
+class SectorIPCC2006Serializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SectorIPCC2006
+        fields = ('id', 'code', 'name', 'sector')
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
+
+
+class CategoryIPCC2006Serializer(serializers.ModelSerializer):
+    
+    name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CategoryIPCC2006
+        fields = ('id', 'code', 'name', 'sector_ipcc2006')
+        
+    def get_name(self, instance):
+        return _(instance, 'name')
+
+
+class SubCategoryIPCC2006Serializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SubCategoryIPCC2006
+        fields = ('id', 'code', 'name', 'category_ipcc2006')
+    
+    def get_name(self, instance):
+        return _(instance, 'name')
+    
+
+class SectorSelectionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = SectorSelection
+        fields = ('id', 'sector', 'sector_ipcc2006', 'category_ipcc2006',
+                  'sub_category_ipcc2006',  'impact_documentation')
+    
         
 ##
 ## Finish Catalogs Serializers

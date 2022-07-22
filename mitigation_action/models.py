@@ -32,7 +32,8 @@ def directory_path(instance, filename):
 
 class Sector(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
 
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -41,11 +42,19 @@ class Sector(models.Model):
     class Meta:
         verbose_name = _('Sector')
         verbose_name_plural = _('Sectors')
+    
+    def __repr__(self) -> str:
+        return '{}: {}'.format(self.code, self.name_es)
+    
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en
+    
 
 
 class SectorIPCC2006(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
     sector = models.ForeignKey(Sector, related_name='sector_ipcc2006', on_delete=models.CASCADE)
     
     ##logs
@@ -55,11 +64,15 @@ class SectorIPCC2006(models.Model):
     class Meta:
         verbose_name = _('Sector IPCC2006')
         verbose_name_plural = _('Sectors IPCC2006')
+        
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector.name_es
 
 
 class CategoryIPCC2006(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
     sector_ipcc2006 = models.ForeignKey(SectorIPCC2006, related_name='category_ipcc2006', on_delete=models.CASCADE)
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -68,11 +81,16 @@ class CategoryIPCC2006(models.Model):
     class Meta:
         verbose_name = _('Category IPCC2006')
         verbose_name_plural = _('Categories IPCC2006')
+        
+        
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector_ipcc2006.name_es
 
 
 class SubCategoryIPCC2006(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
     category_ipcc_2006 = models.ForeignKey(CategoryIPCC2006, related_name='sub_sector_ipcc2006', on_delete=models.CASCADE)
     
     
@@ -83,6 +101,8 @@ class SubCategoryIPCC2006(models.Model):
         verbose_name = _('Subcategory IPCC2006')
         verbose_name_plural = _('Subcategories IPCC2006')
         
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.category_ipcc_2006.name_es
 
 class CarbonDeposit(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
