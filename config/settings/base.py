@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rolepermissions', 
     'users',
     'adaptation_action',
+    'user_self_management',
 ]
 
 MIDDLEWARE = [
