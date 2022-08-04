@@ -9,27 +9,54 @@ service = AdaptationActionServices()
 view_helper = ViewHelper(service)
 
 
-# Create your views here.
+@has_permission_decorator('read_adaptation_action')
+def get_one_adaptation_action(request, pk):
+    if request.method == 'GET':
+        result = view_helper.get_one(request, pk)
+    return result
 
+@has_permission_decorator('read_adaptation_action')
+def get_adaptation_action(request):
+    if request.method == 'GET':
+        result = view_helper.get_all(request)
+    return result
+
+@has_permission_decorator('create_adaptation_action')
+def post_adaptation_action(request):
+    if request.method == 'POST':
+        result = view_helper.post(request)
+    return result
+
+@has_permission_decorator('edit_adaptation_action')
+def put_adaptation_action(request, pk):
+    if request.method == 'PUT':
+        result = view_helper.put(request, pk)
+    return result
+
+@has_permission_decorator('edit_adaptation_action')
+def patch_adaptation_action(request, pk):
+    if request.method == 'PATCH':
+        result = view_helper.patch(request, pk)
+    return result
 
 ## Permission!!!!
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])
 def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and adaptation_action_id:
-        result = view_helper.get_one(request, adaptation_action_id)
+        result = get_one_adaptation_action(request, adaptation_action_id)
     
     elif request.method == 'GET' and not adaptation_action_id:
-        result = view_helper.get_all(request)
+        result = get_adaptation_action(request)
     
     elif request.method == 'POST' and not adaptation_action_id:
-        result = view_helper.post(request)
+        result = post_adaptation_action(request)
 
     elif request.method == 'PUT' and adaptation_action_id:
-        result = view_helper.put(request, adaptation_action_id)
+        result = put_adaptation_action(request, adaptation_action_id)
         
     elif request.method == 'PATCH' and adaptation_action_id:
-        result = view_helper.patch(request, adaptation_action_id)
+        result = patch_adaptation_action(request, adaptation_action_id)
 
     return result
 

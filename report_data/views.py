@@ -56,15 +56,26 @@ def get_report_file_versions(request, pk):
         versions = service.get_all_file_versions(pk)
         return Response(versions)
 
+@has_permission_decorator('create_report_data')
+def post_report_data(request):
+    if request.method == 'POST':
+        result = view_helper.post(request)
+    return result
+
+@has_permission_decorator('read_report_data')
+def get_report_data(request):
+    if request.method == 'GET':
+        result = view_helper.get_all(request)
+    return result
 
 @api_view(['GET', 'POST'])
 @parser_classes((MultiPartParser, FormParser, JSONParser,))
 def get_post_report_data(request):
     if request.method == 'POST':
-        result = view_helper.post(request)
+        result = post_report_data(request)
 
     elif request.method == 'GET':
-        result = view_helper.get_all(request)
+        result = get_report_data(request)
 
     return result
 
