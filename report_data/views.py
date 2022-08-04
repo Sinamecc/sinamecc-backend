@@ -2,26 +2,50 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.http import FileResponse
+from rolepermissions.decorators import has_permission_decorator
 from general.helpers.views import ViewHelper
 from report_data.services import ReportDataService
 
 service = ReportDataService()
 view_helper = ViewHelper(service)
 
+@has_permission_decorator('read_report_data')
+def get_one_report_data(request, pk):
+    if request.method == 'GET':
+        result = view_helper.get_one(pk)
+    return result
+
+@has_permission_decorator('edit_report_data')
+def put_report_data(request, pk):
+    if request.method == 'PUT':
+        result = view_helper.put(pk, request)
+    return result
+
+@has_permission_decorator('delete_report_data')
+def delete_report_data(request, pk):
+    if request.method == 'DELETE':
+        result = view_helper.delete(pk)
+    return result
+
+@has_permission_decorator('edit_report_data')
+def patch_report_data(request, pk):
+    if request.method == 'PATCH':
+        result = view_helper.patch(pk, request)
+    return result
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])
 def get_delete_update_patch_report_data(request, pk):
     if request.method == 'GET':
-        result = view_helper.get_one(request, pk)
+        result = get_one_report_data(request, pk)
 
     elif request.method == 'PUT':
-        result = view_helper.put(request, pk)
+        result = put_report_data(request, pk)
 
     elif request.method == 'DELETE':
-        result = view_helper.delete(pk)
+        result = delete_report_data(request, pk)
         
     elif request.method == 'PATCH':
-        result = view_helper.patch(request, pk)
+        result = patch_report_data(request, pk)
         
     return result
 
