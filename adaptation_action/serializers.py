@@ -254,7 +254,7 @@ class FinanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinanceAdaptation
-        fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
+        fields = ('id', 'administration', 'budget', 'year','status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -279,7 +279,7 @@ class InformationSourceSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['type_information'] = InformationSourceTypeSerializer(instance.type_information).data
+        data['type_information'] = InformationSourceTypeSerializer(instance.type_information.all(), many=True).data
         
         return data
 
@@ -336,7 +336,7 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file')
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file', 'other_indicator_source', 'support_information')
 
     def _get_url(self, obj, file_name):
         

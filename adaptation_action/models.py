@@ -1,3 +1,4 @@
+from distutils.text_file import TextFile
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -333,7 +334,7 @@ class FinanceAdaptation(models.Model):
 
     administration = models.TextField(max_length=500, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-
+    year = models.TextField(null=True)
     status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
     source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
     finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
@@ -362,7 +363,7 @@ class InformationSourceType(models.Model):
 
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type_information = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type_information = models.ManyToManyField(InformationSourceType, related_name='information_source', blank=True)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -496,6 +497,8 @@ class IndicatorMonitoring(models.Model):
 
     ## FK
     indicator_source = models.ManyToManyField(IndicatorSource, related_name='indicator_monitoring', blank=True)
+    other_indicator_source = models.TextField(null=True)
+    support_information = models.TextField(null=True)
     indicator = models.ForeignKey(IndicatorAdaptation, null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
 
     ## Logs
