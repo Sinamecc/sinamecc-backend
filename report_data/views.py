@@ -51,6 +51,7 @@ def get_delete_update_patch_report_data(request, pk):
 
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_report_file_versions(request, pk):
     if request.method == 'GET':
         versions = service.get_all_file_versions(pk)
@@ -81,6 +82,7 @@ def get_post_report_data(request):
 
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_report_file_version_url(request, report_file_id, report_file_version_id):
     if request.method == 'GET':
         file_name, file_data = service.download_file(report_file_id, report_file_version_id)
@@ -92,6 +94,7 @@ def get_report_file_version_url(request, report_file_id, report_file_version_id)
 
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_catalog_data(request): ## We need delete *args this parametes is temp at the moment to refactor MA
     if request.method == 'GET':
         result = view_helper.execute_by_name("get_catalog_data", request)
@@ -109,6 +112,7 @@ def upload_file_to_report_data(request, report_data_id):
 
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_file_to_report_data(request, report_file_id):
     if request.method == 'GET':
         result = view_helper.call_download_file_method('download_report_file', request, report_file_id)
@@ -116,6 +120,7 @@ def get_file_to_report_data(request, report_file_id):
         return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_source_file_to_report_data(request, report_data_id):
     if request.method == 'GET':
         result = view_helper.call_download_file_method('download_source_file', request, report_data_id)
@@ -124,6 +129,7 @@ def get_source_file_to_report_data(request, report_data_id):
 
 
 @api_view(['GET'])
+@has_permission_decorator('read_report_data')
 def get_comments(request, report_data_id, fsm_state=None, review_number=None):
     if request.method == 'GET' and not (fsm_state or review_number):
         result = view_helper.execute_by_name('get_current_comments', request, report_data_id)

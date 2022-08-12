@@ -61,6 +61,7 @@ def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need d
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_type_climate_threat(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and adaptation_action_id:
@@ -72,6 +73,7 @@ def get_type_climate_threat(request, adaptation_action_id=False): ## We need del
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_ods(request, ods_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and ods_id:
@@ -83,6 +85,7 @@ def get_ods(request, ods_id=False): ## We need delete *args this parametes is te
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_topics(request, topic_id=False):
 
     if request.method == 'GET' and not topic_id:
@@ -94,6 +97,7 @@ def get_topics(request, topic_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_subtopics(request, subtopic_id=False):
 
     if request.method == 'GET' and not subtopic_id:
@@ -105,6 +109,7 @@ def get_subtopics(request, subtopic_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_activities(request, activity_id=False):
 
     if request.method == 'GET' and not activity_id:
@@ -116,6 +121,7 @@ def get_activities(request, activity_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_information_source_type(request, information_source_type_id=False):
 
     if request.method == 'GET' and not information_source_type_id:
@@ -127,6 +133,7 @@ def get_information_source_type(request, information_source_type_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_general_impact(request, general_impact_id=False):
 
     if request.method == 'GET' and not general_impact_id:
@@ -138,6 +145,7 @@ def get_general_impact(request, general_impact_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_temporality_impact(request, temporality_impact_id=False):
 
     if request.method == 'GET' and not temporality_impact_id:
@@ -149,6 +157,7 @@ def get_temporality_impact(request, temporality_impact_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_general_impact(request, general_impact_id=False):
 
     if request.method == 'GET' and not general_impact_id:
@@ -160,6 +169,7 @@ def get_general_impact(request, general_impact_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_classifiers(request, classifier_id=False):
 
     if request.method == 'GET' and not classifier_id:
@@ -171,6 +181,7 @@ def get_classifiers(request, classifier_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_source_type(request, source_type_id=False):
 
     if request.method == 'GET' and not source_type_id:
@@ -182,6 +193,7 @@ def get_source_type(request, source_type_id=False):
     return result
 
 @api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_comments(request, adaptation_action_id, fsm_state=None, review_number=None):
     if request.method == 'GET' and not (fsm_state or review_number):
         result = view_helper.execute_by_name('get_current_comments', request, adaptation_action_id)
