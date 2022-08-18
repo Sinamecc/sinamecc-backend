@@ -378,11 +378,12 @@ class IndicatorAdaptation(models.Model):
         ('CANTONAL', 'Cantonal'),
         ('OTHER', 'Other')
     ]
-
+    #Section 4
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
     unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator', on_delete=models.SET_NULL)
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
@@ -549,9 +550,6 @@ class AdaptationAction(models.Model):
 
     #Section 3
     finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    
-    #Section 4
-    indicator = models.ManyToManyField(IndicatorAdaptation, related_name="adaptation_action", blank=True)
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)

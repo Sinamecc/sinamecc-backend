@@ -10,6 +10,7 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument
 
 from general.serializers import AddressSerializer
+from mitigation_action.serializers import GenericListSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -243,11 +244,14 @@ class ClassifierSerializer(serializers.ModelSerializer):
 
 class IndicatorSerializer(serializers.ModelSerializer):
 
+    id = serializers.IntegerField()
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
+        fields = ('id', 'name', 'adaptation_action', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
-    
+        list_serializer_class = GenericListSerializer
+        
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data

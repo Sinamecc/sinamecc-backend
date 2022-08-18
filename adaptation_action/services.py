@@ -42,7 +42,7 @@ class AdaptationActionServices():
         
         if hasattr(self, update_function):
             function = getattr(self, update_function)        
-            record_status, record_detail = function(data, record_for_updating)          
+            record_status, record_detail = function(data, record_for_updating)   
             result = (record_status, record_detail)
         
         else:
@@ -296,6 +296,15 @@ class AdaptationActionServices():
     def _get_serialized_change_log(self, data, change_log=False, partial=False):
     
         serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
+
+        return serializer
+
+    
+    def _get_serialized_indicator_list(self, data, indicator_list, adaption_action_id):
+        
+        data = [{**indicator, 'adaptation_action': adaption_action_id}  for indicator in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
 
         return serializer
     
@@ -710,18 +719,6 @@ class AdaptationActionServices():
         fields = ['information_source', 'contact']
         validation_dict = {}
 
-        """for _field in fields:
-            _data = data.pop(_field, None)
-            if _data:
-                _create_function = f'_get_serialized_{_field}'
-                _function = getattr(self, _create_function)
-                serialized_data = _function(_data)
-
-                if(serialized_data.is_valid()):
-                    field_data = serialized_data.save()
-                    data[_field] = field_data.id
-        """
-
         for field in fields:
             if data.get(field, False):
                 record_status, record_data = self._create_sub_record(data.get(field), field)
@@ -741,6 +738,7 @@ class AdaptationActionServices():
             
             if serialized_indicator_adaptation.is_valid():
                 indicator_adaptation = serialized_indicator_adaptation.save()
+
                 result = (True, indicator_adaptation)
 
             else:
@@ -750,7 +748,9 @@ class AdaptationActionServices():
             
         return result
 
-    def _create_update_list_indicator(self, data, indicator_adaptation=False):
+
+    def _create_update_list_indicator(self, data, indicator_adaptation_relation=False):
+
 
         result_list = []
         result = (True, result_list)
@@ -1162,7 +1162,8 @@ class AdaptationActionServices():
                     record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field), is_list=True)
                     
                     if record_status:
-                        data[field] = record_data.id
+                        ...
+                        data[field] = record_data.id ## Aqui hay que cambiar esto por que esta malo
                         
                     dict_data = record_data if isinstance(record_data, list) else [record_data]
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
