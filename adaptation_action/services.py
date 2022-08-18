@@ -41,11 +41,8 @@ class AdaptationActionServices():
         update_function = f'_create_update_list_{sub_record_name}' if is_list else f'_create_update_{sub_record_name}'
         
         if hasattr(self, update_function):
-          
-            function = getattr(self, update_function)
-        
-            record_status, record_detail = function(data, record_for_updating)
-          
+            function = getattr(self, update_function)        
+            record_status, record_detail = function(data, record_for_updating)          
             result = (record_status, record_detail)
         
         else:
@@ -321,7 +318,26 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
 
         return serializer
+
     
+    def _create_update_contact(self, data, contact=None):
+        
+        if contact:
+            serialized_contact = self._get_serialized_contact(data, contact)
+
+        else:
+            serialized_contact = self._get_serialized_contact(data)
+        
+        if serialized_contact.is_valid():
+            contact = serialized_contact.save()
+            result = (True, contact)
+
+        else:
+            result = (False, serialized_contact.errors)
+
+        return result
+
+
     def _create_update_address(self, data, address=False):
         
         if address:
@@ -692,8 +708,9 @@ class AdaptationActionServices():
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
         fields = ['information_source', 'contact']
+        validation_dict = {}
 
-        for _field in fields:
+        """for _field in fields:
             _data = data.pop(_field, None)
             if _data:
                 _create_function = f'_get_serialized_{_field}'
@@ -703,20 +720,34 @@ class AdaptationActionServices():
                 if(serialized_data.is_valid()):
                     field_data = serialized_data.save()
                     data[_field] = field_data.id
+        """
 
-        if indicator_adaptation:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-        
-        else:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data)
-        
-        if serialized_indicator_adaptation.is_valid():
-            indicator_adaptation = serialized_indicator_adaptation.save()
-            result = (True, indicator_adaptation)
+        for field in fields:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
 
+        if all(validation_dict):
+            
+            if indicator_adaptation:
+                serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+            
+            else:
+                serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data)
+            
+            if serialized_indicator_adaptation.is_valid():
+                indicator_adaptation = serialized_indicator_adaptation.save()
+                result = (True, indicator_adaptation)
+
+            else:
+                result = (False, serialized_indicator_adaptation.errors)
         else:
-            result = (False, serialized_indicator_adaptation.errors)
-    
+            result = (False, validation_dict.get(False))
+            
         return result
 
     def _create_update_list_indicator(self, data, indicator_adaptation=False):
