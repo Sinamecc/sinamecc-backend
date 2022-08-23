@@ -173,7 +173,7 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ('id', 'name', 'description', 'created', 'updated')
+        fields = ('id', 'name', 'created', 'updated')
 
 class TypeClimateThreatSerializer(serializers.ModelSerializer):
 

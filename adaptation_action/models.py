@@ -221,7 +221,6 @@ class Activity(models.Model):
 class Instrument(models.Model):
     
     name = models.CharField(max_length=250, null=True)
-    description = models.CharField(max_length=3000, null=True)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
