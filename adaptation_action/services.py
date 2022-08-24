@@ -8,7 +8,7 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer
+from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
 
 class AdaptationActionServices():
@@ -303,6 +303,13 @@ class AdaptationActionServices():
 
         return serializer
     
+    def _get_serialized_contact(self, data, contact=False):
+
+        serializers = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+
+        return serializers
+
+    
     
     def _serialize_change_log_data(self, user, adaptation_action, previous_status):
 
@@ -323,6 +330,22 @@ class AdaptationActionServices():
 
         return serializer
     
+    def _create_update_contact(self, data, contact=False):
+
+        if contact:
+            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+        else:
+            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data)
+        
+        if serializer.is_valid():
+            contact = serializer.save()
+            result = (True, contact)
+        
+        else:
+            result = (False, serializer.errors)
+        
+        return result
+
     def _create_update_address(self, data, address=False):
         
         if address:
@@ -527,7 +550,6 @@ class AdaptationActionServices():
             return result
     
     def _create_update_activity(self, data, activity = False):
-            
             if activity:
                 serialized_activity = self._get_serialized_activity(data, activity)
             
@@ -681,14 +703,15 @@ class AdaptationActionServices():
         
         return result
 
-    def _get_serialized_contact(self, data, contact=False):
+    ##contact model from mitigation action
+    def _get_serialized_m_contact(self, data, contact=False):
         
         if contact:
-            serialized_contact = ContactSerializer(contact, data=data, partial=True)
+            serialized_contact = MContactSerializer(contact, data=data, partial=True)
         else:
-            serialized_contact = ContactSerializer(data=data)
+            serialized_contact = MContactSerializer(data=data)
         return serialized_contact
-
+        
     def _create_update_indicator(self, data, indicator_adaptation=False):
 
         _information_source = data.pop('information_source', None)
@@ -696,7 +719,7 @@ class AdaptationActionServices():
 
         if(_contact):
 
-            serialized_contact = self._get_serialized_contact(_contact)
+            serialized_contact = self._get_serialized_m_contact(_contact)
 
             if(serialized_contact.is_valid()):
                 contact = serialized_contact.save()
@@ -813,13 +836,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_subtopic_by_id(self, request):
+    def _get_subtopic_by_id(self, request, subtopic_id):
 
-        subtopic_id = request.GET.get('subtopic_id')
-        subtopic_status, subtopic_data = self._service_helper.get_by_id(subtopic_id, SubTopics)
+        subtopic_status, subtopic_data = self._service_helper.get_all(SubTopics, topic__code=subtopic_id)
 
         if subtopic_status:
-            result = (subtopic_status, SubTopicsSerializer(subtopic_data).data)
+            result = (subtopic_status, SubTopicsSerializer(subtopic_data, many=True).data)
         
         else:
             result = (subtopic_status, subtopic_data)
@@ -863,13 +885,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_activity_by_id(self, request):
+    def _get_activity_by_id(self, request, activity_id):
 
-        activity_id = request.GET.get('activity_id')
-        activity_status, activity_data = self._service_helper.get_by_id(activity_id, Activity)
+        activity_status, activity_data = self._service_helper.get_all(Activity, sub_topic__id=activity_id)
 
         if activity_status:
-            result = (activity_status, ActivitySerializer(activity_data).data)
+            result = (activity_status, ActivitySerializer(activity_data, many=True).data)
         
         else:
             result = (activity_status, activity_data)
@@ -1067,7 +1088,7 @@ class AdaptationActionServices():
         data['user'] = request.user.id
 
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
 
         for field in field_list:
@@ -1100,7 +1121,7 @@ class AdaptationActionServices():
         data = request.data.copy()
         data['user'] = request.user.id
 
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)

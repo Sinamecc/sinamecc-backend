@@ -1,5 +1,6 @@
 
 from functools import partial
+from workflow.serializers import CommentSerializer
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
@@ -38,6 +39,7 @@ class MitigationActionService():
         self.MITIGATION_ACTION_NO_INDICATOR = 'Mitigation action {0} does not have indicators related'
         self.SECTION_MODEL_DOES_NOT_EXIST = 'Section Model does not exist {0}'
         self.CATALOG_DOES_NOT_EXIST = "The catalog does not exist:  {0} --> {1}"
+        self.CHANGE_LOG_NOT_FOUND = "Change log not found"
         self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
         self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
         self.INDICATOR_ERROR = "The  indicator could not be saved"
@@ -96,8 +98,31 @@ class MitigationActionService():
 
         return result
 
+    ## auxiliar function
+    def _increase_review_counter(self, mitigation_action):
+        mitigation_action.review_count += 1
+        mitigation_action.save()
+
+    def _serialize_change_log_data(self, user, mitigation_action, previous_status):
+        
+        data = {
+
+            'user': user.id,
+            'mitigation_action': mitigation_action.id,
+            'current_status': mitigation_action.fsm_state,
+            'previous_status': previous_status
+        }
+
+        return data
 
     ## serializers
+    def _get_serialized_change_log(self, data, change_log=False):
+
+        serializer = self._serialize_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log)
+
+        return serializer
+
+
     def _get_serialized_contact(self, data, contact = False):
 
         serializer = self._serialize_helper.get_serialized_record(ContactSerializer, data, record=contact)
@@ -264,6 +289,24 @@ class MitigationActionService():
 
         return result
     
+    ## change_log
+    def _create_update_change_log(self, data, change_log=False):
+        if change_log:
+            serialized_change_log = self._get_serialized_change_log(data, change_log)
+
+        else:
+            serialized_change_log = self._get_serialized_change_log(data)
+
+        if serialized_change_log.is_valid():
+            change_log = serialized_change_log.save()
+            result = (True, change_log)
+
+        else:
+            result = (False, serialized_change_log.errors)
+
+        return result
+
+        
     def _create_update_indicator_change_log(self, data, indicator_change_log=None):
         
         if indicator_change_log:
@@ -862,7 +905,7 @@ class MitigationActionService():
             serialized_mitigation_action = self._get_serialized_mitigation_action(data)
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
-                
+                mitigation_action.create_code()    
                 result = (True, MitigationActionSerializer(mitigation_action).data)
   
             else:
@@ -915,6 +958,85 @@ class MitigationActionService():
 
 
         return result
+
+    ## update FSM State
+    def patch(self, request, mitigation_action_id):
+        ## missing review and comments here!!
+        data = request.data
+        next_state, user = data.pop('fsm_state', None), request.user
+        comment_list = data.pop('comments', [])
+
+        mitigation_action_status, mitigation_action_data = \
+            self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        if mitigation_action_status:
+            mitigation_action = mitigation_action_data
+            if next_state:
+                update_status, update_data = self._update_fsm_state(next_state, mitigation_action, user)
+                if update_status:
+                    self._increase_review_counter(mitigation_action)
+                    assign_status, assign_data = self._assign_comment(comment_list, mitigation_action, user)
+
+                    if assign_status: result = (True, MitigationActionSerializer(mitigation_action).data)
+                    else: result = (assign_status, assign_data)
+                
+                else:
+                    result = (update_status, update_data)
+            else:
+                result = (False, self.INVALID_STATUS_TRANSITION)
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+        
+        return result
+
+
+
+
+    def get_indicator_from_mitigation_action(self, request, mitigation_action_id):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        if mitigation_action_status:
+            monitoring_information = mitigation_action_data.monitoring_information
+            
+            if monitoring_information:
+                indicator_list = monitoring_information.indicator.all()
+                result = (True, IndicatorSerializer(indicator_list, many=True).data)
+
+            else:
+                result = (False, self.MITIGATION_ACTION_NO_INDICATOR.format(mitigation_action_data.id))
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+
+        return result
+
+    def delete_indicator_from_mitigation_action(self, request, mitigation_action_id, indicator_id):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+        if mitigation_action_status:
+            monitoring_information = mitigation_action_data.monitoring_information
+            
+            if monitoring_information:
+                indicator_list = monitoring_information.indicator.filter(id=indicator_id)
+                if indicator_list:
+                    indicator = indicator_list.first()
+                    indicator.delete()
+                    result = (True, {"id": indicator_id})
+                else:
+                    result = (False, self.INDICATOR_NOT_FOUND.format(indicator_id))
+
+            else:
+                result = (False, self.MITIGATION_ACTION_NO_INDICATOR.format(mitigation_action_data.id))
+        
+        else:
+            result = (mitigation_action_status, mitigation_action_data)
+
+        return result
+
+
+
 
 
     def get_indicator_from_mitigation_action(self, request, mitigation_action_id):
@@ -1002,7 +1124,7 @@ class MitigationActionService():
         return result
 
     
-    def  get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
+    def get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
 
         catalogs_by_parent = {
             'action-areas':{'action-goal': (ActionGoals, ActionGoalsSerializer, 'area')},
@@ -1031,7 +1153,7 @@ class MitigationActionService():
         return result
 
 
-    def update_fsm_state(self, next_state, mitigation_action,user):
+    def _update_fsm_state(self, next_state, mitigation_action, user):
 
         result = (False, self.INVALID_STATUS_TRANSITION)
         # --- Transition ---
@@ -1048,15 +1170,89 @@ class MitigationActionService():
         if next_state in states_keys:
             state_transition= states[next_state]
             transition_function = getattr(mitigation_action ,state_transition.method.__name__)
+            previous_state = mitigation_action.fsm_state
 
             if has_transition_perm(transition_function,user):
                 transition_function()
                 mitigation_action.save()
-                result = (True, MitigationActionSerializer(mitigation_action).data)
+                
+                change_log_data = self._serialize_change_log_data(user, mitigation_action, previous_state)
+                serialized_change_log = self._get_serialized_change_log(change_log_data)
+                if serialized_change_log.is_valid():
+                    serialized_change_log.save()
+                    result = (True, mitigation_action)
+
+                else:
+                    result = (False, serialized_change_log.errors)
+
             else: result = (False, self.INVALID_USER_TRANSITION)
 
-        return result    
+        return result
+    
+    def _assign_comment(self, comment_list, mitigation_action, user):
 
+        data = [{**comment, 'fsm_state': mitigation_action.fsm_state, 'user': user.id, 'review_number': mitigation_action.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            mitigation_action.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+        
+        else:
+            result = (False, comment_list_data)
+
+        return result
+
+
+    def get_current_comments(self, request, mitigation_action_id):
+
+        ## get one mitgate_action
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+
+        if mitigation_action_status:
+            review_number = mitigation_action_data.review_count
+            fsm_state = mitigation_action_data.fsm_state
+            commet_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, mitigation_action_data)
+
+        return result
+    
+    def get_comments_by_fsm_state_or_review_number(self, request, mitigation_action_id, fsm_state=False, review_number=False):
+
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if mitigation_action_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = mitigation_action_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, mitigation_action_data)
+
+        return result
+
+
+    def get_change_log_from_mitigation_action(self, request, mitigation_action_id):
+        result = (False, self.CHANGE_LOG_NOT_FOUND)
+        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        if mitigation_action_status:
+            change_log_list = mitigation_action_data.change_log.order_by('-date').all()
+            result = (True, ChangeLogSerializer(change_log_list, many=True).data)
+        else:
+            result = (False, mitigation_action_data)
+        
+        return result
 
 
 
