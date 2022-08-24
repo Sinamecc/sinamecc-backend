@@ -11,6 +11,7 @@ from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
 from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
+from workflow.serializers import CommentSerializer
 
 class AdaptationActionServices():
     def __init__(self) -> None:

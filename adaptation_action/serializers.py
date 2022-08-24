@@ -14,6 +14,7 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
 from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from general.serializers import AddressSerializer
 from mitigation_action.serializers import ContactSerializer, GenericListSerializer
+from workflow.serializers import CommentSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
 
@@ -405,7 +406,6 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data
         data['finance'] = FinanceSerializer(instance.finance).data
-        print("-----------------------------")
         data['indicator_list'] = IndicatorSerializer(instance.indicator.all(), many=True).data
         data['progress_log'] = ProgressLogSerializer(instance.progress_log).data
         data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
