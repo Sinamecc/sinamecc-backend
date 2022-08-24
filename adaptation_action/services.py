@@ -9,13 +9,15 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer
+from mitigation_action.serializers import ContactSerializer as MContactSerializer
+from workflow.services import WorkflowService
 
 class AdaptationActionServices():
     def __init__(self) -> None:
 
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
+        self._workflow_service = WorkflowService()
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
@@ -304,7 +306,14 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
 
         return serializer
+    
+    def _get_serialized_contact(self, data, contact=False):
 
+        serializers = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+
+        return serializers
+
+    
     
     def _get_serialized_indicator_list(self, data, indicator_list, adaption_action_id):
         
@@ -334,15 +343,6 @@ class AdaptationActionServices():
 
         return serializer
 
-    
-    def _get_serialized_contact(self, data, contact=False):
-        
-        if contact:
-            serialized_contact = ContactSerializer(contact, data=data, partial=True)
-        else:
-            serialized_contact = ContactSerializer(data=data)
-    
-        return serialized_contact
     
     
     def _create_update_contact(self, data, contact=None):
@@ -567,7 +567,6 @@ class AdaptationActionServices():
             return result
     
     def _create_update_activity(self, data, activity = False):
-            
             if activity:
                 serialized_activity = self._get_serialized_activity(data, activity)
             
@@ -720,7 +719,15 @@ class AdaptationActionServices():
             result = (False, serialized_information_source.errors)
         
         return result
-
+       ##contact model from mitigation action
+    def _get_serialized_m_contact(self, data, contact=False):
+        
+        if contact:
+            serialized_contact = MContactSerializer(contact, data=data, partial=True)
+        else:
+            serialized_contact = MContactSerializer(data=data)
+        return serialized_contact
+        
     # auxiliar function for create and update record
     def _get_indicators_for_updating_creating(self,indicator_data_list, indicator_list,  adaptation_action):
         ## added object attribute if the indicator data has an indicator id
@@ -896,13 +903,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_subtopic_by_id(self, request):
+    def _get_subtopic_by_id(self, request, subtopic_id):
 
-        subtopic_id = request.GET.get('subtopic_id')
-        subtopic_status, subtopic_data = self._service_helper.get_by_id(subtopic_id, SubTopics)
+        subtopic_status, subtopic_data = self._service_helper.get_all(SubTopics, topic__code=subtopic_id)
 
         if subtopic_status:
-            result = (subtopic_status, SubTopicsSerializer(subtopic_data).data)
+            result = (subtopic_status, SubTopicsSerializer(subtopic_data, many=True).data)
         
         else:
             result = (subtopic_status, subtopic_data)
@@ -946,13 +952,12 @@ class AdaptationActionServices():
         
         return result
     
-    def _get_activity_by_id(self, request):
+    def _get_activity_by_id(self, request, activity_id):
 
-        activity_id = request.GET.get('activity_id')
-        activity_status, activity_data = self._service_helper.get_by_id(activity_id, Activity)
+        activity_status, activity_data = self._service_helper.get_all(Activity, sub_topic__id=activity_id)
 
         if activity_status:
-            result = (activity_status, ActivitySerializer(activity_data).data)
+            result = (activity_status, ActivitySerializer(activity_data, many=True).data)
         
         else:
             result = (activity_status, activity_data)
@@ -1060,9 +1065,24 @@ class AdaptationActionServices():
         return result
 
     ## auxiliar function
-    def _increase_review_counter(self, mitigation_action):
-        mitigation_action.review_count += 1
-        mitigation_action.save()
+    def _increase_review_counter(self, adaptation_action):
+        adaptation_action.review_count += 1
+        adaptation_action.save()
+    
+    
+    def _assign_comment(self, comment_list, adaptation_action, user):
+
+        data = [{**comment, 'fsm_state': adaptation_action.fsm_state, 'user': user.id, 'review_number': adaptation_action.review_count}  for comment in comment_list]
+        comment_list_status, comment_list_data = self._workflow_service.create_comment_list(data)
+
+        if comment_list_status:
+            adaptation_action.comments.add(*comment_list_data)
+            result = (True, comment_list_data)
+        
+        else:
+            result = (False, comment_list_data)
+
+        return result
     
     
     def _update_fsm_state(self, next_state, adaptation_action, user):
@@ -1238,11 +1258,13 @@ class AdaptationActionServices():
                 update_status, update_data = self._update_fsm_state(next_state, adaptation_action, user)
                 if update_status:
                     self._increase_review_counter(adaptation_action)
-                    ##assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
+                    assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
 
-                    ##if assign_status: 
-                    result = (True, AdaptationActionSerializer(adaptation_action).data)
-                    ##else: result = (assign_status, assign_data)
+                    if assign_status: 
+                        result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    
+                    else: 
+                        result = (assign_status, assign_data)
                 
                 else:
                     result = (update_status, update_data)
@@ -1251,4 +1273,40 @@ class AdaptationActionServices():
         else:
             result = (adaptation_action_status, adaptation_action_data)
         
+        return result
+    
+    
+    def get_current_comments(self, request, adaptation_action_id):
+
+        adap_action_status, adap_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adap_action_status:
+            review_number = adap_action_data.review_count
+            fsm_state = adap_action_data.fsm_state
+            commet_list = adap_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, adap_action_data)
+
+        return result
+    
+    def get_comments_by_fsm_state_or_review_number(self, request, adaptation_action_id, fsm_state=None, review_number=None):
+        adap_action_status, adap_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        search_key = lambda x, y: { x:y } if y else {}
+        if adap_action_status:
+
+            search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
+            commet_list = adap_action_data.comments.filter(**search_kwargs).all()
+
+            serialized_comment = CommentSerializer(commet_list, many=True)
+
+            result = (True, serialized_comment.data)
+        
+        else:
+            result = (False, adap_action_data)
+
         return result

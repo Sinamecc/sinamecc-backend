@@ -9,7 +9,7 @@ from general.utils import unique_field_value_generator
 from time import gmtime, strftime
 import string
 from django_fsm import FSMField, transition
-
+from workflow.models import Comment
 import report_data
 
 User =  get_user_model()
@@ -50,7 +50,6 @@ class ReportData(models.Model):
     )
     fsm_state = FSMField(default='new', protected=True, max_length=100)
     user = models.ForeignKey(User, related_name='report_data', on_delete=models.CASCADE)
-    
     # sec 2
     ###
     name = models.CharField(max_length=100, blank=False, null=False)
@@ -94,6 +93,9 @@ class ReportData(models.Model):
     report_data_type = models.CharField(max_length=100, choices=REPORT_DATA_TYPE_CHOICES, blank=True, null=True)
     individual_report_data = models.TextField(blank=True, null=True) ## can be used for the individual report or url
     
+    ## review
+    comments = models.ManyToManyField(Comment, blank=True)
+    review_count = models.IntegerField(null=True, blank=True, default=0)
     
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -244,6 +246,25 @@ class ReportFile(models.Model):
         
         super(ReportFile, self).save(*args, **kwargs)
 
+
+class ChangeLog(models.Model):
+    
+    date = models.DateTimeField(auto_now_add=True, null=False)
+    # Foreign Keys
+    report_data = models.ForeignKey(ReportData, related_name='change_log', on_delete=models.CASCADE)
+    previous_status = models.CharField(max_length=100, null=True)
+    current_status = models.CharField(max_length=100)
+    user = models.ForeignKey(User, related_name='report_data_fsm_change_log', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("ChangeLog")
+        verbose_name_plural = _("ChangeLogs")
+        ordering = ('date',)
+        
+    def __unicode__(self):
+        return smart_unicode(self.name)
+    
+    
 class ReportDataChangeLog(models.Model):
 
     report_data = models.ForeignKey(ReportData, related_name='report_data_change_log', null=True, blank=True, on_delete=models.CASCADE)

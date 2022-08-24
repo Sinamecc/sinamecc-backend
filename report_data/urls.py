@@ -6,8 +6,8 @@ from report_data import views
 urlpatterns = [
     url(
         r'^api/v1/report-data/report/(?P<pk>[0-9]+)/*$',
-        views.get_delete_update_report_data,
-        name='get_delete_update_report_data'
+        views.get_delete_update_patch_report_data,
+        name='get_delete_update_patch_report_data'
     ),
     url(
         r'^api/v1/report_file/(?P<pk>[0-9]+)/versions$',
@@ -43,6 +43,26 @@ urlpatterns = [
         'api/v1/report-data/report/<int:report_data_id>/source-file/',
         views.get_source_file_to_report_data, 
         name='get_source_file_to_report_data'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/<str:fsm_state>/comments/',
+        views.get_comments,
+        name='get_comments'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/comments/',
+        views.get_comments,
+        name='get_comments'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/<str:fsm_state>/review/<int:review_number>/comments/',
+        views.get_comments,
+        name='get_comments'
+    ),
+    path(
+        'api/v1/report-data/report/<int:report_data_id>/review/<int:review_number>/comments/',
+        views.get_comments,
+        name='get_comments'
     ),
 
 ]
