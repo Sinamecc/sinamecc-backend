@@ -9,7 +9,6 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
 from workflow.serializers import CommentSerializer
 
@@ -720,15 +719,7 @@ class AdaptationActionServices():
             result = (False, serialized_information_source.errors)
         
         return result
-       ##contact model from mitigation action
-    def _get_serialized_m_contact(self, data, contact=False):
-        
-        if contact:
-            serialized_contact = MContactSerializer(contact, data=data, partial=True)
-        else:
-            serialized_contact = MContactSerializer(data=data)
-        return serialized_contact
-        
+            
     # auxiliar function for create and update record
     def _get_indicators_for_updating_creating(self,indicator_data_list, indicator_list,  adaptation_action):
         ## added object attribute if the indicator data has an indicator id

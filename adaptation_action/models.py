@@ -1,13 +1,15 @@
 import uuid
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact as MContact
-from general.models import Address, User
+from general.models import Address
 from django_fsm import FSMField, transition
+from users.models import CustomUser
 
 from workflow.models import Comment
 
 # Create your models here.
+User =  get_user_model()
 
 class ReportOrganizationType(models.Model): 
     
@@ -28,7 +30,9 @@ class Contact(models.Model):
     email = models.TextField(null=True)
     phone = models.TextField(null=True)
     address = models.TextField(null=True)
+    institution = models.TextField(null=True)
 
+    user = models.ForeignKey(User, related_name='contact_adaptation_action', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -443,7 +447,7 @@ class IndicatorAdaptation(models.Model):
     other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
-    contact = models.ForeignKey(MContact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
 
 
     ## Logs

@@ -11,9 +11,8 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact
 
-from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from general.serializers import AddressSerializer
-from mitigation_action.serializers import ContactSerializer, GenericListSerializer
+
 from workflow.serializers import CommentSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
@@ -21,6 +20,12 @@ class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportOrganizationType
         fields = ('id', 'code', 'entity_type', 'created', 'updated')
+
+class ContactSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Contact
+        fields = ('id', 'contact_position', 'contact_name', 'address', 'email', 'institution', 'phone')
 
 class ReportOrganizationSerializer(serializers.ModelSerializer):
 
@@ -34,12 +39,6 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
         data['contact'] = ContactSerializer(instance.contact).data
 
         return data
-
-class ContactSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Contact
-        fields = ('id', 'contact_position', 'contact_name', 'address', 'email', 'phone')
 
 class AdaptationActionTypeSerializer(serializers.ModelSerializer):
     
@@ -301,7 +300,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
-        data['contact'] = MContactSerializer(instance.contact).data
+        data['contact'] = ContactSerializer(instance.contact).data
 
         return data
 
