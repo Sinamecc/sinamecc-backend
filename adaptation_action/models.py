@@ -363,7 +363,7 @@ class Classifier(models.Model):
         verbose_name = _("Classifier")
         verbose_name_plural = _("Classifiers")
 
-
+## Section: 4
 class IndicatorAdaptation(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
@@ -426,6 +426,7 @@ class IndicatorAdaptation(models.Model):
         verbose_name = _("Indicator Adaptation")
         verbose_name_plural = _("Indicator Adaptation")
     
+
 class ProgressLog(models.Model):
 
     action_status = models.CharField(max_length=25, null=True)
