@@ -1,13 +1,15 @@
 import uuid
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact as MContact
-from general.models import Address, User
+from general.models import Address
 from django_fsm import FSMField, transition
+from users.models import CustomUser
 
 from workflow.models import Comment
 
 # Create your models here.
+User =  get_user_model()
 
 class ReportOrganizationType(models.Model): 
     
@@ -28,7 +30,9 @@ class Contact(models.Model):
     email = models.TextField(null=True)
     phone = models.TextField(null=True)
     address = models.TextField(null=True)
+    institution = models.TextField(null=True)
 
+    user = models.ForeignKey(User, related_name='contact_adaptation_action', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -391,7 +395,7 @@ class Classifier(models.Model):
         verbose_name = _("Classifier")
         verbose_name_plural = _("Classifiers")
 
-
+## Section: 4
 class IndicatorAdaptation(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
@@ -406,11 +410,12 @@ class IndicatorAdaptation(models.Model):
         ('CANTONAL', 'Cantonal'),
         ('OTHER', 'Other')
     ]
-
+    #Section 4
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
     unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator', on_delete=models.SET_NULL)
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
@@ -442,7 +447,7 @@ class IndicatorAdaptation(models.Model):
     other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
-    contact = models.ForeignKey(MContact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
 
 
     ## Logs
@@ -453,6 +458,7 @@ class IndicatorAdaptation(models.Model):
         verbose_name = _("Indicator Adaptation")
         verbose_name_plural = _("Indicator Adaptation")
     
+
 class ProgressLog(models.Model):
 
     action_status = models.CharField(max_length=25, null=True)
@@ -575,9 +581,6 @@ class AdaptationAction(models.Model):
 
     #Section 3
     finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    
-    #Section 4
-    indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)

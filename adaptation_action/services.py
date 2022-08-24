@@ -1,6 +1,7 @@
 
 from asyncio import start_unix_server
 from os import error
+from unittest import result
 
 from django_fsm import has_transition_perm
 from adaptation_action.models import ReportOrganization, AdaptationAction
@@ -8,8 +9,8 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
+from workflow.serializers import CommentSerializer
 
 class AdaptationActionServices():
     def __init__(self) -> None:
@@ -25,7 +26,7 @@ class AdaptationActionServices():
 
     def _create_sub_record(self, data, sub_record_name):
         
-        create_function = f'_create_update_{sub_record_name}'
+        create_function =  f'_create_update_{sub_record_name}'
 
         if hasattr(self, create_function):
             function = getattr(self, create_function)
@@ -36,17 +37,15 @@ class AdaptationActionServices():
             raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
         return result
-    
+
+
     def _update_sub_record(self, sub_record_name, record_for_updating, data):
         
         update_function = f'_create_update_{sub_record_name}'
         
         if hasattr(self, update_function):
-          
-            function = getattr(self, update_function)
-        
-            record_status, record_detail = function(data, record_for_updating)
-          
+            function = getattr(self, update_function)        
+            record_status, record_detail = function(data, record_for_updating)   
             result = (record_status, record_detail)
         
         else:
@@ -54,9 +53,11 @@ class AdaptationActionServices():
 
         return result
 
+
     def _create_or_update_record(self, instance, field, data):
 
         result = (False, [])
+        
         if hasattr(instance, field):
             if getattr(instance, field) == None:
                 record_status, record_data = self._create_sub_record(data, field) ## field = sub_record_name
@@ -72,6 +73,7 @@ class AdaptationActionServices():
             result = (False, self.ATTRIBUTE_INSTANCE_ERROR)
 
         return result
+
 
     def _get_serialized_adaptation_action(self, data, adaptation_action = False):
 
@@ -148,6 +150,7 @@ class AdaptationActionServices():
             result = (False, serialized_indicator_monitoring.errors)
         
         return result
+    
 
     def _create_update_general_report(self, data, general_report=False):
 
@@ -182,6 +185,7 @@ class AdaptationActionServices():
             result = (False, serialized_action_impact.errors)
 
         return result
+    
 
     def _get_serialized_report_organization_type(self, data, report_organization_type = False):
 
@@ -311,6 +315,15 @@ class AdaptationActionServices():
 
     
     
+    def _get_serialized_indicator_list(self, data, indicator_list, adaption_action_id):
+        
+        data = [{**indicator, 'adaptation_action': adaption_action_id}  for indicator in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
+
+        return serializer
+    
+    
     def _serialize_change_log_data(self, user, adaptation_action, previous_status):
 
         data = {
@@ -324,27 +337,31 @@ class AdaptationActionServices():
     
     
     
-    def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=False):
+    def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=None):
 
         serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
 
         return serializer
-    
-    def _create_update_contact(self, data, contact=False):
 
+    
+    
+    def _create_update_contact(self, data, contact=None):
+        
         if contact:
-            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+            serialized_contact = self._get_serialized_contact(data, contact)
+
         else:
-            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data)
+            serialized_contact = self._get_serialized_contact(data)
         
-        if serializer.is_valid():
-            contact = serializer.save()
+        if serialized_contact.is_valid():
+            contact = serialized_contact.save()
             result = (True, contact)
-        
+
         else:
-            result = (False, serializer.errors)
-        
+            result = (False, serialized_contact.errors)
+
         return result
+
 
     def _create_update_address(self, data, address=False):
         
@@ -702,51 +719,93 @@ class AdaptationActionServices():
             result = (False, serialized_information_source.errors)
         
         return result
+            
+    # auxiliar function for create and update record
+    def _get_indicators_for_updating_creating(self,indicator_data_list, indicator_list,  adaptation_action):
+        ## added object attribute if the indicator data has an indicator id
+        for indicator_data in indicator_data_list:
+            indicator_data_id = indicator_data.get('id', None)
+            if indicator_data_id:
+                obj = next(filter(lambda x: x.id == indicator_data_id, indicator_list), None)
+                if obj: indicator_data['object'] = obj
+                else:
+                    result = (False, 'Indicator with id {} not found'.format(indicator_data_id))
+            else:
+                indicator_data['adaptation_action'] =  adaptation_action.id
 
-    ##contact model from mitigation action
-    def _get_serialized_m_contact(self, data, contact=False):
+        result = (True, indicator_data_list)
+
+        return result    
+
+
+    def _create_update_indicator_list(self, indicator_list_data, adaptation_action):
         
-        if contact:
-            serialized_contact = MContactSerializer(contact, data=data, partial=True)
-        else:
-            serialized_contact = MContactSerializer(data=data)
-        return serialized_contact
+        indicator_list = adaptation_action.indicator.all()
         
-    def _create_update_indicator(self, data, indicator_adaptation=False):
+        result = (True, [])
+        f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
+        indicator_list_data = list(map(f, indicator_list_data))
+        try:
+            if indicator_list.count():
+                ## in this part we are going to get the indicators to update or create
+                ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_obj_from_DB_with_id_2> }, {...}, ... ]
+                ## and if the indicator json data has not id, we are going to create it , not update it
+                ## change the indicator_list_data to update or create the indicators
+                indicator_list_status, indicator_list_data = self._get_indicators_for_updating_creating(indicator_list_data, indicator_list, adaptation_action)
+                if not indicator_list_status: raise Exception(indicator_list)
 
-        _information_source = data.pop('information_source', None)
-        _contact = data.pop('contact', None)
-
-        if(_contact):
-
-            serialized_contact = self._get_serialized_m_contact(_contact)
-
-            if(serialized_contact.is_valid()):
-                contact = serialized_contact.save()
-                data['contact'] = contact.id
-
-        if(_information_source):
+            result_indicator_list = []
+            for indicator_data in indicator_list_data:
+                indicator = indicator_data.pop('object', None)
+                indicator_status, indicator_data = self._create_update_indicator(indicator_data, indicator)
                 
-            serialized_information_source = self._get_serialized_information_source(_information_source)
+                if not indicator_status:
+                    ## if the indicator is not valid, return the error
+                    result = (indicator_status, indicator_data) 
+                    break
+                result_indicator_list.append(indicator_data)
 
-            if(serialized_information_source.is_valid()):
-                information_source = serialized_information_source.save()
-                data['information_source'] = information_source.id
+            else:
+                result = (True, result_indicator_list)
 
-        if indicator_adaptation:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-        
-        else:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data)
-        
-        if serialized_indicator_adaptation.is_valid():
-            indicator_adaptation = serialized_indicator_adaptation.save()
-            result = (True, indicator_adaptation)
-        
-        else:
-            result = (False, serialized_indicator_adaptation.errors)
+
+        except Exception as error:
+            result = (False, error)
         
         return result
+    
+    
+    
+    def _create_update_indicator(self, data, indicator_adaptation=None):
+
+        fields = ['information_source', 'contact']
+        validation_dict = {}
+        for field in fields:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+        if all(validation_dict):
+
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+            
+            if serialized_indicator_adaptation.is_valid():
+                indicator_adaptation = serialized_indicator_adaptation.save()
+
+                result = (True, indicator_adaptation)
+
+            else:
+                result = (False, serialized_indicator_adaptation.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
+        return result
+
+
 
     def _create_update_report_organization(self, data, report_organization=False):
 
@@ -1086,10 +1145,10 @@ class AdaptationActionServices():
         validation_dict = {}
         data = request.data.copy()
         data['user'] = request.user.id
-
+        indicator_list = data.pop('indicator_list', [])
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
 
         for field in field_list:
             if data.get(field, False):
@@ -1099,13 +1158,21 @@ class AdaptationActionServices():
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
+
         
         if all(validation_dict):
             serialized_adaptation_action = self._get_serialized_adaptation_action(data)
             if serialized_adaptation_action.is_valid():
                 adaptation_action = serialized_adaptation_action.save()
+                ## create indicator_list
+                indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+
+                if indicator_status:
+                    result = (True, AdaptationActionSerializer(adaptation_action).data)
                 
-                result = (True, AdaptationActionSerializer(adaptation_action).data)
+                else:
+                    result = (False, indicator_data)
+                    
   
             else:
                 errors.append(serialized_adaptation_action.errors)
@@ -1115,14 +1182,17 @@ class AdaptationActionServices():
             
         return result
     
+    
+    
     def update(self, request, adaptation_action_id):
 
         validation_dict = {}
         data = request.data.copy()
         data['user'] = request.user.id
+        indicator_list = data.pop('indicator_list', [])
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
 
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
@@ -1138,13 +1208,21 @@ class AdaptationActionServices():
                         
                     dict_data = record_data if isinstance(record_data, list) else [record_data]
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
+            
 
             if all(validation_dict):
                 serialized_adaptation_action = self._get_serialized_adaptation_action(data, adaptation_action)
                 
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
-                    result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    ## create indicator_list, the adaptation_action has an  indicator_list field in his model
+                    indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+
+                    if indicator_status:
+                        result = (True, AdaptationActionSerializer(adaptation_action).data)
+                
+                    else:
+                        result = (False, indicator_data)
 
                 else:
                     result = (False, serialized_adaptation_action.errors)

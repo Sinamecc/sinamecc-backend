@@ -11,8 +11,8 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact
 
-from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from general.serializers import AddressSerializer
+
 from workflow.serializers import CommentSerializer
 
 class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
@@ -20,6 +20,12 @@ class ReportOrganizationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportOrganizationType
         fields = ('id', 'code', 'entity_type', 'created', 'updated')
+
+class ContactSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Contact
+        fields = ('id', 'contact_position', 'contact_name', 'address', 'email', 'institution', 'phone')
 
 class ReportOrganizationSerializer(serializers.ModelSerializer):
 
@@ -33,12 +39,6 @@ class ReportOrganizationSerializer(serializers.ModelSerializer):
         data['contact'] = ContactSerializer(instance.contact).data
 
         return data
-
-class ContactSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Contact
-        fields = ('id', 'contact_position', 'contact_name', 'address', 'email', 'phone')
 
 class AdaptationActionTypeSerializer(serializers.ModelSerializer):
     
@@ -291,15 +291,16 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
+        fields = ('id', 'name', 'adaptation_action', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
-    
+        
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
-        data['contact'] = MContactSerializer(instance.contact).data
+        data['contact'] = ContactSerializer(instance.contact).data
 
         return data
 
@@ -369,7 +370,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
+        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         
@@ -404,7 +405,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data
         data['finance'] = FinanceSerializer(instance.finance).data
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator_list'] = IndicatorSerializer(instance.indicator.all(), many=True).data
         data['progress_log'] = ProgressLogSerializer(instance.progress_log).data
         data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
