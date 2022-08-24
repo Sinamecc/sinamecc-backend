@@ -11,10 +11,14 @@ from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
 from workflow.services import WorkflowService
 from workflow.serializers import CommentSerializer
+from general.storages import S3Storage
+import os
+from io import BytesIO
 
 class AdaptationActionServices():
     def __init__(self) -> None:
 
+        self._storage = S3Storage()
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
         self._workflow_service = WorkflowService()
@@ -1113,7 +1117,160 @@ class AdaptationActionServices():
 
         return result
     
+    def _upload_file_to_climate_threat(self, data, adaptation_action):
+
+        file_data = {"file_description_climate_threat": data.get("file_description_climate_threat", None), 
+                     "file_vulnerability_climate_threat": data.get("file_vulnerability_climate_threat", None),
+                     "file_exposed_elements": data.get("file_exposed_elements", None),}
+
+        climate_threat = adaptation_action.climate_threat
+        climate_threat_status, climate_threat_data = self._create_update_climate_threat(file_data, climate_threat)
+
+        if climate_threat_status:
+            if climate_threat == None:
+                adaptation_action.climate_threat = climate_threat_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (climate_threat_status, climate_threat_data)
+            
+        return result
     
+    def _upload_file_to_indicator(self, data, adaptation_action):
+
+        file_data = {"methodological_detail_file": data.get("methodological_detail_file", None), 
+                     "additional_information_file": data.get("additional_information_file", None),}
+
+        indicator = adaptation_action.indicator
+        indicator_status, indicator_data = self._create_update_indicator(file_data, indicator)
+
+        if indicator_status:
+            if indicator == None:
+                adaptation_action.indicator = indicator_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (indicator_status, indicator_data)
+            
+        return result
+
+    def _upload_file_to_indicator_monitoring(self, data, adaptation_action):
+
+        file_data = {"data_to_update_file": data.get("data_to_update_file", None),}
+
+        indicator_monitoring = adaptation_action.indicator_monitoring
+        indicator_monitoring_status, indicator_monitoring_data = self._create_update_indicator_monitoring(file_data, indicator_monitoring)
+
+        if indicator_monitoring_status:
+            if indicator_monitoring == None:
+                adaptation_action.indicator_monitoring = indicator_monitoring_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (indicator_monitoring_status, indicator_monitoring_data)
+        
+        return result
+
+    def _upload_file_to_action_impact(self, data, adaptation_action):
+
+        file_data = {"data_to_update_file_action_impact": data.get("data_to_update_file_action_impact", None),}
+
+        action_impact = adaptation_action.action_impact
+        action_impact_status, action_impact_data = self._create_update_action_impact(file_data, action_impact)
+
+        if action_impact_status:
+            if action_impact == None:
+                adaptation_action.action_impact = action_impact_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (action_impact_status, action_impact_data)
+        
+        return result
+
+    ## upload files in the models
+    def upload_file_from_adaptation_action(self, request, adaptation_action_id, model_type):
+
+        model_type_options = {
+            'climate_threat': self._upload_file_to_climate_threat,
+            'indicator': self._upload_file_to_indicator,
+            'indicator_monitoring': self._upload_file_to_indicator_monitoring,
+            'action_impact': self._upload_file_to_action_impact,
+        }    
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            method = model_type_options.get(model_type, False)
+            
+            if method:
+                response_status, response_data = method(data, adaptation_action_data)
+                
+                if response_status:
+                    result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                    
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(model_type))
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
+
+
+    def _download(self, s3_path):
+
+        path, filename = os.path.split(s3_path)
+    
+        file_content =  BytesIO(self._storage.get_file(s3_path))
+        result = (True, (filename, file_content))    
+
+        return result
+
+    def download_file(self, request, model_id, file_name):
+
+        file_name_options = {
+            'file_description_climate_threat': [ClimateThreat, lambda a: a.file_description_climate_threat.name],
+            'file_vulnerability_climate_threat': [ClimateThreat, lambda a: a.file_vulnerability_climate_threat.name],
+            'file_exposed_elements': [ClimateThreat, lambda a: a.file_exposed_elements.name],
+            'methodological_detail_file': [IndicatorAdaptation, lambda a: a.methodological_detail_file.name],
+            'additional_information_file': [IndicatorAdaptation, lambda a: a.additional_information_file.name],
+            'data_to_update_file': [IndicatorMonitoring, lambda a: a.data_to_update_file.name],
+            'data_to_update_file_action_impact': [ActionImpact, lambda a: a.data_to_update_file_action_impact.name],
+        }    
+    
+        method = file_name_options.get(file_name, False)
+        
+        if method:
+            method_status, method_data = self._service_helper.get_one(method[0], model_id)
+            if method_status:
+
+                s3_path = method[1](method_data)
+
+                response_status, response_data = self._download(s3_path)
+            
+                if response_status:
+                    result = (response_status, response_data)
+                    
+                else:
+                    result = (response_status, response_data)
+            else:
+                result = (method_status, method_data)
+
+        else:
+            result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(file_name))
+        
+        return result
+
     def get(self, request, adaptation_action_id):
         
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)

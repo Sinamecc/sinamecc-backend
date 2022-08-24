@@ -5,6 +5,7 @@ from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 from django.conf import settings
 from general.utils import get_translation_from_database as _
+from django.urls import reverse
 
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
@@ -172,7 +173,7 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ('id', 'name', 'description', 'created', 'updated')
+        fields = ('id', 'name', 'created', 'updated')
 
 class TypeClimateThreatSerializer(serializers.ModelSerializer):
 
@@ -184,11 +185,18 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements')
+        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat', 'file_vulnerability_climate_threat', 'file_exposed_elements')
     
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat.all(), many=True).data
+        data['file_description_climate_threat'] = self._get_url(instance, 'file_description_climate_threat')
+        data['file_vulnerability_climate_threat'] = self._get_url(instance, 'file_vulnerability_climate_threat')
+        data['file_exposed_elements'] = self._get_url(instance, 'file_exposed_elements')
 
         return data
 
@@ -246,7 +254,7 @@ class FinanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinanceAdaptation
-        fields = ('id', 'administration', 'budget', 'status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
+        fields = ('id', 'administration', 'budget', 'year','status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -271,7 +279,7 @@ class InformationSourceSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['type_information'] = InformationSourceTypeSerializer(instance.type_information).data
+        data['type_information'] = InformationSourceTypeSerializer(instance.type_information.all(), many=True).data
         
         return data
 
@@ -291,16 +299,21 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'adaptation_action', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
-         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'created', 'updated')
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
+         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file', 'created', 'updated')
+    
+    def _get_url(self, obj, file_name):
         
-        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
         data['contact'] = ContactSerializer(instance.contact).data
+        data['methodological_detail_file'] = self._get_url(instance, 'methodological_detail_file')
+        data['additional_information_file'] = self._get_url(instance, 'additional_information_file')
 
         return data
 
@@ -323,12 +336,17 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'created', 'updated')
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file', 'other_indicator_source', 'support_information')
+
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['indicator_source'] = IndicatorSourceSerializer(instance.indicator_source.all(), many=True).data
         data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['data_to_update_file'] = self._get_url(instance, 'data_to_update_file')
 
         return data
 
@@ -348,13 +366,18 @@ class ActionImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActionImpact
-        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'created', 'updated')
+        fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'data_to_update_file_action_impact')
     
+    def _get_url(self, obj, file_name):
+        
+        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['general_impact'] = GeneralImpactSerializer(instance.general_impact).data
         data['temporality_impact'] = TemporalityImpactSerializer(instance.temporality_impact.all(), many=True).data
         data['ods'] = ODSSerializer(instance.ods.all(), many=True).data
+        data['data_to_update_file_action_impact'] = self._get_url(instance, 'data_to_update_file_action_impact')
 
         return data
     
@@ -400,7 +423,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['report_organization'] = ReportOrganizationSerializer(instance.report_organization).data
         data['address'] = AddressSerializer(instance.address).data
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
-        data['activity'] = ActivitySerializer(instance.activity).data
+        data['activity'] = ActivitySerializer(instance.activity.all(), many=True).data
         data['instrument'] = InstrumentSerializer(instance.instrument).data
         data['climate_threat'] = ClimateThreatSerializer(instance.climate_threat).data
         data['implementation'] = ImplementationSerializer(instance.implementation).data

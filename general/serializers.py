@@ -51,6 +51,6 @@ class AddressSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
-        data['district'] = DistrictSerializer(instance.district).data
+        data['district'] = DistrictSerializer(instance.district.all(), many=True).data
 
         return data
