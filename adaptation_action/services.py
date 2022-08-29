@@ -1,8 +1,4 @@
 
-from asyncio import start_unix_server
-from os import error
-from unittest import result
-
 from django_fsm import has_transition_perm
 from adaptation_action.models import ReportOrganization, AdaptationAction
 from adaptation_action.serializers import *
@@ -749,6 +745,7 @@ class AdaptationActionServices():
         result = (True, [])
         f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
         indicator_list_data = list(map(f, indicator_list_data))
+        print(indicator_list_data)
         try:
             if indicator_list.count():
                 ## in this part we are going to get the indicators to update or create
@@ -1305,7 +1302,7 @@ class AdaptationActionServices():
         indicator_list = data.pop('indicator_list', [])
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring_list', 'general_report', 'action_impact']
 
         for field in field_list:
             if data.get(field, False):
@@ -1348,7 +1345,7 @@ class AdaptationActionServices():
         data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring_list', 'general_report', 'action_impact']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)

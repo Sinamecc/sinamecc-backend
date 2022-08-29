@@ -299,7 +299,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage',
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage', 'adaptation_action',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file', 'created', 'updated')
     
     def _get_url(self, obj, file_name):
@@ -393,7 +393,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
+        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         
@@ -430,7 +430,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['finance'] = FinanceSerializer(instance.finance).data
         data['indicator_list'] = IndicatorSerializer(instance.indicator.all(), many=True).data
         data['progress_log'] = ProgressLogSerializer(instance.progress_log).data
-        data['indicator_monitoring'] = IndicatorMonitoringSerializer(instance.indicator_monitoring).data
+        data['indicator_monitoring_list'] = IndicatorMonitoringSerializer(instance.indicator_monitoring.all(), many=True).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data

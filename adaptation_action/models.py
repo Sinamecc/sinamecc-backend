@@ -491,6 +491,7 @@ class IndicatorSource(models.Model):
         verbose_name = _("Indicator Source")
         verbose_name_plural = _("Indicator Source")
 
+## Section: 5
 class IndicatorMonitoring(models.Model):
 
     start_date = models.DateField(null=True)
@@ -500,6 +501,7 @@ class IndicatorMonitoring(models.Model):
     data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
     indicator_source = models.ManyToManyField(IndicatorSource, related_name='indicator_monitoring', blank=True)
     other_indicator_source = models.TextField(null=True)
     support_information = models.TextField(null=True)
@@ -592,7 +594,6 @@ class AdaptationAction(models.Model):
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    indicator_monitoring = models.ForeignKey(IndicatorMonitoring, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     general_report = models.ForeignKey(GeneralReport, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 6
