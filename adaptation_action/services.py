@@ -745,7 +745,7 @@ class AdaptationActionServices():
         result = (True, [])
         f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
         indicator_list_data = list(map(f, indicator_list_data))
-        print(indicator_list_data)
+        
         try:
             if indicator_list.count():
                 ## in this part we are going to get the indicators to update or create
@@ -806,6 +806,61 @@ class AdaptationActionServices():
             
         return result
 
+    
+    def _get_indicator_monitoring_for_updating_creating(self, ind_monitoring_data_list, ind_monitoring_list, adaptation_action):
+        
+        for ind_monitoring_data in ind_monitoring_data_list:
+            ind_monitoring_data_id = ind_monitoring_data.get('id', None)
+            if ind_monitoring_data_id:
+                obj = next(filter(lambda x: x.id == ind_monitoring_data_id, ind_monitoring_list), None)
+                if obj: ind_monitoring_data['object'] = obj
+                else:
+                    result = (False, 'Indicator Monitoring with id {} not found'.format(ind_monitoring_data_id))
+            else:
+                ind_monitoring_data['adaptation_action'] =  adaptation_action.id
+            
+        result = (True, ind_monitoring_data_list)
+        
+        return result
+
+        
+    def _create_update_indicator_monitoring_list(self, indicator_monitoring_list_data, adaptation_action):
+        
+        indicator_monitoring_list = adaptation_action.indicator_monitoring.all()
+        
+        result = (True, [])
+        f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
+        indicator_monitoring_list_data = list(map(f, indicator_monitoring_list_data))
+        try:
+            if indicator_monitoring_list.count():
+                ## in this part we are going to get the indicator monitoring to update or create
+                ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_monitoring_obj_from_DB_with_id_2> }, {...}, ... ]
+                ## and if the indicator monitoring json data has not id, we are going to create it , not update it
+                ## change the indicator_monitoring_list_data to update or create the indicator monitoring
+                indicator_monitoring_list_status, indicator_monitoring_list_data = \
+                    self._get_indicator_monitoring_for_updating_creating(indicator_monitoring_list_data, indicator_monitoring_list, adaptation_action)
+                    
+                if not indicator_monitoring_list_status: raise Exception(indicator_monitoring_list)
+
+            result_indicator_monitoring_list = []
+            for indicator_monitoring_data in indicator_monitoring_list_data:
+                ind_monitoring = indicator_monitoring_data.pop('object', None)
+                ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring(indicator_monitoring_data, ind_monitoring)
+                
+                if not ind_monitoring_status:
+                    ## if the indicator is not valid, return the error
+                    result = (ind_monitoring_status, ind_monitoring_data) 
+                    break
+                result_indicator_monitoring_list.append(ind_monitoring_data)
+
+            else:
+                result = (True, result_indicator_monitoring_list)
+
+
+        except Exception as error:
+            result = (False, error)
+        
+        return result
 
 
     def _create_update_report_organization(self, data, report_organization=False):
@@ -1153,6 +1208,8 @@ class AdaptationActionServices():
             
         return result
 
+    
+    ## this function must be updated 
     def _upload_file_to_indicator_monitoring(self, data, adaptation_action):
 
         file_data = {"data_to_update_file": data.get("data_to_update_file", None),}
@@ -1300,9 +1357,10 @@ class AdaptationActionServices():
         data = request.data.copy()
         data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
+        ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring_list', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
 
         for field in field_list:
             if data.get(field, False):
@@ -1320,6 +1378,13 @@ class AdaptationActionServices():
                 adaptation_action = serialized_adaptation_action.save()
                 ## create indicator_list
                 indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+                ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
+                
+                if indicator_status and ind_monitoring_status:
+                    result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    
+                else:
+                    result = (False, indicator_data if indicator_status else ind_monitoring_data)
 
                 if indicator_status:
                     result = (True, AdaptationActionSerializer(adaptation_action).data)
@@ -1344,8 +1409,9 @@ class AdaptationActionServices():
         data = request.data.copy()
         data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
+        ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'indicator_monitoring_list', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
@@ -1371,12 +1437,13 @@ class AdaptationActionServices():
                     adaptation_action = serialized_adaptation_action.save()
                     ## create indicator_list, the adaptation_action has an  indicator_list field in his model
                     indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+                    ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
 
-                    if indicator_status:
+                    if indicator_status and ind_monitoring_status:
                         result = (True, AdaptationActionSerializer(adaptation_action).data)
                 
                     else:
-                        result = (False, indicator_data)
+                        result = (False, indicator_data if indicator_status else ind_monitoring_data)
 
                 else:
                     result = (False, serialized_adaptation_action.errors)

@@ -336,7 +336,8 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file', 'other_indicator_source', 'support_information')
+        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file',
+                  'other_indicator_source', 'support_information', 'adaptation_action')
 
     def _get_url(self, obj, file_name):
         
