@@ -1359,7 +1359,7 @@ class AdaptationActionServices():
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         # fk's of object adaptation_action that have nested fields
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
 
         for field in field_list:
@@ -1410,7 +1410,7 @@ class AdaptationActionServices():
         data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
-        field_list = ['report_organization', 'address', 'adaptation_action_information', 'activity', 'instrument', 'climate_threat', 'implementation', 'finance',
+        field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
 
         adaptation_action_status, adaptation_action_data = \
