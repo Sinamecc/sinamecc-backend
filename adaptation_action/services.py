@@ -1487,7 +1487,18 @@ class AdaptationActionServices():
             result = (adaptation_action_status, adaptation_action_data)
         
         return result
-    
+
+    def delete(self, adaptation_action_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            adaptation_action_data.delete()
+            result = (True, {"Result":"Adaptation has been delete"})
+        else:
+            result = (False, {"Result":"Adaptation has been delete"})
+            
+        return result
     
     def get_current_comments(self, request, adaptation_action_id):
 

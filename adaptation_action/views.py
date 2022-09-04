@@ -38,6 +38,13 @@ def patch_adaptation_action(request, pk):
     if request.method == 'PATCH':
         result = view_helper.patch(request, pk)
     return result
+
+@has_permission_decorator('delete_adaptation_action')
+def delete_adaptation_action(request, adaptation_action_id):
+    if request.method == 'DELETE':
+        result = view_helper.delete(adaptation_action_id)
+    return result
+
 ## Permission!!!!
 @api_view(['PUT'])
 def upload_file_from_adaptation_action(request, adaptation_action_id, model_type):
@@ -53,7 +60,7 @@ def get_file_to_adaptation_action(request, model_id, file_name):
         return result
 
 ## Permission!!!!
-@api_view(['GET', 'POST', 'PUT', 'PATCH'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and adaptation_action_id:
@@ -70,6 +77,9 @@ def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need d
         
     elif request.method == 'PATCH' and adaptation_action_id:
         result = patch_adaptation_action(request, adaptation_action_id)
+
+    elif request.method == 'DELETE' and adaptation_action_id:
+        result = delete_adaptation_action(request, adaptation_action_id)
 
     return result
 
