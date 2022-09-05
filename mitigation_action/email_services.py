@@ -24,14 +24,14 @@ class MitigationActionEmailServices():
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
-        context = {'lang': 'es'} 
+        context = {'lang': 'es', 'ma_code': mitigation_action.code}
 
         ## change this here 
         email = 'sinamec@grupoincocr.com'
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
 
-        notification_status, notification_data = self.send_notification(email, subject, message_body)
+        notification_status, notification_data = self.send_notification([email, mitigation_action.contact.email], subject, message_body)
 
         result = (notification_status, notification_data)
         
@@ -45,7 +45,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
 
         ## change this here 
         email = contact.email
@@ -66,7 +66,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
 
         ## change this here 
         email = contact.email
@@ -86,14 +86,14 @@ class MitigationActionEmailServices():
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
-        context = {'lang': 'es'} 
+        context = {'lang': 'es', 'ma_code': mitigation_action.code}
 
         ## change this here
         email = 'sinamec@grupoincocr.com'
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
 
-        notification_status, notification_data = self.send_notification(email, subject, message_body)
+        notification_status, notification_data = self.send_notification([email, mitigation_action.contact.email], subject, message_body)
 
         result = (notification_status, notification_data)
 
@@ -108,7 +108,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
 
         ## change this here 
         email = contact.email
