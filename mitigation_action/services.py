@@ -539,8 +539,6 @@ class MitigationActionService():
         
         return result
 
-        
-
 
     def _create_update_monitoring_indicator(self, data, monitoring_reporting_indicator):
 

@@ -1,13 +1,23 @@
+from distutils.text_file import TextFile
 import uuid
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact as MContact
-from general.models import Address, User
+from general.models import Address
 from django_fsm import FSMField, transition
+from time import gmtime, strftime
+from general.storages import PrivateMediaStorage
 
 from workflow.models import Comment
 
 # Create your models here.
+User =  get_user_model()
+
+def directory_path(instance, filename): 
+    path = "adaptation_action/{0}/{1}/{2}/"
+
+    return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
+
 
 class ReportOrganizationType(models.Model): 
     
@@ -28,7 +38,9 @@ class Contact(models.Model):
     email = models.TextField(null=True)
     phone = models.TextField(null=True)
     address = models.TextField(null=True)
+    institution = models.TextField(null=True)
 
+    user = models.ForeignKey(User, related_name='contact_adaptation_action', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -212,7 +224,6 @@ class Activity(models.Model):
 class Instrument(models.Model):
     
     name = models.CharField(max_length=250, null=True)
-    description = models.CharField(max_length=3000, null=True)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -239,11 +250,11 @@ class ClimateThreat(models.Model):
     type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)
     other_type_climate_threat = models.TextField(null=True)
     description_climate_threat = models.TextField(null=True)
-    #file_description_climate_threat = models.FileField(upload_to='climate_threat', null=True)
+    file_description_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     vulnerability_climate_threat = models.TextField(null=True)
-    #file_vulnerability_climate_threat = models.FileField(upload_to='climate_threat', null=True)
+    file_vulnerability_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     exposed_elements = models.TextField(null=True)
-    #file_exposed_elements = models.FileField(upload_to='climate_threat', null=True)
+    file_exposed_elements = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -325,7 +336,7 @@ class FinanceAdaptation(models.Model):
 
     administration = models.TextField(max_length=500, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-
+    year = models.TextField(null=True)
     status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
     source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
     finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
@@ -354,7 +365,7 @@ class InformationSourceType(models.Model):
 
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type_information = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type_information = models.ManyToManyField(InformationSourceType, related_name='information_source', blank=True)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -391,7 +402,7 @@ class Classifier(models.Model):
         verbose_name = _("Classifier")
         verbose_name_plural = _("Classifiers")
 
-
+## Section: 4
 class IndicatorAdaptation(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
@@ -406,13 +417,13 @@ class IndicatorAdaptation(models.Model):
         ('CANTONAL', 'Cantonal'),
         ('OTHER', 'Other')
     ]
-
+    #Section 4
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
     unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
-    ## need to endpoint to upload file
-    #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator', on_delete=models.SET_NULL)
+    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     other_reporting_periodicity = models.TextField(null=True)
     
@@ -428,7 +439,7 @@ class IndicatorAdaptation(models.Model):
 
     ## ensure sustainability
     additional_information = models.TextField(null=True)
-    #additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     comments = models.TextField(null=True)
     ## FK
@@ -442,7 +453,7 @@ class IndicatorAdaptation(models.Model):
     other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
-    contact = models.ForeignKey(MContact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
 
 
     ## Logs
@@ -453,6 +464,7 @@ class IndicatorAdaptation(models.Model):
         verbose_name = _("Indicator Adaptation")
         verbose_name_plural = _("Indicator Adaptation")
     
+
 class ProgressLog(models.Model):
 
     action_status = models.CharField(max_length=25, null=True)
@@ -479,16 +491,20 @@ class IndicatorSource(models.Model):
         verbose_name = _("Indicator Source")
         verbose_name_plural = _("Indicator Source")
 
+## Section: 5
 class IndicatorMonitoring(models.Model):
 
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     update_date = models.DateField(null=True)
     data_to_update = models.CharField(max_length=300, null=True)
-    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
     indicator_source = models.ManyToManyField(IndicatorSource, related_name='indicator_monitoring', blank=True)
+    other_indicator_source = models.TextField(null=True)
+    support_information = models.TextField(null=True)
     indicator = models.ForeignKey(IndicatorAdaptation, null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
 
     ## Logs
@@ -544,7 +560,7 @@ class ActionImpact(models.Model):
     gender_equality_description = models.CharField(max_length=3000, null=True)
     unwanted_action = models.TextField(null=True)
     unwanted_action_description = models.CharField(max_length=3000, null=True)
-    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    data_to_update_file_action_impact = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
     general_impact = models.ForeignKey(GeneralImpact, null=True, related_name='action_impact', on_delete=models.CASCADE)
@@ -568,20 +584,16 @@ class AdaptationAction(models.Model):
     #Section 2
     address = models.ForeignKey(Address, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     adaptation_action_information = models.ForeignKey(AdaptationActionInformation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    activity = models.ForeignKey(Activity, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    activity = models.ManyToManyField(Activity, related_name="adaptation_action", blank=True)
     instrument = models.ForeignKey(Instrument, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     climate_threat = models.ForeignKey(ClimateThreat, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     implementation = models.ForeignKey(Implementation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 3
     finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    
-    #Section 4
-    indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    indicator_monitoring = models.ForeignKey(IndicatorMonitoring, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     general_report = models.ForeignKey(GeneralReport, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 6

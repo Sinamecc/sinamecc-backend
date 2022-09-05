@@ -78,6 +78,11 @@ urlpatterns = [
         name='get_comments'
     ),
     path(
+        'api/v1/adaptation-action/<uuid:adaptation_action_id>/file/<str:model_type>/',
+        views.upload_file_from_adaptation_action,
+        name='upload_file_from_adaptation_action'
+    ),
+    path(
         'api/v1/adaptation-action/<uuid:adaptation_action_id>/comments/',
         views.get_comments,
         name='get_comments'
@@ -91,5 +96,10 @@ urlpatterns = [
         'api/v1/adaptation-action/<uuid:adaptation_action_id>/review/<int:review_number>/comments/',
         views.get_comments,
         name='get_comments'
+    ),
+    path(
+        'api/v1/adaptation-action/file/<int:model_id>/filename/<str:file_name>/',
+        views.get_file_to_adaptation_action,
+        name='get_file_to_adaptation_action'
     ),
 ]
