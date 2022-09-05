@@ -30,12 +30,13 @@ class ViewHelper():
         return self.get_by_name("get_form_data", *args)
 
     def delete(self, *args):
+        
         result_status, result_data = self.service.delete(*args)
         if result_status:
             result = Response(result_data, status=status.HTTP_200_OK)
         else:
             result = Response(result_data, status=status.HTTP_404_NOT_FOUND)
-        print("resultado: ",result_data)
+
         return result
 
     def download_file(self, parent_id, file_id):
