@@ -254,7 +254,7 @@ class FinanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FinanceAdaptation
-        fields = ('id', 'administration', 'budget', 'year','status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
+        fields = ('id', 'administration', 'budget', 'currency', 'year','status', 'source', 'finance_instrument', 'instrument_name', 'mideplan', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
