@@ -59,6 +59,23 @@ def get_file_to_adaptation_action(request, model_id, file_name):
 
         return result
 
+@api_view(['PUT'])
+@has_permission_decorator('edit_adaptation_action')
+def put_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
+    if request.method == 'PUT':
+        result = view_helper.execute_by_name('upload_indicator_file_by_id', request, adaptation_action_id, file_id)
+
+        return result
+
+
+@api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
+def get_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
+    if request.method == 'GET':
+        result = view_helper.execute_by_name('download_indicator_file_by_id', request ,adaptation_action_id, file_id)
+
+        return result
+
 ## Permission!!!!
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def get_post_put_patch_delete(request, adaptation_action_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
@@ -104,6 +121,17 @@ def get_ods(request, ods_id=False): ## We need delete *args this parametes is te
     
     elif request.method == 'GET' and not ods_id:
         result = view_helper.execute_by_name("_get_all_ods", request)
+
+    return result
+
+@api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
+def get_instrument_detail(request, instrument_id=False):
+    if request.method == 'GET' and instrument_id:
+        result = view_helper.get_one(request, instrument_id)
+    
+    elif request.method == 'GET' and not instrument_id:
+        result = view_helper.execute_by_name("_get_all_instrument_detail", request)
 
     return result
 

@@ -22,6 +22,7 @@ class AdaptationActionServices():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.NO_INDICATOR = "The indicator id does not exist."
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -901,6 +902,18 @@ class AdaptationActionServices():
             result = (climate_status, climate_data)
         
         return result
+
+    def _get_all_instrument_detail(self, request):
+            
+            instrument_status, instrument_data = self._service_helper.get_all(FinanceInstrument)
+    
+            if instrument_status:
+                result = (instrument_status, FinanceInstrumentSerializer(instrument_data, many=True).data)
+            
+            else:
+                result = (instrument_status, instrument_data)
+            
+            return result
     
     def _get_all_ods(self, request):
 
@@ -1189,23 +1202,24 @@ class AdaptationActionServices():
             
         return result
     
-    def _upload_file_to_indicator(self, data, adaptation_action):
+    def _upload_file_to_indicator(self, data, adaptation_action, indicator_id):
 
         file_data = {"methodological_detail_file": data.get("methodological_detail_file", None), 
                      "additional_information_file": data.get("additional_information_file", None),}
 
-        indicator = adaptation_action.indicator
-        indicator_status, indicator_data = self._create_update_indicator(file_data, indicator)
+        indicator = adaptation_action.indicator.filter(id=indicator_id).first()
+        if indicator:
+            indicator_status, indicator_data = self._create_update_indicator(file_data, indicator)
 
-        if indicator_status:
-            if indicator == None:
-                adaptation_action.indicator = indicator_data
-                adaptation_action.save()
-            result = (True, adaptation_action)
-        
-        else:
-            result = (indicator_status, indicator_data)
+            if indicator_status:
+                result = (indicator_status, indicator_data)
             
+            else:
+                result = (indicator_status, indicator_data)
+
+        else:
+            result = (False, self.NO_INDICATOR)
+
         return result
 
     
@@ -1251,7 +1265,6 @@ class AdaptationActionServices():
 
         model_type_options = {
             'climate_threat': self._upload_file_to_climate_threat,
-            'indicator': self._upload_file_to_indicator,
             'indicator_monitoring': self._upload_file_to_indicator_monitoring,
             'action_impact': self._upload_file_to_action_impact,
         }    
@@ -1280,14 +1293,54 @@ class AdaptationActionServices():
         
         return result
 
+    def upload_indicator_file_by_id(self, request, adaptation_action_id, indicator_id):
+
+        model_type = ('indicator',  self._upload_file_to_indicator)
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+
+            response_status, response_data = self._upload_file_to_indicator(data, adaptation_action_data, indicator_id)
+
+            if response_status:
+                result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                
+            else:
+                result = (response_status, response_data)
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
 
     def _download(self, s3_path):
 
         path, filename = os.path.split(s3_path)
-    
         file_content =  BytesIO(self._storage.get_file(s3_path))
         result = (True, (filename, file_content))    
 
+        return result
+
+    def download_indicator_file_by_id(self, request, adaptation_action_id, indicator_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        if adaptation_action_status:
+            indicator = adaptation_action_data.indicator.filter(id=indicator_id).first()
+            if indicator:
+                response_status, response_data = self._download(indicator.methodological_detail_file.name)
+
+                if response_status:
+                    result = (response_status, response_data)
+                
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.NO_INDICATOR)
+        
         return result
 
     def download_file(self, request, model_id, file_name):

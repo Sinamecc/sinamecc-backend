@@ -302,9 +302,9 @@ class IndicatorSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage', 'adaptation_action',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file', 'created', 'updated')
     
-    def _get_url(self, obj, file_name):
+    def _get_url(self, obj):
         
-        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+        return reverse('get_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -312,8 +312,8 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
         data['contact'] = ContactSerializer(instance.contact).data
-        data['methodological_detail_file'] = self._get_url(instance, 'methodological_detail_file')
-        data['additional_information_file'] = self._get_url(instance, 'additional_information_file')
+        data['methodological_detail_file'] = self._get_url(instance)
+        data['additional_information_file'] = self._get_url(instance)
 
         return data
 
