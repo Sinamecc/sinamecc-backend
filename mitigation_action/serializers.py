@@ -334,7 +334,7 @@ class CategoryIPCC2006Serializer(serializers.ModelSerializer):
     
     class Meta:
         model = CategoryIPCC2006
-        fields = ('id', 'code', 'name', 'sector_ipcc2006')
+        fields = ('id', 'code', 'name', 'sector_ipcc_2006')
         
     def get_name(self, instance):
         return _(instance, 'name')
@@ -345,7 +345,7 @@ class SubCategoryIPCC2006Serializer(serializers.ModelSerializer):
     
     class Meta:
         model = SubCategoryIPCC2006
-        fields = ('id', 'code', 'name', 'category_ipcc2006')
+        fields = ('id', 'code', 'name', 'category_ipcc_2006')
     
     def get_name(self, instance):
         return _(instance, 'name')

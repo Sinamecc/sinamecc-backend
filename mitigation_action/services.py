@@ -1234,6 +1234,7 @@ class MitigationActionService():
             'classifier': (Classifier, ClassifierSerializer),
             'information_source_type': (InformationSourceType, InformationSourceTypeSerializer),
             'thematic_categorization_type': (ThematicCategorizationType, ThematicCategorizationTypeSerializer),
+            'sector': (Sector, SectorSerializer),
         }
 
         data = {}
@@ -1253,12 +1254,15 @@ class MitigationActionService():
 
     
     def get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
-
+        ## tuple (child model, child serialzers, field parent to related)
         catalogs_by_parent = {
             'action-areas':{'action-goal': (ActionGoals, ActionGoalsSerializer, 'area')},
             'descarbonization-axis':{'transformational-visions': (TransformationalVisions, TransformationalVisionsSerializer, 'axis')},
             'topics': {'sub-topics': (SubTopics, SubTopicsSerializer, 'topic')},
             'sub-topics':{'activities': (Activity, ActivitySerializer, 'sub_topic')},
+            'sector': {'sector-ipcc': (SectorIPCC2006, SectorIPCC2006Serializer, 'sector')},
+            'sector-ipcc': {'category-ipcc': (CategoryIPCC2006, CategoryIPCC2006Serializer, 'sector_ipcc_2006')},
+            'category-ipcc': {'subcategory-ipcc': (SubCategoryIPCC2006, SubCategoryIPCC2006Serializer, 'category_ipcc_2006')},
         }
         result = (False, self.CATALOG_DOES_NOT_EXIST.format(parent, child))
 

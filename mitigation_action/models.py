@@ -55,7 +55,7 @@ class SectorIPCC2006(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
     name_es = models.TextField()
     name_en = models.TextField()
-    sector = models.ForeignKey(Sector, related_name='sector_ipcc2006', on_delete=models.CASCADE)
+    sector = models.ForeignKey(Sector, related_name='sector_ipcc_2006', on_delete=models.CASCADE)
     
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -73,7 +73,7 @@ class CategoryIPCC2006(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
     name_es = models.TextField()
     name_en = models.TextField()
-    sector_ipcc2006 = models.ForeignKey(SectorIPCC2006, related_name='category_ipcc2006', on_delete=models.CASCADE)
+    sector_ipcc_2006 = models.ForeignKey(SectorIPCC2006, related_name='category_ipcc_2006', on_delete=models.CASCADE)
     ##logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -84,7 +84,7 @@ class CategoryIPCC2006(models.Model):
         
         
     def __str__(self):
-        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector_ipcc2006.name_es
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector_ipcc_2006.name_es
 
 
 class SubCategoryIPCC2006(models.Model):
@@ -487,7 +487,6 @@ class ImpactDocumentation(models.Model):
     ## missing file for documentation of calculations estimate 
     estimate_reduction_co2 = models.TextField(null=True)
     period_potential_reduction =models.TextField(null=True)
-    
     
     ##catalog
     carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
