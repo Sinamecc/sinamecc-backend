@@ -267,6 +267,15 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(QAQCReductionEstimateQuestionSerializer, data, record=question_list, many=True,  partial=True)
 
         return serializer
+    
+
+    def _get_serialized_sector_selection_list(self, data, sector_selection_list, impact_documentation_id):
+        
+        data = [{**sector_selection, 'impact_documentation': impact_documentation_id}  for sector_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(SectorSelectionSerializer, data, record=sector_selection_list, many=True,  partial=True)
+        
+        return serializer
 
     
     def _get_serialized_finance_information_list(self, data, finance_information_list, finance_id):
@@ -619,7 +628,28 @@ class MitigationActionService():
             
         return result
 
+    def _create_update_sector_selection(self, data,impact_documentation):
+        result = (True, [])
 
+        if isinstance(data, list):
+            sector_selection_list = impact_documentation.sector_selection.all() 
+            serializer = self._get_serialized_sector_selection_list(data, sector_selection_list, impact_documentation.id)
+            
+            if serializer.is_valid():
+                
+                sector_selection = serializer.save()
+
+                result = (True, sector_selection)
+
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('sector_selection'))
+            
+        return result
+    
+    
     def _create_update_question(self, data, impact_documentation):
  
         result = (True, [])
@@ -735,13 +765,20 @@ class MitigationActionService():
             impact_documentation = serialized_impact_documentation.save()
 
             question_data = data.get("question", [])
+            sector_selection_data = data.get("sector_selection", [])
+            
             serialized_question_status, serialized_question_data = self._create_update_question(question_data, impact_documentation)
+            serialized_sector_selection_status, serialized_sector_selection_data = self._create_update_sector_selection(sector_selection_data, impact_documentation)
+            
+            if not serialized_question_status:
+                result = (serialized_question_status, serialized_question_data )
 
-            if serialized_question_status:
-                result = (True, impact_documentation)
+            elif not serialized_sector_selection_status:
+                result = (serialized_sector_selection_status, serialized_sector_selection_data )
 
             else:
-                result = (serialized_question_status, serialized_question_data )
+                result = (True, impact_documentation)
+
 
         else:
             errors = serialized_impact_documentation.errors

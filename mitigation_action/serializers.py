@@ -352,12 +352,21 @@ class SubCategoryIPCC2006Serializer(serializers.ModelSerializer):
     
 
 class SectorSelectionSerializer(serializers.ModelSerializer):
-    
+    id = serializers.IntegerField()
     class Meta:
         model = SectorSelection
-        fields = ('id', 'sector', 'sector_ipcc2006', 'category_ipcc2006',
-                  'sub_category_ipcc2006',  'impact_documentation')
+        fields = ('id', 'sector', 'sector_ipcc_2006', 'category_ipcc_2006',
+                  'sub_category_ipcc_2006',  'impact_documentation')
+        list_serializer_class = GenericListSerializer
     
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['sector'] = SectorSerializer(instance.sector).data
+        data['sector_ipcc_2006'] = SectorIPCC2006Serializer(instance.sector_ipcc_2006).data
+        data['category_ipcc_2006'] = CategoryIPCC2006Serializer(instance.category_ipcc_2006).data
+        data['sub_category_ipcc_2006'] = SubCategoryIPCC2006Serializer(instance.sub_category_ipcc_2006.all(), many=True).data
+
+        return data
         
 ##
 ## Finish Catalogs Serializers
@@ -513,6 +522,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
         data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit).data
         data['standard'] =  StandardSerializer(instance.standard).data
         data['estimate_calculation_documentation_file'] = self._get_estimate_calculation_documentation_file_url(instance)
+        data['sector_selection'] = SectorSelectionSerializer(instance.sector_selection.all(), many=True).data
 
         return data
 

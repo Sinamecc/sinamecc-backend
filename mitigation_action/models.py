@@ -566,9 +566,9 @@ class DescarbonizationAxisSelection(models.Model):
 ## section #4 selection of sector
 class SectorSelection(models.Model):
     sector = models.ForeignKey(Sector, related_name='sector_selection', on_delete=models.CASCADE)
-    sector_ipcc2006 = models.ForeignKey(SectorIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
-    category_ipcc2006 = models.ForeignKey(CategoryIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
-    sub_category_ipcc2006 = models.ManyToManyField(SubCategoryIPCC2006, related_name='sector_selection')
+    sector_ipcc_2006 = models.ForeignKey(SectorIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    category_ipcc_2006 = models.ForeignKey(CategoryIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    sub_category_ipcc_2006 = models.ManyToManyField(SubCategoryIPCC2006, related_name='sector_selection')
     impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='sector_selection', on_delete=models.CASCADE)
     
     ## logs
