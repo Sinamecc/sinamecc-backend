@@ -1,6 +1,6 @@
 from rolepermissions.roles import AbstractUserRole
 from ppcn.permissions.permissions import *
-from mitigation_action.permissions.permissions import *
+from mitigation_action.permissions_data.permission import * 
 from mccr.permissions.permissions import  *
 from users.permissions.permissions import *  
 from adaptation_action.permissions.permissions import *
