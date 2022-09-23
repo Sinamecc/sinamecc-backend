@@ -601,6 +601,7 @@ class AdaptationAction(models.Model):
 
     comments = models.ManyToManyField(Comment, blank=True)
     review_count = models.IntegerField(null=True, blank=True, default=0)
+    user = models.ForeignKey(User, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
