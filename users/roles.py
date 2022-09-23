@@ -4,7 +4,7 @@ from mitigation_action.permissions_data.permission import *
 from mccr.permissions.permissions import  *
 from users.permissions.permissions import *  
 from adaptation_action.permissions.permissions import *
-from report_data.permissions.permissions import *
+from report_data.permissions_data.permissions import *
 
 class Admin(AbstractUserRole):
 

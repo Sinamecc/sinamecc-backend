@@ -883,7 +883,7 @@ class MitigationActionService():
                 self._service_helper.get_all(MitigationAction, user=user)
                 
         else:
-            result = (False, self.ACCESS_DENIED_ALL)
+            return  (False, self.ACCESS_DENIED_ALL)
             
         if mitigation_action_status:
             result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data, many=True).data)
