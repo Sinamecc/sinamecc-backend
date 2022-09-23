@@ -1,5 +1,5 @@
 
-from functools import partial
+from rolepermissions.checkers import has_object_permission
 from workflow.serializers import CommentSerializer
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
@@ -9,16 +9,12 @@ from mitigation_action.models import MitigationAction, Contact, Status, FinanceS
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
-import datetime
-import uuid
-from io import BytesIO
-from django.urls import reverse
-import os
 from general.services import HandlerErrors
 from workflow.services import WorkflowService
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.services import EmailServices
+from rolepermissions.checkers import has_role
 
 handler = HandlerErrors()
 workflow_service = WorkflowService()
@@ -43,6 +39,8 @@ class MitigationActionService():
         self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
         self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
         self.INDICATOR_ERROR = "The  indicator could not be saved"
+        self.ACCESS_DENIED = "Access denied to this mitigation action register: {0}"
+        self.ACCESS_DENIED_ALL = "Access denied to all mitigation action registers"
 
 
     # auxiliary functions
@@ -854,22 +852,39 @@ class MitigationActionService():
 
 
     def get(self, request, mitigation_action_id):
-        
+
         mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
         
-        if mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
+        if not mitigation_action_status:
+            result = (mitigation_action_status, mitigation_action_data)
         
-        else:
-            result = (mitigation_action_status, mitigation_action_data) 
+        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
+            result = (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
+        
+        elif mitigation_action_status:
+            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
+
 
         return result
     
 
     def get_all(self, request):
+        """
+        This logic we need to refactor. At the moment we are going to allow the Reviewer to see all the mitigation actions
+        """
+        user = request.user
+        mitigation_action_status, mitigation_action_data = None, None
 
-        mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
-
+        if has_role(user,['reviewer', 'reviewer_mitigation_action', 'admin']):
+            mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
+        
+        elif has_role(user, ['information_provider_mitigation_action', 'information_provider']):
+            mitigation_action_status, mitigation_action_data = \
+                self._service_helper.get_all(MitigationAction, user=user)
+                
+        else:
+            result = (False, self.ACCESS_DENIED_ALL)
+            
         if mitigation_action_status:
             result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data, many=True).data)
         
@@ -926,6 +941,10 @@ class MitigationActionService():
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        ## permission access return here
+        if not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
+            return  (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
         
         if mitigation_action_status:
             mitigation_action = mitigation_action_data
