@@ -31,9 +31,6 @@ pipeline {
                   sh 'pip install -r requirements.txt'
 
                   echo "Step: Running Migrations"
-                  sh 'python manage.py migrate mitigation_action 0017_auto_20210831_0331'
-
-                  echo " Step: Running Migrations"
                   sh 'python manage.py migrate'
                 }
             }

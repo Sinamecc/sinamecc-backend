@@ -1,3 +1,4 @@
+from pyexpat import model
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.encoding import smart_text as smart_unicode
@@ -85,6 +86,7 @@ class Address(models.Model):
     GIS = models.CharField(max_length=200, null=True)
 
     district = models.ManyToManyField(District, related_name="address", blank=True)
+    canton = models.ManyToManyField(Canton, related_name="address", blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
