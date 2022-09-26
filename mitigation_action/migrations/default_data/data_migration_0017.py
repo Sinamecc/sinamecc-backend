@@ -1,11 +1,11 @@
 
 _information_source_type = [
-    {'name_es': 'Census', 'name_en': 'Censo', 'code': 'census'},
-    {'name_es': 'Survey', 'name_en': 'Encuesta por muestreo', 'code': 'survey'},
-    {'name_es': 'Combination of Census and Survey', 'name_en': 'Combinación de censo y muestreo', 'code': 'combination_of_census_and_survey'},
-    {'name_es': 'Survey opinion', 'name_en': 'Sondeos de opinión', 'code': 'survey_opinion'},
-    {'name_es': 'Administrative register', 'name_en': 'Registro administrativo', 'code': 'administrative_register'},
-    {'name_es': 'Monitoring', 'name_en': 'Sistema de Monitoreo', 'code': 'monitoring'},
+    {'name_en': 'Census', 'name_es': 'Censo', 'code': 'census'},
+    {'name_en': 'Survey', 'name_es': 'Encuesta por muestreo', 'code': 'survey'},
+    {'name_en': 'Combination of Census and Survey', 'name_es': 'Combinación de censo y muestreo', 'code': 'combination_of_census_and_survey'},
+    {'name_en': 'Survey opinion', 'name_es': 'Sondeos de opinión', 'code': 'survey_opinion'},
+    {'name_en': 'Administrative register', 'name_es': 'Registro administrativo', 'code': 'administrative_register'},
+    {'name_en': 'Monitoring', 'name_es': 'Sistema de Monitoreo', 'code': 'monitoring'},
 ]
 
 
