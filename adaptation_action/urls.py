@@ -108,13 +108,13 @@ urlpatterns = [
         name='get_file_to_adaptation_action'
     ),
     path(
-        'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator_id/<str:file_id>/',
-        views.put_indicator_file_adaptation_action,
-        name='put_indicator_file_adaptation_action'
+        'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator-id/<str:file_id>/',
+        views.get_put_indicator_file_adaptation_action,
+        name='get_put_indicator_file_adaptation_action'
     ),
     path(
-        'api/v1/adaptation-action/<uuid:adaptation_action_id>/file_id/<str:file_id>/',
-        views.get_indicator_file_adaptation_action,
-        name='get_indicator_file_adaptation_action'
+        'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator-monitoring-id/<str:file_id>/',
+        views.get_put_monitoring_indicator_file_adaptation_action,
+        name='get_put_monitoring_indicator_file_adaptation_action'
     ),
 ]

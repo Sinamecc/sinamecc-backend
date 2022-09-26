@@ -304,7 +304,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
     
     def _get_url(self, obj):
         
-        return reverse('get_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
+        return reverse('get_put_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -339,15 +339,15 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
         fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file',
                   'other_indicator_source', 'support_information', 'adaptation_action')
 
-    def _get_url(self, obj, file_name):
+    def _get_url(self, obj):
         
-        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+        return reverse('get_put_monitoring_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['indicator_source'] = IndicatorSourceSerializer(instance.indicator_source.all(), many=True).data
         data['indicator'] = IndicatorSerializer(instance.indicator).data
-        data['data_to_update_file'] = self._get_url(instance, 'data_to_update_file')
+        data['data_to_update_file'] = self._get_url(instance)
 
         return data
 

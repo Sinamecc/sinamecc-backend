@@ -23,6 +23,7 @@ class AdaptationActionServices():
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
         self.NO_INDICATOR = "The indicator id does not exist."
+        self.NO_INDICATOR_MONITORING = "The indicator monitoring id does not exist."
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -1224,22 +1225,24 @@ class AdaptationActionServices():
 
     
     ## this function must be updated 
-    def _upload_file_to_indicator_monitoring(self, data, adaptation_action):
+    def _upload_file_to_indicator_monitoring(self, data, adaptation_action, indicator_monitoring_id):
 
         file_data = {"data_to_update_file": data.get("data_to_update_file", None),}
 
-        indicator_monitoring = adaptation_action.indicator_monitoring
-        indicator_monitoring_status, indicator_monitoring_data = self._create_update_indicator_monitoring(file_data, indicator_monitoring)
+        indicator_monitoring = adaptation_action.indicator_monitoring.filter(id=indicator_monitoring_id).first()
 
-        if indicator_monitoring_status:
-            if indicator_monitoring == None:
-                adaptation_action.indicator_monitoring = indicator_monitoring_data
-                adaptation_action.save()
-            result = (True, adaptation_action)
-        
+        if indicator_monitoring:
+            indicator_monitoring_status, indicator_monitoring_data = self._create_update_indicator_monitoring(file_data, indicator_monitoring)
+
+            if indicator_monitoring_status:
+                result = (indicator_monitoring_status, indicator_monitoring_data)
+            
+            else:
+                result = (indicator_monitoring_status, indicator_monitoring_data)
+            
         else:
-            result = (indicator_monitoring_status, indicator_monitoring_data)
-        
+            result = (False, self.NO_INDICATOR_MONITORING)
+
         return result
 
     def _upload_file_to_action_impact(self, data, adaptation_action):
@@ -1265,7 +1268,6 @@ class AdaptationActionServices():
 
         model_type_options = {
             'climate_threat': self._upload_file_to_climate_threat,
-            'indicator_monitoring': self._upload_file_to_indicator_monitoring,
             'action_impact': self._upload_file_to_action_impact,
         }    
     
@@ -1315,6 +1317,29 @@ class AdaptationActionServices():
             result = (adaptation_action_status, adaptation_action_data)
         
         return result
+    
+    def upload_monitoring_file_by_id(self, request, adaptation_action_id, monitoring_id):
+
+        model_type = ('indicator_monitoring',  self._upload_file_to_indicator_monitoring)
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+
+            response_status, response_data = self._upload_file_to_indicator_monitoring(data, adaptation_action_data, monitoring_id)
+
+            if response_status:
+                result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                
+            else:
+                result = (response_status, response_data)
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
 
     def _download(self, s3_path):
 
@@ -1329,6 +1354,7 @@ class AdaptationActionServices():
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         if adaptation_action_status:
             indicator = adaptation_action_data.indicator.filter(id=indicator_id).first()
+
             if indicator:
                 response_status, response_data = self._download(indicator.methodological_detail_file.name)
 
@@ -1342,6 +1368,26 @@ class AdaptationActionServices():
                 result = (False, self.NO_INDICATOR)
         
         return result
+    
+    def download_monitoring_indicator_file_by_id(self, request, adaptation_action_id, monitoring_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        if adaptation_action_status:
+            indicator_monitoring = adaptation_action_data.indicator_monitoring.filter(id=monitoring_id).first()
+
+            if indicator_monitoring:
+                response_status, response_data = self._download(indicator_monitoring.data_to_update_file.name)
+
+                if response_status:
+                    result = (response_status, response_data)
+                
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.NO_INDICATOR_MONITORING)
+        
+        return result
 
     def download_file(self, request, model_id, file_name):
 
@@ -1349,9 +1395,6 @@ class AdaptationActionServices():
             'file_description_climate_threat': [ClimateThreat, lambda a: a.file_description_climate_threat.name],
             'file_vulnerability_climate_threat': [ClimateThreat, lambda a: a.file_vulnerability_climate_threat.name],
             'file_exposed_elements': [ClimateThreat, lambda a: a.file_exposed_elements.name],
-            'methodological_detail_file': [IndicatorAdaptation, lambda a: a.methodological_detail_file.name],
-            'additional_information_file': [IndicatorAdaptation, lambda a: a.additional_information_file.name],
-            'data_to_update_file': [IndicatorMonitoring, lambda a: a.data_to_update_file.name],
             'data_to_update_file_action_impact': [ActionImpact, lambda a: a.data_to_update_file_action_impact.name],
         }    
     
