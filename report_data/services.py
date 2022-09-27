@@ -10,6 +10,7 @@ from workflow.services import WorkflowService
 import os
 from django_fsm import has_transition_perm
 from io import BytesIO
+from rolepermissions.checkers import has_role, has_object_permission
 
 # TODO: Add exception handling
 class ReportDataService():
@@ -22,6 +23,8 @@ class ReportDataService():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid report data state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.ACCESS_DENIED_ALL = "Access denied to all report data"
+        self.ACCESS_DENIED = "Access denied to report data: {0}"
 
 
     def _get_serialized_report_data(self,  data, report_data=None, partial=None):
@@ -181,19 +184,31 @@ class ReportDataService():
     def get(self, request, report_data_id):
         
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
-
-        if report_data_status:
-            result = (True, ReportDataSerializer(report_data_details).data)
-        else:
-            result = (False, report_data_details)
+        if not report_data_status:
+            result = (report_data_status, report_data_details)
+        
+        elif not has_object_permission('access_report_data_register', request.user, report_data_details):
+            result = (False, self.ACCESS_DENIED.format(report_data_details.id))
+        
+        elif report_data_status:
+            result = (report_data_status, ReportDataSerializer(report_data_details).data)
 
         return result
 
     
     def get_all(self, request):
+        user =  request.user
+        report_data_status, report_data_details = None, None
         
-        report_data_status, report_data_details = self._service_helper.get_all(ReportData)
-
+        if has_role(user,['reviewer', 'reviewer_report_data', 'admin']):
+            report_data_status, report_data_details = self._service_helper.get_all(ReportData)
+            
+        elif has_role(user, ['information_provider_report_data', 'information_provider']):
+            report_data_status, report_data_details = \
+                self._service_helper.get_all(ReportData, user=user)
+        else:
+            return (False, self.ACCESS_DENIED_ALL)
+        
         if report_data_status:
             result = (True, ReportDataSerializer(report_data_details, many=True).data)
 
@@ -242,7 +257,9 @@ class ReportDataService():
 
         field_list = ['contact']
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
-
+        if not has_object_permission('access_report_data_register', request.user, report_data_details):
+            return (False, self.ACCESS_DENIED.format(report_data_details.id))
+        
         if report_data_status:
             validation_dict = self._service_helper.create_or_update_record(field_list, data, report_data_details)
 
@@ -324,9 +341,11 @@ class ReportDataService():
         return result
     
     
-    def delete(self, report_data_id):
+    def delete(self, request, report_data_id):
         
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
+        if not has_object_permission('access_report_data_register', request.user, report_data_details):
+            return (False, self.ACCESS_DENIED.format(report_data_details.id))
 
         if report_data_status:
             serialized_report_data = ReportDataSerializer(report_data_details).data

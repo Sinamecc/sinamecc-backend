@@ -12,19 +12,19 @@ view_helper = ViewHelper(service)
 @has_permission_decorator('read_report_data')
 def get_one_report_data(request, pk):
     if request.method == 'GET':
-        result = view_helper.get_one(pk)
+        result = view_helper.get_one(request, pk)
     return result
 
 @has_permission_decorator('edit_report_data')
 def put_report_data(request, pk):
     if request.method == 'PUT':
-        result = view_helper.put(pk, request)
+        result = view_helper.put(request, pk)
     return result
 
 @has_permission_decorator('delete_report_data')
 def delete_report_data(request, pk):
     if request.method == 'DELETE':
-        result = view_helper.delete(pk)
+        result = view_helper.delete(request, pk)
     return result
 
 @has_permission_decorator('edit_report_data')

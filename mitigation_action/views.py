@@ -30,6 +30,7 @@ def get_catalog_data(request, parent=None, parent_id=None, child=None, **kwargs)
 
     return result
 
+
 ## Permission!!!!
 @api_view(['GET'])
 def get_indicator_from_mitigation_action(request, mitigation_action_id=False):
@@ -37,6 +38,8 @@ def get_indicator_from_mitigation_action(request, mitigation_action_id=False):
     if request.method == 'GET':
         result = view_helper.execute_by_name("get_indicator_from_mitigation_action", request, mitigation_action_id)
     return result
+
+
 ## Permission!!!!
 @api_view(['DELETE'])
 def delete_indicator_from_mitigation_action(request, mitigation_action_id=None, indicator_id=None):
@@ -83,6 +86,7 @@ def upload_file_from_mitigation_action(request, mitigation_action_id, model_type
     if request.method == 'PUT':
         result = view_helper.execute_by_name("upload_file_from_mitigation_action", request, mitigation_action_id, model_type)
     return result
+
 
 ## Permission!!!!
 @api_view(['GET'])

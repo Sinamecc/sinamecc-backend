@@ -394,7 +394,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','created', 'updated')
+        fields = ('id', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         

@@ -8,6 +8,7 @@ from general.serializers import DistrictSerializer
 from workflow.services import WorkflowService
 from workflow.serializers import CommentSerializer
 from general.storages import S3Storage
+from rolepermissions.checkers import has_role, has_object_permission
 import os
 from io import BytesIO
 
@@ -22,6 +23,8 @@ class AdaptationActionServices():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.ACCESS_DENIED = "Access denied to this adaptation action register: {0}"
+        self.ACCESS_DENIED_ALL = "Access denied to all adaptation action registers"
         self.NO_INDICATOR = "The indicator id does not exist."
         self.NO_INDICATOR_MONITORING = "The indicator monitoring id does not exist."
 
@@ -1421,22 +1424,37 @@ class AdaptationActionServices():
         
         return result
 
+
     def get(self, request, adaptation_action_id):
         
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
-        if adaptation_action_status:
-            result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data).data)
+        if not adaptation_action_status:
+            result = (adaptation_action_status, adaptation_action_data)
         
-        else:
-            result = (adaptation_action_status, adaptation_action_data) 
+        elif not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
+            result = (False, self.ACCESS_DENIED.format(adaptation_action_data.id))
+        
+        elif adaptation_action_status:
+            result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data).data)
 
         return result
     
     def get_all(self, request):
-
-        adaptation_action_status, adaptation_action_data = self._service_helper.get_all(AdaptationAction)
-
+        """
+        This logic we need to refactor. At the moment we are going to allow the Reviewer to see all the adaptation actions
+        """
+        user =  request.user
+        if has_role(user,['reviewer', 'reviewer_adaptation_action', 'admin']):
+            adaptation_action_status, adaptation_action_data = self._service_helper.get_all(AdaptationAction)
+        
+        elif has_role(user, ['information_provider_adaptation_action', 'information_provider']):
+            adaptation_action_status, adaptation_action_data = \
+                self._service_helper.get_all(AdaptationAction, user=user)
+                
+        else:
+            return  (False, self.ACCESS_DENIED_ALL)
+        
         if adaptation_action_status:
             result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data, many=True).data)
         
@@ -1511,6 +1529,9 @@ class AdaptationActionServices():
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        ## permission access return here
+        if not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
+            return  (False, self.ACCESS_DENIED.format(adaptation_action_data.id))
         
         if adaptation_action_status:
             adaptation_action = adaptation_action_data
