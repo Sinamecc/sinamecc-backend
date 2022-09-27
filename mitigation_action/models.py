@@ -20,7 +20,7 @@ from django.db import transaction
 User =  get_user_model()
 permission = PermissionsHelper()
 
-CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')))
+CURRENCIES = (('CRC', _('Costa Rican colon')), ('USD', _('United States dollar')),  ('EUR', 'Euro'))
 ##
 ## Start Catalogs
 ##
@@ -30,9 +30,84 @@ def directory_path(instance, filename):
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
 
 
+class Sector(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
+
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Sector')
+        verbose_name_plural = _('Sectors')
+    
+    def __repr__(self) -> str:
+        return '{}: {}'.format(self.code, self.name_es)
+    
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en
+    
+
+
+class SectorIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
+    sector = models.ForeignKey(Sector, related_name='sector_ipcc_2006', on_delete=models.CASCADE)
+    
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Sector IPCC2006')
+        verbose_name_plural = _('Sectors IPCC2006')
+        
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector.name_es
+
+
+class CategoryIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
+    sector_ipcc_2006 = models.ForeignKey(SectorIPCC2006, related_name='category_ipcc_2006', on_delete=models.CASCADE)
+    ##logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Category IPCC2006')
+        verbose_name_plural = _('Categories IPCC2006')
+        
+        
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.sector_ipcc_2006.name_es
+
+
+class SubCategoryIPCC2006(models.Model):
+    code = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.TextField()
+    name_en = models.TextField()
+    category_ipcc_2006 = models.ForeignKey(CategoryIPCC2006, related_name='sub_sector_ipcc2006', on_delete=models.CASCADE)
+    
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Subcategory IPCC2006')
+        verbose_name_plural = _('Subcategories IPCC2006')
+        
+    def __str__(self):
+        return self.code + ":" +self.name_es + '::' + self.name_en + ':::' + self.category_ipcc_2006.name_es
+
 class CarbonDeposit(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -45,7 +120,8 @@ class CarbonDeposit(models.Model):
 
 class Standard(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ##logs
     created = models.DateTimeField(auto_now_add=True)
@@ -58,7 +134,8 @@ class Standard(models.Model):
 
 class SustainableDevelopmentGoals(models.Model): 
     code = models.CharField(max_length=255, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
+    description_es = models.TextField(blank=True, null=True)
+    description_en = models.TextField(blank=True, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -72,7 +149,8 @@ class SustainableDevelopmentGoals(models.Model):
 class GHGImpactSector(models.Model):
 
     code = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name_es = models.CharField(max_length=255, blank=True, null=True)
+    name_en = models.CharField(max_length=255, blank=True, null=True)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -84,7 +162,8 @@ class GHGImpactSector(models.Model):
 
 
 class ActionAreas(models.Model):
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     code = models.CharField(max_length=3, null=False, blank=False)
     
     ## logs
@@ -98,7 +177,8 @@ class ActionAreas(models.Model):
 
 class ActionGoals(models.Model):
 
-    goal = models.TextField()
+    goal_es = models.TextField()
+    goal_en = models.TextField()
     code = models.CharField(max_length=3, null=False, blank=False)
     area = models.ForeignKey(ActionAreas, null=False, related_name='goal', on_delete=models.CASCADE)
 
@@ -110,11 +190,11 @@ class ActionGoals(models.Model):
         verbose_name = _('Action Goal')
         verbose_name_plural = _('Action Goals')
 
-
 class DescarbonizationAxis(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -128,7 +208,8 @@ class DescarbonizationAxis(models.Model):
 class TransformationalVisions(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
     axis = models.ForeignKey(DescarbonizationAxis, null=False, related_name='transformational_vision', on_delete=models.CASCADE)
     
     ## logs
@@ -143,7 +224,8 @@ class TransformationalVisions(models.Model):
 class Topics(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -157,7 +239,8 @@ class Topics(models.Model):
 class SubTopics(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
     topic = models.ForeignKey(Topics, null=False, related_name='sub_topic', on_delete=models.CASCADE)
 
     ## logs
@@ -172,7 +255,8 @@ class SubTopics(models.Model):
 class Activity(models.Model):
 
     code = models.CharField(max_length=3, null=False, blank=False)
-    description = models.TextField()
+    description_es = models.TextField()
+    description_en = models.TextField()
     sub_topic = models.ForeignKey(SubTopics, null=False, related_name='activity', on_delete=models.CASCADE)
 
     ## logs
@@ -187,7 +271,8 @@ class Activity(models.Model):
 class ImpactCategory(models.Model):
 
     code = models.CharField(max_length=255, null=False, blank=False)
-    name = models.CharField(max_length=255, null=False, blank=False)
+    name_es = models.CharField(max_length=255, null=False, blank=False)
+    name_en = models.CharField(max_length=255, null=False, blank=False)
 
     ## logs
     created = models.DateTimeField(auto_now_add=True)
@@ -200,7 +285,8 @@ class ImpactCategory(models.Model):
 
 class InitiativeType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
     type = models.CharField(max_length=2, blank=False, null=False)
     count = models.IntegerField(default=0)
@@ -219,7 +305,8 @@ class InitiativeType(models.Model):
 
 class GeographicScale(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
      
     ## Logs
@@ -236,7 +323,8 @@ class GeographicScale(models.Model):
 
 class FinanceSourceType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
      
     ## Logs
@@ -252,7 +340,8 @@ class FinanceSourceType(models.Model):
 
 class FinanceStatus(models.Model):
     
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -268,7 +357,8 @@ class FinanceStatus(models.Model):
 
 class Status(models.Model):
 
-    status = models.CharField(max_length=100, blank=False, null=False)
+    status_es = models.CharField(max_length=100, blank=False, null=False)
+    status_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -286,7 +376,8 @@ class Status(models.Model):
 ## section 5 new
 class ThematicCategorizationType(models.Model):
 
-    name = models.CharField(max_length=100, blank=False, null=False)
+    name_es = models.CharField(max_length=100, blank=False, null=False)
+    name_en = models.CharField(max_length=100, blank=False, null=False)
     code = models.CharField(max_length=100, blank=False, null=False)
 
     ## Logs
@@ -299,7 +390,8 @@ class ThematicCategorizationType(models.Model):
 
 ## section 5 new
 class InformationSourceType(models.Model):
-    name = models.CharField(max_length=500, null=True)
+    name_es = models.CharField(max_length=500, null=True)
+    name_en = models.CharField(max_length=500, null=True)
     code = models.CharField(max_length=500, null=True)
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -312,7 +404,8 @@ class InformationSourceType(models.Model):
 ## section 5 new
 class Classifier(models.Model):
     code = models.CharField(max_length=255, null=True)
-    name = models.CharField(max_length=255, null=True)
+    name_es = models.CharField(max_length=255, null=True)
+    name_en = models.CharField(max_length=255, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -394,14 +487,15 @@ class ImpactDocumentation(models.Model):
     ## missing file for documentation of calculations estimate 
     estimate_reduction_co2 = models.TextField(null=True)
     period_potential_reduction =models.TextField(null=True)
+    
     ##catalog
     carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
     estimate_calculation_documentation = models.TextField(null=True)
     estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-    mitigation_action_in_inventory = models.BooleanField(null=True)
-
+    mitigation_action_in_inventory = models.CharField(max_length=50, null=True)
 
     ## Section 4.3
     ## TODO: Missing. catalogs standar to apply
@@ -418,19 +512,14 @@ class ImpactDocumentation(models.Model):
         verbose_name = _("Monitoring Information")
         verbose_name_plural = _("Monitoring Information")
 
+
+
 ## missing Serializer
 class Categorization(models.Model):
     
-    action_goal = models.ManyToManyField(ActionGoals, related_name='categorization', blank=True)
-    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='categorization', blank=True)
-    sub_topics = models.ManyToManyField(SubTopics, related_name='categorization', blank=True)
-    activities = models.ManyToManyField(Activity, related_name='categorization', blank=True)
-
-    ## can be select more than one
-    impact_categories = models.ManyToManyField(ImpactCategory, related_name='categorization', blank=True)
+    impact_category = models.ForeignKey(ImpactCategory, related_name='categorization', blank=True, null=True, on_delete=models.PROTECT)
     is_part_to_another_mitigation_action = models.BooleanField(null=True)
-    relation_description = models.CharField(max_length=255, blank=True, null=True)
-
+    relation_description = models.TextField(max_length=255, blank=True, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -439,6 +528,52 @@ class Categorization(models.Model):
     class Meta:
         verbose_name = _("Categorization")
         verbose_name_plural = _("Categorization")
+
+
+## multiselection of the same model
+## section 1
+class TopicsSelection(models.Model):
+    topic = models.ForeignKey(Topics, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+    sub_topic = models.ManyToManyField(SubTopics, related_name='topics_selection')
+    categorization = models.ForeignKey(Categorization, null=True, related_name='topics_selection', on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+
+class ActionAreasSelection(models.Model):
+    area = models.ForeignKey(ActionAreas, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, null=False, related_name='action_area_selection', on_delete=models.CASCADE)
+    goals = models.ManyToManyField(ActionGoals, related_name='action_area_selection', blank=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+
+class DescarbonizationAxisSelection(models.Model):
+    descarbonization_axis = models.ForeignKey(DescarbonizationAxis, related_name='descarbonization_axis_selection', on_delete=models.CASCADE)
+    categorization = models.ForeignKey(Categorization, related_name='descarbonization_axis_selection', blank=True, on_delete=models.CASCADE)
+    transformational_vision = models.ManyToManyField(TransformationalVisions, related_name='descarbonization_axis_selection', blank=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+
+
+## section #4 selection of sector
+class SectorSelection(models.Model):
+    sector = models.ForeignKey(Sector, related_name='sector_selection', on_delete=models.CASCADE)
+    sector_ipcc_2006 = models.ForeignKey(SectorIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    category_ipcc_2006 = models.ForeignKey(CategoryIPCC2006, related_name='sector_selection', on_delete=models.CASCADE)
+    sub_category_ipcc_2006 = models.ManyToManyField(SubCategoryIPCC2006, related_name='sector_selection')
+    impact_documentation = models.ForeignKey(ImpactDocumentation, related_name='sector_selection', on_delete=models.CASCADE)
+    
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 ## section 5 new
@@ -494,10 +629,6 @@ class Indicator(models.Model):
 
     limitation = models.TextField(null=True)
 
-    ## ensure sustainability
-    additional_information = models.TextField(null=True)
-    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-
     comments = models.TextField(null=True)
     ## FK
     ## information source
@@ -506,8 +637,6 @@ class Indicator(models.Model):
     ## thematic categorization
     type_of_data = models.ForeignKey(ThematicCategorizationType, null=True, related_name='indicator', on_delete=models.PROTECT)
     other_type_of_data = models.CharField(max_length=255, blank=True, null=True)
-    classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
-    other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
@@ -601,14 +730,12 @@ class QAQCReductionEstimateQuestion(models.Model):
 
 
 class Finance(models.Model):
-
+    
     status = models.ForeignKey(FinanceStatus, related_name='finance', null=True, on_delete=models.CASCADE)
-    administration = models.TextField(null=True)
+    administration = models.TextField(null=True) ## !! review this
     source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
-    source_description = models.CharField(max_length=255, null=True)
-    reference_year =models.IntegerField(null=True, validators=[validate_year])
-    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    
+    reference_year =models.DateField(null=True)
     mideplan_registered = models.BooleanField(null=True)
     mideplan_project = models.CharField(max_length=255, null=True) ## depend on mideplan registered
     executing_entity = models.CharField(max_length=255, null=True)
@@ -622,6 +749,20 @@ class Finance(models.Model):
 
     def __unicode__(self):
         return smart_unicode(self.administration)
+
+
+class FinanceInformation(models.Model):
+
+    source_description = models.CharField(max_length=255, null=True)
+    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    finance = models.ForeignKey(Finance, related_name='finance_information', null=True, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Finance Information")
+        verbose_name_plural = _("Finance Information")
 
 
 class GeographicLocation(models.Model):

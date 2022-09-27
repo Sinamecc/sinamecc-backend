@@ -23,7 +23,7 @@ class S3Storage():
     def get_file(self, file_path):
         file_content = None
         if (self.storage.exists(file_path)):
-            file = self.storage.open(file_path, 'r')
+            file = self.storage.open(file_path, 'rb')
             file_content = file.read()
             file.close()
         return file_content

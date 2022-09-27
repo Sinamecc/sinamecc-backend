@@ -336,6 +336,7 @@ class FinanceAdaptation(models.Model):
 
     administration = models.TextField(max_length=500, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    currency = models.TextField(null=True)
     year = models.TextField(null=True)
     status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
     source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
