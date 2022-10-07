@@ -468,6 +468,13 @@ class InformationSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InformationSource
         fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['type'] = InformationSourceTypeSerializer(instance.type.all(), many=True).data
+        
+        return data
+    
 
 
 class MonitoringInformationSerializer(serializers.ModelSerializer):
