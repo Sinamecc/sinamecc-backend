@@ -949,7 +949,7 @@ class MitigationAction(models.Model):
         return self.fsm_state == 'requested_changes_by_DCC'
 
     @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
-    def submit(self):
+    def submit(self, user_approver):
         # new --> submitted        
         # send email to user that submitted the action
         print(f'The mitigation action is transitioning from <{self.fsm_state}> to <submitted>')
@@ -958,7 +958,7 @@ class MitigationAction(models.Model):
             'updating_by_request_DCC': self.email_service.notify_dcc_responsible_mitigation_action_update,
         }
 
-        email_status, email_data = email_function.get(self.fsm_state)(self)
+        email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
         if email_status:
             print(email_data)
             return email_status, email_data

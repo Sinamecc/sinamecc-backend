@@ -18,20 +18,22 @@ class MitigationActionEmailServices():
         return (result_status, result_data)
 
 
-    def notify_dcc_responsible_mitigation_action_submission(self, mitigation_action):
+    def notify_dcc_responsible_mitigation_action_submission(self, mitigation_action, user_approver):
 
         template_path_data = {'module': 'email', 'template': 'submitted_ma'}
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         context = {'lang': 'es', 'ma_code': mitigation_action.code}
-
-        ## change this here 
-        email = 'sinamec@grupoincocr.com'
+      
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-
-        notification_status, notification_data = self.send_notification([email, mitigation_action.contact.email], subject, message_body)
+        email_list = []
+        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
+            if user and hasattr(user, 'email'):
+                email_list.append(user.email)
+                
+        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
 
         result = (notification_status, notification_data)
         
