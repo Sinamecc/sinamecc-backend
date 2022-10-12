@@ -385,6 +385,12 @@ class DescarbonizationAxisSelectionSerializer(serializers.ModelSerializer):
         fields = ('id', 'descarbonization_axis', 'categorization', 'transformational_vision')
         list_serializer_class = GenericListSerializer
     
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['descarbonization_axis'] = DescarbonizationAxisSerializer(instance.descarbonization_axis).data
+        data['transformational_vision'] = TransformationalVisionsSerializer(instance.transformational_vision.all(), many=True).data
+        return data
+    
     
 class ActionAreasSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -392,6 +398,12 @@ class ActionAreasSelectionSerializer(serializers.ModelSerializer):
         model = ActionAreasSelection
         fields = ('id', 'area', 'goals', 'categorization')
         list_serializer_class = GenericListSerializer
+    
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['area'] = ActionAreasSerializer(instance.area).data
+        data['goals'] = ActionGoalsSerializer(instance.goals.all(), many=True).data
+        return data
        
 
 class TopicsSelectionSerializer(serializers.ModelSerializer):
@@ -400,6 +412,12 @@ class TopicsSelectionSerializer(serializers.ModelSerializer):
         model = TopicsSelection
         fields = ('id', 'topic', 'sub_topic', 'categorization')
         list_serializer_class = GenericListSerializer
+    
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['topic'] = TopicsSerializer(instance.topic).data
+        data['sub_topic'] = SubTopicsSerializer(instance.sub_topic.all(), many=True).data
+        return data
         
 
 class CategorizationSerializer(serializers.ModelSerializer):
@@ -565,10 +583,13 @@ class FinanceSerializer(serializers.ModelSerializer):
         fields = ('id', 'status', 'administration', 'source', 'reference_year',
                   'mideplan_registered', 'mideplan_project', 'executing_entity')
         
+    
         
     def to_representation(self, instance):
         
         data = super().to_representation(instance)
+        data['status'] = FinanceStatusSerializer(instance.status).data
+        data['source'] = FinanceSourceTypeSerializer(instance.source.all(), many=True).data
         data['finance_information'] = FinanceInformationSerializer(instance.finance_information.all(), many=True).data
         
         return data
