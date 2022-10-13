@@ -29,8 +29,7 @@ class MAWorkflowStep(models.Model):
         verbose_name = _("Workflow Step")
         verbose_name_plural = _("Workflow Steps")
 
-    def __unicode__(self):
-        return smart_unicode("{} - {}".format(self.name, self.entry_name))
+        
 
 
 class MAWorkflowStepFile(models.Model):
@@ -45,5 +44,3 @@ class MAWorkflowStepFile(models.Model):
         verbose_name = _("Workflow Step File")
         verbose_name_plural = _("Workflow Step Files")
 
-    def __unicode__(self):
-        return smart_unicode("{} - {}".format(self.workflow_step.name, self.file.name))

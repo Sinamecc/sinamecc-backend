@@ -28,7 +28,7 @@ class MitigationActionService():
         self._serialize_helper = SerializersHelper()
         self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
-        self.INVALID_USER_TRANSITION = "the user doesn´t have permission for this transition"
+        self.INVALID_USER_TRANSITION = "the user doesn't have permission for this transition"
         self.FUNCTION_INSTANCE_ERROR = 'Error Mitigation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.LIST_ERROR = "Was expected a {0} list into data"
