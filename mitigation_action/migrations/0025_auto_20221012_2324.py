@@ -48,6 +48,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='informationsource',
             name='type',
-            field=models.ManyToManyField(blank=True, null=True, related_name='information_source', to='mitigation_action.InformationSourceType'),
+            field=models.ManyToManyField(blank=True, related_name='information_source', to='mitigation_action.InformationSourceType'),
         ),
     ]

@@ -579,7 +579,7 @@ class SectorSelection(models.Model):
 ## section 5 new
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type = models.ManyToManyField(InformationSourceType, null=True, blank=True, related_name='information_source')
+    type = models.ManyToManyField(InformationSourceType, blank=True, related_name='information_source')
     other_type = models.CharField(max_length=500, blank=True, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
