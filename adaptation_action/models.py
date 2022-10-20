@@ -7,6 +7,8 @@ from general.models import Address
 from django_fsm import FSMField, transition
 from time import gmtime, strftime
 from general.storages import PrivateMediaStorage
+from adaptation_action.email_services import AdaptationActionEmailServices
+from general.services import EmailServices
 
 from workflow.models import Comment
 
@@ -606,6 +608,8 @@ class AdaptationAction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    email_service = AdaptationActionEmailServices(EmailServices())
+
     class Meta:
         verbose_name = _("Adaptation Action")
         verbose_name_plural = _("Adaptation Actions")
@@ -644,7 +648,18 @@ class AdaptationAction(models.Model):
         # new --> submitted        
         # send email to user that submitted the action
         print(f'The adaptation action is transitioning from <{self.fsm_state}> to <submitted>')
-        ...
+        email_function = {
+            'new': self.email_service.notify_dcc_responsible_adaptation_action_submission
+        }
+        
+        email_status, email_data = email_function.get(self.fsm_state)(self)
+        
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
+
         ## maybe raise exception
 
     
@@ -653,7 +668,14 @@ class AdaptationAction(models.Model):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_resposible_adaptation_action_evaluation_by_dcc(self)
+        if email_status:
+            return email_status, email_data
+        
+        else:
+            ...
+
         ## maybe raise exception
 
     ##
