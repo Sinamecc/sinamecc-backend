@@ -1361,7 +1361,7 @@ class MitigationActionService():
             previous_state = mitigation_action.fsm_state
 
             if has_transition_perm(transition_function,user):
-                transition_function()
+                transition_function(user)
                 mitigation_action.save()
                 
                 change_log_data = self._serialize_change_log_data(user, mitigation_action, previous_state)
