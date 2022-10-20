@@ -14,7 +14,7 @@ class AdaptationActionEmailServices():
         result_status, result_data = self.email_services.send_status_notification(recipient , subject, message_body)
         return (result_status, result_data)
 
-    def notify_dcc_responsible_adaptation_action_submission(self, adaptation_action):
+    def notify_dcc_responsible_adaptation_action_submission(self, adaptation_action, user_approver):
 
         template_path_data = {'module': 'email', 'template': 'submitted_aa'}
         
@@ -23,17 +23,20 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.id}
 
-        email = 'sinamec@grupoincocr.com'
         subject = 'Registro de Acción de Adaptación en SINAMECC'
         message_body = template.render(context)
+        email_list = []
+        for user in [contact, adaptation_action.user , user_approver]:
+            if user and hasattr(user, 'email'):
+                email_list.append(user.email)
 
-        notification_status, notification_data = self.send_notification([email, contact.email], subject, message_body)
+        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
 
         result = (notification_status, notification_data)
 
         return result
 
-    def notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, adaptation_action):
+    def notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, adaptation_action, user_approver):
 
         template_path_data = {'module': 'email', 'template': 'evaluation_aa'}
         

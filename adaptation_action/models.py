@@ -644,15 +644,16 @@ class AdaptationAction(models.Model):
         return self.fsm_state == 'requested_changes_by_DCC'
 
     @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
-    def submit(self):
+    def submit(self, user_approver):
         # new --> submitted        
         # send email to user that submitted the action
         print(f'The adaptation action is transitioning from <{self.fsm_state}> to <submitted>')
+        
         email_function = {
             'new': self.email_service.notify_dcc_responsible_adaptation_action_submission
         }
         
-        email_status, email_data = email_function.get(self.fsm_state)(self)
+        email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
         
         if email_status:
             return email_status, email_data
@@ -664,12 +665,12 @@ class AdaptationAction(models.Model):
 
     
     @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
-    def evaluate_by_DCC(self):
+    def evaluate_by_DCC(self, user_approver):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
         
-        email_status, email_data = self.email_service.notify_contact_resposible_adaptation_action_evaluation_by_dcc(self)
+        email_status, email_data = self.email_service.notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, user_approver)
         if email_status:
             return email_status, email_data
         
