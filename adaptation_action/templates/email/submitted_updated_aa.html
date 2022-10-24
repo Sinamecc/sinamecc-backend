@@ -1,0 +1,21 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de registro actualizado{% else %}  Registration updated notification {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            ¡Hola! Reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+                La solicitud para registrar Acción de Adaptación en el SINAMECC con el ID {{aa_code}}, ha<br/>
+            con el ID {{aa_code}}.<br/>
+            </p>
+            <p>
+            En el siguiente $enlace$ puede acceder al registro y dar inicio al proceso de revisión del <br/>
+            registro de acciones climáticas.
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/signature.html"%}
+        </div>
+{% endblock content %}

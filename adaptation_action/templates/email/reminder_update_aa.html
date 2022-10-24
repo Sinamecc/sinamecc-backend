@@ -1,0 +1,24 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Recordatorio de actualización de Acción de Adaptación {% else %} Adaptation Action Update Reminder {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            Hola, reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+                Se notifica que el registro de Acción de Adaptación con ID {{aa_code}} ha registrado esta <br/>
+                fecha como recordatorio de actualización de datos en SINAMECC.
+            </p>
+            <p>
+            En el siguiente $enlace$ puede acceder a su registro para completar la actualización y reporte<br>
+            de sus datos en SINAMECC
+            </p>
+            <p>
+            Si tiene alguna consulta adicional, no dude en contactarnos a cambioclimatico@minae.go.cr
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/signature.html"%}
+        </div>
+{% endblock content %}
