@@ -59,7 +59,7 @@ class AdaptationActionEmailServices():
         
         return result
     
-    def notify_contact_responsible_mitigation_action_rejection(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_rejection(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
@@ -72,10 +72,10 @@ class AdaptationActionEmailServices():
 
         return result
     
-    def notify_contact_responsible_mitigation_action_changes(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_requested_changes(self, adaptation_action, user_approver):
         ...
     
-    def notify_contact_responsible_mitigation_action_update(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_update(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.id}
@@ -88,7 +88,7 @@ class AdaptationActionEmailServices():
 
         return result
     
-    def notify_contact_responsible_mitigation_action_approval(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_approval(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
@@ -101,7 +101,7 @@ class AdaptationActionEmailServices():
 
         return result
     
-    def notify_contact_responsible_mitigation_action_reminder_update(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_reminder_update(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.id}
