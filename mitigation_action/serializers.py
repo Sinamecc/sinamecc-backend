@@ -503,7 +503,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ImpactDocumentation
-        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit','calculation_methodology', 
+        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit', 'gases', 'calculation_methodology', 
                     'estimate_calculation_documentation', 'estimate_calculation_documentation_file', 'mitigation_action_in_inventory', 'standard', 
                     'other_standard', 'carbon_international_commerce', 'methodologies_to_use')
     
