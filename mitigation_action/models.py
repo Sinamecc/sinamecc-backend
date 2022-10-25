@@ -489,7 +489,7 @@ class ImpactDocumentation(models.Model):
     period_potential_reduction =models.TextField(null=True)
     
     ##catalog
-    carbon_deposit = models.ForeignKey(CarbonDeposit, null=True, related_name='impact_documentation', on_delete=models.CASCADE)
+    carbon_deposit = models.ManyToManyField(CarbonDeposit, blank=True, related_name='impact_documentation')
     gases = models.TextField(null=True) # separate by commas CO2, CH4, N2O
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
