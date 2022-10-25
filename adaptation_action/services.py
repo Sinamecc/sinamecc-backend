@@ -1170,7 +1170,7 @@ class AdaptationActionServices():
             previous_state = adaptation_action.fsm_state
 
             if has_transition_perm(transition_function, user):
-                transition_function()
+                transition_function(user)
                 adaptation_action.save()
                 
                 change_log_data = self._serialize_change_log_data(user, adaptation_action, previous_state)
@@ -1590,7 +1590,7 @@ class AdaptationActionServices():
                     self._increase_review_counter(adaptation_action)
                     assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
 
-                    if assign_status: 
+                    if assign_status:
                         result = (True, AdaptationActionSerializer(adaptation_action).data)
                     
                     else: 
