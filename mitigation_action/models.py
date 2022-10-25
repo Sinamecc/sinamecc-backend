@@ -579,7 +579,7 @@ class SectorSelection(models.Model):
 ## section 5 new
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type = models.ManyToManyField(InformationSourceType, blank=True, related_name='information_source')
     other_type = models.CharField(max_length=500, blank=True, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -627,8 +627,14 @@ class Indicator(models.Model):
     
     disaggregation = models.TextField(null=True)
 
+    classifier = models.ManyToManyField(Classifier, related_name='indicator', blank=True)
+    other_classifier = models.CharField(max_length=255, blank=True, null=True)
+    
     limitation = models.TextField(null=True)
-
+    ensure_sustainability = models.TextField(null=True)
+    ## need to endpoint to upload file
+    ensure_sustainability_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    
     comments = models.TextField(null=True)
     ## FK
     ## information source
