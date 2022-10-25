@@ -386,6 +386,12 @@ class DescarbonizationAxisSelectionSerializer(serializers.ModelSerializer):
         fields = ('id', 'descarbonization_axis', 'categorization', 'transformational_vision')
         list_serializer_class = GenericListSerializer
     
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['descarbonization_axis'] = DescarbonizationAxisSerializer(instance.descarbonization_axis).data
+        data['transformational_vision'] = TransformationalVisionsSerializer(instance.transformational_vision.all(), many=True).data
+        return data
+    
     
 class ActionAreasSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
@@ -393,6 +399,12 @@ class ActionAreasSelectionSerializer(serializers.ModelSerializer):
         model = ActionAreasSelection
         fields = ('id', 'area', 'goals', 'categorization')
         list_serializer_class = GenericListSerializer
+    
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['area'] = ActionAreasSerializer(instance.area).data
+        data['goals'] = ActionGoalsSerializer(instance.goals.all(), many=True).data
+        return data
        
 
 class TopicsSelectionSerializer(serializers.ModelSerializer):
@@ -401,6 +413,12 @@ class TopicsSelectionSerializer(serializers.ModelSerializer):
         model = TopicsSelection
         fields = ('id', 'topic', 'sub_topic', 'categorization')
         list_serializer_class = GenericListSerializer
+    
+    def to_representation(self, instance):
+        data =  super().to_representation(instance)
+        data['topic'] = TopicsSerializer(instance.topic).data
+        data['sub_topic'] = SubTopicsSerializer(instance.sub_topic.all(), many=True).data
+        return data
         
 
 class CategorizationSerializer(serializers.ModelSerializer):
@@ -451,7 +469,8 @@ class IndicatorSerializer(serializers.ModelSerializer):
         model = Indicator
 
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
-                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation', 'comments',
+                'geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation','classifier', 'other_classifier' ,'ensure_sustainability',
+                'comments',
                 'information_source', 'type_of_data', 'other_type_of_data', 'contact', 'monitoring_information')
     
 
@@ -460,6 +479,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['contact'] = ContactSerializer(instance.contact).data
         data['information_source'] = InformationSourceSerializer(instance.information_source).data
         data['change_log'] = IndicatorChangeLogSerializer(instance.indicator_change_log.all(), many=True).data
+        data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
         ## push the indicator_id to the indicator_change_log
         return data
 
@@ -469,6 +489,13 @@ class InformationSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InformationSource
         fields = ('id', 'responsible_institution', 'type', 'other_type', 'statistical_operation')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['type'] = InformationSourceTypeSerializer(instance.type.all(), many=True).data
+        
+        return data
+    
 
 
 class MonitoringInformationSerializer(serializers.ModelSerializer):
@@ -520,7 +547,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
 
         data = super().to_representation(instance)
         data['question'] = QAQCReductionEstimateQuestionSerializer(instance.question.all(), many=True).data
-        data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit).data
+        data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit.all(), many=True).data
         data['standard'] =  StandardSerializer(instance.standard).data
         data['estimate_calculation_documentation_file'] = self._get_estimate_calculation_documentation_file_url(instance)
         data['sector_selection'] = SectorSelectionSerializer(instance.sector_selection.all(), many=True).data
@@ -559,10 +586,13 @@ class FinanceSerializer(serializers.ModelSerializer):
         fields = ('id', 'status', 'administration', 'source', 'reference_year',
                   'mideplan_registered', 'mideplan_project', 'executing_entity')
         
+    
         
     def to_representation(self, instance):
         
         data = super().to_representation(instance)
+        data['status'] = FinanceStatusSerializer(instance.status).data
+        data['source'] = FinanceSourceTypeSerializer(instance.source.all(), many=True).data
         data['finance_information'] = FinanceInformationSerializer(instance.finance_information.all(), many=True).data
         
         return data
