@@ -17,7 +17,7 @@ class AdaptationActionEmailServices():
     def _notify_aux(self, from_template, context, subject, users):
 
         template_path_data = {'module': 'email', 'template': from_template}
-        template = loader.get_template(self.template_path.format(**template_path_data))
+        template = loader.get_template(self.template_path.format_map(template_path_data))
 
         message_body = template.render(context)
         email_list = []
