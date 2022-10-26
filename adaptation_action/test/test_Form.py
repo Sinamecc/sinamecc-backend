@@ -53,5 +53,9 @@ class AdaptationActionTest(TestCase):
         client.force_login(self.superUser)
         response = client.get(reverse('get_post_adaptation_action'))
         response_data = response.data
+        serialized_aa = AdaptationActionSerializer(AdaptationAction.objects.all(), many=True)
         
+        print(serialized_aa)
+        self.assertEqual(response_data, serialized_aa.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
