@@ -4,13 +4,13 @@ from user_self_management.models import User, Module
 class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
-        fields = ('name', 'supplier_reviewer')
+        fields = ('name', 'code')
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'institution', 'role', 'position', 'module')
+        fields = ('id', 'email', 'first_name', 'last_name', 'institution', 'position', 'module')
     
     def to_representation(self, instance):
         data =  super().to_representation(instance)

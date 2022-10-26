@@ -5,7 +5,7 @@ import uuid
 class Module(models.Model):
 
     name = models.TextField(null=True)
-    supplier_reviewer = models.TextField(null=True)
+    code = models.TextField(null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -22,7 +22,6 @@ class User(models.Model):
     first_name = models.TextField(null=True)
     last_name = models.TextField(null=True)
     institution = models.TextField(null=True)
-    role = models.TextField(null=True)
     position = models.TextField(null=True)
     module = models.ManyToManyField(Module, blank=True)
 
