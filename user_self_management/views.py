@@ -22,7 +22,7 @@ def get_all_user_self_management(request):
 @api_view(['POST', 'GET'])
 def get_post_user_self_management(request):
     if request.method == 'POST':
-        result = post_user_self_management
+        result = post_user_self_management(request)
         
     elif request.method == 'GET':
         result = get_all_user_self_management(request)
