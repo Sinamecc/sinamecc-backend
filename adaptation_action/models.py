@@ -582,7 +582,7 @@ class AdaptationAction(models.Model):
     
     #Section 1
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    fsm_state = FSMField(default='new', protected=True, max_length=100)
+    fsm_state = FSMField(default='nuevo', protected=True, max_length=100)
     report_organization = models.ForeignKey(ReportOrganization, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     #Section 2
     address = models.ForeignKey(Address, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
@@ -619,38 +619,38 @@ class AdaptationAction(models.Model):
     # --- Transition ---
     def can_submit(self):
         ## check all field are filled !!
-        ## check current status is new
-        return self.fsm_state in ['new','updating_by_request_DCC']
+        ## check current status is nuevo
+        return self.fsm_state in ['nuevo','actualizando_por_solicitud_DCC']
   
     def can_evaluate_by_DCC(self):
-        ## check current status is submitted
-        return self.fsm_state == 'submitted'
+        ## check current status is enviado
+        return self.fsm_state == 'enviado'
 
-    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
+    ## rechazado_por_DCC, cambios_solicitados_por_DCC, aceptado_por_DCC
     def can_rejected_by_DCC(self):
-        ## check current status is submitted
-        return self.fsm_state == 'in_evaluation_by_DCC'
+        ## check current status is enviado
+        return self.fsm_state == 'en_evaluación_por_DCC'
     
     def can_request_changes_by_DCC(self):
-        ## check current status is submitted
-        return self.fsm_state == 'in_evaluation_by_DCC'
+        ## check current status is enviado
+        return self.fsm_state == 'en_evaluación_por_DCC'
     
     def can_acception_by_DCC(self):
-        ## check current status is submitted
-        return self.fsm_state == 'in_evaluation_by_DCC'
+        ## check current status is enviado
+        return self.fsm_state == 'en_evaluación_por_DCC'
 
     def can_update_by_DCC_request(self):
-        ## check current status is submitted
-        return self.fsm_state == 'requested_changes_by_DCC'
+        ## check current status is enviado
+        return self.fsm_state == 'cambios_solicitados_por_DCC'
 
-    @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
+    @transition(field='fsm_state', source=['nuevo', 'actualizando_por_solicitud_DCC'], target='enviado', conditions=[can_submit], on_error='enviado')
     def submit(self, user_approver):
-        # new --> submitted        
-        # send email to user that submitted the action
-        print(f'The adaptation action is transitioning from <{self.fsm_state}> to <submitted>')
+        # nuevo --> enviado        
+        # send email to user that enviado the action
+        print(f'The adaptation action is transitioning from <{self.fsm_state}> to <enviado>')
         
         email_function = {
-            'new': self.email_service.notify_dcc_responsible_adaptation_action_submission
+            'nuevo': self.email_service.notify_dcc_responsible_adaptation_action_submission
         }
         
         email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
@@ -664,11 +664,11 @@ class AdaptationAction(models.Model):
         ## maybe raise exception
 
     
-    @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
+    @transition(field='fsm_state', source='enviado', target='en_evaluación_por_DCC', conditions=[can_evaluate_by_DCC], on_error='enviado', permission='')
     def evaluate_by_DCC(self, user_approver):
-        # submitted --> in_evaluation_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
+        # enviado --> en_evaluación_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <enviado> to <en_evaluación_por_DCC>')
         
         email_status, email_data = self.email_service.notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, user_approver)
         if email_status:
@@ -680,13 +680,13 @@ class AdaptationAction(models.Model):
         ## maybe raise exception
 
     ##
-    ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
+    ## rechazado_por_DCC, cambios_solicitados_por_DCC, aceptado_por_DCC
     ##
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_rejected_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    @transition(field='fsm_state', source='en_evaluación_por_DCC', target='rechazado_por_DCC', conditions=[can_rejected_by_DCC], on_error='en_evaluación_por_DCC', permission='')
     def evaluate_by_DCC_rejected(self, user_approver):
-        # in_evaluation_by_DCC --> rejected_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
+        # en_evaluación_por_DCC --> rechazado_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <en_evaluación_por_DCC> to <rechazado_por_DCC>')
         
         email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_rejection(self, user_approver)
         if email_status:
@@ -696,11 +696,11 @@ class AdaptationAction(models.Model):
             ...
         ## maybe raise exception
     
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='requested_changes_by_DCC', conditions=[can_request_changes_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    @transition(field='fsm_state', source='en_evaluación_por_DCC', target='cambios_solicitados_por_DCC', conditions=[can_request_changes_by_DCC], on_error='en_evaluación_por_DCC', permission='')
     def evaluate_by_DCC_requested_changes(self, user_approver):
-        # in_evaluation_by_DCC --> requested_changes_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
+        # en_evaluación_por_DCC --> cambios_solicitados_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <en_evaluación_por_DCC> to <cambios_solicitados_por_DCC>')
         
         """
         email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_requested_changes(self, user_approver)
@@ -708,11 +708,11 @@ class AdaptationAction(models.Model):
             return email_status, email_data
         """
     
-    @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
+    @transition(field='fsm_state', source='en_evaluación_por_DCC', target='aceptado_por_DCC', conditions=[can_acception_by_DCC], on_error='en_evaluación_por_DCC', permission='')
     def evaluate_by_DCC_accepted(self, user_approver):
-        # in_evaluation_by_DCC --> accepted_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
+        # en_evaluación_por_DCC --> aceptado_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <en_evaluación_por_DCC> to <aceptado_por_DCC>')
         
         email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_approval(self, user_approver)
         if email_status:
@@ -724,18 +724,18 @@ class AdaptationAction(models.Model):
             ## maybe raise exception
     
     ## rejected by DCC to end
-    @transition(field='fsm_state', source='rejected_by_DCC', target='end', conditions=[], on_error='rejected_by_DCC', permission='')
+    @transition(field='fsm_state', source='rechazado_por_DCC', target='fin', conditions=[], on_error='rechazado_por_DCC', permission='')
     def rejected_by_DCC_to_end(self):
-        # rejected_by_DCC --> rejected_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <rejected_by_DCC> to <end>')
+        # rechazado_por_DCC --> rechazado_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <rechazado_por_DCC> to <fin>')
         ...
     
-    @transition(field='fsm_state', source='requested_changes_by_DCC', target='updating_by_request_DCC', conditions=[can_update_by_DCC_request], on_error='requested_changes_by_DCC', permission='')
+    @transition(field='fsm_state', source='cambios_solicitados_por_DCC', target='actualizando_por_solicitud_DCC', conditions=[can_update_by_DCC_request], on_error='cambios_solicitados_por_DCC', permission='')
     def update_by_DCC_request(self, user_approver):
-        # requested_changes_by_DCC --> updating_by_request_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
+        # cambios_solicitados_por_DCC --> actualizando_por_solicitud_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <cambios_solicitados_por_DCC> to <actualizando_por_solicitud_DCC>')
         
         email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_update(self, user_approver)
 
@@ -745,12 +745,12 @@ class AdaptationAction(models.Model):
         else:
             ...
     
-    ## accepted_by_DCC to	registered_by_DCC
-    @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')
+    ## aceptado_por_DCC to	registrado_por_DCC
+    @transition(field='fsm_state', source='aceptado_por_DCC', target='registrado_por_DCC', conditions=[], on_error='aceptado_por_DCC', permission='')
     def registered_by_DCC(self):
-        # accepted_by_DCC --> registered_by_DCC
-        # send email to user that submitted the action
-        print('The adaptation action is transitioning from <accepted_by_DCC> to <registered_by_DCC>')
+        # aceptado_por_DCC --> registrado_por_DCC
+        # send email to user that enviado the action
+        print('The adaptation action is transitioning from <aceptado_por_DCC> to <registrado_por_DCC>')
         ...
 
 
