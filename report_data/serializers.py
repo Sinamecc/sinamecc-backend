@@ -5,6 +5,8 @@ from report_data.models import ChangeLog, ReportData, Report, ReportFile, Report
 from mitigation_action.serializers import ContactSerializer
 from users.serializers import CustomUserSerializer
 from workflow.serializers import CommentSerializer
+from report_data.workflow_steps.fsm_utils.fsm_states import RD_FSM_STATE
+from general.utils import get_translation_from_database as _
 
 
 class ReportDataChangeLogSerializer(serializers.ModelSerializer):
@@ -32,7 +34,7 @@ class ReportDataSerializer(serializers.ModelSerializer):
         
         data = {
             'state': instance.fsm_state,
-            'label':  f'{instance.fsm_state} label'
+            'label':  _(RD_FSM_STATE.get(instance.fsm_state), 'label'),
         }
         return data
     
@@ -42,7 +44,7 @@ class ReportDataSerializer(serializers.ModelSerializer):
         result = [
                     {
                         'state':transition.target, 
-                        'label': f'{transition.target} label', 
+                        'label': _(RD_FSM_STATE.get(instance.fsm_state), 'label'),
                         'required_comments': True
                     } for transition in transitions
                 ]
