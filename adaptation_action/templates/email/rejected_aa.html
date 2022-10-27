@@ -1,0 +1,24 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de Registro Rechazado {% else %} Rejected Mitigation Action Notification {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            Hola {{full_name}}. Reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+            Le informamos que su solicitud para registrar Acción de Adapctación en el SINAMECC con el<br/>
+            ID {{aa_code}}, ha sido rechazada.
+            </p>
+            <p>
+            Si requiere mayor detalle, puede consultar el estado de su solicitud en el siguiente $enlace$.<br>
+            Agradecemos su interés en registrar sus acciones climáticas en el SINAMECC.
+            </p>
+            <p>
+            Si tiene alguna consulta adicional, no dude en contactarnos a cambioclimatico@minae.go.cr
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/signature.html"%}
+        </div>
+{% endblock content %}
