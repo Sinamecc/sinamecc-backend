@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.db.models import fields
+from adaptation_action.workflow_steps.fsm_utils.fsm_states import AA_FSM_STATE
 from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 from django.conf import settings
@@ -400,7 +401,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         
         data = {
             'state': instance.fsm_state,
-            'label':  f'{instance.fsm_state} label'
+            'label':  _(AA_FSM_STATE.get(instance.fsm_state), 'label'),
         }
         return data
     
@@ -410,7 +411,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         result = [
                     {
                         'state':transition.target, 
-                        'label': f'{transition.target} label', 
+                        'label': _(AA_FSM_STATE.get(instance.fsm_state), 'label'),
                         'required_comments': True
                     } for transition in transitions
                 ]
