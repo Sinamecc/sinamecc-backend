@@ -44,7 +44,7 @@ class ReportDataSerializer(serializers.ModelSerializer):
         result = [
                     {
                         'state':transition.target, 
-                        'label': _(RD_FSM_STATE.get(instance.fsm_state), 'label'),
+                        'label': _(RD_FSM_STATE.get(transition.target), 'label'),
                         'required_comments': True
                     } for transition in transitions
                 ]
