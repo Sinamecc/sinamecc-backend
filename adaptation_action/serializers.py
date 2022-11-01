@@ -410,8 +410,8 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         transitions = instance.get_available_fsm_state_transitions()
         result = [
                     {
-                        'state': transition.target, 
-                        'label': _(AA_FSM_STATE.get(transition.target), 'label'),
+                        'state':transition.target, 
+                        'label': _(AA_FSM_STATE.get(instance.fsm_state), 'label'),
                         'required_comments': True
                     } for transition in transitions
                 ]
