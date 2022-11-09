@@ -9,6 +9,7 @@ from time import gmtime, strftime
 from general.storages import PrivateMediaStorage
 from adaptation_action.email_services import AdaptationActionEmailServices
 from general.services import EmailServices
+from django.db import transaction
 
 from workflow.models import Comment
 
@@ -72,6 +73,8 @@ class AdaptationActionType(models.Model):
 
     code = models.CharField(max_length=3, null=True)
     name = models.CharField(max_length=100, null=True)
+    type = models.CharField(max_length=2, null=True)
+    count = models.IntegerField(default=0)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -582,6 +585,7 @@ class AdaptationAction(models.Model):
     
     #Section 1
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=255, null=True)
     fsm_state = FSMField(default='new', protected=True, max_length=100)
     report_organization = models.ForeignKey(ReportOrganization, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     #Section 2
@@ -613,6 +617,20 @@ class AdaptationAction(models.Model):
     class Meta:
         verbose_name = _("Adaptation Action")
         verbose_name_plural = _("Adaptation Actions")
+    
+
+    def create_code(self):
+        ##
+        ## format code: AA{initiative_type}-{0000}
+        ##
+        if not (self.adaptation_action_information is None or self.adaptation_action_information.adaptation_action_type is None):
+            with transaction.atomic():
+                adaptation_action_type = AdaptationActionType.objects.select_for_update().get(pk=self.adaptation_action_information.adaptation_action_type.id)
+                self.code = f'AA{adaptation_action_type.type}-{adaptation_action_type.count:0>4}'
+                self.adaptation_action_information.adaptation_action_type.count += 1
+                self.save()
+                self.adaptation_action_information.adaptation_action_type.save()
+    
 
 
     # FSM Annotated Methods (Transitions) and Ordinary Conditions
