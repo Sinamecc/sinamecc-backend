@@ -55,6 +55,8 @@ class ReportDataSerializer(serializers.ModelSerializer):
         data['fsm_state'] = self._get_fsm_state_info(instance)
         data['contact'] = ContactSerializer(instance.contact).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
+        data['information_source'] = InformationSourceTypeSerializer(instance.information_source.all(), many=True).data
+        data['data_type'] = ThematicCategorizationTypeSerializer(instance.data_type.all(), many=True).data
         data['report_data_change_log'] = ReportDataChangeLogSerializer(instance.report_data_change_log.all().order_by('-id'), many=True).data
         data['files'] = ReportFileSerializer(instance.report_file.all(), many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(fsm_state=instance.fsm_state, review_number=instance.review_count), many=True).data
