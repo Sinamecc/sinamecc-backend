@@ -702,11 +702,11 @@ class AdaptationAction(models.Model):
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
         
-        """
+        
         email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_requested_changes(self, user_approver)
         if email_status:
             return email_status, email_data
-        """
+        
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
     def evaluate_by_DCC_accepted(self, user_approver):

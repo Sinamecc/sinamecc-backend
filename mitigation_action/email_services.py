@@ -29,7 +29,7 @@ class MitigationActionEmailServices():
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
         email_list = []
-        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
+        for user in [user_approver]:
             if user and hasattr(user, 'email'):
                 email_list.append(user.email)
                 
@@ -52,7 +52,7 @@ class MitigationActionEmailServices():
         subject = 'Evaluación de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
         email_list = []
-        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
+        for user in [mitigation_action.contact]:
             if user and hasattr(user, 'email'):
                 email_list.append(user.email)
                 
@@ -76,7 +76,7 @@ class MitigationActionEmailServices():
         subject = 'Rechazo de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
         email_list = []
-        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
+        for user in [mitigation_action.contact]:
             if user and hasattr(user, 'email'):
                 email_list.append(user.email)
                 
@@ -87,6 +87,29 @@ class MitigationActionEmailServices():
 
         return result
     
+
+    def notify_dcc_responsible_mitigation_action_request_changes(self, mitigation_action, user_approver):
+
+        template_path_data = {'module': 'email', 'template': 'changes_ma'}
+        
+        template = loader.get_template(self.template_path.format(**template_path_data))
+
+        context = {'lang': 'es', 'ma_code': mitigation_action.code}
+
+        subject = 'Actualización de Acción de Mitigación en SINAMECC'
+        message_body = template.render(context)
+        email_list = []
+        for user in [mitigation_action.contact]:
+            if user and hasattr(user, 'email'):
+                email_list.append(user.email)
+                
+        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+
+
+        result = (notification_status, notification_data)
+
+        return result
+
 
     def notify_dcc_responsible_mitigation_action_update(self, mitigation_action, user_approver):
 

@@ -966,7 +966,6 @@ class MitigationAction(models.Model):
 
         email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
         if email_status:
-            print(email_data)
             return email_status, email_data
         else:
             ...
@@ -981,7 +980,6 @@ class MitigationAction(models.Model):
 
         email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_evaluation_by_dcc(self, user_approver)
         if email_status:
-            print(email_data)
             return email_status, email_data
         else:
             ...
@@ -997,7 +995,6 @@ class MitigationAction(models.Model):
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
         email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_rejection(self, user_approver)
         if email_status:
-            print(email_data)
             return email_status, email_data
         else:
             ...
@@ -1008,7 +1005,11 @@ class MitigationAction(models.Model):
         # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
-        ...
+        email_status, email_data = self.email_service.notify_dcc_responsible_mitigation_action_request_changes(self, user_approver)
+        if email_status:
+            return email_status, email_data
+        else:
+            ...
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
     def evaluate_by_DCC_accepted(self, user_approver):
@@ -1017,7 +1018,6 @@ class MitigationAction(models.Model):
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
         email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_approval(self, user_approver)
         if email_status:
-            print(email_data)
             return email_status, email_data
         else:
             ...
@@ -1035,9 +1035,12 @@ class MitigationAction(models.Model):
     def update_by_DCC_request(self, user_approver):
         # requested_changes_by_DCC --> updating_by_request_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
-        ...
-    
+        email_status, email_data = self.email_service.notify_dcc_responsible_mitigation_action_update(self, user_approver)
+        if email_status:
+            return email_status, email_data
+        else:
+            ...
+        
     ## accepted_by_DCC to	registered_by_DCC
     @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')
     def registered_by_DCC(self,user_approver):
