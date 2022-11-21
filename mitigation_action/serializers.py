@@ -449,9 +449,11 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
+    id = serializers.IntegerField()
     class Meta:
         model = MonitoringIndicator
         fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'progress_report_period', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        list_serializer_class = GenericListSerializer
         
 
 
