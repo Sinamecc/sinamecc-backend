@@ -693,7 +693,7 @@ class MonitoringIndicator(models.Model):
     initial_date_report_period = models.DateField(null=True)
     final_date_report_period = models.DateField(null=True)
     data_updated_date = models.DateField(null=True)
-    source_type = models.TextField(null=True)
+    report_type = models.TextField(null=True)
     updated_data = models.CharField(max_length=150, null=True)
     updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     progress_report_period = models.DateField(null=True)
