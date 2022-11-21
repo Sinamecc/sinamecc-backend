@@ -451,7 +451,7 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MonitoringIndicator
-        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'updated_data', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'progress_report_period', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
         
 
 
