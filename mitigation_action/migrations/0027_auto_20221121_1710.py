@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mitigation_action', '0025_auto_20221012_2324'),
+        ('mitigation_action', '0026_impactdocumentation_gases'),
     ]
 
     operations = [
