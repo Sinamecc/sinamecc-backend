@@ -38,7 +38,7 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.id}
         subject = 'Registro de Acción de Adaptación en SINAMECC'
-        users = [contact, adaptation_action.user, user_approver]
+        users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_aa', context, subject, users)
 
@@ -51,7 +51,7 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
         subject = 'Evaluación de Acción de Adaptación en SINAMECC'
-        users = [contact, adaptation_action.user, user_approver]
+        users = [contact]
 
         notification_status, notification_data = self._notify_aux('evaluation_aa', context, subject, users)
 
@@ -64,7 +64,7 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
         subject = 'Rechazo de Acción de Adaptación en SINAMECC'
-        users = [contact, adaptation_action.user, user_approver]
+        users = [contact]
 
         notification_status, notification_data = self._notify_aux('rejected_aa', context, subject, users)
 
@@ -73,14 +73,24 @@ class AdaptationActionEmailServices():
         return result
     
     def notify_contact_responsible_adaptation_action_requested_changes(self, adaptation_action, user_approver):
-        ...
-    
+        
+        contact = adaptation_action.report_organization.contact
+        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
+        subject = 'Solicitud de cambios en Acción de Adaptación en SINAMECC'
+        users = [contact]
+
+        notification_status, notification_data = self._notify_aux('changes_aa', context, subject, users)
+
+        result = (notification_status, notification_data)
+
+        return result
+
     def notify_contact_responsible_adaptation_action_update(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.id}
         subject = 'Actualización de Acción de Adaptación en SINAMECC'
-        users = [contact, adaptation_action.user, user_approver]
+        users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_updated_aa', context, subject, users)
 
@@ -93,7 +103,7 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
         subject = 'Aprobación de Acción de Adaptación en SINAMECC'
-        users = [contact, adaptation_action.user, user_approver]
+        users = [contact]
 
         notification_status, notification_data = self._notify_aux('approved_aa', context, subject, users)
 
