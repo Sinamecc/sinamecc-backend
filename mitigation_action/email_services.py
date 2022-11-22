@@ -28,19 +28,15 @@ class MitigationActionEmailServices():
       
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [user_approver]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
-                
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+
+        notification_status, notification_data = self.send_notification(user_approver.email, subject, message_body)
 
         result = (notification_status, notification_data)
         
         return result
     
 
-    def notify_contact_responsible_mitigation_action_evaluation_by_dcc(self, mitigation_action, user_approver):
+    def notify_contact_responsible_mitigation_action_evaluation_by_dcc(self, mitigation_action):
 
         template_path_data = {'module': 'email', 'template': 'evaluation_ma'}
         
@@ -51,12 +47,8 @@ class MitigationActionEmailServices():
 
         subject = 'Evaluación de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [mitigation_action.contact]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
-                
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+        contact_email = mitigation_action.user.email
+        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
 
 
         result = (notification_status, notification_data)
@@ -64,7 +56,7 @@ class MitigationActionEmailServices():
         return result
     
 
-    def notify_contact_responsible_mitigation_action_rejection(self, mitigation_action, user_approver):
+    def notify_contact_responsible_mitigation_action_rejection(self, mitigation_action):
         
         template_path_data = {'module': 'email', 'template': 'rejected_ma'}
         
@@ -75,12 +67,9 @@ class MitigationActionEmailServices():
 
         subject = 'Rechazo de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [mitigation_action.contact]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
-                
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+        contact_email = mitigation_action.user.email
+        
+        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
 
 
         result = (notification_status, notification_data)
@@ -88,7 +77,7 @@ class MitigationActionEmailServices():
         return result
     
 
-    def notify_dcc_responsible_mitigation_action_request_changes(self, mitigation_action, user_approver):
+    def notify_dcc_responsible_mitigation_action_request_changes(self, mitigation_action):
 
         template_path_data = {'module': 'email', 'template': 'changes_ma'}
         
@@ -98,12 +87,9 @@ class MitigationActionEmailServices():
 
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [mitigation_action.contact]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
+        contact_email = mitigation_action.user.email
                 
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
 
 
         result = (notification_status, notification_data)
@@ -121,12 +107,9 @@ class MitigationActionEmailServices():
 
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
+        contact_email = user_approver.email
                 
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
 
 
         result = (notification_status, notification_data)
@@ -135,7 +118,7 @@ class MitigationActionEmailServices():
 
     ## aproved mitigation action
 
-    def notify_contact_responsible_mitigation_action_approval(self, mitigation_action, user_approver):
+    def notify_contact_responsible_mitigation_action_approval(self, mitigation_action):
         
         template_path_data = {'module': 'email', 'template': 'approved_ma'}
         
@@ -147,12 +130,9 @@ class MitigationActionEmailServices():
 
         subject = 'Aprobación de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        email_list = []
-        for user in [mitigation_action.contact, mitigation_action.user, user_approver]:
-            if user and hasattr(user, 'email'):
-                email_list.append(user.email)
+        contact_email = mitigation_action.user.email
                 
-        notification_status, notification_data = self.send_notification(email_list, subject, message_body)
+        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
 
 
         result = (notification_status, notification_data)

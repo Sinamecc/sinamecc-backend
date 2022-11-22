@@ -978,7 +978,7 @@ class MitigationAction(models.Model):
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
 
-        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_evaluation_by_dcc(self, user_approver)
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_evaluation_by_dcc(self)
         if email_status:
             return email_status, email_data
         else:
@@ -993,7 +993,7 @@ class MitigationAction(models.Model):
         # in_evaluation_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
-        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_rejection(self, user_approver)
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_rejection(self)
         if email_status:
             return email_status, email_data
         else:
@@ -1005,7 +1005,7 @@ class MitigationAction(models.Model):
         # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
-        email_status, email_data = self.email_service.notify_dcc_responsible_mitigation_action_request_changes(self, user_approver)
+        email_status, email_data = self.email_service.notify_dcc_responsible_mitigation_action_request_changes(self)
         if email_status:
             return email_status, email_data
         else:
@@ -1016,7 +1016,7 @@ class MitigationAction(models.Model):
         # in_evaluation_by_DCC --> accepted_by_DCC
         # send email to user that submitted the action
         print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
-        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_approval(self, user_approver)
+        email_status, email_data = self.email_service.notify_contact_responsible_mitigation_action_approval(self)
         if email_status:
             return email_status, email_data
         else:

@@ -1101,7 +1101,6 @@ class MitigationActionService():
 
         validation_dict = {}
         data = request.data.copy()
-        data['user'] = request.user.id
 
         field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'categorization',
                         'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator'] 
