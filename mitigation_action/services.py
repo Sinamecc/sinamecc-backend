@@ -170,7 +170,7 @@ class MitigationActionService():
 
     def _get_serialized_mitigation_action(self, data, mitigation_action = False):
 
-        serializer = self._serialize_helper.get_serialized_record(MitigationActionSerializer, data, record=mitigation_action)
+        serializer = self._serialize_helper.get_serialized_record(MitigationActionSerializer, data, record=mitigation_action, partial=True)
 
         return serializer
 
