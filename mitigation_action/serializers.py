@@ -449,9 +449,11 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
+    id = serializers.IntegerField()
     class Meta:
         model = MonitoringIndicator
-        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'updated_data', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'progress_report_period', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        list_serializer_class = GenericListSerializer
         
 
 
@@ -530,7 +532,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ImpactDocumentation
-        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit','calculation_methodology', 
+        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit', 'gases', 'calculation_methodology', 
                     'estimate_calculation_documentation', 'estimate_calculation_documentation_file', 'mitigation_action_in_inventory', 'standard', 
                     'other_standard', 'carbon_international_commerce', 'methodologies_to_use')
     
