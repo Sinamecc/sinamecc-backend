@@ -1521,7 +1521,6 @@ class AdaptationActionServices():
 
         validation_dict = {}
         data = request.data.copy()
-        data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',

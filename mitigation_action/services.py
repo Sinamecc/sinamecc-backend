@@ -1440,9 +1440,3 @@ class MitigationActionService():
             result = (False, mitigation_action_data)
         
         return result
-
-
-
-
-
-
