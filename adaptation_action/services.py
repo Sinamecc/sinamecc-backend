@@ -82,7 +82,7 @@ class AdaptationActionServices():
 
     def _get_serialized_adaptation_action(self, data, adaptation_action = False):
 
-        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action)
+        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action, partial=True)
 
         return serializer
     
@@ -1522,7 +1522,6 @@ class AdaptationActionServices():
 
         validation_dict = {}
         data = request.data.copy()
-        data['user'] = request.user.id
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
