@@ -82,7 +82,7 @@ class AdaptationActionServices():
 
     def _get_serialized_adaptation_action(self, data, adaptation_action = False):
 
-        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action)
+        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action, partial=True)
 
         return serializer
     
