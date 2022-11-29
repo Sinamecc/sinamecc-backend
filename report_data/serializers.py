@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 from report_data.models import ChangeLog, ReportData, Report, ReportFile, ReportDataChangeLog
-from mitigation_action.serializers import ContactSerializer
+from mitigation_action.serializers import ContactSerializer, ClassifierSerializer, ThematicCategorizationTypeSerializer, InformationSourceTypeSerializer
 from users.serializers import CustomUserSerializer
 from workflow.serializers import CommentSerializer
 from report_data.workflow_steps.fsm_utils.fsm_states import RD_FSM_STATE
@@ -53,6 +53,9 @@ class ReportDataSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['fsm_state'] = self._get_fsm_state_info(instance)
         data['contact'] = ContactSerializer(instance.contact).data
+        data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
+        data['information_source'] = InformationSourceTypeSerializer(instance.information_source.all(), many=True).data
+        data['data_type'] = ThematicCategorizationTypeSerializer(instance.data_type).data
         data['report_data_change_log'] = ReportDataChangeLogSerializer(instance.report_data_change_log.all().order_by('-id'), many=True).data
         data['files'] = ReportFileSerializer(instance.report_file.all(), many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(fsm_state=instance.fsm_state, review_number=instance.review_count), many=True).data
