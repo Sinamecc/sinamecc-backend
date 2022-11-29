@@ -1,6 +1,5 @@
 from django.urls import reverse
 from rest_framework import serializers
-import report_data
 from report_data.models import ChangeLog, ReportData, Report, ReportFile, ReportDataChangeLog
 from mitigation_action.serializers import ContactSerializer
 from users.serializers import CustomUserSerializer
