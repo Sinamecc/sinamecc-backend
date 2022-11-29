@@ -27,15 +27,18 @@ _report_organization_type = [
 _adaptation_action_type = [ 
     {
         'name': 'Tipo A - Instrumentos de políticas y planes',
-        'code': '1'
+        'code': '1',
+        'type': 'A'
     },
     {
         'name': 'Tipo B - Proyectos y programas',
-        'code': '2'
+        'code': '2',
+        'type': 'B'
     },
     {
         'name': 'Tipo C - Actividades',
-        'code': '3'
+        'code': '3',
+        'type': 'C'
     }
 ]
 
