@@ -30,7 +30,7 @@ def delete_report_data(request, pk):
 @has_permission_decorator('edit_report_data')
 def patch_report_data(request, pk):
     if request.method == 'PATCH':
-        result = view_helper.patch(pk, request)
+        result = view_helper.patch(request, pk)
     return result
 
 @api_view(['GET', 'DELETE', 'PUT', 'PATCH'])

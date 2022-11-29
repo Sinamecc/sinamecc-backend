@@ -358,7 +358,7 @@ class ReportDataService():
         return result
     
     def patch(self, request, report_data_id):
-        ## missing review and comments here!!
+
         data = request.data
         next_state, user = data.pop('fsm_state', None), request.user
         comment_list = data.pop('comments', [])
@@ -465,9 +465,9 @@ class ReportDataService():
         if report_data_status:
             review_number = report_data.review_count
             fsm_state = report_data.fsm_state
-            commet_list = report_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+            comment_list = report_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
 
@@ -476,6 +476,7 @@ class ReportDataService():
 
         return result
 
+
     def get_comments_by_fsm_state_or_review_number(self, request, report_data_id, fsm_state=None, review_number=None):
         
         report_data_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
@@ -483,9 +484,9 @@ class ReportDataService():
         if report_data_status:
 
             search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
-            commet_list = report_data.comments.filter(**search_kwargs).all()
+            comment_list = report_data.comments.filter(**search_kwargs).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
 
