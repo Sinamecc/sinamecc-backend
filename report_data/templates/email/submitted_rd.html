@@ -1,0 +1,21 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de registro {% else %}  Registration notification {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            ¡Hola! Reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+            Se ha generado una nueva solicitud de registro de datos para reportes en el SINAMECC<br/>
+            con el ID {{rd_code}}<br/>
+            </p>
+            <p>
+            En el siguiente $enlace$ puede acceder al registro y dar inicio al proceso de revisión del<br/>
+            registro de acciones climáticas.
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/simple_signature.html"%}
+        </div>
+{% endblock content %}
