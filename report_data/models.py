@@ -4,6 +4,8 @@ from django.utils.encoding import smart_text as smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from mitigation_action.models import Contact, ThematicCategorizationType, Classifier, InformationSourceType
+from report_data.email_services import ReportDataEmailServices
+from general.services import EmailServices
 from general.storages import PrivateMediaStorage
 from general.utils import unique_field_value_generator
 from time import gmtime, strftime
@@ -100,6 +102,8 @@ class ReportData(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    email_service = ReportDataEmailServices(EmailServices())
+
     class Meta:
         verbose_name = _("Report Data")
         verbose_name_plural = _("Report Data")
@@ -138,31 +142,57 @@ class ReportData(models.Model):
         return self.fsm_state == 'requested_changes_by_DCC'
 
     @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
-    def submit(self):
+    def submit(self, user_approver):
         # new --> submitted        
         # send email to user that submitted the action
         print(f'The report data is transitioning from <{self.fsm_state}> to <submitted>')
-        ...
+        
+        email_function = {
+            'new': self.email_service.notify_dcc_responsible_report_data_submission
+        }
+        
+        email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
+        
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
+
         ## maybe raise exception
 
     
     @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
-    def evaluate_by_DCC(self):
+    def evaluate_by_DCC(self, user_approver):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
         print('The report data is transitioning from <submitted> to <in_evaluation_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_resposible_report_data_evaluation_by_dcc(self, user_approver)
+        if email_status:
+            return email_status, email_data
+        
+        else:
+            ...
+
         ## maybe raise exception
 
     ##
     ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
     ##
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_rejected_by_DCC], on_error='in_evaluation_by_DCC', permission='')
-    def evaluate_by_DCC_rejected(self):
+    def evaluate_by_DCC_rejected(self, user_approver):
         # in_evaluation_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
         print('The report data is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_report_data_rejection(self, user_approver)
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
+        
         ## maybe raise exception
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='requested_changes_by_DCC', conditions=[can_request_changes_by_DCC], on_error='in_evaluation_by_DCC', permission='')
@@ -170,14 +200,24 @@ class ReportData(models.Model):
         # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
         print('The report data is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_report_data_requested_changes(self, user_approver)
+        if email_status:
+            return email_status, email_data
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
     def evaluate_by_DCC_accepted(self):
         # in_evaluation_by_DCC --> accepted_by_DCC
         # send email to user that submitted the action
         print('The report data is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
-        ...
+        
+
+        email_status, email_data = self.email_service.notify_contact_responsible_report_data_approval(self, user_approver)
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
             ## maybe raise exception
     
     ## rejected by DCC to end
@@ -193,7 +233,15 @@ class ReportData(models.Model):
         # requested_changes_by_DCC --> updating_by_request_DCC
         # send email to user that submitted the action
         print('The report data is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
-        ...
+        
+
+        email_status, email_data = self.email_service.notify_contact_responsible_report_data_update(self, user_approver)
+
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
     
     ## accepted_by_DCC to	registered_by_DCC
     @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')

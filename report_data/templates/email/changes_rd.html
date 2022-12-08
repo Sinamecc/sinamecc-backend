@@ -1,0 +1,23 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de requerimiento de ajuste {% else %} Adjustment requirement notification{% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            Hola {{full_name}}. Reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+            Le informamos que se ha generado el requirimiento de aclaración y/o modificación en el<br/>
+            formato del registro de datos en SINAMECC con el ID {{rd_code}}.
+            </p>
+            En el siguiente $enlace$ puede acceder a su registro para completar el requerimiento de<br>
+            aclaración y/o modificación de su solicitud.
+            </p>
+            <p>
+            Si tiene alguna consulta adicional, no dude en contactarnos a cambioclimatico@minae.go.cr
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/simple_signature.html"%}
+        </div>
+{% endblock content %}
