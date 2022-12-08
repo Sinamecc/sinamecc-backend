@@ -1552,6 +1552,9 @@ class AdaptationActionServices():
                 
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
+        
+                    if adaptation_action.code is None: adaptation_action.create_code()
+                    
                     ## create indicator_list, the adaptation_action has an  indicator_list field in his model
                     indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
                     ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
