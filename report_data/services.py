@@ -164,7 +164,7 @@ class ReportDataService():
             previous_state = report_data.fsm_state
 
             if has_transition_perm(transition_function, user):
-                transition_function()
+                transition_function(user)
                 report_data.save()
                 
                 change_log_data = self._serialize_change_log_data(user, report_data, previous_state)
