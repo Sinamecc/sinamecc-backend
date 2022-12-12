@@ -49,7 +49,7 @@ class ReportDataEmailServices():
     def notify_contact_resposible_report_data_evaluation_by_dcc(self, report_data, user_approver):
 
         contact = report_data.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id}
         subject = 'Evaluación de Captura de datos en SINAMECC'
         users = [contact]
 
@@ -62,7 +62,7 @@ class ReportDataEmailServices():
     def notify_contact_responsible_report_data_rejection(self, report_data, user_approver):
 
         contact = report_data.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id}
         subject = 'Rechazo de Captura de datos en SINAMECC'
         users = [contact]
 
@@ -75,7 +75,7 @@ class ReportDataEmailServices():
     def notify_contact_responsible_report_data_requested_changes(self, report_data, user_approver):
         
         contact = report_data.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id}
         subject = 'Solicitud de cambios en Captura de datos en SINAMECC'
         users = [contact]
 
@@ -101,7 +101,7 @@ class ReportDataEmailServices():
     def notify_contact_responsible_report_data_approval(self, report_data, user_approver):
 
         contact = report_data.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id}
         subject = 'Aprobación de Captura de datos en SINAMECC'
         users = [contact]
 

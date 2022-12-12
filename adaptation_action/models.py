@@ -668,7 +668,8 @@ class AdaptationAction(models.Model):
         print(f'The adaptation action is transitioning from <{self.fsm_state}> to <submitted>')
         
         email_function = {
-            'new': self.email_service.notify_dcc_responsible_adaptation_action_submission
+            'new': self.email_service.notify_dcc_responsible_adaptation_action_submission,
+            'updating_by_request_DCC': self.email_service.notify_contact_responsible_adaptation_action_update
         }
         
         email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
