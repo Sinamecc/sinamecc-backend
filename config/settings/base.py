@@ -18,7 +18,7 @@ env.read_env() ## load variable env config/settings/.env
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-BASE_DIR_FRONTEND = "http://localhost:4200"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 

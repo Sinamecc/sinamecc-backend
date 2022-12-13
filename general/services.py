@@ -9,7 +9,7 @@ import json
 
 class EmailServices():
 
-    def __init__(self, sender = "sinamec@grupoincocr.com", base_dir_notification =  settings.BASE_DIR_FRONTEND ):
+    def __init__(self, sender = "sinamec@grupoincocr.com", base_dir_notification =  settings.FRONTEND_URL):
         self.sender = sender
         self.base_dir_notification = base_dir_notification
         self.AWS_REGION = "us-east-1"
