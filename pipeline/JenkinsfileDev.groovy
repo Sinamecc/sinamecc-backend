@@ -7,7 +7,8 @@ pipeline {
         NGINX_TAG = "nginx-$ENVIRONMENT"
         ECS_CLUSTER_NAME = "sinamecc-cluster-$ENVIRONMENT"
         ECS_SERVICE_NAME = "sinamecc-backend-$ENVIRONMENT"
-
+        
+        FRONTEND_URL = "app.devel.sinamecc.go.cr"
         DJANGO_SETTINGS_MODULE = "config.settings.ecs_aws"
         DATABASE_HOST = sh (
           script: '/usr/local/bin/aws ssm get-parameters --region us-east-2 --names /dev/backend/db-url --query Parameters[0].Value --with-decryption | sed \'s/"//g\'',

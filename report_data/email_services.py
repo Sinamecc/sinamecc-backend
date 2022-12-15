@@ -35,8 +35,8 @@ class ReportDataEmailServices():
 
     def notify_dcc_responsible_report_data_submission(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'rd_code': report_data.id}
+        contact = report_data.contact
+        context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Registro de datos en SINAMECC'
         users = [user_approver]
 
@@ -48,10 +48,10 @@ class ReportDataEmailServices():
 
     def notify_contact_resposible_report_data_evaluation_by_dcc(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
-        subject = 'Evaluación de Acción de Adaptación en SINAMECC'
-        users = [contact]
+        contact = report_data.contact
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Evaluación de Captura de datos en SINAMECC'
+        users = [report_data.user]
 
         notification_status, notification_data = self._notify_aux('evaluation_rd', context, subject, users)
 
@@ -61,10 +61,10 @@ class ReportDataEmailServices():
     
     def notify_contact_responsible_report_data_rejection(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
-        subject = 'Rechazo de Acción de Adaptación en SINAMECC'
-        users = [contact]
+        contact = report_data.contact
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Rechazo de Captura de datos en SINAMECC'
+        users = [report_data.user]
 
         notification_status, notification_data = self._notify_aux('rejected_rd', context, subject, users)
 
@@ -74,10 +74,10 @@ class ReportDataEmailServices():
     
     def notify_contact_responsible_report_data_requested_changes(self, report_data, user_approver):
         
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
-        subject = 'Solicitud de cambios en Acción de Adaptación en SINAMECC'
-        users = [contact]
+        contact = report_data.contact
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Solicitud de cambios en Captura de datos en SINAMECC'
+        users = [report_data.user]
 
         notification_status, notification_data = self._notify_aux('changes_rd', context, subject, users)
 
@@ -87,10 +87,10 @@ class ReportDataEmailServices():
 
     def notify_contact_responsible_report_data_update(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'rd_code': report_data.id}
-        subject = 'Actualización de Acción de Adaptación en SINAMECC'
-        users = [user_approver]
+        contact = report_data.contact
+        context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Actualización de Captura de datos en SINAMECC'
+        users = [report_data.user]
 
         notification_status, notification_data = self._notify_aux('submitted_updated_rd', context, subject, users)
 
@@ -100,10 +100,10 @@ class ReportDataEmailServices():
     
     def notify_contact_responsible_report_data_approval(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'rd_code': report_data.id}
-        subject = 'Aprobación de Acción de Adaptación en SINAMECC'
-        users = [contact]
+        contact = report_data.contact
+        context = {'lang': 'es', 'full_name': contact.full_name, 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Aprobación de Captura de datos en SINAMECC'
+        users = [report_data.user]
 
         notification_status, notification_data = self._notify_aux('approved_rd', context, subject, users)
 
@@ -113,9 +113,9 @@ class ReportDataEmailServices():
     
     def notify_contact_responsible_report_data_reminder_update(self, report_data, user_approver):
 
-        contact = report_data.report_organization.contact
-        context = {'lang': 'es', 'rd_code': report_data.id}
-        subject = 'Recordatorio de actualización de Acción de Adaptación en SINAMECC'
+        contact = report_data.contact
+        context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
+        subject = 'Recordatorio de actualización de Captura de datos en SINAMECC'
         users = [contact, report_data.user, user_approver]
 
         notification_status, notification_data = self._notify_aux('reminder_update_rd', context, subject, users)

@@ -36,7 +36,7 @@ class AdaptationActionEmailServices():
     def notify_dcc_responsible_adaptation_action_submission(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Registro de Acción de Adaptación en SINAMECC'
         users = [user_approver]
 
@@ -49,7 +49,7 @@ class AdaptationActionEmailServices():
     def notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Evaluación de Acción de Adaptación en SINAMECC'
         users = [adaptation_action.user]
 
@@ -62,7 +62,7 @@ class AdaptationActionEmailServices():
     def notify_contact_responsible_adaptation_action_rejection(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Rechazo de Acción de Adaptación en SINAMECC'
         users = [adaptation_action.user]
 
@@ -75,7 +75,7 @@ class AdaptationActionEmailServices():
     def notify_contact_responsible_adaptation_action_requested_changes(self, adaptation_action, user_approver):
         
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Solicitud de cambios en Acción de Adaptación en SINAMECC'
         users = [adaptation_action.user]
 
@@ -88,7 +88,7 @@ class AdaptationActionEmailServices():
     def notify_contact_responsible_adaptation_action_update(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Actualización de Acción de Adaptación en SINAMECC'
         users = [user_approver]
 
@@ -101,7 +101,7 @@ class AdaptationActionEmailServices():
     def notify_contact_responsible_adaptation_action_approval(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Aprobación de Acción de Adaptación en SINAMECC'
         users = [adaptation_action.user]
 
@@ -114,7 +114,7 @@ class AdaptationActionEmailServices():
     def notify_contact_responsible_adaptation_action_reminder_update(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
-        context = {'lang': 'es', 'aa_code': adaptation_action.id}
+        context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Recordatorio de actualización de Acción de Adaptación en SINAMECC'
         users = [contact, adaptation_action.user, user_approver]
 

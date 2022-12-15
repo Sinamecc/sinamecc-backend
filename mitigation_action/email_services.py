@@ -24,7 +24,7 @@ class MitigationActionEmailServices():
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
-        context = {'lang': 'es', 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
       
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
@@ -43,7 +43,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
 
         subject = 'Evaluación de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
@@ -63,7 +63,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
 
         subject = 'Rechazo de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
@@ -83,7 +83,7 @@ class MitigationActionEmailServices():
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
-        context = {'lang': 'es', 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
 
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
@@ -103,7 +103,7 @@ class MitigationActionEmailServices():
         
         template = loader.get_template(self.template_path.format(**template_path_data))
 
-        context = {'lang': 'es', 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
 
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
@@ -125,7 +125,7 @@ class MitigationActionEmailServices():
         template = loader.get_template(self.template_path.format(**template_path_data))
 
         contact = mitigation_action.contact
-        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code}
+        context = {'lang': 'es', 'full_name': contact.full_name, 'ma_code': mitigation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'mitigation_id': mitigation_action.id}
 
 
         subject = 'Aprobación de Acción de Mitigación en SINAMECC'
