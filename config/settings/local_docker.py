@@ -17,7 +17,7 @@ DEBUG = True
 
 # TODO:
 # - Set duration time for signed url
-
+FRONTEND_URL = 'http://localhost:4200'
 AWS_STORAGE_BUCKET_NAME = 'sinamecc-dev'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')

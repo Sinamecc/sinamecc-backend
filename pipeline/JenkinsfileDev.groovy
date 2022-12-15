@@ -43,7 +43,7 @@ pipeline {
                 sh 'docker system prune -a -f'
 
                 echo "Step: Building docker image"
-                sh 'docker build -t $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT .'
+                sh 'docker build --build-arg FRONTEND_URL=app.devel.sinamecc.go.cr -t $BASE_ECR/$ENVIRONMENT/$APP:$ENVIRONMENT .'
           }
         }
 
