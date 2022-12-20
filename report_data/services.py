@@ -229,11 +229,18 @@ class ReportDataService():
         validation_dict = self._service_helper.create_or_update_record(field_list, data)
 
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
             serialized_report_data = self._get_serialized_report_data(data, partial=True)
             
             if all([serialized_report_data.is_valid(), serialized_report_data_change_log.is_valid()]):
+
                 report_data = serialized_report_data.save()
+
+                if is_complete:
+                        report_data.submit(request.user)
+                        report_data.save()
+
                 report_data_change_log = serialized_report_data_change_log.save()
                 report_data.report_data_change_log.add(report_data_change_log)
                 result = (True, ReportDataSerializer(report_data).data)
@@ -263,11 +270,17 @@ class ReportDataService():
             validation_dict = self._service_helper.create_or_update_record(field_list, data, report_data_details)
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
                 serialized_report_data = self._get_serialized_report_data(data, report_data=report_data_details, partial=True)
 
                 if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
                     report_data = serialized_report_data.save()
+
+                    if is_complete:
+                        report_data.submit(request.user)
+                        report_data.save()
+                        
                     report_data_change_log = serialized_report_data_change_log.save()
                     report_data.report_data_change_log.add(report_data_change_log)
                     

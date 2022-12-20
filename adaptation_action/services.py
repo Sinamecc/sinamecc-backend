@@ -1487,6 +1487,7 @@ class AdaptationActionServices():
 
         
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_adaptation_action = self._get_serialized_adaptation_action(data)
             if serialized_adaptation_action.is_valid():
                 adaptation_action = serialized_adaptation_action.save()
@@ -1494,7 +1495,11 @@ class AdaptationActionServices():
                 ## create indicator_list
                 indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
                 ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
-                
+
+                if is_complete:
+                    adaptation_action.submit(request.user)
+                    adaptation_action.save()
+
                 if indicator_status and ind_monitoring_status:
                     result = (True, AdaptationActionSerializer(adaptation_action).data)
                     
@@ -1506,7 +1511,6 @@ class AdaptationActionServices():
                 
                 else:
                     result = (False, indicator_data)
-                    
   
             else:
                 errors.append(serialized_adaptation_action.errors)
@@ -1548,11 +1552,16 @@ class AdaptationActionServices():
             
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_adaptation_action = self._get_serialized_adaptation_action(data, adaptation_action)
                 
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
         
+                    if is_complete:
+                        adaptation_action.submit(request.user)
+                        adaptation_action.save()
+
                     if adaptation_action.code is None: adaptation_action.create_code()
                     
                     ## create indicator_list, the adaptation_action has an  indicator_list field in his model
