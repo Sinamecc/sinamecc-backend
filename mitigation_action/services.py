@@ -1082,10 +1082,16 @@ class MitigationActionService():
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
         
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_mitigation_action = self._get_serialized_mitigation_action(data)
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
-                mitigation_action.create_code()    
+                mitigation_action.create_code()
+                
+                if is_complete: 
+                    mitigation_action.submit(request.user) 
+                    mitigation_action.save()
+
                 result = (True, MitigationActionSerializer(mitigation_action).data)
   
             else:
@@ -1126,10 +1132,15 @@ class MitigationActionService():
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_mitigation_action = self._get_serialized_mitigation_action(data, mitigation_action)
                 
                 if serialized_mitigation_action.is_valid():
                     mitigation_action = serialized_mitigation_action.save()
+                    if is_complete: 
+                        mitigation_action.submit(request.user) 
+                        mitigation_action.save()
+                        
                     result = (True, MitigationActionSerializer(mitigation_action).data)
 
                 else:
