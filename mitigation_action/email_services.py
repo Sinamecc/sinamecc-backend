@@ -1,4 +1,5 @@
 from users.services import UserService
+from users.models import CustomUser
 from django.contrib.auth import get_user_model
 from django.template import loader
 
@@ -28,6 +29,8 @@ class MitigationActionEmailServices():
       
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
+
+        user_approver = CustomUser.objects.filter(username='general_dcc').first()
 
         notification_status, notification_data = self.send_notification(user_approver.email, subject, message_body)
 
@@ -107,9 +110,10 @@ class MitigationActionEmailServices():
 
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
-        contact_email = user_approver.email
+        
+        user_approver = CustomUser.objects.filter(username='general_dcc').first()
                 
-        notification_status, notification_data = self.send_notification(contact_email, subject, message_body)
+        notification_status, notification_data = self.send_notification(user_approver.email, subject, message_body)
 
 
         result = (notification_status, notification_data)

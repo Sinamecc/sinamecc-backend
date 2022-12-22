@@ -38,6 +38,9 @@ class ReportDataEmailServices():
         contact = report_data.contact
         context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Registro de datos en SINAMECC'
+
+        user_approver = User.objects.filter(username='general_dcc').first()
+
         users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_rd', context, subject, users)
@@ -90,7 +93,10 @@ class ReportDataEmailServices():
         contact = report_data.contact
         context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Actualización de Captura de datos en SINAMECC'
-        users = [report_data.user]
+
+        user_approver = User.objects.filter(username='general_dcc').first()
+
+        users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_updated_rd', context, subject, users)
 
@@ -116,6 +122,9 @@ class ReportDataEmailServices():
         contact = report_data.contact
         context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Recordatorio de actualización de Captura de datos en SINAMECC'
+
+        user_approver = User.objects.filter(username='general_dcc').first()
+
         users = [contact, report_data.user, user_approver]
 
         notification_status, notification_data = self._notify_aux('reminder_update_rd', context, subject, users)
