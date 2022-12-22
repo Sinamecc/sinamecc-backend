@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.template import loader
+from users.models import CustomUser
 
 User = get_user_model()
 
@@ -25,7 +26,7 @@ class AdaptationActionEmailServices():
         for user in users:
             if user and hasattr(user, 'email'):
                 email_list.append(user.email)
-        
+
         notification_status, notification_data = self.send_notification(email_list, subject, message_body)
 
         result = (notification_status, notification_data)
@@ -38,6 +39,9 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Registro de Acción de Adaptación en SINAMECC'
+
+        user_approver = CustomUser.objects.filter(username='general_dcc').first()
+
         users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_aa', context, subject, users)
@@ -90,6 +94,9 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Actualización de Acción de Adaptación en SINAMECC'
+
+        user_approver = CustomUser.objects.filter(username='general_dcc').first()
+
         users = [user_approver]
 
         notification_status, notification_data = self._notify_aux('submitted_updated_aa', context, subject, users)
@@ -116,6 +123,9 @@ class AdaptationActionEmailServices():
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Recordatorio de actualización de Acción de Adaptación en SINAMECC'
+
+        user_approver = CustomUser.objects.filter(username='general_dcc').first()
+
         users = [contact, adaptation_action.user, user_approver]
 
         notification_status, notification_data = self._notify_aux('reminder_update_aa', context, subject, users)
