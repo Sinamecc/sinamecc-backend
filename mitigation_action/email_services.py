@@ -2,6 +2,8 @@ from users.services import UserService
 from users.models import CustomUser
 from django.contrib.auth import get_user_model
 from django.template import loader
+from users.roles import Reviewer, ReviewerMitigationAction
+from rolepermissions import roles
 
 User =  get_user_model()
 
@@ -30,9 +32,14 @@ class MitigationActionEmailServices():
         subject = 'Registro de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
 
-        user_approver = CustomUser.objects.filter(username='general_dcc').first()
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerMitigationAction in user_roles or Reviewer in user_roles):
+                users.append(user.email)
 
-        notification_status, notification_data = self.send_notification(user_approver.email, subject, message_body)
+        notification_status, notification_data = self.send_notification(users, subject, message_body)
 
         result = (notification_status, notification_data)
         
@@ -111,9 +118,14 @@ class MitigationActionEmailServices():
         subject = 'Actualización de Acción de Mitigación en SINAMECC'
         message_body = template.render(context)
         
-        user_approver = CustomUser.objects.filter(username='general_dcc').first()
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerMitigationAction in user_roles or Reviewer in user_roles):
+                users.append(user.email)
                 
-        notification_status, notification_data = self.send_notification(user_approver.email, subject, message_body)
+        notification_status, notification_data = self.send_notification(users, subject, message_body)
 
 
         result = (notification_status, notification_data)

@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.template import loader
 from users.models import CustomUser
+from users.roles import Reviewer, ReviewerAdaptationAction
+from rolepermissions import roles
 
 User = get_user_model()
 
@@ -40,9 +42,12 @@ class AdaptationActionEmailServices():
         context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Registro de Acción de Adaptación en SINAMECC'
 
-        user_approver = CustomUser.objects.filter(username='general_dcc').first()
-
-        users = [user_approver]
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerAdaptationAction in user_roles or Reviewer in user_roles):
+                users.append(user)
 
         notification_status, notification_data = self._notify_aux('submitted_aa', context, subject, users)
 
@@ -54,7 +59,9 @@ class AdaptationActionEmailServices():
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
+        
         subject = 'Evaluación de Acción de Adaptación en SINAMECC'
+
         users = [adaptation_action.user]
 
         notification_status, notification_data = self._notify_aux('evaluation_aa', context, subject, users)
@@ -95,9 +102,12 @@ class AdaptationActionEmailServices():
         context = {'lang': 'es', 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
         subject = 'Actualización de Acción de Adaptación en SINAMECC'
 
-        user_approver = CustomUser.objects.filter(username='general_dcc').first()
-
-        users = [user_approver]
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerAdaptationAction in user_roles or Reviewer in user_roles):
+                users.append(user)
 
         notification_status, notification_data = self._notify_aux('submitted_updated_aa', context, subject, users)
 
