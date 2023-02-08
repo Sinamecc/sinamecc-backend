@@ -433,6 +433,7 @@ class IndicatorAdaptation(models.Model):
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     other_reporting_periodicity = models.TextField(null=True)
     
+    time_series_available = models.DateField(null=True) 
     available_time_start_date = models.DateField(null=True)
     available_time_end_date = models.DateField(null=True)
 
@@ -500,6 +501,8 @@ class IndicatorSource(models.Model):
 ## Section: 5
 class IndicatorMonitoring(models.Model):
 
+
+    reporting_period = models.DateField(null=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     update_date = models.DateField(null=True)
