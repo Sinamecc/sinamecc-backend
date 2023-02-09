@@ -300,7 +300,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorAdaptation
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage', 'adaptation_action',
+        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'time_series_available', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage', 'adaptation_action',
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file', 'created', 'updated')
     
     def _get_url(self, obj):
@@ -337,7 +337,7 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IndicatorMonitoring
-        fields = ('id', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file',
+        fields = ('id', 'reporting_period', 'start_date', 'end_date', 'update_date', 'data_to_update', 'indicator_source', 'indicator', 'data_to_update_file',
                   'other_indicator_source', 'support_information', 'adaptation_action')
 
     def _get_url(self, obj):
