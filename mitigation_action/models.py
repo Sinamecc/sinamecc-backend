@@ -764,6 +764,7 @@ class FinanceInformation(models.Model):
     source_description = models.CharField(max_length=255, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
     currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    other_currency = models.TextField(null=True)
     finance = models.ForeignKey(Finance, related_name='finance_information', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
