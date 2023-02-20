@@ -604,7 +604,7 @@ class FinanceInformationSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = FinanceInformation
-        fields = ('id', 'source_description', 'budget', 'currency', 'other_currency', 'finance')
+        fields = ('id', 'source_description', 'budget', 'currency', 'finance')
         list_serializer_class = GenericListSerializer
         
 
