@@ -87,6 +87,8 @@ class ReportFileSerializer(serializers.ModelSerializer):
         
         data =  super().to_representation(instance)
         data["file"] = self._get_url(instance)
+        if not instance.filename:
+            data["filename"] = instance.file.name.split('/')[-1]
         
         return data
 
