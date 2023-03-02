@@ -62,6 +62,7 @@ class ReportDataService():
         
         data = {
             'file': file,
+            'filename': file.name,
             'report_data': data.get('report_data', None),
             'report_type': data.get('report_type', None),
         }

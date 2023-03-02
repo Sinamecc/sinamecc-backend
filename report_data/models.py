@@ -18,9 +18,17 @@ User =  get_user_model()
 
 
 def directory_path(instance, filename): 
-    path = "report_data/{0}/{1}/{2}/"
+    path = "report_data/{model_name}/{username}/{report_name}/{date}/{filename}"
 
-    return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
+    path_data = {
+        'model_name': instance.report_data._meta.verbose_name,
+        'username': instance.report_data.user.username,
+        'report_name': instance.report_data.name,
+        'date': strftime("%Y%m%d", gmtime()),
+        'filename': filename
+    }
+    
+    return path.format_map(path_data)
 
 
 class ReportData(models.Model):
@@ -274,6 +282,7 @@ class ReportFile(models.Model):
 
     slug = models.SlugField(max_length=100, unique=True, blank=False, null=False)
     file = models.FileField(upload_to=directory_path, storage=PrivateMediaStorage(), blank=True, null=True)
+    filename = models.CharField(max_length=100, blank=True, null=True)
     report_data = models.ForeignKey(ReportData, related_name='report_file', on_delete=models.CASCADE, null=True)
     report_type = models.CharField(max_length=100, null=True) ## base_line_indicator | report_data
     created = models.DateTimeField(auto_now_add=True)
