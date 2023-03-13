@@ -64,7 +64,7 @@ class AdaptationActionInformationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationActionInformation
-        fields = ('id', 'name', 'objective', 'description', 'meta', 'expected_result', 'potential_co_benefits', 'adaptation_action_type', 'ods', 'benefited_population', 'created', 'updated')
+        fields = ('id', 'name', 'objective', 'description', 'meta', 'adaptation_action_type', 'ods', 'benefited_population', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
