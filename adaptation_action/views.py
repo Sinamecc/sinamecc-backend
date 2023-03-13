@@ -152,6 +152,17 @@ def get_type_climate_threat(request, adaptation_action_id=False): ## We need del
 
 @api_view(['GET'])
 @has_permission_decorator('read_adaptation_action')
+def get_benefited_population(request, benefited_population_id=False):
+    if request.method == 'GET' and benefited_population_id:
+        result = view_helper.execute_by_name("_get_benefited_population_by_id", request)
+    
+    elif request.method == 'GET' and not benefited_population_id:
+        result = view_helper.execute_by_name("_get_all_benefited_population", request)
+
+    return result
+
+@api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
 def get_ods(request, ods_id=False): ## We need delete *args this parametes is temp at the moment to refactor AA
     
     if request.method == 'GET' and ods_id:

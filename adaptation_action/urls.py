@@ -117,4 +117,9 @@ urlpatterns = [
         views.get_put_monitoring_indicator_file_adaptation_action,
         name='get_put_monitoring_indicator_file_adaptation_action'
     ),
+    path(
+        'api/v1/adaptation-action/get_benefited_population/',
+        views.get_benefited_population,
+        name='get_benefited_population'
+    ),
 ]
