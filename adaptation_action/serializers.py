@@ -11,7 +11,7 @@ from django.urls import reverse
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
-             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation
 
 from general.serializers import AddressSerializer
 
@@ -54,16 +54,23 @@ class ODSSerializer(serializers.ModelSerializer):
         model = ODS
         fields = ('id', 'code', 'name', 'created', 'updated')
 
+class BenefitedPopulationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BenefitedPopulation
+        fields = ('id', 'name', 'code', 'created', 'updated')
+
 class AdaptationActionInformationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationActionInformation
-        fields = ('id', 'name', 'objective', 'description', 'meta', 'adaptation_action_type', 'ods', 'created', 'updated')
+        fields = ('id', 'name', 'objective', 'description', 'meta', 'expected_result', 'potential_co_benefits', 'adaptation_action_type', 'ods', 'benefited_population', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['adaptation_action_type'] = AdaptationActionTypeSerializer(instance.adaptation_action_type).data
         data['ods'] = ODSSerializer(instance.ods.all(), many = True).data
+        data['benefited_population'] = BenefitedPopulationSerializer(instance.benefited_population.all(), many = True).data
 
         return data
 
@@ -186,7 +193,8 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClimateThreat
-        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat', 'file_vulnerability_climate_threat', 'file_exposed_elements')
+        fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat', 'file_vulnerability_climate_threat', 'file_exposed_elements',
+                  'description_losses', 'file_description_losses', 'description_risks', 'file_description_risks')
     
     def _get_url(self, obj, file_name):
         
@@ -198,6 +206,8 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
         data['file_description_climate_threat'] = self._get_url(instance, 'file_description_climate_threat')
         data['file_vulnerability_climate_threat'] = self._get_url(instance, 'file_vulnerability_climate_threat')
         data['file_exposed_elements'] = self._get_url(instance, 'file_exposed_elements')
+        data['file_description_losses'] = self._get_url(instance, 'file_description_losses')
+        data['file_description_risks'] = self._get_url(instance, 'file_description_risks')
 
         return data
 
@@ -301,7 +311,8 @@ class IndicatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndicatorAdaptation
         fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 'geographic_coverage', 'other_geographic_coverage', 'adaptation_action',
-         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file', 'created', 'updated')
+         'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file',
+         'indicator_base_line', 'file_base_line')
     
     def _get_url(self, obj):
         
@@ -315,6 +326,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['contact'] = ContactSerializer(instance.contact).data
         data['methodological_detail_file'] = self._get_url(instance)
         data['additional_information_file'] = self._get_url(instance)
+        data['file_base_line'] = self._get_url(instance)
 
         return data
 

@@ -930,6 +930,31 @@ class AdaptationActionServices():
             result = (ods_status, ods_data)
         
         return result
+
+    def _get_all_benefited_population(self, request):
+
+        population_status, population_data = self._service_helper.get_all(BenefitedPopulation)
+
+        if population_status:
+            result = (population_status, BenefitedPopulationSerializer(population_data, many=True).data)
+        
+        else:
+            result = (population_status, population_data)
+        
+        return result
+    
+    def _get_benefited_population_by_id(self, request):
+        
+        population_id = request.GET.get('population_id')
+        population_status, population_data = self._service_helper.get_by_id(population_id, BenefitedPopulation)
+
+        if population_status:
+            result = (population_status, BenefitedPopulationSerializer(population_data).data)
+        
+        else:
+            result = (population_status, population_data)
+        
+        return result
     
     def _get_all_topic(self, request):
 

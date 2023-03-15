@@ -36,10 +36,10 @@ class ReportOrganizationType(models.Model):
 
 class Contact(models.Model):
 
-    contact_name = models.TextField(null=True)
-    contact_position = models.TextField(null=True)
-    email = models.TextField(null=True)
-    phone = models.TextField(null=True)
+    contact_name = models.TextField(null=True)      #1.1.5
+    contact_position = models.TextField(null=True)  #1.1.6
+    email = models.TextField(null=True)             #1.1.7
+    phone = models.TextField(null=True)             #1.1.8
     address = models.TextField(null=True)
     institution = models.TextField(null=True)
 
@@ -53,12 +53,12 @@ class Contact(models.Model):
 
 class ReportOrganization(models.Model):
 
-    responsible_entity = models.CharField(max_length=250, null=True)
-    legal_identification = models.CharField(max_length=50, null=True)
-    elaboration_date = models.DateField(null=True)
-    entity_address = models.CharField(max_length=250, null=True)
+    responsible_entity = models.CharField(max_length=250, null=True)    #1.1.2
+    legal_identification = models.CharField(max_length=50, null=True)   #1.1.3
+    elaboration_date = models.DateField(null=True)                      #1.1.4
+    entity_address = models.CharField(max_length=250, null=True)        #1.1.9
     
-    report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)
+    report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)   #1.1.1
     other_report_organization_type = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name="report_organization", null=True, on_delete=models.CASCADE)
 
@@ -95,15 +95,30 @@ class ODS (models.Model):
         verbose_name = _("ODS")
         verbose_name_plural = _("ODS")
 
+class BenefitedPopulation(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Benefited Population")
+        verbose_name_plural = _("Benefited Populations")
+
 class AdaptationActionInformation(models.Model):
 
-    name = models.CharField(max_length=250, null=True)
-    objective = models.CharField(max_length=3000, null=True)
-    description = models.CharField(max_length=3000, null=True)
-    meta = models.CharField(max_length=3000, null=True)
+    name = models.CharField(max_length=250, null=True)          #2.1.2
+    objective = models.CharField(max_length=3000, null=True)    #2.1.3
+    description = models.CharField(max_length=3000, null=True)  #2.1.4
+    meta = models.CharField(max_length=3000, null=True)         #2.1.5
+    expected_result = models.TextField(null=True)               #2.1.6
+    potential_co_benefits = models.TextField(null=True)         #2.1.8
 
-    adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
-    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", blank=True)
+    adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE) #2.1.1
+    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", blank=True)                                                         #2.1.6
+    benefited_population = models.ManyToManyField(BenefitedPopulation, related_name="adaptation_action_information", blank=True)                        #2.1.7
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -228,7 +243,7 @@ class Activity(models.Model):
 
 class Instrument(models.Model):
     
-    name = models.CharField(max_length=250, null=True)
+    name = models.CharField(max_length=250, null=True)  #2.4.1
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -252,14 +267,18 @@ class TypeClimateThreat(models.Model):
 
 class ClimateThreat(models.Model):
 
-    type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)
-    other_type_climate_threat = models.TextField(null=True)
-    description_climate_threat = models.TextField(null=True)
-    file_description_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-    vulnerability_climate_threat = models.TextField(null=True)
+    type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)              #2.5.1
+    other_type_climate_threat = models.TextField(null=True)                                                                 #2.5.1.1
+    description_climate_threat = models.TextField(null=True)                                                                #2.5.2              
+    file_description_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())  
+    vulnerability_climate_threat = models.TextField(null=True)                                                              #2.5.3
     file_vulnerability_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-    exposed_elements = models.TextField(null=True)
+    exposed_elements = models.TextField(null=True)                                                                          #2.5.4
     file_exposed_elements = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    description_losses = models.TextField(null=True)                                                                        #2.5.5
+    file_description_losses = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    description_risks = models.TextField(null=True)                                                                         #2.5.6
+    file_description_risks = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -270,11 +289,11 @@ class ClimateThreat(models.Model):
 
 class Implementation(models.Model):
     
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
-    responsible_entity = models.CharField(max_length=50, null=True)
-    other_entity = models.CharField(max_length=250, null=True)
-    action_code = models.TextField(null=True)
+    start_date = models.DateField(null=True)                            #2.6.1
+    end_date = models.DateField(null=True)                              #2.6.2
+    responsible_entity = models.CharField(max_length=50, null=True)     #2.6.4
+    other_entity = models.CharField(max_length=250, null=True)          #2.6.5
+    action_code = models.TextField(null=True)                           #2.6.6
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -326,8 +345,8 @@ class FinanceInstrument(models.Model):
 class Mideplan(models.Model):
 
     registry = models.CharField(max_length=2, null=True)
-    name = models.CharField(max_length=300, null=True)
-    entity = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=300, null=True)      #3.2.1.1
+    entity = models.CharField(max_length=200, null=True)    #3.2.2
 
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -343,9 +362,9 @@ class FinanceAdaptation(models.Model):
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
     currency = models.TextField(null=True)
     year = models.TextField(null=True)
-    status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
-    source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
-    finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
+    status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)       #3.1.1
+    source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)                       #3.2.1
+    finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)           #3.2.2
     instrument_name = models.TextField(null=True)
     mideplan = models.ForeignKey(Mideplan, related_name="finance_adaptation", null=True, on_delete=models.CASCADE)
 
@@ -448,6 +467,9 @@ class IndicatorAdaptation(models.Model):
     additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     comments = models.TextField(null=True)
+    indicator_base_line = models.TextField(null=True)
+    file_base_line = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    
     ## FK
     ## information source
     information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)

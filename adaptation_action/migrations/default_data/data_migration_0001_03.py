@@ -397,5 +397,65 @@ _temporality_impact = [
     }
 ]
 
-
-
+_benefited_population = [
+    {
+        'name': 'Todos',
+        'code': '1'
+    },
+    {
+        'name': 'Mujeres',
+        'code': '2'
+    },
+    {
+        'name': 'Niñez (menores de 12 años)',
+        'code': '3'
+    },
+    {
+        'name': 'Adolescentes (12- 18 años)',
+        'code': '4'
+    },
+    {
+        'name': 'Jóvenes (12-35 años)',
+        'code': '5'
+    },
+    {
+        'name': 'Población adulta mayor',
+        'code': '6'
+    },
+    {
+        'name': 'Población con discapacidad',
+        'code': '7'
+    },
+    {
+        'name': 'Pueblos indígenas',
+        'code': '8'
+    },
+    {
+        'name': 'Población migrante',
+        'code': '9'
+    },
+    {
+        'name': 'Población afrodescendiente',
+        'code': '10'
+    },
+    {
+        'name': 'Población LGBTIQ+',
+        'code': '11'
+    },
+    {
+        'name': 'Población productora (ganadería, agricultura, pesca)',
+        'code': '12'
+    },
+    {
+        'name': 'Organizaciones de base comunitaria y grupos locales',
+        'code': '13'
+    },
+    {
+        'name': 'Gobiernos locales',
+        'code': '14'
+    },
+    {
+        'name': 'Otro',
+        'code': '15'
+    }
+]
