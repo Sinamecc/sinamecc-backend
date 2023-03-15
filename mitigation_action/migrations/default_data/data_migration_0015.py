@@ -95,8 +95,8 @@ _ghg_impact_sector = [
     },
     {
         'code': '2',
-        'name_es': 'Agricultura, Silvicultura y Otros Usos de la Tierra (AFOLU)',
-        'name_en': 'Agriculture, forestry and other land uses (AFOLU)',
+        'name_es': 'Agricultura',
+        'name_en': 'Agriculture',
     },
     {
         'code': '3',
