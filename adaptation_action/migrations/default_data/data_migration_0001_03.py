@@ -44,72 +44,88 @@ _adaptation_action_type = [
 
 _type_climate_threat = [ 
     {
-        'name': 'Deslizamiento',
+        'name': 'Depresión Tropical',
         'code': '1'
     },
     {
-        'name': 'Inundación',
+        'name': 'Tormenta Tropical',
         'code': '2'
     },
     {
-        'name': 'Ondas tropicales',
+        'name': 'Huracán (incluye efecto indirecto)',
         'code': '3'
     },
     {
-        'name': 'Ola de calor',
+        'name': 'Onda Tropical',
         'code': '4'
     },
     {
-        'name': 'Sequía',
+        'name': 'Sistema de Baja Presión',
         'code': '5',
     },
     {
-        'name': 'Altos niveles de precipitación',
+        'name': 'Temporal',
         'code': '6'
     },
     {
-        'name': 'Bajas temperaturas (heladas)',
+        'name': 'Frente Frío',
         'code': '7'
     },
     {
-        'name': 'Huracanes',
+        'name': 'Empuje Frío',
         'code': '8'
     },
     {
-        'name': 'Incremento del nivel de agua',
+        'name': 'Lluvia intensa',
         'code': '9'
     },
     {
-        'name': 'Tormentas tropicales',
+        'name': 'Marejada',
         'code': '10'
     },
     {
-        'name': 'Vientos de alta velocidad',
+        'name': 'Tromba marina',
         'code': '11'
     },
     {
-        'name': 'Tormentas eléctricas',
+        'name': 'Viento intenso o vendavales',
         'code': '12'
     },
     {
-        'name': 'Incendios forestales',
+        'name': 'Corriente de viento descendente (Tornado)',
         'code': '13'
     },
     {
-        'name': 'Fénomeno del niño',
+        'name': 'Tormenta eléctrica',
         'code': '14'
     },
     {
-        'name': 'Fenómeno de la niña',
+        'name': 'Sequía',
         'code': '15'
     },
     {
-        'name': 'Cambios en los patrones estacionales',
+        'name': 'Temperaturas Altas extremas',
         'code': '16'
     },
     {
-        'name': 'Otra',
+        'name': 'Temperaturas Bajas extremas',
         'code': '17'
+    },
+    {
+        'name': ' Aumento del nivel del mar',
+        'code': '18'
+    },
+    {
+        'name': 'Fenómeno ENOS Fase El Niño',
+        'code': '19'
+    },
+    {
+        'name': 'Fenómeno ENOS Fase La Niña',
+        'code': '20'
+    },
+    {
+        'name': 'Otra',
+        'code': '21'
     }
 ]
 
