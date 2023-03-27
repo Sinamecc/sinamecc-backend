@@ -541,7 +541,7 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
 
         if instance.estimate_calculation_documentation_file:
 
-            return 'fake/url/{0}'.format(instance.estimate_calculation_documentation_file.name)
+            return 'fake/url/{0}'.format(instance.estimate_calculation_documentation_file.name.split('/')[-1])
         
         return None
 
@@ -566,8 +566,9 @@ class GHGInformationSerializer(serializers.ModelSerializer):
     def _get_graphic_description_file_url(self, instance):
 
         if instance.graphic_description_file:
-
-            return 'fake/url/{0}'.format(instance.graphic_description_file.name)
+            file_data = {'url':'fake/url/{0}'.format(instance.graphic_description_file.name), 
+                         'name': instance.graphic_description_file.name}
+            return file_data
         
         return None
 
@@ -625,7 +626,9 @@ class InitiativeSerializer(serializers.ModelSerializer):
 
         if instance.description_file:
 
-            return 'fake/url/{0}'.format(instance.description_file.name)
+            file_data = {'url':'fake/url/{0}'.format(instance.description_file.name),
+                        'name': instance.description_file.name.split('/')[-1]}
+            return file_data
         
         return None
 
@@ -663,7 +666,9 @@ class GeographicLocationSerializer(serializers.ModelSerializer):
 
         if instance.location_file:
 
-            return 'fake/url/{0}'.format(instance.location_file.name)
+            file_data = {'url':'fake/url/{0}'.format(instance.location_file.name),
+                        'name': instance.location_file.name.split('/')[-1]}
+            return file_data
         
         return None
 
