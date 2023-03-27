@@ -3,8 +3,8 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from general.helpers.services import ServiceHelper
 from general.models import User
-from .models import CustomUser, ProfilePicture
-from .serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
+from ..models import CustomUser, ProfilePicture
+from ..serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
     GroupSerializer, ProfilePictureSerializer
 from django.contrib.auth.models import Permission, Group
 from django.contrib.auth import get_user_model

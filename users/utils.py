@@ -1,6 +1,6 @@
 from datetime import datetime
 from calendar import timegm
-from users.services import UserService
+from users.services.general import UserService
 import rest_framework_jwt.utils as utils
 
 service = UserService()

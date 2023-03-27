@@ -4,6 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from general.storages import PrivateMediaStorage
 from time import gmtime, strftime
+from users.constants import USER_MODULES
+from uuid import uuid4
 
 def profile_picture_path(instance, filename):
     dayly_date_segment = strftime("%Y%m%d", gmtime())
@@ -30,3 +32,41 @@ class ProfilePicture(models.Model):
     current = models.BooleanField(blank=False, null=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+
+
+class Module(models.Model):
+
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=100, unique=True)
+    
+    active = models.BooleanField(blank=False, null=False, default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Module'
+        verbose_name_plural = 'Modules'
+
+    def __str__(self):
+        return self.name
+    
+
+class UserRequest(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    email = models.TextField(null=True)
+    first_name = models.TextField(null=True)
+    last_name = models.TextField(null=True)
+    institution = models.TextField(null=True)
+    phone = models.CharField(max_length=50, blank=False, null=True)
+    position = models.TextField(null=True)
+    module = models.ManyToManyField(Module, related_name='request_user', blank=True)
+
+    active = models.BooleanField(blank=False, null=False, default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'

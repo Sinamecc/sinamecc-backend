@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import CustomUser, ProfilePicture
+from users.models import CustomUser, ProfilePicture, UserRequest, Module
 from django.contrib.auth.models import Group, Permission
 
 
@@ -31,3 +31,16 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('id', 'name')
 
+
+
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = ('id', 'name', 'code', 'active')
+
+
+class UserRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRequest
+        fields = ('id', 'email', 'first_name', 'last_name', 'institution', 
+                  'phone', 'module', 'created', 'updated', 'active')

@@ -10,7 +10,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-    - ./sql/sinamecc_db.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres12_data:/var/lib/postgresql/data/
   web:
     build: 
       context: .
@@ -24,3 +24,5 @@ services:
       - "8000:8000"
     depends_on:
       - db
+volumes:
+  postgres12_data:
