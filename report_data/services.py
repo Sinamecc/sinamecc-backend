@@ -25,6 +25,7 @@ class ReportDataService():
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
         self.ACCESS_DENIED_ALL = "Access denied to all report data"
         self.ACCESS_DENIED = "Access denied to report data: {0}"
+        self.CHANGE_LOG_NOT_FOUND = "Change log not found"
 
 
     def _get_serialized_report_data(self,  data, report_data=None, partial=None):
@@ -507,3 +508,14 @@ class ReportDataService():
 
         return result
 
+    def get_change_log_from_report_data(self, request, report_data_id):
+        result = (False, self.CHANGE_LOG_NOT_FOUND)
+        report_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
+        
+        if report_status:
+            change_log_list = report_data.change_log.order_by('-date').all()
+            result = (True, ChangeLogSerializer(change_log_list, many=True).data)
+        else:
+            result = (False, report_data)
+        
+        return result
