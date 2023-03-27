@@ -198,6 +198,8 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
     
     def _get_url(self, obj, file_name, attr):
         
+        attr.name = '' if attr.name is None else attr.name
+
         file_data = {'url':reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name}), 
                      'file_name': attr.name.split('/')[-1]}
         return file_data
@@ -318,6 +320,8 @@ class IndicatorSerializer(serializers.ModelSerializer):
     
     def _get_url(self, obj, file_name, attr):
         
+        attr.name = '' if attr.name is None else attr.name
+
         file_data = {'url':reverse('get_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id, 'file_field': file_name}), 
                      'file_name': attr.name.split('/')[-1]}
         return file_data
