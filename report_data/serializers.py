@@ -73,7 +73,10 @@ class ReportSerializer(serializers.ModelSerializer):
 class ReportFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportFile
-        fields = ('id', 'slug', 'file', 'report_data', 'report_type')
+        fields = ('id', 'slug', 'filename', 'file', 'report_data', 'report_type')
+        kwargs = {
+            'filename': {'read_only': True},   
+        }
         
     def _get_url(self, obj):
         
@@ -84,6 +87,8 @@ class ReportFileSerializer(serializers.ModelSerializer):
         
         data =  super().to_representation(instance)
         data["file"] = self._get_url(instance)
+        if not instance.filename:
+            data["filename"] = instance.file.name.split('/')[-1]
         
         return data
 
