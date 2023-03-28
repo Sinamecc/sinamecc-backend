@@ -1,4 +1,3 @@
-from cgi import parse_multipart
 from users.serializers import CustomUserSerializer, UserRequestSerializer
 from general.helpers.services import ServiceHelper
 from users.models import UserRequest

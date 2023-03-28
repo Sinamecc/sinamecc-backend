@@ -72,38 +72,7 @@ UserRequestApproveResponse:
     phone:
       type: string
       example: 123456789
-# [
-#     {
-#         "id": 1,
-#         "name": "PPCN",
-#         "code": "ppcn",
-#         "active": true
-#     },
-#     {
-#         "id": 2,
-#         "name": "Mitigation Actions",
-#         "code": "mitigation_action",
-#         "active": true
-#     },
-#     {
-#         "id": 3,
-#         "name": "Adaptation Actions",
-#         "code": "adaptation_action",
-#         "active": true
-#     },
-#     {
-#         "id": 4,
-#         "name": "Report Data",
-#         "code": "report_data",
-#         "active": true
-#     },
-#     {
-#         "id": 5,
-#         "name": "MCCR",
-#         "code": "mccr",
-#         "active": true
-#     }
-# ]
+
 ModuleResponse:
   type: object
   properties:

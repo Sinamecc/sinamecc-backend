@@ -1,16 +1,13 @@
-from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from general.helpers.services import ServiceHelper
 from general.models import User
-from ..models import CustomUser, ProfilePicture
-from ..serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
+from users.models import CustomUser, ProfilePicture
+from users.serializers import CustomUserSerializer, NewCustomUserSerializer, PermissionSerializer, \
     GroupSerializer, ProfilePictureSerializer
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import login
 from rolepermissions import roles
 from general.storages import S3Storage
 from django.urls import reverse
@@ -24,8 +21,6 @@ from general.services import EmailServices
 from users.email_services import UserEmailServices
 from django.utils.crypto import get_random_string
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-
-
 
 ses_service = EmailServices()
 
