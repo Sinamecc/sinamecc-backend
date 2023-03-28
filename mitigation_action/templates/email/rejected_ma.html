@@ -10,16 +10,16 @@
             <p style=”text-align: justify;”>
             Le informamos que su solicitud para el registro de acciones climáticas con impactos en<br/>
             mitigación en el Sistema Nacional de Métrica para el Cambio Climático (SINAMECC) con el<br/>
-            ID AMXXXX, ha sido rechazada.
+            ID {{ma_code}}., ha sido rechazada.
             </p>
             <p>
-            Si requiere mayor detalle, puede consultar el estado de su solicitud en el siguiente $enlace$.<br>
+            Si requiere mayor detalle, puede consultar el estado de su solicitud en el siguiente <a href={{frontend_url}}/mitigation/actions/{{mitigation_id}}> enlace</a>.<br>
             Agradecemos su interés en registrar sus acciones climáticas con impactos en mitigación en el SINAMECC.
             </p>
             <p>
             Si tiene alguna consulta adicional, no dude en contactarnos a cambioclimatico@minae.go.cr
             </p>
             <p>Saludos cordiales,</p>
-            {% include  "./../general/email/signature.html"%}
+            {% include  "./../general/email/simple_signature.html"%}
         </div>
 {% endblock content %}

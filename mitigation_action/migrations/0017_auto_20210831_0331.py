@@ -39,7 +39,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=255, null=True)),
-                ('name', models.CharField(max_length=255, null=True)),
+                ('name_es', models.CharField(max_length=255, null=True)),
+                ('name_en', models.CharField(max_length=255, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -52,7 +53,8 @@ class Migration(migrations.Migration):
             name='InformationSourceType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=500, null=True)),
+                ('name_en', models.CharField(max_length=500, null=True)),
+                ('name_es', models.CharField(max_length=500, null=True)),
                 ('code', models.CharField(max_length=500, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -66,7 +68,8 @@ class Migration(migrations.Migration):
             name='ThematicCategorizationType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                ('name_es', models.CharField(max_length=100)),
+                ('name_en', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),

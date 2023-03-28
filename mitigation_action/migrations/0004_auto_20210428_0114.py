@@ -17,7 +17,8 @@ class Migration(migrations.Migration):
             name='FinanceSourceType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                ('name_en', models.CharField(max_length=100)),
+                ('name_es', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -31,7 +32,8 @@ class Migration(migrations.Migration):
             name='FinanceStatus',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                ('name_en', models.CharField(max_length=100)),
+                ('name_es', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -45,7 +47,8 @@ class Migration(migrations.Migration):
             name='GeographicScale',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                ('name_es', models.CharField(max_length=100)),
+                ('name_en', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -59,7 +62,8 @@ class Migration(migrations.Migration):
             name='InitiativeType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                ('name_es', models.CharField(max_length=100)),
+                ('name_en', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('type', models.CharField(max_length=2)),
                 ('created', models.DateTimeField(auto_now_add=True)),
@@ -74,7 +78,8 @@ class Migration(migrations.Migration):
             name='Status',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(max_length=100)),
+                ('status_es', models.CharField(max_length=100)),
+                ('status_en', models.CharField(max_length=100)),
                 ('code', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -89,7 +94,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=255)),
-                ('name', models.CharField(max_length=255)),
+                ('name_en', models.CharField(max_length=255)),
+                ('name_es', models.CharField(max_length=255)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],

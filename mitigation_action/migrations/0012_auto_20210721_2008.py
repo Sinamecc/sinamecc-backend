@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
             name='ActionAreas',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
+                ('name_es', models.CharField(max_length=255)),
+                ('name_en', models.CharField(max_length=255)),
                 ('code', models.CharField(max_length=3)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
@@ -30,7 +31,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('description', models.TextField()),
+                ('description_es', models.TextField()),
+                ('description_en', models.TextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -44,7 +46,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('name', models.CharField(max_length=255)),
+                ('name_es', models.CharField(max_length=255)),
+                ('name_en', models.CharField(max_length=255)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],
@@ -58,7 +61,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('description', models.TextField()),
+                ('description_es', models.TextField()),
+                ('description_en', models.TextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('axis', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transformational_vision', to='mitigation_action.descarbonizationaxis')),
@@ -73,7 +77,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('name', models.CharField(max_length=255)),
+                ('name_es', models.CharField(max_length=255)),
+                ('name_en', models.CharField(max_length=255)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('topic', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sub_topic', to='mitigation_action.topics')),
@@ -88,7 +93,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3)),
-                ('description', models.TextField()),
+                ('description_es', models.TextField()),
+                ('description_en', models.TextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('sub_topic', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity', to='mitigation_action.subtopics')),
@@ -102,7 +108,8 @@ class Migration(migrations.Migration):
             name='ActionGoals',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('goal', models.TextField()),
+                ('goal_es', models.TextField()),
+                ('goal_en', models.TextField()),
                 ('code', models.CharField(max_length=3)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),

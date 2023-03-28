@@ -1,5 +1,5 @@
 
-from functools import partial
+from rolepermissions.checkers import has_object_permission
 from workflow.serializers import CommentSerializer
 from mitigation_action.workflow_steps.models import *
 from mitigation_action.serializers import *
@@ -9,16 +9,12 @@ from mitigation_action.models import MitigationAction, Contact, Status, FinanceS
 
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
-import datetime
-import uuid
-from io import BytesIO
-from django.urls import reverse
-import os
 from general.services import HandlerErrors
 from workflow.services import WorkflowService
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.services import EmailServices
+from rolepermissions.checkers import has_role
 
 handler = HandlerErrors()
 workflow_service = WorkflowService()
@@ -32,7 +28,7 @@ class MitigationActionService():
         self._serialize_helper = SerializersHelper()
         self.INVALID_STATUS_TRANSITION = "Invalid mitigation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
-        self.INVALID_USER_TRANSITION = "the user doesn´t have permission for this transition"
+        self.INVALID_USER_TRANSITION = "the user doesn't have permission for this transition"
         self.FUNCTION_INSTANCE_ERROR = 'Error Mitigation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.LIST_ERROR = "Was expected a {0} list into data"
@@ -43,6 +39,8 @@ class MitigationActionService():
         self.INDICATOR_CHANGE_LOG_ERROR = "Error creating indicator change log"
         self.INDICATOR_NOT_FOUND = "The indicator with ID {0} does not exist"
         self.INDICATOR_ERROR = "The  indicator could not be saved"
+        self.ACCESS_DENIED = "Access denied to this mitigation action register: {0}"
+        self.ACCESS_DENIED_ALL = "Access denied to all mitigation action registers"
 
 
     # auxiliary functions
@@ -172,7 +170,7 @@ class MitigationActionService():
 
     def _get_serialized_mitigation_action(self, data, mitigation_action = False):
 
-        serializer = self._serialize_helper.get_serialized_record(MitigationActionSerializer, data, record=mitigation_action)
+        serializer = self._serialize_helper.get_serialized_record(MitigationActionSerializer, data, record=mitigation_action, partial=True)
 
         return serializer
 
@@ -233,7 +231,33 @@ class MitigationActionService():
 
         return serializer
 
+    
+    def _get_serialized_action_area_selection_list(self, data, action_area_selection_list, categorization_id):
+        
+        data = [{**action_area_selection, 'categorization': categorization_id}  for action_area_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(ActionAreasSelectionSerializer, data, record=action_area_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
+    def _get_serialized_topic_selection_list(self, data, topic_selection_list, categorization_id):
+        
+        data = [{**topic_selection, 'categorization': categorization_id}  for topic_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(TopicsSelectionSerializer, data, record=topic_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
 
+    def _get_serialized_descarbonization_axis_selection_list(self, data, descarbonization_axis_selection_list, categorization_id):
+        
+        data = [{**descarbonization_axis_selection, 'categorization': categorization_id}  for descarbonization_axis_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(DescarbonizationAxisSelectionSerializer, data, record=descarbonization_axis_selection_list, many=True,  partial=True)
+        
+        return serializer
+    
+    
     def _get_serialized_question_list(self, data, question_list, impact_documentation_id):
         
         data = [{**question, 'impact_documentation': impact_documentation_id}  for question in data ]
@@ -241,7 +265,24 @@ class MitigationActionService():
         serializer = self._serialize_helper.get_serialized_record(QAQCReductionEstimateQuestionSerializer, data, record=question_list, many=True,  partial=True)
 
         return serializer
+    
 
+    def _get_serialized_sector_selection_list(self, data, sector_selection_list, impact_documentation_id):
+        
+        data = [{**sector_selection, 'impact_documentation': impact_documentation_id}  for sector_selection in data ]
+        
+        serializer = self._serialize_helper.get_serialized_record(SectorSelectionSerializer, data, record=sector_selection_list, many=True,  partial=True)
+        
+        return serializer
+
+    
+    def _get_serialized_finance_information_list(self, data, finance_information_list, finance_id):
+        
+        data = [{**finance_information, 'finance': finance_id}  for finance_information in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(FinanceInformationSerializer, data, record=finance_information_list, many=True,  partial=True)
+
+        return serializer
     
     
     def _get_serialized_monitoring_indicator_list(self, data, monitoring_indicator_list, monitoring_reporting_indicator_id):
@@ -343,6 +384,7 @@ class MitigationActionService():
 
         return result
 
+
     def _create_update_ghg_information(self, data, ghg_information=None):
         
         if ghg_information:
@@ -360,22 +402,7 @@ class MitigationActionService():
 
         return result
 
-    def _create_update_finance(self, data, finance=None):
-        
-        if finance:
-            serialized_finance = self._get_serialized_finance(data, finance)
-
-        else:
-            serialized_finance = self._get_serialized_finance(data)
-        
-        if serialized_finance.is_valid():
-            finance = serialized_finance.save()
-            result = (True, finance)
-
-        else:
-            result = (False, serialized_finance.errors)
-
-        return result
+    
 
     ## update and create function
 
@@ -387,6 +414,7 @@ class MitigationActionService():
         else:
             serialized_ghg_information = self._get_serialized_ghg_information(data, partial=True)
         
+        
         if serialized_ghg_information.is_valid():
             ghg_information = serialized_ghg_information.save()
             result = (True, ghg_information)
@@ -397,7 +425,7 @@ class MitigationActionService():
         return result
 
 
-    def _create_update_finance(self, data, finance=False):
+    def _create_update_finance(self, data, finance=None):
         
         if finance:
             serialized_finance = self._get_serialized_finance(data, finance)
@@ -407,7 +435,14 @@ class MitigationActionService():
         
         if serialized_finance.is_valid():
             finance = serialized_finance.save()
-            result = (True, finance)
+            finance_information_data = data.get("finance_information", [])
+            serialized_fi_status, serialized_fi_data = self._create_update_finance_information(finance_information_data, finance)
+
+            if serialized_fi_status:
+                result = (True, finance)
+            else:
+                result = (serialized_fi_status, serialized_fi_data)
+
 
         else:
             result = (False, serialized_finance.errors)
@@ -451,7 +486,13 @@ class MitigationActionService():
         return result
 
     
+    
+    
     def _create_update_categorization(self, data, categorization=False):
+        
+        action_area_selection = data.pop('action_area_selection', [])
+        topic_selection = data.pop('topics_selection', [])
+        descarbonization_axis_selection = data.pop('descarbonization_axis_selection', [])
         
         if categorization:
             serialized_categorization = self._get_serialized_categorization(data, categorization)
@@ -461,14 +502,89 @@ class MitigationActionService():
         
         if serialized_categorization.is_valid():
             categorization = serialized_categorization.save()
-            result = (True, categorization)
-
+            area_selection_status, area_selection_data = self._create_update_action_area_selection(action_area_selection, categorization)
+            topic_selection_status, topic_selection_data = self._create_update_topic_selection(topic_selection, categorization)
+            desc_axis_selection_status, desc_axis_selection_data = self._create_update_descarbonization_axis_selection(descarbonization_axis_selection, categorization)
+            validation_dict = {'action_area_selection': area_selection_status, 'topic_selection': topic_selection_status, 'descarbonization_axis_selection': desc_axis_selection_status}
+            if all(validation_dict.values()):
+                result = (True, categorization)
+                
+            else:
+               for key, value in validation_dict.items():
+                   if not value:
+                       result = (False, validation_dict)
+                       break
+                
         else:
             result = (False, serialized_categorization.errors)
 
         return result
 
+    
+    def _create_update_action_area_selection(self, data, categorization):
+ 
+        result = (True, [])
+        
+        if isinstance(data, list):
+            action_area_selection_list = categorization.action_area_selection.all() 
+            serializer = self._get_serialized_action_area_selection_list(data, action_area_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
 
+        else:
+            result = (False, self.LIST_ERROR.format('action_area_selection'))
+            
+        return result
+    
+    
+    def _create_update_topic_selection(self, data, categorization):
+        
+        result = (True, [])
+        
+        if isinstance(data, list):
+            topic_selection_list = categorization.topics_selection.all() 
+            serializer = self._get_serialized_topic_selection_list(data, topic_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
+        else:
+            result = (False, self.LIST_ERROR.format('topic_selection'))
+        
+        return  result
+        
+        
+    def _create_update_descarbonization_axis_selection(self, data, categorization):
+        
+        result = (True, [])
+        
+        if isinstance(data, list):
+            desc_axis_selection_list = categorization.descarbonization_axis_selection.all() 
+            serializer = self._get_serialized_descarbonization_axis_selection_list(data, desc_axis_selection_list, categorization.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, categorization)
+                
+            else: 
+                result = (False, serializer.errors)
+        else:
+            result = (False, self.LIST_ERROR.format('descarbonization_axis_selection'))
+        
+        return result
+        
+        
     def _create_update_initiative_goal(self, data, initiative):
  
         result = (True, [])
@@ -489,7 +605,49 @@ class MitigationActionService():
             
         return result
     
+    
+    def _create_update_finance_information(self, data, finance):
+ 
+        result = (True, [])
+        
+        if isinstance(data, list):
+            finance_information_list = finance.finance_information.all() 
+            serializer = self._get_serialized_finance_information_list(data, finance_information_list, finance.id)
+            
+            if serializer.is_valid():
+                
+                serializer.save()
+                result = (True, serializer.data)
+            else: 
+                result = (False, serializer.errors)
 
+        else:
+            result = (False, self.LIST_ERROR.format('Finance Information'))
+            
+        return result
+
+    def _create_update_sector_selection(self, data,impact_documentation):
+        result = (True, [])
+
+        if isinstance(data, list):
+            sector_selection_list = impact_documentation.sector_selection.all() 
+            serializer = self._get_serialized_sector_selection_list(data, sector_selection_list, impact_documentation.id)
+            
+            if serializer.is_valid():
+                
+                sector_selection = serializer.save()
+
+                result = (True, sector_selection)
+
+            else: 
+                result = (False, serializer.errors)
+
+        else:
+            result = (False, self.LIST_ERROR.format('sector_selection'))
+            
+        return result
+    
+    
     def _create_update_question(self, data, impact_documentation):
  
         result = (True, [])
@@ -538,8 +696,6 @@ class MitigationActionService():
             result = (False, indicator_list_data)
         
         return result
-
-        
 
 
     def _create_update_monitoring_indicator(self, data, monitoring_reporting_indicator):
@@ -607,13 +763,20 @@ class MitigationActionService():
             impact_documentation = serialized_impact_documentation.save()
 
             question_data = data.get("question", [])
+            sector_selection_data = data.get("sector_selection", [])
+            
             serialized_question_status, serialized_question_data = self._create_update_question(question_data, impact_documentation)
+            serialized_sector_selection_status, serialized_sector_selection_data = self._create_update_sector_selection(sector_selection_data, impact_documentation)
+            
+            if not serialized_question_status:
+                result = (serialized_question_status, serialized_question_data )
 
-            if serialized_question_status:
-                result = (True, impact_documentation)
+            elif not serialized_sector_selection_status:
+                result = (serialized_sector_selection_status, serialized_sector_selection_data )
 
             else:
-                result = (serialized_question_status, serialized_question_data )
+                result = (True, impact_documentation)
+
 
         else:
             errors = serialized_impact_documentation.errors
@@ -856,22 +1019,39 @@ class MitigationActionService():
 
 
     def get(self, request, mitigation_action_id):
-        
+
         mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
         
-        if mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
+        if not mitigation_action_status:
+            result = (mitigation_action_status, mitigation_action_data)
         
-        else:
-            result = (mitigation_action_status, mitigation_action_data) 
+        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
+            result = (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
+        
+        elif mitigation_action_status:
+            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
+
 
         return result
     
 
     def get_all(self, request):
+        """
+        This logic we need to refactor. At the moment we are going to allow the Reviewer to see all the mitigation actions
+        """
+        user = request.user
+        mitigation_action_status, mitigation_action_data = None, None
 
-        mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
-
+        if has_role(user,['reviewer', 'reviewer_mitigation_action', 'admin']):
+            mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
+        
+        elif has_role(user, ['information_provider_mitigation_action', 'information_provider']):
+            mitigation_action_status, mitigation_action_data = \
+                self._service_helper.get_all(MitigationAction, user=user)
+                
+        else:
+            return  (False, self.ACCESS_DENIED_ALL)
+            
         if mitigation_action_status:
             result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data, many=True).data)
         
@@ -902,10 +1082,16 @@ class MitigationActionService():
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
         
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_mitigation_action = self._get_serialized_mitigation_action(data)
             if serialized_mitigation_action.is_valid():
                 mitigation_action = serialized_mitigation_action.save()
-                mitigation_action.create_code()    
+                mitigation_action.create_code()
+                
+                if is_complete: 
+                    mitigation_action.submit(request.user) 
+                    mitigation_action.save()
+
                 result = (True, MitigationActionSerializer(mitigation_action).data)
   
             else:
@@ -921,13 +1107,16 @@ class MitigationActionService():
 
         validation_dict = {}
         data = request.data.copy()
-        data['user'] = request.user.id
 
         field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'categorization',
                         'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        
+        ## permission access return here
+        if not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
+            return  (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
         
         if mitigation_action_status:
             mitigation_action = mitigation_action_data
@@ -943,10 +1132,15 @@ class MitigationActionService():
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_mitigation_action = self._get_serialized_mitigation_action(data, mitigation_action)
                 
                 if serialized_mitigation_action.is_valid():
                     mitigation_action = serialized_mitigation_action.save()
+                    if is_complete: 
+                        mitigation_action.submit(request.user) 
+                        mitigation_action.save()
+                        
                     result = (True, MitigationActionSerializer(mitigation_action).data)
 
                 else:
@@ -1106,6 +1300,7 @@ class MitigationActionService():
             'classifier': (Classifier, ClassifierSerializer),
             'information_source_type': (InformationSourceType, InformationSourceTypeSerializer),
             'thematic_categorization_type': (ThematicCategorizationType, ThematicCategorizationTypeSerializer),
+            'sector': (Sector, SectorSerializer),
         }
 
         data = {}
@@ -1125,12 +1320,15 @@ class MitigationActionService():
 
     
     def get_child_data_from_parent_id_catalogs(self, request, parent, parent_id, child):
-
+        ## tuple (child model, child serialzers, field parent to related)
         catalogs_by_parent = {
             'action-areas':{'action-goal': (ActionGoals, ActionGoalsSerializer, 'area')},
             'descarbonization-axis':{'transformational-visions': (TransformationalVisions, TransformationalVisionsSerializer, 'axis')},
             'topics': {'sub-topics': (SubTopics, SubTopicsSerializer, 'topic')},
             'sub-topics':{'activities': (Activity, ActivitySerializer, 'sub_topic')},
+            'sector': {'sector-ipcc': (SectorIPCC2006, SectorIPCC2006Serializer, 'sector')},
+            'sector-ipcc': {'category-ipcc': (CategoryIPCC2006, CategoryIPCC2006Serializer, 'sector_ipcc_2006')},
+            'category-ipcc': {'subcategory-ipcc': (SubCategoryIPCC2006, SubCategoryIPCC2006Serializer, 'category_ipcc_2006')},
         }
         result = (False, self.CATALOG_DOES_NOT_EXIST.format(parent, child))
 
@@ -1173,7 +1371,7 @@ class MitigationActionService():
             previous_state = mitigation_action.fsm_state
 
             if has_transition_perm(transition_function,user):
-                transition_function()
+                transition_function(user)
                 mitigation_action.save()
                 
                 change_log_data = self._serialize_change_log_data(user, mitigation_action, previous_state)
@@ -1212,9 +1410,9 @@ class MitigationActionService():
         if mitigation_action_status:
             review_number = mitigation_action_data.review_count
             fsm_state = mitigation_action_data.fsm_state
-            commet_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+            comment_list = mitigation_action_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
         
@@ -1230,9 +1428,9 @@ class MitigationActionService():
         if mitigation_action_status:
 
             search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
-            commet_list = mitigation_action_data.comments.filter(**search_kwargs).all()
+            comment_list = mitigation_action_data.comments.filter(**search_kwargs).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
         
@@ -1253,9 +1451,3 @@ class MitigationActionService():
             result = (False, mitigation_action_data)
         
         return result
-
-
-
-
-
-

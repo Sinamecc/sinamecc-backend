@@ -10,6 +10,7 @@ from workflow.services import WorkflowService
 import os
 from django_fsm import has_transition_perm
 from io import BytesIO
+from rolepermissions.checkers import has_role, has_object_permission
 
 # TODO: Add exception handling
 class ReportDataService():
@@ -22,6 +23,8 @@ class ReportDataService():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid report data state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.ACCESS_DENIED_ALL = "Access denied to all report data"
+        self.ACCESS_DENIED = "Access denied to report data: {0}"
 
 
     def _get_serialized_report_data(self,  data, report_data=None, partial=None):
@@ -161,7 +164,7 @@ class ReportDataService():
             previous_state = report_data.fsm_state
 
             if has_transition_perm(transition_function, user):
-                transition_function()
+                transition_function(user)
                 report_data.save()
                 
                 change_log_data = self._serialize_change_log_data(user, report_data, previous_state)
@@ -181,19 +184,31 @@ class ReportDataService():
     def get(self, request, report_data_id):
         
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
-
-        if report_data_status:
-            result = (True, ReportDataSerializer(report_data_details).data)
-        else:
-            result = (False, report_data_details)
+        if not report_data_status:
+            result = (report_data_status, report_data_details)
+        
+        elif not has_object_permission('access_report_data_register', request.user, report_data_details):
+            result = (False, self.ACCESS_DENIED.format(report_data_details.id))
+        
+        elif report_data_status:
+            result = (report_data_status, ReportDataSerializer(report_data_details).data)
 
         return result
 
     
     def get_all(self, request):
+        user =  request.user
+        report_data_status, report_data_details = None, None
         
-        report_data_status, report_data_details = self._service_helper.get_all(ReportData)
-
+        if has_role(user,['reviewer', 'reviewer_report_data', 'admin']):
+            report_data_status, report_data_details = self._service_helper.get_all(ReportData)
+            
+        elif has_role(user, ['information_provider_report_data', 'information_provider']):
+            report_data_status, report_data_details = \
+                self._service_helper.get_all(ReportData, user=user)
+        else:
+            return (False, self.ACCESS_DENIED_ALL)
+        
         if report_data_status:
             result = (True, ReportDataSerializer(report_data_details, many=True).data)
 
@@ -214,11 +229,18 @@ class ReportDataService():
         validation_dict = self._service_helper.create_or_update_record(field_list, data)
 
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
             serialized_report_data = self._get_serialized_report_data(data, partial=True)
             
             if all([serialized_report_data.is_valid(), serialized_report_data_change_log.is_valid()]):
+
                 report_data = serialized_report_data.save()
+
+                if is_complete:
+                        report_data.submit(request.user)
+                        report_data.save()
+
                 report_data_change_log = serialized_report_data_change_log.save()
                 report_data.report_data_change_log.add(report_data_change_log)
                 result = (True, ReportDataSerializer(report_data).data)
@@ -237,21 +259,28 @@ class ReportDataService():
 
         validation_dict, errors = {}, []
         data = request.data.copy()
-        data['user'] = request.user.id
         data['report_data_change_log'] = self._get_report_data_change_log_data(data.get('report_data_change_log', {}), request.user)
 
         field_list = ['contact']
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
-
+        if not has_object_permission('access_report_data_register', request.user, report_data_details):
+            return (False, self.ACCESS_DENIED.format(report_data_details.id))
+        
         if report_data_status:
             validation_dict = self._service_helper.create_or_update_record(field_list, data, report_data_details)
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_report_data_change_log = self._get_serialized_report_data_change_log(data.pop('report_data_change_log'), partial=True)
                 serialized_report_data = self._get_serialized_report_data(data, report_data=report_data_details, partial=True)
 
                 if serialized_report_data.is_valid() and serialized_report_data_change_log.is_valid():
                     report_data = serialized_report_data.save()
+
+                    if is_complete:
+                        report_data.submit(request.user)
+                        report_data.save()
+                        
                     report_data_change_log = serialized_report_data_change_log.save()
                     report_data.report_data_change_log.add(report_data_change_log)
                     
@@ -324,9 +353,11 @@ class ReportDataService():
         return result
     
     
-    def delete(self, report_data_id):
+    def delete(self, request, report_data_id):
         
         report_data_status, report_data_details = self._service_helper.get_one(ReportData, report_data_id)
+        if not has_object_permission('access_report_data_register', request.user, report_data_details):
+            return (False, self.ACCESS_DENIED.format(report_data_details.id))
 
         if report_data_status:
             serialized_report_data = ReportDataSerializer(report_data_details).data
@@ -339,7 +370,7 @@ class ReportDataService():
         return result
     
     def patch(self, request, report_data_id):
-        ## missing review and comments here!!
+
         data = request.data
         next_state, user = data.pop('fsm_state', None), request.user
         comment_list = data.pop('comments', [])
@@ -446,9 +477,9 @@ class ReportDataService():
         if report_data_status:
             review_number = report_data.review_count
             fsm_state = report_data.fsm_state
-            commet_list = report_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
+            comment_list = report_data.comments.filter(review_number=review_number, fsm_state=fsm_state).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
 
@@ -457,6 +488,7 @@ class ReportDataService():
 
         return result
 
+
     def get_comments_by_fsm_state_or_review_number(self, request, report_data_id, fsm_state=None, review_number=None):
         
         report_data_status, report_data = self._service_helper.get_one(ReportData, report_data_id)
@@ -464,9 +496,9 @@ class ReportDataService():
         if report_data_status:
 
             search_kwargs = {**search_key('fsm_state', fsm_state), **search_key('review_number', review_number)}
-            commet_list = report_data.comments.filter(**search_kwargs).all()
+            comment_list = report_data.comments.filter(**search_kwargs).all()
 
-            serialized_comment = CommentSerializer(commet_list, many=True)
+            serialized_comment = CommentSerializer(comment_list, many=True)
 
             result = (True, serialized_comment.data)
 

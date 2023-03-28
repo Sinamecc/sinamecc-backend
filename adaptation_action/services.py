@@ -1,19 +1,21 @@
 
-from asyncio import start_unix_server
-from os import error
-
 from django_fsm import has_transition_perm
 from adaptation_action.models import ReportOrganization, AdaptationAction
 from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from mitigation_action.serializers import ContactSerializer as MContactSerializer
 from workflow.services import WorkflowService
+from workflow.serializers import CommentSerializer
+from general.storages import S3Storage
+from rolepermissions.checkers import has_role, has_object_permission
+import os
+from io import BytesIO
 
 class AdaptationActionServices():
     def __init__(self) -> None:
 
+        self._storage = S3Storage()
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
         self._workflow_service = WorkflowService()
@@ -21,11 +23,15 @@ class AdaptationActionServices():
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
         self.STATE_HAS_NO_AVAILABLE_TRANSITIONS = "State has no available transitions."
+        self.ACCESS_DENIED = "Access denied to this adaptation action register: {0}"
+        self.ACCESS_DENIED_ALL = "Access denied to all adaptation action registers"
+        self.NO_INDICATOR = "The indicator id does not exist."
+        self.NO_INDICATOR_MONITORING = "The indicator monitoring id does not exist."
 
 
     def _create_sub_record(self, data, sub_record_name):
         
-        create_function = f'_create_update_{sub_record_name}'
+        create_function =  f'_create_update_{sub_record_name}'
 
         if hasattr(self, create_function):
             function = getattr(self, create_function)
@@ -36,17 +42,15 @@ class AdaptationActionServices():
             raise Exception(self.FUNCTION_INSTANCE_ERROR.format(create_function))
 
         return result
-    
+
+
     def _update_sub_record(self, sub_record_name, record_for_updating, data):
         
         update_function = f'_create_update_{sub_record_name}'
         
         if hasattr(self, update_function):
-          
-            function = getattr(self, update_function)
-        
-            record_status, record_detail = function(data, record_for_updating)
-          
+            function = getattr(self, update_function)        
+            record_status, record_detail = function(data, record_for_updating)   
             result = (record_status, record_detail)
         
         else:
@@ -54,9 +58,11 @@ class AdaptationActionServices():
 
         return result
 
+
     def _create_or_update_record(self, instance, field, data):
 
         result = (False, [])
+        
         if hasattr(instance, field):
             if getattr(instance, field) == None:
                 record_status, record_data = self._create_sub_record(data, field) ## field = sub_record_name
@@ -73,9 +79,10 @@ class AdaptationActionServices():
 
         return result
 
+
     def _get_serialized_adaptation_action(self, data, adaptation_action = False):
 
-        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action)
+        serializer = self._serializer_helper.get_serialized_record(AdaptationActionSerializer, data, record=adaptation_action, partial=True)
 
         return serializer
     
@@ -148,6 +155,7 @@ class AdaptationActionServices():
             result = (False, serialized_indicator_monitoring.errors)
         
         return result
+    
 
     def _create_update_general_report(self, data, general_report=False):
 
@@ -182,6 +190,7 @@ class AdaptationActionServices():
             result = (False, serialized_action_impact.errors)
 
         return result
+    
 
     def _get_serialized_report_organization_type(self, data, report_organization_type = False):
 
@@ -311,6 +320,15 @@ class AdaptationActionServices():
 
     
     
+    def _get_serialized_indicator_list(self, data, indicator_list, adaption_action_id):
+        
+        data = [{**indicator, 'adaptation_action': adaption_action_id}  for indicator in data ]
+ 
+        serializer = self._serialize_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
+
+        return serializer
+    
+    
     def _serialize_change_log_data(self, user, adaptation_action, previous_status):
 
         data = {
@@ -324,27 +342,31 @@ class AdaptationActionServices():
     
     
     
-    def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=False):
+    def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=None):
 
         serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
 
         return serializer
-    
-    def _create_update_contact(self, data, contact=False):
 
+    
+    
+    def _create_update_contact(self, data, contact=None):
+        
         if contact:
-            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data, record=contact)
+            serialized_contact = self._get_serialized_contact(data, contact)
+
         else:
-            serializer = self._serializer_helper.get_serialized_record(ContactSerializer, data)
+            serialized_contact = self._get_serialized_contact(data)
         
-        if serializer.is_valid():
-            contact = serializer.save()
+        if serialized_contact.is_valid():
+            contact = serialized_contact.save()
             result = (True, contact)
-        
+
         else:
-            result = (False, serializer.errors)
-        
+            result = (False, serialized_contact.errors)
+
         return result
+
 
     def _create_update_address(self, data, address=False):
         
@@ -702,51 +724,149 @@ class AdaptationActionServices():
             result = (False, serialized_information_source.errors)
         
         return result
+            
+    # auxiliar function for create and update record
+    def _get_indicators_for_updating_creating(self,indicator_data_list, indicator_list,  adaptation_action):
+        ## added object attribute if the indicator data has an indicator id
+        for indicator_data in indicator_data_list:
+            indicator_data_id = indicator_data.get('id', None)
+            if indicator_data_id:
+                obj = next(filter(lambda x: x.id == indicator_data_id, indicator_list), None)
+                if obj: indicator_data['object'] = obj
+                else:
+                    result = (False, 'Indicator with id {} not found'.format(indicator_data_id))
+            else:
+                indicator_data['adaptation_action'] =  adaptation_action.id
 
-    ##contact model from mitigation action
-    def _get_serialized_m_contact(self, data, contact=False):
+        result = (True, indicator_data_list)
+
+        return result    
+
+
+    def _create_update_indicator_list(self, indicator_list_data, adaptation_action):
         
-        if contact:
-            serialized_contact = MContactSerializer(contact, data=data, partial=True)
-        else:
-            serialized_contact = MContactSerializer(data=data)
-        return serialized_contact
+        indicator_list = adaptation_action.indicator.all()
         
-    def _create_update_indicator(self, data, indicator_adaptation=False):
+        result = (True, [])
+        f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
+        indicator_list_data = list(map(f, indicator_list_data))
+        
+        try:
+            if indicator_list.count():
+                ## in this part we are going to get the indicators to update or create
+                ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_obj_from_DB_with_id_2> }, {...}, ... ]
+                ## and if the indicator json data has not id, we are going to create it , not update it
+                ## change the indicator_list_data to update or create the indicators
+                indicator_list_status, indicator_list_data = self._get_indicators_for_updating_creating(indicator_list_data, indicator_list, adaptation_action)
+                if not indicator_list_status: raise Exception(indicator_list)
 
-        _information_source = data.pop('information_source', None)
-        _contact = data.pop('contact', None)
-
-        if(_contact):
-
-            serialized_contact = self._get_serialized_m_contact(_contact)
-
-            if(serialized_contact.is_valid()):
-                contact = serialized_contact.save()
-                data['contact'] = contact.id
-
-        if(_information_source):
+            result_indicator_list = []
+            for indicator_data in indicator_list_data:
+                indicator = indicator_data.pop('object', None)
+                indicator_status, indicator_data = self._create_update_indicator(indicator_data, indicator)
                 
-            serialized_information_source = self._get_serialized_information_source(_information_source)
+                if not indicator_status:
+                    ## if the indicator is not valid, return the error
+                    result = (indicator_status, indicator_data) 
+                    break
+                result_indicator_list.append(indicator_data)
 
-            if(serialized_information_source.is_valid()):
-                information_source = serialized_information_source.save()
-                data['information_source'] = information_source.id
+            else:
+                result = (True, result_indicator_list)
 
-        if indicator_adaptation:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-        
-        else:
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data)
-        
-        if serialized_indicator_adaptation.is_valid():
-            indicator_adaptation = serialized_indicator_adaptation.save()
-            result = (True, indicator_adaptation)
-        
-        else:
-            result = (False, serialized_indicator_adaptation.errors)
+
+        except Exception as error:
+            result = (False, error)
         
         return result
+    
+    
+    
+    def _create_update_indicator(self, data, indicator_adaptation=None):
+
+        fields = ['information_source', 'contact']
+        validation_dict = {}
+        for field in fields:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+
+        if all(validation_dict):
+
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+            
+            if serialized_indicator_adaptation.is_valid():
+                indicator_adaptation = serialized_indicator_adaptation.save()
+
+                result = (True, indicator_adaptation)
+
+            else:
+                result = (False, serialized_indicator_adaptation.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
+        return result
+
+    
+    def _get_indicator_monitoring_for_updating_creating(self, ind_monitoring_data_list, ind_monitoring_list, adaptation_action):
+        
+        for ind_monitoring_data in ind_monitoring_data_list:
+            ind_monitoring_data_id = ind_monitoring_data.get('id', None)
+            if ind_monitoring_data_id:
+                obj = next(filter(lambda x: x.id == ind_monitoring_data_id, ind_monitoring_list), None)
+                if obj: ind_monitoring_data['object'] = obj
+                else:
+                    result = (False, 'Indicator Monitoring with id {} not found'.format(ind_monitoring_data_id))
+            else:
+                ind_monitoring_data['adaptation_action'] =  adaptation_action.id
+            
+        result = (True, ind_monitoring_data_list)
+        
+        return result
+
+        
+    def _create_update_indicator_monitoring_list(self, indicator_monitoring_list_data, adaptation_action):
+        
+        indicator_monitoring_list = adaptation_action.indicator_monitoring.all()
+        
+        result = (True, [])
+        f = lambda ind: {'adaptation_action': adaptation_action.id, **ind}
+        indicator_monitoring_list_data = list(map(f, indicator_monitoring_list_data))
+        try:
+            if indicator_monitoring_list.count():
+                ## in this part we are going to get the indicator monitoring to update or create
+                ## retrun the object to update into the json data -->[ {'id': 2, ..., 'object': <indicator_monitoring_obj_from_DB_with_id_2> }, {...}, ... ]
+                ## and if the indicator monitoring json data has not id, we are going to create it , not update it
+                ## change the indicator_monitoring_list_data to update or create the indicator monitoring
+                indicator_monitoring_list_status, indicator_monitoring_list_data = \
+                    self._get_indicator_monitoring_for_updating_creating(indicator_monitoring_list_data, indicator_monitoring_list, adaptation_action)
+                    
+                if not indicator_monitoring_list_status: raise Exception(indicator_monitoring_list)
+
+            result_indicator_monitoring_list = []
+            for indicator_monitoring_data in indicator_monitoring_list_data:
+                ind_monitoring = indicator_monitoring_data.pop('object', None)
+                ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring(indicator_monitoring_data, ind_monitoring)
+                
+                if not ind_monitoring_status:
+                    ## if the indicator is not valid, return the error
+                    result = (ind_monitoring_status, ind_monitoring_data) 
+                    break
+                result_indicator_monitoring_list.append(ind_monitoring_data)
+
+            else:
+                result = (True, result_indicator_monitoring_list)
+
+
+        except Exception as error:
+            result = (False, error)
+        
+        return result
+
 
     def _create_update_report_organization(self, data, report_organization=False):
 
@@ -786,6 +906,18 @@ class AdaptationActionServices():
             result = (climate_status, climate_data)
         
         return result
+
+    def _get_all_instrument_detail(self, request):
+            
+            instrument_status, instrument_data = self._service_helper.get_all(FinanceInstrument)
+    
+            if instrument_status:
+                result = (instrument_status, FinanceInstrumentSerializer(instrument_data, many=True).data)
+            
+            else:
+                result = (instrument_status, instrument_data)
+            
+            return result
     
     def _get_all_ods(self, request):
 
@@ -796,6 +928,31 @@ class AdaptationActionServices():
         
         else:
             result = (ods_status, ods_data)
+        
+        return result
+
+    def _get_all_benefited_population(self, request):
+
+        population_status, population_data = self._service_helper.get_all(BenefitedPopulation)
+
+        if population_status:
+            result = (population_status, BenefitedPopulationSerializer(population_data, many=True).data)
+        
+        else:
+            result = (population_status, population_data)
+        
+        return result
+    
+    def _get_benefited_population_by_id(self, request):
+        
+        population_id = request.GET.get('population_id')
+        population_status, population_data = self._service_helper.get_by_id(population_id, BenefitedPopulation)
+
+        if population_status:
+            result = (population_status, BenefitedPopulationSerializer(population_data).data)
+        
+        else:
+            result = (population_status, population_data)
         
         return result
     
@@ -1038,7 +1195,7 @@ class AdaptationActionServices():
             previous_state = adaptation_action.fsm_state
 
             if has_transition_perm(transition_function, user):
-                transition_function()
+                transition_function(user)
                 adaptation_action.save()
                 
                 change_log_data = self._serialize_change_log_data(user, adaptation_action, previous_state)
@@ -1054,23 +1211,275 @@ class AdaptationActionServices():
 
         return result
     
+    def _upload_file_to_climate_threat(self, data, adaptation_action):
+
+        file_data = {"file_description_climate_threat": data.get("file_description_climate_threat", None), 
+                     "file_vulnerability_climate_threat": data.get("file_vulnerability_climate_threat", None),
+                     "file_exposed_elements": data.get("file_exposed_elements", None),}
+
+        climate_threat = adaptation_action.climate_threat
+        climate_threat_status, climate_threat_data = self._create_update_climate_threat(file_data, climate_threat)
+
+        if climate_threat_status:
+            if climate_threat == None:
+                adaptation_action.climate_threat = climate_threat_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (climate_threat_status, climate_threat_data)
+            
+        return result
     
+    def _upload_file_to_indicator(self, data, adaptation_action, indicator_id):
+
+        file_data = {"methodological_detail_file": data.get("methodological_detail_file", None), 
+                     "additional_information_file": data.get("additional_information_file", None),}
+
+        indicator = adaptation_action.indicator.filter(id=indicator_id).first()
+        if indicator:
+            indicator_status, indicator_data = self._create_update_indicator(file_data, indicator)
+
+            if indicator_status:
+                result = (indicator_status, indicator_data)
+            
+            else:
+                result = (indicator_status, indicator_data)
+
+        else:
+            result = (False, self.NO_INDICATOR)
+
+        return result
+
+    
+    ## this function must be updated 
+    def _upload_file_to_indicator_monitoring(self, data, adaptation_action, indicator_monitoring_id):
+
+        file_data = {"data_to_update_file": data.get("data_to_update_file", None),}
+
+        indicator_monitoring = adaptation_action.indicator_monitoring.filter(id=indicator_monitoring_id).first()
+
+        if indicator_monitoring:
+            indicator_monitoring_status, indicator_monitoring_data = self._create_update_indicator_monitoring(file_data, indicator_monitoring)
+
+            if indicator_monitoring_status:
+                result = (indicator_monitoring_status, indicator_monitoring_data)
+            
+            else:
+                result = (indicator_monitoring_status, indicator_monitoring_data)
+            
+        else:
+            result = (False, self.NO_INDICATOR_MONITORING)
+
+        return result
+
+    def _upload_file_to_action_impact(self, data, adaptation_action):
+
+        file_data = {"data_to_update_file_action_impact": data.get("data_to_update_file_action_impact", None),}
+
+        action_impact = adaptation_action.action_impact
+        action_impact_status, action_impact_data = self._create_update_action_impact(file_data, action_impact)
+
+        if action_impact_status:
+            if action_impact == None:
+                adaptation_action.action_impact = action_impact_data
+                adaptation_action.save()
+            result = (True, adaptation_action)
+        
+        else:
+            result = (action_impact_status, action_impact_data)
+        
+        return result
+
+    ## upload files in the models
+    def upload_file_from_adaptation_action(self, request, adaptation_action_id, model_type):
+
+        model_type_options = {
+            'climate_threat': self._upload_file_to_climate_threat,
+            'action_impact': self._upload_file_to_action_impact,
+        }    
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            method = model_type_options.get(model_type, False)
+            
+            if method:
+                response_status, response_data = method(data, adaptation_action_data)
+                
+                if response_status:
+                    result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                    
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(model_type))
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
+
+    def upload_indicator_file_by_id(self, request, adaptation_action_id, indicator_id):
+
+        model_type = ('indicator',  self._upload_file_to_indicator)
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+
+            response_status, response_data = self._upload_file_to_indicator(data, adaptation_action_data, indicator_id)
+
+            if response_status:
+                result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                
+            else:
+                result = (response_status, response_data)
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
+    
+    def upload_monitoring_file_by_id(self, request, adaptation_action_id, monitoring_id):
+
+        model_type = ('indicator_monitoring',  self._upload_file_to_indicator_monitoring)
+    
+        data = request.data
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+
+            response_status, response_data = self._upload_file_to_indicator_monitoring(data, adaptation_action_data, monitoring_id)
+
+            if response_status:
+                result = (response_status, AdaptationActionSerializer(adaptation_action_data).data)
+                
+            else:
+                result = (response_status, response_data)
+
+        else:
+            result = (adaptation_action_status, adaptation_action_data)
+        
+        return result
+
+    def _download(self, s3_path):
+
+        path, filename = os.path.split(s3_path)
+        file_content =  BytesIO(self._storage.get_file(s3_path))
+        result = (True, (filename, file_content))    
+
+        return result
+
+    def download_indicator_file_by_id(self, request, adaptation_action_id, indicator_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        if adaptation_action_status:
+            indicator = adaptation_action_data.indicator.filter(id=indicator_id).first()
+
+            if indicator:
+                response_status, response_data = self._download(indicator.methodological_detail_file.name)
+
+                if response_status:
+                    result = (response_status, response_data)
+                
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.NO_INDICATOR)
+        
+        return result
+    
+    def download_monitoring_indicator_file_by_id(self, request, adaptation_action_id, monitoring_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        if adaptation_action_status:
+            indicator_monitoring = adaptation_action_data.indicator_monitoring.filter(id=monitoring_id).first()
+
+            if indicator_monitoring:
+                response_status, response_data = self._download(indicator_monitoring.data_to_update_file.name)
+
+                if response_status:
+                    result = (response_status, response_data)
+                
+                else:
+                    result = (response_status, response_data)
+
+            else:
+                result = (False, self.NO_INDICATOR_MONITORING)
+        
+        return result
+
+    def download_file(self, request, model_id, file_name):
+
+        file_name_options = {
+            'file_description_climate_threat': [ClimateThreat, lambda a: a.file_description_climate_threat.name],
+            'file_vulnerability_climate_threat': [ClimateThreat, lambda a: a.file_vulnerability_climate_threat.name],
+            'file_exposed_elements': [ClimateThreat, lambda a: a.file_exposed_elements.name],
+            'data_to_update_file_action_impact': [ActionImpact, lambda a: a.data_to_update_file_action_impact.name],
+        }    
+    
+        method = file_name_options.get(file_name, False)
+        
+        if method:
+            method_status, method_data = self._service_helper.get_one(method[0], model_id)
+            if method_status:
+
+                s3_path = method[1](method_data)
+
+                response_status, response_data = self._download(s3_path)
+            
+                if response_status:
+                    result = (response_status, response_data)
+                    
+                else:
+                    result = (response_status, response_data)
+            else:
+                result = (method_status, method_data)
+
+        else:
+            result = (False, self.SECTION_MODEL_DOES_NOT_EXIST.format(file_name))
+        
+        return result
+
+
     def get(self, request, adaptation_action_id):
         
         adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
-        if adaptation_action_status:
-            result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data).data)
+        if not adaptation_action_status:
+            result = (adaptation_action_status, adaptation_action_data)
         
-        else:
-            result = (adaptation_action_status, adaptation_action_data) 
+        elif not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
+            result = (False, self.ACCESS_DENIED.format(adaptation_action_data.id))
+        
+        elif adaptation_action_status:
+            result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data).data)
 
         return result
     
     def get_all(self, request):
-
-        adaptation_action_status, adaptation_action_data = self._service_helper.get_all(AdaptationAction)
-
+        """
+        This logic we need to refactor. At the moment we are going to allow the Reviewer to see all the adaptation actions
+        """
+        user =  request.user
+        if has_role(user,['reviewer', 'reviewer_adaptation_action', 'admin']):
+            adaptation_action_status, adaptation_action_data = self._service_helper.get_all(AdaptationAction)
+        
+        elif has_role(user, ['information_provider_adaptation_action', 'information_provider']):
+            adaptation_action_status, adaptation_action_data = \
+                self._service_helper.get_all(AdaptationAction, user=user)
+                
+        else:
+            return  (False, self.ACCESS_DENIED_ALL)
+        
         if adaptation_action_status:
             result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data, many=True).data)
         
@@ -1086,10 +1495,11 @@ class AdaptationActionServices():
         validation_dict = {}
         data = request.data.copy()
         data['user'] = request.user.id
-
+        indicator_list = data.pop('indicator_list', [])
+        ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
 
         for field in field_list:
             if data.get(field, False):
@@ -1099,13 +1509,33 @@ class AdaptationActionServices():
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
+
         
         if all(validation_dict):
+            is_complete = data.pop('is_complete', False)
             serialized_adaptation_action = self._get_serialized_adaptation_action(data)
             if serialized_adaptation_action.is_valid():
                 adaptation_action = serialized_adaptation_action.save()
+                adaptation_action.create_code()
+                ## create indicator_list
+                indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+                ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
+
+                if is_complete:
+                    adaptation_action.submit(request.user)
+                    adaptation_action.save()
+
+                if indicator_status and ind_monitoring_status:
+                    result = (True, AdaptationActionSerializer(adaptation_action).data)
+                    
+                else:
+                    result = (False, indicator_data if indicator_status else ind_monitoring_data)
+
+                if indicator_status:
+                    result = (True, AdaptationActionSerializer(adaptation_action).data)
                 
-                result = (True, AdaptationActionSerializer(adaptation_action).data)
+                else:
+                    result = (False, indicator_data)
   
             else:
                 errors.append(serialized_adaptation_action.errors)
@@ -1115,16 +1545,22 @@ class AdaptationActionServices():
             
         return result
     
+    
+    
     def update(self, request, adaptation_action_id):
 
         validation_dict = {}
         data = request.data.copy()
-        data['user'] = request.user.id
-
+        indicator_list = data.pop('indicator_list', [])
+        ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'indicator', 'progress_log', 'indicator_monitoring', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
+
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        ## permission access return here
+        if not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
+            return  (False, self.ACCESS_DENIED.format(adaptation_action_data.id))
         
         if adaptation_action_status:
             adaptation_action = adaptation_action_data
@@ -1138,13 +1574,30 @@ class AdaptationActionServices():
                         
                     dict_data = record_data if isinstance(record_data, list) else [record_data]
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
+            
 
             if all(validation_dict):
+                is_complete = data.pop('is_complete', False)
                 serialized_adaptation_action = self._get_serialized_adaptation_action(data, adaptation_action)
                 
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
-                    result = (True, AdaptationActionSerializer(adaptation_action).data)
+        
+                    if is_complete:
+                        adaptation_action.submit(request.user)
+                        adaptation_action.save()
+
+                    if adaptation_action.code is None: adaptation_action.create_code()
+                    
+                    ## create indicator_list, the adaptation_action has an  indicator_list field in his model
+                    indicator_status, indicator_data = self._create_update_indicator_list(indicator_list, adaptation_action=adaptation_action)
+                    ind_monitoring_status, ind_monitoring_data = self._create_update_indicator_monitoring_list(ind_monitoring_list, adaptation_action=adaptation_action)
+
+                    if indicator_status and ind_monitoring_status:
+                        result = (True, AdaptationActionSerializer(adaptation_action).data)
+                
+                    else:
+                        result = (False, indicator_data if indicator_status else ind_monitoring_data)
 
                 else:
                     result = (False, serialized_adaptation_action.errors)
@@ -1174,7 +1627,7 @@ class AdaptationActionServices():
                     self._increase_review_counter(adaptation_action)
                     assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
 
-                    if assign_status: 
+                    if assign_status:
                         result = (True, AdaptationActionSerializer(adaptation_action).data)
                     
                     else: 
@@ -1188,7 +1641,18 @@ class AdaptationActionServices():
             result = (adaptation_action_status, adaptation_action_data)
         
         return result
-    
+
+    def delete(self, adaptation_action_id):
+
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+
+        if adaptation_action_status:
+            adaptation_action_data.delete()
+            result = (True, {"Result":"Adaptation has been delete"})
+        else:
+            result = (False, {"Result":"Adaptation has been delete"})
+            
+        return result
     
     def get_current_comments(self, request, adaptation_action_id):
 

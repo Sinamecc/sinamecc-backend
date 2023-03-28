@@ -10,16 +10,16 @@
             <p style=”text-align: justify;”>
             Le confirmamos que su solicitud para el registro de acciones climáticas con impactos en<br/>
             mitigación en el Sistema Nacional de Métrica para el Cambio Climático (SINAMECC) con el<br/>
-            ID AMXXXX, ha sido recibida y se encuentra en proceso de revisión.
+            ID {{ma_code}}., ha sido recibida y se encuentra en proceso de revisión.
             </p>
             <p>
             Le estaremos notificando en caso de requerir algún ajuste o información adicional. También<br/>
-            puede consultar el estado de su solicitud en el siguiente $enlace$
+            puede consultar el estado de su solicitud en el siguiente <a href={{frontend_url}}/mitigation/actions/{{mitigation_id}}> enlace</a>.
             </p>
             <p>
             Si tiene alguna consulta no dude en contactarnos a cambioclimatico@minae.go.cr
             </p>
             <p>Saludos cordiales,</p>
-            {% include  "./../general/email/signature.html"%}
+            {% include  "./../general/email/simple_signature.html"%}
         </div>
 {% endblock content %}

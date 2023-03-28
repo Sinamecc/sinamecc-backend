@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=3, null=True)),
                 ('name', models.CharField(max_length=100, null=True)),
+                ('type', models.CharField(max_length=2, null=True)),
+                ('count', models.IntegerField(default=0)),        
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
             ],

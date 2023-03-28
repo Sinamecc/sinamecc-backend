@@ -1,13 +1,26 @@
+from distutils.text_file import TextFile
 import uuid
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from mitigation_action.models import Contact as MContact
-from general.models import Address, User
+from general.models import Address
 from django_fsm import FSMField, transition
+from time import gmtime, strftime
+from general.storages import PrivateMediaStorage
+from adaptation_action.email_services import AdaptationActionEmailServices
+from general.services import EmailServices
+from django.db import transaction
 
 from workflow.models import Comment
 
 # Create your models here.
+User =  get_user_model()
+
+def directory_path(instance, filename): 
+    path = "adaptation_action/{0}/{1}/{2}/"
+
+    return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
+
 
 class ReportOrganizationType(models.Model): 
     
@@ -23,12 +36,14 @@ class ReportOrganizationType(models.Model):
 
 class Contact(models.Model):
 
-    contact_name = models.TextField(null=True)
-    contact_position = models.TextField(null=True)
-    email = models.TextField(null=True)
-    phone = models.TextField(null=True)
+    contact_name = models.TextField(null=True)      #1.1.5
+    contact_position = models.TextField(null=True)  #1.1.6
+    email = models.TextField(null=True)             #1.1.7
+    phone = models.TextField(null=True)             #1.1.8
     address = models.TextField(null=True)
+    institution = models.TextField(null=True)
 
+    user = models.ForeignKey(User, related_name='contact_adaptation_action', on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -38,12 +53,12 @@ class Contact(models.Model):
 
 class ReportOrganization(models.Model):
 
-    responsible_entity = models.CharField(max_length=250, null=True)
-    legal_identification = models.CharField(max_length=50, null=True)
-    elaboration_date = models.DateField(null=True)
-    entity_address = models.CharField(max_length=250, null=True)
+    responsible_entity = models.CharField(max_length=250, null=True)    #1.1.2
+    legal_identification = models.CharField(max_length=50, null=True)   #1.1.3
+    elaboration_date = models.DateField(null=True)                      #1.1.4
+    entity_address = models.CharField(max_length=250, null=True)        #1.1.9
     
-    report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)
+    report_organization_type = models.ForeignKey(ReportOrganizationType, related_name="report_organization", null=True, on_delete=models.CASCADE)   #1.1.1
     other_report_organization_type = models.TextField(null=True)
     contact = models.ForeignKey(Contact, related_name="report_organization", null=True, on_delete=models.CASCADE)
 
@@ -58,6 +73,8 @@ class AdaptationActionType(models.Model):
 
     code = models.CharField(max_length=3, null=True)
     name = models.CharField(max_length=100, null=True)
+    type = models.CharField(max_length=2, null=True)
+    count = models.IntegerField(default=0)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -78,15 +95,30 @@ class ODS (models.Model):
         verbose_name = _("ODS")
         verbose_name_plural = _("ODS")
 
+class BenefitedPopulation(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+
+    created =  models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Benefited Population")
+        verbose_name_plural = _("Benefited Populations")
+
 class AdaptationActionInformation(models.Model):
 
-    name = models.CharField(max_length=250, null=True)
-    objective = models.CharField(max_length=3000, null=True)
-    description = models.CharField(max_length=3000, null=True)
-    meta = models.CharField(max_length=3000, null=True)
+    name = models.CharField(max_length=250, null=True)          #2.1.2
+    objective = models.CharField(max_length=3000, null=True)    #2.1.3
+    description = models.CharField(max_length=3000, null=True)  #2.1.4
+    meta = models.CharField(max_length=3000, null=True)         #2.1.5
+    expected_result = models.TextField(null=True)               #2.1.6
+    potential_co_benefits = models.TextField(null=True)         #2.1.8
 
-    adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE)
-    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", blank=True)
+    adaptation_action_type = models.ForeignKey(AdaptationActionType, related_name="adaptation_action_information", null=True, on_delete=models.CASCADE) #2.1.1
+    ods = models.ManyToManyField(ODS, related_name="adaptation_action_information", blank=True)                                                         #2.1.6
+    benefited_population = models.ManyToManyField(BenefitedPopulation, related_name="adaptation_action_information", blank=True)                        #2.1.7
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -211,8 +243,7 @@ class Activity(models.Model):
 
 class Instrument(models.Model):
     
-    name = models.CharField(max_length=250, null=True)
-    description = models.CharField(max_length=3000, null=True)
+    name = models.CharField(max_length=250, null=True)  #2.4.1
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -236,14 +267,18 @@ class TypeClimateThreat(models.Model):
 
 class ClimateThreat(models.Model):
 
-    type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)
-    other_type_climate_threat = models.TextField(null=True)
-    description_climate_threat = models.TextField(null=True)
-    #file_description_climate_threat = models.FileField(upload_to='climate_threat', null=True)
-    vulnerability_climate_threat = models.TextField(null=True)
-    #file_vulnerability_climate_threat = models.FileField(upload_to='climate_threat', null=True)
-    exposed_elements = models.TextField(null=True)
-    #file_exposed_elements = models.FileField(upload_to='climate_threat', null=True)
+    type_climate_threat = models.ManyToManyField(TypeClimateThreat, related_name="climate_threat", blank=True)              #2.5.1
+    other_type_climate_threat = models.TextField(null=True)                                                                 #2.5.1.1
+    description_climate_threat = models.TextField(null=True)                                                                #2.5.2              
+    file_description_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())  
+    vulnerability_climate_threat = models.TextField(null=True)                                                              #2.5.3
+    file_vulnerability_climate_threat = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    exposed_elements = models.TextField(null=True)                                                                          #2.5.4
+    file_exposed_elements = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    description_losses = models.TextField(null=True)                                                                        #2.5.5
+    file_description_losses = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    description_risks = models.TextField(null=True)                                                                         #2.5.6
+    file_description_risks = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -254,11 +289,11 @@ class ClimateThreat(models.Model):
 
 class Implementation(models.Model):
     
-    start_date = models.DateField(null=True)
-    end_date = models.DateField(null=True)
-    responsible_entity = models.CharField(max_length=50, null=True)
-    other_entity = models.CharField(max_length=250, null=True)
-    action_code = models.TextField(null=True)
+    start_date = models.DateField(null=True)                            #2.6.1
+    end_date = models.DateField(null=True)                              #2.6.2
+    responsible_entity = models.CharField(max_length=50, null=True)     #2.6.4
+    other_entity = models.CharField(max_length=250, null=True)          #2.6.5
+    action_code = models.TextField(null=True)                           #2.6.6
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -310,8 +345,8 @@ class FinanceInstrument(models.Model):
 class Mideplan(models.Model):
 
     registry = models.CharField(max_length=2, null=True)
-    name = models.CharField(max_length=300, null=True)
-    entity = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=300, null=True)      #3.2.1.1
+    entity = models.CharField(max_length=200, null=True)    #3.2.2
 
     ## Logs
     created =  models.DateTimeField(auto_now_add=True)
@@ -325,10 +360,11 @@ class FinanceAdaptation(models.Model):
 
     administration = models.TextField(max_length=500, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-
-    status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)
-    source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)
-    finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)
+    currency = models.TextField(null=True)
+    year = models.TextField(null=True)
+    status = models.ForeignKey(FinanceStatus, related_name='finance_adaptation', null=True, on_delete=models.CASCADE)       #3.1.1
+    source = models.ManyToManyField(FinanceSourceType, related_name='finance_adaptation', blank=True)                       #3.2.1
+    finance_instrument = models.ManyToManyField(FinanceInstrument, related_name='finance_adaptation', blank=True)           #3.2.2
     instrument_name = models.TextField(null=True)
     mideplan = models.ForeignKey(Mideplan, related_name="finance_adaptation", null=True, on_delete=models.CASCADE)
 
@@ -354,7 +390,7 @@ class InformationSourceType(models.Model):
 
 class InformationSource(models.Model):
     responsible_institution = models.CharField(max_length=500, null=True)
-    type_information = models.ForeignKey(InformationSourceType, null=True, related_name='information_source', on_delete=models.SET_NULL)
+    type_information = models.ManyToManyField(InformationSourceType, related_name='information_source', blank=True)
     other_type = models.CharField(max_length=500, null=True)
     statistical_operation = models.CharField(max_length=500, null=True)
 
@@ -391,7 +427,7 @@ class Classifier(models.Model):
         verbose_name = _("Classifier")
         verbose_name_plural = _("Classifiers")
 
-
+## Section: 4
 class IndicatorAdaptation(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
@@ -406,13 +442,13 @@ class IndicatorAdaptation(models.Model):
         ('CANTONAL', 'Cantonal'),
         ('OTHER', 'Other')
     ]
-
+    #Section 4
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
     unit = models.CharField(max_length=100, null=True)
     methodological_detail = models.TextField(null=True)
-    ## need to endpoint to upload file
-    #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator', on_delete=models.SET_NULL)
+    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     other_reporting_periodicity = models.TextField(null=True)
     
@@ -428,9 +464,12 @@ class IndicatorAdaptation(models.Model):
 
     ## ensure sustainability
     additional_information = models.TextField(null=True)
-    #additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     comments = models.TextField(null=True)
+    indicator_base_line = models.TextField(null=True)
+    file_base_line = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    
     ## FK
     ## information source
     information_source = models.ForeignKey(InformationSource, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
@@ -442,7 +481,7 @@ class IndicatorAdaptation(models.Model):
     other_classifier = models.CharField(max_length=255, blank=True, null=True)
 
     ## contact
-    contact = models.ForeignKey(MContact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
+    contact = models.ForeignKey(Contact, null=True, related_name='indicator_adaptation', on_delete=models.SET_NULL)
 
 
     ## Logs
@@ -453,6 +492,7 @@ class IndicatorAdaptation(models.Model):
         verbose_name = _("Indicator Adaptation")
         verbose_name_plural = _("Indicator Adaptation")
     
+
 class ProgressLog(models.Model):
 
     action_status = models.CharField(max_length=25, null=True)
@@ -479,16 +519,20 @@ class IndicatorSource(models.Model):
         verbose_name = _("Indicator Source")
         verbose_name_plural = _("Indicator Source")
 
+## Section: 5
 class IndicatorMonitoring(models.Model):
 
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     update_date = models.DateField(null=True)
     data_to_update = models.CharField(max_length=300, null=True)
-    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
+    adaptation_action = models.ForeignKey('AdaptationAction', null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
     indicator_source = models.ManyToManyField(IndicatorSource, related_name='indicator_monitoring', blank=True)
+    other_indicator_source = models.TextField(null=True)
+    support_information = models.TextField(null=True)
     indicator = models.ForeignKey(IndicatorAdaptation, null=True, related_name='indicator_monitoring', on_delete=models.CASCADE)
 
     ## Logs
@@ -544,7 +588,7 @@ class ActionImpact(models.Model):
     gender_equality_description = models.CharField(max_length=3000, null=True)
     unwanted_action = models.TextField(null=True)
     unwanted_action_description = models.CharField(max_length=3000, null=True)
-    ##data_to_update_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    data_to_update_file_action_impact = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
 
     ## FK
     general_impact = models.ForeignKey(GeneralImpact, null=True, related_name='action_impact', on_delete=models.CASCADE)
@@ -563,25 +607,22 @@ class AdaptationAction(models.Model):
     
     #Section 1
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=255, null=True)
     fsm_state = FSMField(default='new', protected=True, max_length=100)
     report_organization = models.ForeignKey(ReportOrganization, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     #Section 2
     address = models.ForeignKey(Address, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     adaptation_action_information = models.ForeignKey(AdaptationActionInformation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    activity = models.ForeignKey(Activity, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    activity = models.ManyToManyField(Activity, related_name="adaptation_action", blank=True)
     instrument = models.ForeignKey(Instrument, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     climate_threat = models.ForeignKey(ClimateThreat, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     implementation = models.ForeignKey(Implementation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 3
     finance = models.ForeignKey(FinanceAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    
-    #Section 4
-    indicator = models.ForeignKey(IndicatorAdaptation, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 5
     progress_log = models.ForeignKey(ProgressLog, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
-    indicator_monitoring = models.ForeignKey(IndicatorMonitoring, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     general_report = models.ForeignKey(GeneralReport, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 6
@@ -589,12 +630,29 @@ class AdaptationAction(models.Model):
 
     comments = models.ManyToManyField(Comment, blank=True)
     review_count = models.IntegerField(null=True, blank=True, default=0)
+    user = models.ForeignKey(User, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    email_service = AdaptationActionEmailServices(EmailServices())
 
     class Meta:
         verbose_name = _("Adaptation Action")
         verbose_name_plural = _("Adaptation Actions")
+    
+
+    def create_code(self):
+        ##
+        ## format code: AA{initiative_type}-{0000}
+        ##
+        if not (self.adaptation_action_information is None or self.adaptation_action_information.adaptation_action_type is None):
+            with transaction.atomic():
+                adaptation_action_type = AdaptationActionType.objects.select_for_update().get(pk=self.adaptation_action_information.adaptation_action_type.id)
+                self.code = f'AA{adaptation_action_type.type}-{adaptation_action_type.count:0>4}'
+                self.adaptation_action_information.adaptation_action_type.count += 1
+                self.save()
+                self.adaptation_action_information.adaptation_action_type.save()
+    
 
 
     # FSM Annotated Methods (Transitions) and Ordinary Conditions
@@ -626,46 +684,84 @@ class AdaptationAction(models.Model):
         return self.fsm_state == 'requested_changes_by_DCC'
 
     @transition(field='fsm_state', source=['new', 'updating_by_request_DCC'], target='submitted', conditions=[can_submit], on_error='submitted')
-    def submit(self):
+    def submit(self, user_approver):
         # new --> submitted        
         # send email to user that submitted the action
         print(f'The adaptation action is transitioning from <{self.fsm_state}> to <submitted>')
-        ...
+        
+        email_function = {
+            'new': self.email_service.notify_dcc_responsible_adaptation_action_submission,
+            'updating_by_request_DCC': self.email_service.notify_contact_responsible_adaptation_action_update
+        }
+        
+        email_status, email_data = email_function.get(self.fsm_state)(self, user_approver)
+        
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
+
         ## maybe raise exception
 
     
     @transition(field='fsm_state', source='submitted', target='in_evaluation_by_DCC', conditions=[can_evaluate_by_DCC], on_error='submitted', permission='')
-    def evaluate_by_DCC(self):
+    def evaluate_by_DCC(self, user_approver):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, user_approver)
+        if email_status:
+            return email_status, email_data
+        
+        else:
+            ...
+
         ## maybe raise exception
 
     ##
     ## rejected_by_DCC, requested_changes_by_DCC, accepted_by_DCC
     ##
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='rejected_by_DCC', conditions=[can_rejected_by_DCC], on_error='in_evaluation_by_DCC', permission='')
-    def evaluate_by_DCC_rejected(self):
+    def evaluate_by_DCC_rejected(self, user_approver):
         # in_evaluation_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_rejection(self, user_approver)
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
         ## maybe raise exception
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='requested_changes_by_DCC', conditions=[can_request_changes_by_DCC], on_error='in_evaluation_by_DCC', permission='')
-    def evaluate_by_DCC_requested_changes(self):
+    def evaluate_by_DCC_requested_changes(self, user_approver):
         # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
-        ...
+        
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_requested_changes(self, user_approver)
+        if email_status:
+            return email_status, email_data
+        
     
     @transition(field='fsm_state', source='in_evaluation_by_DCC', target='accepted_by_DCC', conditions=[can_acception_by_DCC], on_error='in_evaluation_by_DCC', permission='')
-    def evaluate_by_DCC_accepted(self):
+    def evaluate_by_DCC_accepted(self, user_approver):
         # in_evaluation_by_DCC --> accepted_by_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_approval(self, user_approver)
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
+
             ## maybe raise exception
     
     ## rejected by DCC to end
@@ -677,11 +773,18 @@ class AdaptationAction(models.Model):
         ...
     
     @transition(field='fsm_state', source='requested_changes_by_DCC', target='updating_by_request_DCC', conditions=[can_update_by_DCC_request], on_error='requested_changes_by_DCC', permission='')
-    def update_by_DCC_request(self):
+    def update_by_DCC_request(self, user_approver):
         # requested_changes_by_DCC --> updating_by_request_DCC
         # send email to user that submitted the action
         print('The adaptation action is transitioning from <requested_changes_by_DCC> to <updating_by_request_DCC>')
-        ...
+        
+        email_status, email_data = self.email_service.notify_contact_responsible_adaptation_action_update(self, user_approver)
+
+        if email_status:
+            return email_status, email_data
+
+        else:
+            ...
     
     ## accepted_by_DCC to	registered_by_DCC
     @transition(field='fsm_state', source='accepted_by_DCC', target='registered_by_DCC', conditions=[], on_error='accepted_by_DCC', permission='')

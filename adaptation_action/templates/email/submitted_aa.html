@@ -1,0 +1,21 @@
+{% extends "./../general/header.html" %}
+{% block content %}
+        <div class="content-title">
+            <h2 class="text-title">{% if lang == "es" %} Notificación de registro {% else %}  Registration notification {% endif %}</h2>
+        </div>
+        <div class="content">
+            <p style="text-align: justify;">
+            ¡Hola! Reciba un cordial saludo.
+            </p>
+            <p style="text-align: justify;">
+            Se ha generado una nueva solicitud para registrar Acción de Adaptación en el SINAMECC<br/>
+            sido exitosamente actualizada de acuerdo al requerimiento de aclaración y/o modificación<br/>
+            generado.
+            </p>
+            <p>
+            En el siguiente <a href={{frontend_url}}/adaptation/actions/{{adaptation_id}}> enlace</a> puede acceder al registro y verificar la información actualizada.<br/>
+            </p>
+            <p>Saludos cordiales,</p>
+            {% include  "./../general/email/simple_signature.html"%}
+        </div>
+{% endblock content %}

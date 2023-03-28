@@ -27,86 +27,105 @@ _report_organization_type = [
 _adaptation_action_type = [ 
     {
         'name': 'Tipo A - Instrumentos de políticas y planes',
-        'code': '1'
+        'code': '1',
+        'type': 'A'
     },
     {
         'name': 'Tipo B - Proyectos y programas',
-        'code': '2'
+        'code': '2',
+        'type': 'B'
     },
     {
         'name': 'Tipo C - Actividades',
-        'code': '3'
+        'code': '3',
+        'type': 'C'
     }
 ]
 
 _type_climate_threat = [ 
     {
-        'name': 'Deslizamiento',
+        'name': 'Depresión Tropical',
         'code': '1'
     },
     {
-        'name': 'Inundación',
+        'name': 'Tormenta Tropical',
         'code': '2'
     },
     {
-        'name': 'Ondas tropicales',
+        'name': 'Huracán (incluye efecto indirecto)',
         'code': '3'
     },
     {
-        'name': 'Ola de calor',
+        'name': 'Onda Tropical',
         'code': '4'
     },
     {
-        'name': 'Sequía',
+        'name': 'Sistema de Baja Presión',
         'code': '5',
     },
     {
-        'name': 'Altos niveles de precipitación',
+        'name': 'Temporal',
         'code': '6'
     },
     {
-        'name': 'Bajas temperaturas (heladas)',
+        'name': 'Frente Frío',
         'code': '7'
     },
     {
-        'name': 'Huracanes',
+        'name': 'Empuje Frío',
         'code': '8'
     },
     {
-        'name': 'Incremento del nivel de agua',
+        'name': 'Lluvia intensa',
         'code': '9'
     },
     {
-        'name': 'Tormentas tropicales',
+        'name': 'Marejada',
         'code': '10'
     },
     {
-        'name': 'Vientos de alta velocidad',
+        'name': 'Tromba marina',
         'code': '11'
     },
     {
-        'name': 'Tormentas eléctricas',
+        'name': 'Viento intenso o vendavales',
         'code': '12'
     },
     {
-        'name': 'Incendios forestales',
+        'name': 'Corriente de viento descendente (Tornado)',
         'code': '13'
     },
     {
-        'name': 'Fénomeno del niño',
+        'name': 'Tormenta eléctrica',
         'code': '14'
     },
     {
-        'name': 'Fenómeno de la niña',
+        'name': 'Sequía',
         'code': '15'
     },
     {
-        'name': 'Cambios en los patrones estacionales',
+        'name': 'Temperaturas Altas extremas',
         'code': '16'
     },
     {
-        'name': 'Otra',
+        'name': 'Temperaturas Bajas extremas',
         'code': '17'
+    },
+    {
+        'name': ' Aumento del nivel del mar',
+        'code': '18'
+    },
+    {
+        'name': 'Fenómeno ENOS Fase El Niño',
+        'code': '19'
+    },
+    {
+        'name': 'Fenómeno ENOS Fase La Niña',
+        'code': '20'
+    },
+    {
+        'name': 'Otra',
+        'code': '21'
     }
 ]
 
@@ -378,5 +397,65 @@ _temporality_impact = [
     }
 ]
 
-
-
+_benefited_population = [
+    {
+        'name': 'Todos',
+        'code': '1'
+    },
+    {
+        'name': 'Mujeres',
+        'code': '2'
+    },
+    {
+        'name': 'Niñez (menores de 12 años)',
+        'code': '3'
+    },
+    {
+        'name': 'Adolescentes (12- 18 años)',
+        'code': '4'
+    },
+    {
+        'name': 'Jóvenes (12-35 años)',
+        'code': '5'
+    },
+    {
+        'name': 'Población adulta mayor',
+        'code': '6'
+    },
+    {
+        'name': 'Población con discapacidad',
+        'code': '7'
+    },
+    {
+        'name': 'Pueblos indígenas',
+        'code': '8'
+    },
+    {
+        'name': 'Población migrante',
+        'code': '9'
+    },
+    {
+        'name': 'Población afrodescendiente',
+        'code': '10'
+    },
+    {
+        'name': 'Población LGBTIQ+',
+        'code': '11'
+    },
+    {
+        'name': 'Población productora (ganadería, agricultura, pesca)',
+        'code': '12'
+    },
+    {
+        'name': 'Organizaciones de base comunitaria y grupos locales',
+        'code': '13'
+    },
+    {
+        'name': 'Gobiernos locales',
+        'code': '14'
+    },
+    {
+        'name': 'Otro',
+        'code': '15'
+    }
+]
