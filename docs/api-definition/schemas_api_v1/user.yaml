@@ -1,0 +1,123 @@
+
+
+UserRequestBody:
+  type: object
+  required:
+    - email
+    - first_name
+    - last_name
+    - institution
+    - phone
+    - module
+  properties:
+    email:
+      type: string
+      format: email
+    first_name:
+      type: string
+      example: John
+    last_name:
+      type: string
+      example: Doe
+    institution:
+      type: string
+      example: INCOCR
+    phone:
+      type: string
+      example: 123456789
+    module:
+      type: array
+      items:
+        type: integer
+        format: int64
+        example: 1
+
+UserRequestApproveResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+      example: 1
+    username:
+      type: string
+      example: joh12n.doe
+    first_name:
+      type: string
+      example: John
+    last_name:
+      type: string
+      example: Doe
+    institution:
+      type: string
+      example: INCOCR
+    position:
+      type: string
+      example: fullstack developer
+    is_staff:
+      type: boolean
+      example: false
+    email:
+      type: string
+      format: email
+    is_active:
+      type: boolean
+      example: true
+    is_provider:
+      type: boolean
+      example: false
+    is_administrador_dcc:
+      type: boolean
+      example: false
+    phone:
+      type: string
+      example: 123456789
+# [
+#     {
+#         "id": 1,
+#         "name": "PPCN",
+#         "code": "ppcn",
+#         "active": true
+#     },
+#     {
+#         "id": 2,
+#         "name": "Mitigation Actions",
+#         "code": "mitigation_action",
+#         "active": true
+#     },
+#     {
+#         "id": 3,
+#         "name": "Adaptation Actions",
+#         "code": "adaptation_action",
+#         "active": true
+#     },
+#     {
+#         "id": 4,
+#         "name": "Report Data",
+#         "code": "report_data",
+#         "active": true
+#     },
+#     {
+#         "id": 5,
+#         "name": "MCCR",
+#         "code": "mccr",
+#         "active": true
+#     }
+# ]
+ModuleResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      format: int64
+      example: 1
+    name:
+      type: string
+      example: PPCN
+    code:
+      type: string
+      example: ppcn
+    active:
+      type: boolean
+      example: true
+
