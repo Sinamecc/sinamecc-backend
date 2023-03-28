@@ -1,17 +1,17 @@
 from django.conf.urls import url
 from django.urls import path, include
-from users.views import general
-from users.views import user_request
+from users.views import catalogs, general, user_request
 from rest_framework import routers
 
-NAMESPACE = 'users'
 
 router = routers.DefaultRouter()
 router.register(r'user-request', user_request.UserRequestViewSet, basename='user-request')
+router.register(r'modules', catalogs.ModuleCatalogView, basename='module')
 
 urlpatterns = [
     
-    path('api/v1/', include((router.urls, NAMESPACE))),
+    path('api/v1/', include((router.urls, 'user-request'))),
+    path('api/v1/', include((router.urls, 'modules'))),
     
     url(
         r'^api/v1/user/(?P<user_id>[0-9]+)/profile_picture/(?P<image_id>[0-9]+)/*$',

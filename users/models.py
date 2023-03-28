@@ -62,6 +62,7 @@ class UserRequest(models.Model):
     phone = models.CharField(max_length=50, blank=False, null=True)
     position = models.TextField(null=True)
     module = models.ManyToManyField(Module, related_name='request_user', blank=True)
+    user = models.ForeignKey(CustomUser, related_name='request_user', on_delete=models.CASCADE, blank=True, null=True)
 
     active = models.BooleanField(blank=False, null=False, default=True)
     created = models.DateTimeField(auto_now_add=True)

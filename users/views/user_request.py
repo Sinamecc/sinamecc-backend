@@ -8,7 +8,6 @@ class UserRequestViewSet(viewsets.ViewSet):
 
     view_helper = ViewHelper(UserRequestService())
 
-
     def list(self, request, pk=None):
         result =  self.view_helper.get_all(request)
 
