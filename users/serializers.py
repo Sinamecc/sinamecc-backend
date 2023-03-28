@@ -6,12 +6,13 @@ from django.contrib.auth.models import Group, Permission
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'first_name', 'last_name', 'is_staff', 'email', 'is_active', 'is_provider', 'is_administrador_dcc', 'phone')
+        fields = ('id', 'username', 'first_name', 'last_name', 'institution', 'position','is_staff', 'email', 'is_active', 'is_provider', 'is_administrador_dcc', 'phone')
 
 class NewCustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_provider', 'is_administrador_dcc', 'phone')
+
 
 class ProfilePictureSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,5 +43,5 @@ class ModuleSerializer(serializers.ModelSerializer):
 class UserRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRequest
-        fields = ('id', 'email', 'first_name', 'last_name', 'institution', 
+        fields = ('id', 'email', 'first_name', 'last_name', 'institution', 'position',
                   'phone', 'module', 'created', 'updated', 'active')

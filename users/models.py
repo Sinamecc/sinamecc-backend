@@ -17,6 +17,8 @@ def profile_picture_path(instance, filename):
 class CustomUser(AbstractUser):
     is_provider = models.BooleanField(blank=False, null=False, default=False)
     is_administrador_dcc = models.BooleanField(blank=False, null=False, default=False)
+    institution = models.CharField(max_length=255, blank=True, null=True)
+    position = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=False, null=True)
     email = models.EmailField(_('email address'), blank=True, unique=True)
 
