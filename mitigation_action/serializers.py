@@ -452,7 +452,7 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = MonitoringIndicator
-        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'progress_report_period', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'report_line_text', 'web_service_conection', 'progress_report_period', 'progress_report_period_until', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
         list_serializer_class = GenericListSerializer
         
 
@@ -585,7 +585,7 @@ class GHGInformationSerializer(serializers.ModelSerializer):
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('id', 'status', 'administration', 'source', 'reference_year',
+        fields = ('id', 'status', 'administration', 'source',
                   'mideplan_registered', 'mideplan_project', 'executing_entity')
         
     
@@ -604,7 +604,7 @@ class FinanceInformationSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = FinanceInformation
-        fields = ('id', 'source_description', 'budget', 'currency', 'finance')
+        fields = ('id', 'source_description', 'budget', 'currency', 'finance', 'reference_year')
         list_serializer_class = GenericListSerializer
         
 

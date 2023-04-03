@@ -2,7 +2,7 @@ _carbon_deposits = [
     {'code': 'aerial_biomass', 'name_en': 'Aerial biomass', 'name_es': 'Biomasa aérea'},
     {'code': 'underground_biomass', 'name_en': 'Underground biomass', 'name_es': 'Biomasa subterránea'},
     {'code': 'dead_wood', 'name_en': 'Dead wood', 'name_es': 'Madera muerta'},
-    {'code': 'organic_mulch', 'name_en': 'Organic mulch', 'name_es': 'Mantillo orgánico-hojarazca'},
+    {'code': 'organic_mulch', 'name_en': 'Organic mulch', 'name_es': 'Mantillo orgánico-hojarasca'},
     {'code': 'organic_carbon_in_soil', 'name_en': 'Organic carbon in soil', 'name_es': 'Carbono orgánico en suelos'},
     {'code': 'n/a', 'name_en': 'Does not apply', 'name_es': 'No aplica'}
 ]

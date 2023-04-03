@@ -597,7 +597,8 @@ class Indicator(models.Model):
     PERIODICITY = [
         ('YEARLY', 'Yearly'),
         ('BIANNUAL', 'Biannual'),
-        ('QUARTERLY', 'Quartely')
+        ('QUARTERLY', 'Quartely'),
+        ('OTHER', 'Other')
     ]
     GEOGRAPHIC = [
         ('NATIONAL', 'National'),
@@ -617,7 +618,7 @@ class Indicator(models.Model):
     methodological_detail = models.TextField(null=True)
     ## need to endpoint to upload file
     methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
-    reporting_periodicity = models.CharField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
+    reporting_periodicity = models.TextField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     
     available_time_start_date = models.DateField(null=True)
     available_time_end_date = models.DateField(null=True)
@@ -696,7 +697,13 @@ class MonitoringIndicator(models.Model):
     report_type = models.TextField(null=True)
     updated_data = models.CharField(max_length=150, null=True)
     updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    report_line_text = models.TextField(null=True)
+    report_line_text_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    web_service_conection = models.TextField(null=True)
+    web_service_conection_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    
     progress_report_period = models.DateField(null=True)
+    progress_report_period_until = models.DateField(null=True)
     progress_report = models.TextField(null=True)
 
     ## FK 
@@ -743,7 +750,6 @@ class Finance(models.Model):
     administration = models.TextField(null=True) ## !! review this
     source = models.ManyToManyField(FinanceSourceType, related_name='finance', blank=True)
     
-    reference_year =models.DateField(null=True)
     mideplan_registered = models.BooleanField(null=True)
     mideplan_project = models.CharField(max_length=255, null=True) ## depend on mideplan registered
     executing_entity = models.CharField(max_length=255, null=True)
@@ -763,7 +769,8 @@ class FinanceInformation(models.Model):
 
     source_description = models.CharField(max_length=255, null=True)
     budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
-    currency = models.CharField(choices=CURRENCIES, max_length=10, blank=False, null=True)
+    currency = models.TextField(null=True)
+    reference_year =models.DateField(null=True)
     finance = models.ForeignKey(Finance, related_name='finance_information', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
