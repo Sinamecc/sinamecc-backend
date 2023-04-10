@@ -1,16 +1,13 @@
-from rest_framework.fields import MISSING_ERROR_MESSAGE
 from mccr.models import OVV
 from mccr.serializers import OVVSerializer
 from ppcn.models import Organization, GeographicLevel, RequiredLevel, RecognitionType, Sector,GeiOrganization, GeiActivityType, SubSector, PPCN, PPCNFile
 from django.contrib.auth.models import *
-from mitigation_action.services import MitigationActionService
 from mitigation_action.serializers import ContactSerializer
 from ppcn.serializers import *
 from ppcn.workflow_steps.models import PPCNWorkflowStepFile
-from django_fsm import can_proceed, has_transition_perm
+from django_fsm import has_transition_perm
 from io import BytesIO
 from general.storages import S3Storage
-from django.http import FileResponse
 from django.urls import reverse
 from general.services import EmailServices
 from general.helpers.serializer import SerializersHelper
@@ -19,7 +16,7 @@ from workflow.serializers import CommentSerializer
 from django.contrib.auth import get_user_model
 from workflow.services import WorkflowService
 from django.db import transaction, DatabaseError
-import datetime, uuid, json, os, pdb
+import os
 
 
 email_sender  = "sinamec@grupoincocr.com" ##change to sinamecc email
@@ -1358,7 +1355,6 @@ class PpcnService():
                     for carbon_offset in ppcn.organization_classification.carbon_offset.all():
                         ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
                 
-                ppcn_data['next_state'] = self.next_action(ppcn)
                 ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
                 ppcn_data['file']= self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
                 ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
@@ -1493,22 +1489,6 @@ class PpcnService():
 
 
 
-
-
-    def next_action(self, ppcn):
-        result = {'states': False, 'required_comments': False}
-        # change for transitions method available for users
-        transitions = ppcn.get_available_fsm_state_transitions()
-        states = []
-        for transition in  transitions:
-            states.append(transition.target)
-        result['states'] = states if len(states) else False
-        result['required_comments'] = True if len(states) > 1 else False
-            
-        return result
-
-
-
     def get(self, id ,language = 'en'):
         context = {'language': language}
         try:
@@ -1536,7 +1516,6 @@ class PpcnService():
                 for carbon_offset in ppcn.organization_classification.carbon_offset.all():
                     ppcn_data.get('organization_classification').get('carbon_offset').append(CarbonOffsetSerializer(carbon_offset).data)
                     
-            ppcn_data['next_state'] = self.next_action(ppcn)
             ppcn_data['ppcn_files'] = self._get_ppcn_files_list(ppcn.files.all())
             ppcn_data['file'] = self._get_files_list([f.files.all() for f in ppcn.workflow_step.all()])
             ppcn_data['geographic_level'] = GeographicLevelSerializer(ppcn.geographic_level, context=context).data
