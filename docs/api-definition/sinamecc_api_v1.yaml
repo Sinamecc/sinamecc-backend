@@ -1,0 +1,128 @@
+openapi: 3.0.1
+info:
+  title: SINAMECC API
+  description: This is the API for SINAMECC including the following endpoints  - Users
+  contact:
+    email: info@grupoincocr.com
+  version: 1.0.0
+servers:
+- url: http://localhost:8000/api/v1
+tags:
+- name: users
+  description: Users management
+
+paths:
+  /user-request/:
+    post:
+      tags:
+      - users
+      summary: Create a new user request
+      description: Create a new user request
+      operationId: createUserRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './schemas_api_v1/user.yaml#/UserRequestBody'
+        required: true
+      responses:
+        '201':
+          description: User request created
+          content:
+            application/json:
+              schema:
+                $ref: './schemas_api_v1/user.yaml#/UserRequestBody'
+
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: string
+                example: some error message
+  /user-request/{id}/approve/:
+    put:
+      tags:
+      - users
+      summary: Approve a user request
+      description: Approve a user request by ID and return the user created wiht the username
+      operationId: approveUserRequest
+      parameters:
+      - name: id
+        in: path
+        description: ID of the user request to approve
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: User request approved
+          content:
+            application/json:
+              schema:
+                $ref: './schemas_api_v1/user.yaml#/UserRequestApproveResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: string
+                example: some error message
+  /modules/:
+    get:
+      tags:
+      - users
+      summary: Get all modules
+      description: Get all modules
+      operationId: getModules
+      responses:
+        '200':
+          description: Modules retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas_api_v1/user.yaml#/ModuleResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: string
+                example: some error message
+  /modules/{id}/:
+    get:
+      tags:
+      - users
+      summary: Get a module by ID
+      description: Get a module by ID
+      operationId: getModule
+      parameters:
+      - name: id
+        in: path
+        description: ID of the module to retrieve
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Module retrieved
+          content:
+            application/json:
+              schema:
+                $ref: './schemas_api_v1/user.yaml#/ModuleResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: string
+                example: some error message
+
+
+
+
+

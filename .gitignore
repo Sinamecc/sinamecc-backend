@@ -7,7 +7,7 @@ report_data/migrations/__pycache__/
 report_data/__pycache__/
 media/*
 config/media/*
-env_p3/*
+*env_p3*/*
 config/*.pyc
 config/settings/*.pyc
 general/*pyc
