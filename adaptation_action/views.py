@@ -302,3 +302,10 @@ def get_comments(request, adaptation_action_id, fsm_state=None, review_number=No
         result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, adaptation_action_id, fsm_state, review_number)
         
     return result
+
+@api_view(['GET'])
+def get_change_log_from_adaptation_action(request, adaptation_action_id=None):
+
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_change_log_from_adaptation_action", request, adaptation_action_id)
+    return result

@@ -138,3 +138,10 @@ def get_comments(request, report_data_id, fsm_state=None, review_number=None):
         result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, report_data_id, fsm_state, review_number)
 
     return result
+
+@api_view(['GET'])
+def get_change_log_from_report_data(request, report_data_id=None):
+
+    if request.method == 'GET':
+        result = view_helper.execute_by_name("get_change_log_from_report_data", request, report_data_id)
+    return result
