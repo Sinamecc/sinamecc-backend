@@ -109,8 +109,13 @@ urlpatterns = [
     ),
     path(
         'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator-id/<str:file_id>/',
-        views.get_put_indicator_file_adaptation_action,
-        name='get_put_indicator_file_adaptation_action'
+        views.put_indicator_file_adaptation_action,
+        name='put_indicator_file_adaptation_action'
+    ),
+    path(
+        'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator-id/<str:file_id>/file-field/<str:file_field>/',
+        views.get_indicator_file_adaptation_action,
+        name='get_indicator_file_adaptation_action'
     ),
     path(
         'api/v1/adaptation-action/<uuid:adaptation_action_id>/indicator-monitoring-id/<str:file_id>/',

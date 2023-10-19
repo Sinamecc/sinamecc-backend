@@ -60,31 +60,22 @@ def get_file_to_adaptation_action(request, model_id, file_name):
         return result
 
 
+@api_view(['PUT'])
 @has_permission_decorator('edit_adaptation_action')
-def _put_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
+def put_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
     if request.method == 'PUT':
         result = view_helper.execute_by_name('upload_indicator_file_by_id', request, adaptation_action_id, file_id)
 
         return result
 
 
-
+@api_view(['GET'])
 @has_permission_decorator('read_adaptation_action')
-def _get_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
+def get_indicator_file_adaptation_action(request, adaptation_action_id, file_id, file_field):
     if request.method == 'GET':
-        result = view_helper.call_download_file_method('download_indicator_file_by_id', request ,adaptation_action_id, file_id)
+        result = view_helper.call_download_file_method('download_indicator_file_by_id', request ,adaptation_action_id, file_id, file_field)
 
         return result
-
-@api_view(['GET', 'PUT'])
-def get_put_indicator_file_adaptation_action(request, adaptation_action_id, file_id):
-    
-    if request.method == 'PUT':
-        result = _put_indicator_file_adaptation_action(request, adaptation_action_id, file_id)
-    elif request.method == 'GET':
-        result = _get_indicator_file_adaptation_action(request, adaptation_action_id, file_id)
-    
-    return result
 
 
 @has_permission_decorator('edit_adaptation_action')

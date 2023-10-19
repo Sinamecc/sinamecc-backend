@@ -1377,23 +1377,30 @@ class AdaptationActionServices():
 
         return result
 
-    def download_indicator_file_by_id(self, request, adaptation_action_id, indicator_id):
+    def download_indicator_file_by_id(self, request, adaptation_action_id, indicator_id, file_field):
+        file_name_options = {
+            'methodological_detail_file': [IndicatorAdaptation, lambda x: x.methodological_detail_file.name],
+            'additional_information_file': [IndicatorAdaptation, lambda x: x.additional_information_file.name],
+        }
 
-        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
-        if adaptation_action_status:
-            indicator = adaptation_action_data.indicator.filter(id=indicator_id).first()
+        method = file_name_options.get(file_field, False)        
+        if method:
+            adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+            
+            if adaptation_action_status:
+                indicator = adaptation_action_data.indicator.filter(id=indicator_id).first()
 
-            if indicator:
-                response_status, response_data = self._download(indicator.methodological_detail_file.name)
+                if indicator:
+                    response_status, response_data = self._download(method[1](indicator))
 
-                if response_status:
-                    result = (response_status, response_data)
-                
+                    if response_status:
+                        result = (response_status, response_data)
+                    
+                    else:
+                        result = (response_status, response_data)
+
                 else:
-                    result = (response_status, response_data)
-
-            else:
-                result = (False, self.NO_INDICATOR)
+                    result = (False, self.NO_INDICATOR)
         
         return result
     
