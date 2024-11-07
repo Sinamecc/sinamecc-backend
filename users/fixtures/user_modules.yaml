@@ -1,0 +1,40 @@
+- model: users.module
+  pk: 1
+  fields:
+    name: PPCN
+    code: ppcn
+    active: true
+    created: 2023-03-27 21:27:40.693190+00:00
+    updated: 2023-03-27 21:27:40.693207+00:00
+- model: users.module
+  pk: 2
+  fields:
+    name: Mitigation Actions
+    code: mitigation_action
+    active: true
+    created: 2023-03-27 21:27:40.696963+00:00
+    updated: 2023-03-27 21:27:40.696969+00:00
+- model: users.module
+  pk: 3
+  fields:
+    name: Adaptation Actions
+    code: adaptation_action
+    active: true
+    created: 2023-03-27 21:27:40.697789+00:00
+    updated: 2023-03-27 21:27:40.697794+00:00
+- model: users.module
+  pk: 4
+  fields:
+    name: Report Data
+    code: report_data
+    active: true
+    created: 2023-03-27 21:27:40.698579+00:00
+    updated: 2023-03-27 21:27:40.698585+00:00
+- model: users.module
+  pk: 5
+  fields:
+    name: MCCR
+    code: mccr
+    active: true
+    created: 2023-03-27 21:27:40.699304+00:00
+    updated: 2023-03-27 21:27:40.699309+00:00

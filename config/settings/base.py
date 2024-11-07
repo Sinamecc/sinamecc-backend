@@ -33,6 +33,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
+MODULES = [
+    'general',
+    'report_data',
+    'mitigation_action',
+    'workflow',
+    'mccr',
+    'ppcn',
+    'users',
+    'adaptation_action',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,18 +52,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'general',
-    'report_data',
-    'mitigation_action',
-    'workflow',
-    'mccr',
-    'ppcn',
     'corsheaders',
     'django_fsm',
     'rolepermissions', 
-    'users',
-    'adaptation_action',
 ]
+
+INSTALLED_APPS.extend(MODULES)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,6 +1,6 @@
 from datetime import datetime
 from calendar import timegm
-from users.services import UserService
+from users.services.general import UserService
 import rest_framework_jwt.utils as utils
 
 service = UserService()
@@ -21,3 +21,4 @@ def jwt_response_payload_handler(token, user=None, request=None):
         'token': token,
         'user_id': user.id
     }
+
