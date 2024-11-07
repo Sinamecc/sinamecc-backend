@@ -64,5 +64,9 @@ urlpatterns = [
         views.get_comments,
         name='get_comments'
     ),
-
+    path(
+        'api/v1/report-data/<int:report_data_id>/change-log/',
+        views.get_change_log_from_report_data,
+        name='get_change_log_from_report_data'
+    ),
 ]

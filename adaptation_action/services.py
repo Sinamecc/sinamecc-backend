@@ -27,6 +27,7 @@ class AdaptationActionServices():
         self.ACCESS_DENIED_ALL = "Access denied to all adaptation action registers"
         self.NO_INDICATOR = "The indicator id does not exist."
         self.NO_INDICATOR_MONITORING = "The indicator monitoring id does not exist."
+        self.CHANGE_LOG_NOT_FOUND = "Change log not found"
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -1694,4 +1695,16 @@ class AdaptationActionServices():
         else:
             result = (False, adap_action_data)
 
+        return result
+
+    def get_change_log_from_adaptation_action(self, request, adaptation_action_id):
+        result = (False, self.CHANGE_LOG_NOT_FOUND)
+        adaptation_action_status, adaptation_action_data = self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        
+        if adaptation_action_status:
+            change_log_list = adaptation_action_data.change_log.order_by('-date').all()
+            result = (True, ChangeLogSerializer(change_log_list, many=True).data)
+        else:
+            result = (False, adaptation_action_data)
+        
         return result

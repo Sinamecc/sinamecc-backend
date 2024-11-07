@@ -127,4 +127,9 @@ urlpatterns = [
         views.get_benefited_population,
         name='get_benefited_population'
     ),
+    path(
+        'api/v1/adaptation-action/<uuid:adaptation_action_id>/change-log/',
+        views.get_change_log_from_adaptation_action,
+        name='get_change_log_from_adaptation_action'
+    ),
 ]
