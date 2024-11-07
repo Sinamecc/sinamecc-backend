@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.template import loader
+from users.models import CustomUser
+from users.roles import Reviewer, ReviewerReportData
+from rolepermissions import roles
 
 User = get_user_model()
 
@@ -39,9 +42,12 @@ class ReportDataEmailServices():
         context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Registro de datos en SINAMECC'
 
-        user_approver = User.objects.filter(username='general_dcc').first()
-
-        users = [user_approver]
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerReportData in user_roles or Reviewer in user_roles):
+                users.append(user)
 
         notification_status, notification_data = self._notify_aux('submitted_rd', context, subject, users)
 
@@ -94,9 +100,12 @@ class ReportDataEmailServices():
         context = {'lang': 'es', 'rd_code': report_data.id, 'frontend_url': self.email_services.base_dir_notification, 'report_id': report_data.id}
         subject = 'Actualización de Captura de datos en SINAMECC'
 
-        user_approver = User.objects.filter(username='general_dcc').first()
-
-        users = [user_approver]
+        all_users = CustomUser.objects.all()
+        users = []
+        for user in all_users:
+            user_roles = roles.get_user_roles(user)
+            if (ReviewerReportData in user_roles or Reviewer in user_roles):
+                users.append(user)
 
         notification_status, notification_data = self._notify_aux('submitted_updated_rd', context, subject, users)
 
