@@ -196,18 +196,22 @@ class ClimateThreatSerializer(serializers.ModelSerializer):
         fields = ('id', 'type_climate_threat', 'other_type_climate_threat', 'description_climate_threat', 'vulnerability_climate_threat', 'exposed_elements', 'file_description_climate_threat', 'file_vulnerability_climate_threat', 'file_exposed_elements',
                   'description_losses', 'file_description_losses', 'description_risks', 'file_description_risks')
     
-    def _get_url(self, obj, file_name):
+    def _get_url(self, obj, file_name, attr):
         
-        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+        attr.name = '' if attr.name is None else attr.name
+
+        file_data = {'url':reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name}), 
+                     'file_name': attr.name.split('/')[-1]}
+        return file_data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['type_climate_threat'] = TypeClimateThreatSerializer(instance.type_climate_threat.all(), many=True).data
-        data['file_description_climate_threat'] = self._get_url(instance, 'file_description_climate_threat')
-        data['file_vulnerability_climate_threat'] = self._get_url(instance, 'file_vulnerability_climate_threat')
-        data['file_exposed_elements'] = self._get_url(instance, 'file_exposed_elements')
-        data['file_description_losses'] = self._get_url(instance, 'file_description_losses')
-        data['file_description_risks'] = self._get_url(instance, 'file_description_risks')
+        data['file_description_climate_threat'] = self._get_url(instance, 'file_description_climate_threat', instance.file_description_climate_threat)
+        data['file_vulnerability_climate_threat'] = self._get_url(instance, 'file_vulnerability_climate_threat', instance.file_vulnerability_climate_threat)
+        data['file_exposed_elements'] = self._get_url(instance, 'file_exposed_elements', instance.file_exposed_elements)
+        data['file_description_losses'] = self._get_url(instance, 'file_description_losses', instance.file_description_losses)
+        data['file_description_risks'] = self._get_url(instance, 'file_description_risks', instance.file_description_risks)
 
         return data
 
@@ -314,9 +318,13 @@ class IndicatorSerializer(serializers.ModelSerializer):
          'disaggregation', 'limitation', 'additional_information', 'comments', 'information_source', 'type_of_data', 'other_type_of_data', 'classifier', 'other_classifier', 'contact', 'additional_information_file', 'methodological_detail_file',
          'indicator_base_line', 'file_base_line')
     
-    def _get_url(self, obj):
+    def _get_url(self, obj, file_name, attr):
         
-        return reverse('get_put_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
+        attr.name = '' if attr.name is None else attr.name
+
+        file_data = {'url':reverse('get_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id, 'file_field': file_name}), 
+                     'file_name': attr.name.split('/')[-1]}
+        return file_data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -324,9 +332,9 @@ class IndicatorSerializer(serializers.ModelSerializer):
         data['type_of_data'] = ThematicCategorizationTypeSerializer(instance.type_of_data).data
         data['classifier'] = ClassifierSerializer(instance.classifier.all(), many=True).data
         data['contact'] = ContactSerializer(instance.contact).data
-        data['methodological_detail_file'] = self._get_url(instance)
-        data['additional_information_file'] = self._get_url(instance)
-        data['file_base_line'] = self._get_url(instance)
+        data['methodological_detail_file'] = self._get_url(instance, "methodological_detail_file", instance.methodological_detail_file)
+        data['additional_information_file'] = self._get_url(instance, "additional_information_file", instance.additional_information_file)
+        data['file_base_line'] = self._get_url(instance, "file_base_line", instance.file_base_line)
 
         return data
 
@@ -354,7 +362,9 @@ class IndicatorMonitoringSerializer(serializers.ModelSerializer):
 
     def _get_url(self, obj):
         
-        return reverse('get_put_monitoring_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id})
+        file_data = {'url':reverse('get_put_monitoring_indicator_file_adaptation_action', kwargs={'adaptation_action_id':  obj.adaptation_action.id , 'file_id': obj.id}), 
+                     'file_name': obj.data_to_update_file.name.split('/')[-1]}
+        return file_data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -383,8 +393,9 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         fields = ('id', 'gender_equality', 'gender_equality_description', 'unwanted_action', 'unwanted_action_description', 'general_impact', 'temporality_impact', 'ods', 'data_to_update_file_action_impact')
     
     def _get_url(self, obj, file_name):
-        
-        return reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name})
+        file_data = {'url':reverse('get_file_to_adaptation_action', kwargs={'model_id': obj.id, 'file_name': file_name}), 
+                     'file_name': obj.data_to_update_file_action_impact.name.split('/')[-1]}
+        return file_data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
