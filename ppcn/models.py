@@ -5,8 +5,8 @@ from django.conf import settings
 import uuid
 from django.core.validators import RegexValidator
 from django.db import models
-from django.utils.encoding import smart_text as smart_unicode
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str as smart_unicode
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from general.storages import PrivateMediaStorage
 from workflow.models import Comment, ReviewStatus

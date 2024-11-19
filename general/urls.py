@@ -1,15 +1,15 @@
-from django.conf.urls import url, handler404
+from django.urls import re_path
 from general import views
 from django.urls import path, re_path
 
 
 urlpatterns_to_delete = [
-    url(
+    re_path(
         r'^api/v1/user/(?P<username>[A-Za-z0-9\._-]+)$',
         views.get_user_info_by_name,
         name='get_user_info_by_name'
     ),
-    url(r'^.*$', views.handler404),
+    re_path(r'^.*$', views.handler404),
 ]
 
 urlpatterns = [ 

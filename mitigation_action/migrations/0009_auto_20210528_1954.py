@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=5, null=True)),
                 ('question', models.TextField(null=True)),
-                ('check', models.BooleanField(null=True)),
+                ('is_checked', models.BooleanField(null=True)),
                 ('detail', models.TextField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),

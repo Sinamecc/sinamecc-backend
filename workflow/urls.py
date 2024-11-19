@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import re_path
 from workflow import views
 
 urlpatterns = [
-    url(
+    re_path(
         r'^api/v1/workflow/status',
         views.get_review_status,
         name='get_review_status'

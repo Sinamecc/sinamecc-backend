@@ -1,19 +1,19 @@
-from django.conf.urls import include, url
+from django.urls import include, re_path
 from django.contrib import admin
-from rest_framework_jwt.views import obtain_jwt_token
+from users.utils import CustomTokenObtainPairView
 
 urlpatterns = [
-    url(r'^', include('report_data.urls')),
-    url(r'^', include('mitigation_action.workflow_steps.urls')),
-    url(r'^', include('mitigation_action.urls')),
-    url(r'^', include('adaptation_action.urls')),
-    url(r'^', include('workflow.urls')),
-    url(r'^', include('mccr.workflow_steps.urls')),
-    url(r'^', include('mccr.urls')),
-    url(r'^', include('ppcn.workflow_steps.urls')),
-    url(r'^', include('ppcn.urls')),
-    url(r'^', include('users.urls')),
-    url(r'^api/v1/token/', obtain_jwt_token),
-    url(r'^admin/', admin.site.urls),
-    url(r'^', include('general.urls'))
+    re_path(r'^', include('report_data.urls')),
+    re_path(r'^', include('mitigation_action.workflow_steps.urls')),
+    re_path(r'^', include('mitigation_action.urls')),
+    re_path(r'^', include('adaptation_action.urls')),
+    re_path(r'^', include('workflow.urls')),
+    re_path(r'^', include('mccr.workflow_steps.urls')),
+    re_path(r'^', include('mccr.urls')),
+    re_path(r'^', include('ppcn.workflow_steps.urls')),
+    re_path(r'^', include('ppcn.urls')),
+    re_path(r'^', include('users.urls')),
+    re_path(r'^api/v1/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^', include('general.urls'))
 ]

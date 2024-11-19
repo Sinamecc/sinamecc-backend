@@ -1,8 +1,8 @@
 from pyexpat import model
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.utils.encoding import smart_text as smart_unicode
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str as smart_unicode
+from django.utils.translation import gettext_lazy as _
 from general.storages import PrivateMediaStorage
 User = get_user_model()
 # Create your models here.

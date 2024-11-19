@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 import uuid
 from django.db import models
-from django.utils.encoding import smart_text as smart_unicode
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str as smart_unicode
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from workflow.models import Comment, ReviewStatus
 from general.storages import PrivateMediaStorage
@@ -726,7 +726,7 @@ class QAQCReductionEstimateQuestion(models.Model):
 
     code = models.CharField(max_length=5, null=True)
     question = models.TextField(null=True)
-    check = models.BooleanField(null=True)
+    is_checked = models.BooleanField(null=True)
     detail = models.TextField(null=True)
     
     ## FK
