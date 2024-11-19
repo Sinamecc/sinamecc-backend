@@ -443,7 +443,7 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     class Meta:
         model = QAQCReductionEstimateQuestion
-        fields = ('id', 'code', 'question', 'check', 'detail', 'impact_documentation')
+        fields = ('id', 'code', 'question', 'is_checked', 'detail', 'impact_documentation')
         list_serializer_class = GenericListSerializer
 
 
