@@ -2,7 +2,7 @@ FROM python:3.10
 
 ARG FRONTEND_URL=http://localhost:3000
 
-ARG ENV=development
+ARG ENVIRONMENT=development
 
 ENV PYTHONUNBUFFERED 1
 
@@ -22,7 +22,7 @@ STOPSIGNAL SIGTERM
 
 ENV FRONTEND_URL=$FRONTEND_URL
 
-CMD if [ "$ENV" = "development" ] ; then \
+CMD if [ "$ENVIRONMENT" = "development" ] ; then \
         echo "Running Development Server" \
     else \
         exec gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:80 config.wsgi:application \
