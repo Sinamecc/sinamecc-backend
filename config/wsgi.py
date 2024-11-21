@@ -11,6 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+environment = os.environ.get('ENVIRONMENT')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'config.environment.{environment}.settings')
 
 application = get_wsgi_application()
