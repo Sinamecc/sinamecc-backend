@@ -2,7 +2,7 @@ FROM python:3.10
 
 ARG FRONTEND_URL=http://localhost:3000
 
-ARG ENVIRONMENT=development
+ARG ENV=development
 
 ENV PYTHONUNBUFFERED 1
 
