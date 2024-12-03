@@ -54,7 +54,7 @@ jobs:
 
         run: |
           echo "Building Docker Image: $REGISTRY/$REPOSITORY_ENV/$IMAGE:$IMAGE_TAG" 
-          docker build -f ./Dockerfile --build-arg env=${{ inputs.environment }} -t $REGISTRY/$REPOSITORY_ENV/$IMAGE:$IMAGE_TAG .
+          docker build -f ./build/Dockerfile --build-arg ENVIRONMENT=${{ inputs.environment }} -t $REGISTRY/$REPOSITORY_ENV/$IMAGE:$IMAGE_TAG .
 
       - name: Pushing Images
         id: push-images

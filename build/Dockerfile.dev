@@ -2,6 +2,8 @@ FROM python:3.10
 
 ARG FRONTEND_URL=http://localhost:3000
 
+ARG ENVIRONMENT=development
+
 ENV PYTHONUNBUFFERED 1
 
 RUN mkdir /code
@@ -20,4 +22,3 @@ STOPSIGNAL SIGTERM
 
 ENV FRONTEND_URL=$FRONTEND_URL
 
-ENTRYPOINT exec gunicorn --access-logfile - --log-level debug --workers 3 --bind 0.0.0.0:80 config.wsgi:application
