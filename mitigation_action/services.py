@@ -1,7 +1,7 @@
 
 from rolepermissions.checkers import has_object_permission
 from workflow.serializers import CommentSerializer
-from mitigation_action.workflow_steps.models import *
+from mitigation_action.workflow.models import *
 from mitigation_action.serializers import *
 from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
     InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics, \
@@ -1163,6 +1163,7 @@ class MitigationActionService():
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
 
+        return (True, "Hola")
         if mitigation_action_status:
             mitigation_action = mitigation_action_data
             if next_state:

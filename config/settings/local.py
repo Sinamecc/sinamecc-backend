@@ -32,3 +32,4 @@ PRIVATE_FILE_STORAGE = 'general.storages.PrivateMediaStorage'
 AWS_QUERYSTRING_AUTH = True
 
 ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True

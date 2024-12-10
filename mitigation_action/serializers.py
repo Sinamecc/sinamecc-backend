@@ -7,7 +7,7 @@ from mitigation_action.models import ActionAreas, ActionGoals, Finance, Mitigati
     FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection, Sector, SectorIPCC2006, CategoryIPCC2006, SubCategoryIPCC2006, SectorSelection
 from workflow.serializers import CommentSerializer
 from general.utils import get_translation_from_database as _
-from mitigation_action.workflow_steps.fsm_utils.fsm_states import MA_FSM_STATE
+from mitigation_action.workflow.states import FSM_STATE_TRANSLATION
 ##
 ## Auxiliar Class Serializer
 ##
@@ -718,7 +718,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
     def _get_fsm_state_info(self, instance):
         data = {
             'state': instance.fsm_state, 
-            'label': _(MA_FSM_STATE.get(instance.fsm_state), 'label')
+            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
         }
 
         return data
@@ -729,7 +729,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         # change for transitions method available for users
         transitions = instance.get_available_fsm_state_transitions()
         ## missing label FSM_LABELs
-        result = [{'state':transition.target, 'label': _(MA_FSM_STATE.get(transition.target), 'label'), 'required_comments': True} for transition in transitions]
+        result = [{'state':transition.target, 'label': _(FSM_STATE_TRANSLATION.get(transition.target), 'label'), 'required_comments': True} for transition in transitions]
 
         return result
 

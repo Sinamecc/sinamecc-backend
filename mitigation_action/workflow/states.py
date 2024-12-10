@@ -1,5 +1,7 @@
+from enum import Enum
 
-MA_FSM_STATE = {
+# NOTE: We will be removing the translation when we have the i18n in place
+FSM_STATE_TRANSLATION = {
     'new': { 
         'label_es': 'Nuevo Registro',
         'label_en': 'New Record',
@@ -37,3 +39,15 @@ MA_FSM_STATE = {
         'label_en': 'Finished',
     },
 }
+
+class States(str, Enum):
+    NEW = 'new'
+    SUBMITTED = 'submitted'
+    IN_EVALUATION_BY_DCC = 'in_evaluation_by_DCC'
+    REQUESTED_CHANGES_BY_DCC = 'requested_changes_by_DCC'
+    UPDATING_BY_REQUEST_DCC = 'updating_by_request_DCC'
+    ACCEPTED_BY_DCC = 'accepted_by_DCC'
+    REJECTED_BY_DCC = 'rejected_by_DCC'
+    REGISTERED_BY_DCC = 'registered_by_DCC'
+    END = 'end'
+
