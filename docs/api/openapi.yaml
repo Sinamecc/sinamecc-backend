@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Sinamecc API
+  description: API documentation for Sinamecc backend
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local server
+
+tags:
+  - name: mitigation-action
+    description: Mitigation action 
+  - name: adaptation-action
+    description: Adaptation action
+  - name: report-data
+    description: for testing backend
+
+paths:
+  /token/:
+    $ref: './components/paths/users/jwt-token.yaml'
+  /mitigation-action/{id}:
+    $ref: './components/paths/mitigation-actions/record.yaml'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: apiKey
+      name: Authorization
+      in: header

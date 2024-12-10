@@ -1,0 +1,31 @@
+patch:
+  summary: Change state of a mitigation action
+  operationId: update-state-mitigation-action
+  description: Change state of a mitigation action
+  tags:
+    - mitigation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the mitigation action
+      required: true
+      schema:
+        type: integer
+        example: 1
+  requestBody:
+      description: The state change of the mitigation action
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+
+  responses:
+    '200':
+      description: Mitigation action state updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+  security:
+    - JWTAuth: []

@@ -1,0 +1,26 @@
+UpdateStateRecord:
+  type: object
+  properties:
+    next_state:
+        type: string
+        description: The next state of the mitigation action
+        example: "in_evaluation_by_dcc"
+    comments:
+        type: array
+        description: Comments about the state change
+        items:
+            type: object
+            properties:
+              comment:
+                  type: string
+                  description: A comment about the state change
+                  example: "The mitigation action is being evaluated by the DCC"
+              form_section:
+                  type: string
+                  description: The form section of the mitigation action that is commented
+                  example: "This is a comment about the form section"
+                
+              field:
+                  type: string
+                  description: The field of the form section that is commented
+                  example: "This is a comment about the field"
