@@ -14,6 +14,7 @@ from general.permissions import PermissionsHelper
 from general.helpers.validators import validate_year
 from time import gmtime, strftime
 from django.db import transaction
+from .workflow.states import States as FSM_STATE
 
 
 
@@ -881,7 +882,7 @@ class MitigationAction(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     code = models.CharField(max_length=255, null=True, unique=True)
-    fsm_state = FSMField(default='new', protected=True, max_length=100)
+    fsm_state = models.CharField(max_length=50, default=FSM_STATE.NEW)
     # Foreign Key
     contact = models.ForeignKey(Contact, related_name='mitigation_action', blank=True, null=True, on_delete=models.CASCADE)
     initiative = models.ForeignKey(Initiative, related_name='mitigation_action', null=True, on_delete=models.CASCADE)
