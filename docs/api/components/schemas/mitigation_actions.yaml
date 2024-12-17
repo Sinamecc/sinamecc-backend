@@ -4,7 +4,7 @@ UpdateStateRecord:
     next_state:
       type: string
       description: The next state of the mitigation action
-      example: "in_evaluation_by_dcc"
+      example: "in_evaluation_by_DCC"
     comments:
       type: array
       description: Comments about the state change

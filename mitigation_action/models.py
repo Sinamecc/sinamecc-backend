@@ -912,9 +912,6 @@ class MitigationAction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    ## email service
-    email_service = MitigationActionEmailServices(EmailServices())
-
     class Meta:
         verbose_name = _("Mitigation Action")
         verbose_name_plural = _("Mitigation Actions")

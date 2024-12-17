@@ -1,5 +1,6 @@
 
 from rolepermissions.checkers import has_object_permission
+from .workflow.services import MitigationActionWorkflowStep as WorkflowService
 from workflow.serializers import CommentSerializer
 from mitigation_action.workflow.models import *
 from mitigation_action.serializers import *
@@ -10,14 +11,14 @@ from mitigation_action.models import MitigationAction, Contact, Status, FinanceS
 from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
 from general.services import HandlerErrors
-from workflow.services import WorkflowService
+from workflow.services import WorkflowService as _WorkflowService
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.services import EmailServices
 from rolepermissions.checkers import has_role
-
+from .workflow.states import States as MitigationActionStates
 handler = HandlerErrors()
-workflow_service = WorkflowService()
+workflow_service = _WorkflowService()
 
 
 class MitigationActionService():
@@ -1157,17 +1158,17 @@ class MitigationActionService():
     def patch(self, request, mitigation_action_id):
         ## missing review and comments here!!
         data = request.data
-        next_state, user = data.pop('fsm_state', None), request.user
+        next_state, user = MitigationActionStates(data.pop('next_state', None)), request.user
         comment_list = data.pop('comments', [])
-
-        mitigation_action_status, mitigation_action_data = \
+        ma_status, ma_obj = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)
 
-        return (True, "Hola")
-        if mitigation_action_status:
-            mitigation_action = mitigation_action_data
+        _workflow_service = WorkflowService(ma_obj)
+
+        if ma_status:
+            mitigation_action = ma_obj
             if next_state:
-                update_status, update_data = self._update_fsm_state(next_state, mitigation_action, user)
+                update_status, update_data = _workflow_service.update_fsm_state(next_state, user)
                 if update_status:
                     self._increase_review_counter(mitigation_action)
                     assign_status, assign_data = self._assign_comment(comment_list, mitigation_action, user)
@@ -1180,7 +1181,7 @@ class MitigationActionService():
             else:
                 result = (False, self.INVALID_STATUS_TRANSITION)
         else:
-            result = (mitigation_action_status, mitigation_action_data)
+            result = (ma_status, ma_obj)
         
         return result
 
@@ -1359,6 +1360,8 @@ class MitigationActionService():
         # source -> target
 
         transitions = mitigation_action.get_available_fsm_state_transitions()
+        print("transitions", transitions)
+        return False, False
         states = {}
         for transition in  transitions:
             states[transition.target] = transition
