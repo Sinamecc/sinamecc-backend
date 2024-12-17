@@ -9,7 +9,7 @@ servers:
 
 tags:
   - name: mitigation-action
-    description: Mitigation action 
+    description: Mitigation action
   - name: adaptation-action
     description: Adaptation action
   - name: report-data
@@ -17,9 +17,11 @@ tags:
 
 paths:
   /token/:
-    $ref: './components/paths/users/jwt-token.yaml'
-  /mitigation-action/{id}:
-    $ref: './components/paths/mitigation-actions/record.yaml'
+    $ref: "./components/paths/users/jwt-token.yaml"
+  /mitigation-action/{id}/:
+    $ref: "./components/paths/mitigation-actions/record.yaml"
+  /mitigation-action/:
+    $ref: "./components/paths/mitigation-actions/record-list.yaml"
 
 components:
   securitySchemes:

@@ -1,0 +1,44 @@
+post:
+  summary: Create a new mitigation action
+  operationId: create-mitigation-action
+  description: Create a new mitigation action record
+  tags:
+    - mitigation-action
+
+  requestBody:
+    description: The mitigation action record to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+
+  responses:
+    '201':
+      description: Mitigation action created
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []
+
+
+get:
+  summary: Get a list of mitigation actions
+  operationId: list-mitigation-actions
+  description: Get a list of mitigation actions
+  tags:
+    - mitigation-action
+
+  responses:
+    '200':
+      description: List of mitigation actions
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []
