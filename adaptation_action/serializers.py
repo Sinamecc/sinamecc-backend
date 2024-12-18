@@ -1,7 +1,8 @@
 
 from django.db import models
 from django.db.models import fields
-from adaptation_action.workflow_steps.fsm_utils.fsm_states import AA_FSM_STATE
+from .workflow.services import AdaptationActionWorkflowStep
+from .workflow.states import FSM_STATE_TRANSLATION
 from general.helpers.serializer import SerializersHelper
 from rest_framework import serializers
 from django.conf import settings
@@ -410,24 +411,23 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
-        
         data = {
-            'state': instance.fsm_state,
-            'label':  _(AA_FSM_STATE.get(instance.fsm_state), 'label'),
+            'state': instance.fsm_state, 
+            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
         }
+
         return data
     
     def _next_action(self, instance):
-        
-        transitions = instance.get_available_fsm_state_transitions()
-        result = [
-                    {
-                        'state':transition.target, 
-                        'label': _(AA_FSM_STATE.get(transition.target), 'label'),
-                        'required_comments': True
-                    } for transition in transitions
-                ]
-        return result
+        _workflow_service = AdaptationActionWorkflowStep(adaptation_action=instance)
+
+        return [
+            {
+                'state':state,
+                'label': _(FSM_STATE_TRANSLATION.get(state), 'label'),
+                'required_comments': True
+            } for state in _workflow_service.get_next_states() 
+        ]
 
 
     def to_representation(self, instance):

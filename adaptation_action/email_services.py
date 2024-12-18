@@ -50,7 +50,7 @@ class AdaptationActionEmailServices():
 
         return result
 
-    def notify_contact_resposible_adaptation_action_evaluation_by_dcc(self, adaptation_action, user_approver):
+    def notify_contact_responsible_adaptation_action_evaluation_by_dcc(self, adaptation_action, user_approver):
 
         contact = adaptation_action.report_organization.contact
         context = {'lang': 'es', 'full_name': contact.contact_name, 'aa_code': adaptation_action.code, 'frontend_url': self.email_services.base_dir_notification, 'adaptation_id': adaptation_action.id}
