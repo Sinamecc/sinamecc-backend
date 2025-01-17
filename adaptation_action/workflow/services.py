@@ -103,6 +103,6 @@ class AdaptationActionWorkflowStep:
         change_log_obj = ChangeLog.objects.create(
             user=user,
             adaptation_action_id=adapt_action_id,
-            previous_state=previous_state,
-            current_state=current_state
+            previous_status=previous_state,
+            current_status=current_state
         )
