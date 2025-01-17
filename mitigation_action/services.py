@@ -1158,7 +1158,7 @@ class MitigationActionService():
     def patch(self, request, mitigation_action_id):
         ## missing review and comments here!!
         data = request.data
-        next_state, user = MitigationActionStates(data.pop('next_state', None)), request.user
+        next_state, user = MitigationActionStates(data.pop('fsm_state', None)), request.user
         comment_list = data.pop('comments', [])
         ma_status, ma_obj = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)

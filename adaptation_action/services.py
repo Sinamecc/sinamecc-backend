@@ -1616,7 +1616,7 @@ class AdaptationActionServices():
     def patch(self, request, adaptation_action_id):
         ## missing review and comments here!!
         data = request.data
-        next_state, user = AdaptationActionStates(data.pop('next_state', None)), request.user
+        next_state, user = AdaptationActionStates(data.pop('fsm_state', None)), request.user
         comment_list = data.pop('comments', [])
 
         adapt_action_status, adapt_action_obj = \
