@@ -696,8 +696,8 @@ class ChangeLogSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         ## missing FSM LAbels
         data['date'] = instance.date.strftime('%Y-%m-%d %H:%M:%S')
-        data['previous_status'] = f"{data.get('previous_status')} label"
-        data['current_status'] = f"{data.get('current_status')} label"
+        data['previous_status'] = _(FSM_STATE_TRANSLATION.get(data.get('previous_status')), 'label')
+        data['current_status'] = _(FSM_STATE_TRANSLATION.get(data.get('current_status')), 'label')
         data['user'] = f'{instance.user.first_name} {instance.user.last_name}'
 
         return data 
