@@ -1,6 +1,6 @@
 
 
-from mitigation_action.models import MitigationAction
+from mitigation_action.models import MitigationAction, ChangeLog
 from .states import States
 from .workflow import WorkFlow as MitigationActionWorkflow
 from django.contrib.auth.models import AbstractUser
@@ -66,10 +66,43 @@ class MitigationActionWorkflowStep:
         transition = transition_dict[next_state]
         transition_function = getattr(self.workflow_state, transition.func.__name__)
         
-        print(f"Transitioning from {self.workflow_state.state} to {next_state} using {transition.func.__name__}")
+        previous_state = self.workflow_state.state
 
+        print(f"Transitioning from {self.workflow_state.state} to {next_state} using {transition.func.__name__}")
         transition_function(user)
 
+        self._add_change_log(
+            user=user,
+            mitigation_action_id=self.workflow_state.obj.id,
+            previous_state=previous_state,
+            current_state=next_state
+        )
         ## Here we need to add an error handling mechanism to handle the case where the transition fails
 
         return True, None
+    
+    def _add_change_log(self,
+        user: type[AbstractUser],
+        mitigation_action_id: str,
+        previous_state: States,
+        current_state: States,
+        ) -> None:
+        """
+        Add a change log entry for the state transition.
+
+        Args:
+            user (type[AbstractUser]): The user performing the transition.
+            mitigation_action_id (str): The ID of the mitigation action.
+            previous_state (States): The previous state.
+            current_state (States): The current state.
+
+        Returns:
+            None
+        """
+
+        change_log_obj = ChangeLog.objects.create(
+            user=user,
+            mitigation_action_id=mitigation_action_id,
+            previous_state=previous_state,
+            current_state=current_state
+        )

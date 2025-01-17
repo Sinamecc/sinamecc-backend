@@ -3,7 +3,7 @@
 from django.contrib.auth.models import AbstractUser
 from viewflow.fsm import Transition
 
-from adaptation_action.models import AdaptationAction
+from adaptation_action.models import AdaptationAction, ChangeLog
 
 from .states import States
 from .workflow import WorkFlow as AdaptationActionWorkflow
@@ -68,10 +68,41 @@ class AdaptationActionWorkflowStep:
         transition = transition_dict[next_state]
         transition_function = getattr(self.workflow_state, transition.func.__name__)
         
-        print(f"Transitioning from {self.workflow_state.state} to {next_state} using {transition.func.__name__}")
+        previous_state = self.workflow_state.state
 
+        print(f"Transitioning from {self.workflow_state.state} to {next_state} using {transition.func.__name__}")
         transition_function(user)
 
+        self._add_changelog(
+            user=user,
+            adapt_action_id=self.workflow_state.obj.id,
+            previous_state=previous_state,
+            current_state=next_state
+        )
         ## Here we need to add an error handling mechanism to handle the case where the transition fails
 
         return True, None
+    
+    def _add_changelog(self, 
+        user: type[AbstractUser],
+        adapt_action_id: str,
+        previous_state: States,
+        current_state: States,) -> None:
+        """
+        Add a new changelog entry to the adaptation action
+
+        Args:
+            user (type[AbstractUser]): The user adding the changelog entry.
+            comment (str): The comment to add to the changelog.
+
+        Returns:
+            None
+        """
+        print(f'Adding changelog entry for adaptation action {adapt_action_id}')
+        print(f'Previous state: {previous_state}', f'Current state: {current_state}')
+        change_log_obj = ChangeLog.objects.create(
+            user=user,
+            adaptation_action_id=adapt_action_id,
+            previous_state=previous_state,
+            current_state=current_state
+        )
