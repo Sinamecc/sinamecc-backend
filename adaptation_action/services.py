@@ -5,7 +5,7 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from workflow.services import _WorkflowService
+from workflow.services import WorkflowService as _WorkflowService
 from workflow.serializers import CommentSerializer
 from general.storages import S3Storage
 from rolepermissions.checkers import has_role, has_object_permission
@@ -1163,8 +1163,9 @@ class AdaptationActionServices():
     
     
     def _assign_comment(self, comment_list, adaptation_action, user):
-
+        
         data = [{**comment, 'fsm_state': adaptation_action.fsm_state, 'user': user.id, 'review_number': adaptation_action.review_count}  for comment in comment_list]
+
         comment_list_status, comment_list_data = self._workflow_service.create_comment_list(data)
 
         if comment_list_status:
@@ -1620,7 +1621,7 @@ class AdaptationActionServices():
 
         adapt_action_status, adapt_action_obj = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
-
+        
         _workflow_service = WorkflowService(adapt_action_obj)
 
         if adapt_action_status:

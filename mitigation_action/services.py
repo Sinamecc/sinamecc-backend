@@ -1393,7 +1393,9 @@ class MitigationActionService():
     
     def _assign_comment(self, comment_list, mitigation_action, user):
 
-        data = [{**comment, 'fsm_state': mitigation_action.fsm_state, 'user': user.id, 'review_number': mitigation_action.review_count}  for comment in comment_list]
+        ## convert fsm_state to string since it is an Enum(str)
+        data = [{**comment, 'fsm_state': str(mitigation_action.fsm_state), 'user': user.id, 'review_number': mitigation_action.review_count}  for comment in comment_list]
+        print("data", data)
         comment_list_status, comment_list_data = workflow_service.create_comment_list(data)
 
         if comment_list_status:

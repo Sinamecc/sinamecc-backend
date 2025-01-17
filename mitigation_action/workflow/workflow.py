@@ -18,7 +18,7 @@ class WorkFlow:
         return self.obj.fsm_state
 
     @state.setter()
-    def _set_state(self, value):
+    def _set_state(self, value: States) -> None:
         print(f'Changing state from <{self.obj.fsm_state}> to <{value}>')
         self.obj.fsm_state = value
     
@@ -27,31 +27,38 @@ class WorkFlow:
         print(f'The mitigation action is saved with state <{target}>')
         self.obj.save()
 
-    @state.transition(source=(States.NEW, States.UPDATING_BY_REQUEST_DCC), target=States.SUBMITTED, permission=None)
-    def submit(self, user_approver):
+    @state.transition(source=(States.NEW), target=States.SUBMITTED, permission=None)
+    def submit_new_record(self, user_approver):
         # new --> submitted        
         # send email to user that submitted the action
-        print(f'The mitigation action is transitioning from <{self.state}> to <submitted>')
+        print(f'The mitigation action is transitioning from <{States.NEW}> to <{States.SUBMITTED}>')
         _email_service = MitigationActionEmailServices(EmailServices())
 
-        email_function = {
-            States.NEW: _email_service.notify_dcc_responsible_mitigation_action_submission,
-            States.UPDATING_BY_REQUEST_DCC: _email_service.notify_dcc_responsible_mitigation_action_update,
-        }
-
-        email_status, email_data = email_function.get(self.fsm_state)(self.obj, user_approver)
+        email_status, email_data = _email_service.notify_dcc_responsible_mitigation_action_submission(self.obj, user_approver)
         if email_status:
             return email_status, email_data
         else:
             ...
             ## maybe raise exception
 
+    @state.transition(source=(States.UPDATING_BY_REQUEST_DCC), target=States.SUBMITTED, permission=None)
+    def submit_updated_record(self, user_approver):
+        # updating_by_request_DCC --> submitted
+        # send email to user that submitted the action
+        _email_service = MitigationActionEmailServices(EmailServices())
+        print(f'The mitigation action is transitioning from <{States.UPDATING_BY_REQUEST_DCC}> to <{States.SUBMITTED}>')
+
+        email_status, email_data = _email_service.notify_dcc_responsible_mitigation_action_update(self.obj, user_approver)
+        if email_status:
+            return email_status, email_data
+        else:
+            ...
     
     @state.transition(source=(States.SUBMITTED), target=States.IN_EVALUATION_BY_DCC, permission=None)
     def evaluate_by_DCC(self, user_approver):
         # submitted --> in_evaluation_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <submitted> to <in_evaluation_by_DCC>')
+        print(f'The mitigation action is transitioning from <{States.SUBMITTED}> to <{States.IN_EVALUATION_BY_DCC}>')
         _email_service = MitigationActionEmailServices(EmailServices())
 
         email_status, email_data = _email_service.notify_contact_responsible_mitigation_action_evaluation_by_dcc(self.obj)
@@ -69,7 +76,7 @@ class WorkFlow:
     def evaluate_by_DCC_rejected(self, user_approver):
         # in_evaluation_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <rejected_by_DCC>')
+        print(f'The mitigation action is transitioning from <{States.IN_EVALUATION_BY_DCC}> to <{States.REJECTED_BY_DCC}>')
         _email_service = MitigationActionEmailServices(EmailServices())
 
         email_status, email_data = _email_service.notify_contact_responsible_mitigation_action_rejection(self.obj)
@@ -83,7 +90,7 @@ class WorkFlow:
     def evaluate_by_DCC_requested_changes(self, user_approver):
         # in_evaluation_by_DCC --> requested_changes_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <requested_changes_by_DCC>')
+        print(f'The mitigation action is transitioning from <{States.IN_EVALUATION_BY_DCC}> to <{States.REQUESTED_CHANGES_BY_DCC}>')
         _email_service = MitigationActionEmailServices(EmailServices())
 
         email_status, email_data = _email_service.notify_dcc_responsible_mitigation_action_request_changes(self.obj)
@@ -96,7 +103,7 @@ class WorkFlow:
     def evaluate_by_DCC_accepted(self, user_approver):
         # in_evaluation_by_DCC --> accepted_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <in_evaluation_by_DCC> to <accepted_by_DCC>')
+        print(f'The mitigation action is transitioning from <{States.IN_EVALUATION_BY_DCC}> to <{States.ACCEPTED_BY_DCC}>')
         _email_service = MitigationActionEmailServices(EmailServices())
 
         email_status, email_data = _email_service.notify_contact_responsible_mitigation_action_approval(self.obj)
@@ -111,7 +118,7 @@ class WorkFlow:
     def rejected_by_DCC_to_end(self, user_approver):
         # rejected_by_DCC --> rejected_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <rejected_by_DCC> to <end>')
+        print(f'The mitigation action is transitioning from <{States.REJECTED_BY_DCC}> to <{States.END}>')
         ...
     
     @state.transition(source=(States.REQUESTED_CHANGES_BY_DCC), target=States.UPDATING_BY_REQUEST_DCC, permission=None)
@@ -130,7 +137,7 @@ class WorkFlow:
     def registered_by_DCC(self,user_approver):
         # accepted_by_DCC --> registered_by_DCC
         # send email to user that submitted the action
-        print('The mitigation action is transitioning from <accepted_by_DCC> to <registered_by_DCC>')
+        print(f'The mitigation action is transitioning from <{States.ACCEPTED_BY_DCC}> to <{States.REGISTERED_BY_DCC}>')
         ...
 
 

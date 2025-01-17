@@ -1,0 +1,44 @@
+post:
+  summary: Create a new adaptation action
+  operationId: create-adapter-action
+  description: Create a new adaptation action record
+  tags:
+    - adaptation-action
+
+  requestBody:
+    description: The adaptation action record to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+
+  responses:
+    '201':
+      description: Adaptation action created
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []
+
+
+get:
+  summary: Get a list of adaptation-action
+  operationId: list-adapter-actions
+  description: Get a list of adaptation actions
+  tags:
+    - adaptation-action
+
+  responses:
+    '200':
+      description: List of mitigation actions
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []

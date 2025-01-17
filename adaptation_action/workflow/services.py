@@ -1,14 +1,16 @@
 
 
-from adaptation_action.models import AdaptationAction
-from .states import States
-from .workflow import WorkFlow as AdaptationActionWorkflow
 from django.contrib.auth.models import AbstractUser
 from viewflow.fsm import Transition
+
+from adaptation_action.models import AdaptationAction
+
+from .states import States
+from .workflow import WorkFlow as AdaptationActionWorkflow
+
+
 class AdaptationActionWorkflowStep:
     
-    workflow_state: AdaptationActionWorkflow
-
     def __init__(self, adaptation_action: AdaptationAction):
         self.workflow_state = AdaptationActionWorkflow(adaptation_action)
     

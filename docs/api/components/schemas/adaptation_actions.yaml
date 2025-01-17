@@ -1,0 +1,71 @@
+UpdateStateRecord:
+  type: object
+  properties:
+    next_state:
+      type: string
+      description: The next state of the adaptation action
+      example: "in_evaluation_by_DCC"
+    comments:
+      type: array
+      description: Comments about the state change
+      items:
+        type: object
+        properties:
+          comment:
+            type: string
+            description: A comment about the state change
+            example: "The adaptation action is being evaluated by the DCC"
+          form_section:
+            type: string
+            description: The form section of the adaptation action that is commented
+            example: "This is a comment about the form section"
+
+          field:
+            type: string
+            description: The field of the form section that is commented
+            example: "This is a comment about the field"
+
+CreateRecord:
+  type: object
+  properties:
+    contact:
+      $ref: "#/_ContactSchema"
+
+_ContactSchema:
+  type: object
+  properties:
+    institution:
+      type: string
+      maxLength: 500
+      nullable: true
+      description: The institution of the contact
+      example: "Environmental Protection Agency"
+
+    full_name:
+      type: string
+      maxLength: 100
+      nullable: true
+      description: The full name of the contact
+      example: "John Doe"
+
+    job_title:
+      type: string
+      maxLength: 100
+      nullable: true
+      description: The job title of the contact
+      example: "Climate Change Analyst"
+
+    email:
+      type: string
+      format: email
+      maxLength: 254
+      nullable: true
+      description: The email of the contact
+      example: "john.doe@example.com"
+
+    phone:
+      type: string
+      maxLength: 100
+      nullable: true
+      description: The phone number of the contact
+      example: "+1-800-555-1234"

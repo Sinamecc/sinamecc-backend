@@ -52,3 +52,5 @@ class States(str, Enum):
     REGISTERED_BY_DCC = 'registered_by_DCC'
     END = 'end'
 
+    def __str__(self):
+        return self.value
