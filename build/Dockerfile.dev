@@ -6,15 +6,22 @@ ARG ENVIRONMENT=development
 
 ENV PYTHONUNBUFFERED 1
 
+# Use the system Python environment
+ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
+
 RUN mkdir /code
 
 WORKDIR /code
 
-COPY requirements.txt /code/
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-RUN pip install --no-cache-dir -r requirements.txt
+ENV PATH="/root/.local/bin:$PATH"
 
+## copy all content except the files in .dockerignore
 COPY . /code/
+
+RUN uv sync 
+
 
 EXPOSE 80
 
