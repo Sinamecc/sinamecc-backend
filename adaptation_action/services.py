@@ -5,12 +5,14 @@ from adaptation_action.serializers import *
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
 from general.serializers import DistrictSerializer
-from workflow.services import WorkflowService
+from workflow.services import WorkflowService as _WorkflowService
 from workflow.serializers import CommentSerializer
 from general.storages import S3Storage
 from rolepermissions.checkers import has_role, has_object_permission
 import os
 from io import BytesIO
+from .workflow.states import States as AdaptationActionStates
+from .workflow.services import AdaptationActionWorkflowStep as WorkflowService
 
 class AdaptationActionServices():
     def __init__(self) -> None:
@@ -18,7 +20,7 @@ class AdaptationActionServices():
         self._storage = S3Storage()
         self._service_helper = ServiceHelper()
         self._serializer_helper = SerializersHelper()
-        self._workflow_service = WorkflowService()
+        self._workflow_service = _WorkflowService() # We need to remove this
         self.FUNCTION_INSTANCE_ERROR = 'Error Adaptation Action Service does not have {0} function'
         self.ATTRIBUTE_INSTANCE_ERROR = 'Instance Model does not have {0} attribute'
         self.INVALID_STATUS_TRANSITION = "Invalid adaptation action state transition."
@@ -1161,8 +1163,9 @@ class AdaptationActionServices():
     
     
     def _assign_comment(self, comment_list, adaptation_action, user):
-
+        
         data = [{**comment, 'fsm_state': adaptation_action.fsm_state, 'user': user.id, 'review_number': adaptation_action.review_count}  for comment in comment_list]
+
         comment_list_status, comment_list_data = self._workflow_service.create_comment_list(data)
 
         if comment_list_status:
@@ -1174,7 +1177,7 @@ class AdaptationActionServices():
 
         return result
     
-    
+    ## REMOVE THIS FUNCTION
     def _update_fsm_state(self, next_state, adaptation_action, user):
 
         result = (False, self.INVALID_STATUS_TRANSITION)
@@ -1613,16 +1616,18 @@ class AdaptationActionServices():
     def patch(self, request, adaptation_action_id):
         ## missing review and comments here!!
         data = request.data
-        next_state, user = data.pop('fsm_state', None), request.user
+        next_state, user = AdaptationActionStates(data.pop('fsm_state', None)), request.user
         comment_list = data.pop('comments', [])
 
-        adaptation_action_status, adaptation_action_data = \
+        adapt_action_status, adapt_action_obj = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        
+        _workflow_service = WorkflowService(adapt_action_obj)
 
-        if adaptation_action_status:
-            adaptation_action = adaptation_action_data
+        if adapt_action_status:
+            adaptation_action = adapt_action_obj
             if next_state:
-                update_status, update_data = self._update_fsm_state(next_state, adaptation_action, user)
+                update_status, update_data = _workflow_service.update_fsm_state(next_state, user)
                 if update_status:
                     self._increase_review_counter(adaptation_action)
                     assign_status, assign_data = self._assign_comment(comment_list, adaptation_action, user)
@@ -1638,7 +1643,7 @@ class AdaptationActionServices():
             else:
                 result = (False, self.INVALID_STATUS_TRANSITION)
         else:
-            result = (adaptation_action_status, adaptation_action_data)
+            result = (adapt_action_status, adapt_action_obj)
         
         return result
 

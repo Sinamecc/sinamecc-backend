@@ -4,7 +4,7 @@ from users.utils import CustomTokenObtainPairView
 
 urlpatterns = [
     re_path(r'^', include('report_data.urls')),
-    re_path(r'^', include('mitigation_action.workflow_steps.urls')),
+    # re_path(r'^', include('mitigation_action.workflow_steps.urls')),
     re_path(r'^', include('mitigation_action.urls')),
     re_path(r'^', include('adaptation_action.urls')),
     re_path(r'^', include('workflow.urls')),

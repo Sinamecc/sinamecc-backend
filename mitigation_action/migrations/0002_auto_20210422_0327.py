@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import general.storages
-import mitigation_action.workflow_steps.models
+import mitigation_action.workflow.models
 
 
 class Migration(migrations.Migration):
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             name='MAWorkflowStepFile',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(storage=general.storages.PrivateMediaStorage(), upload_to=mitigation_action.workflow_steps.models.workflow_step_directory_path)),
+                ('file', models.FileField(storage=general.storages.PrivateMediaStorage(), upload_to=mitigation_action.workflow.models.workflow_step_directory_path)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),

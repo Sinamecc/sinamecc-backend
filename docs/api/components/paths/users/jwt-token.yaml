@@ -1,0 +1,34 @@
+post:
+  summary: Get JWT token
+  operationId: get-jwt-token
+  description: Get JWT token for user authentication
+  tags:
+    - users
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            username:
+              type: string
+              example: "admin"
+            password:
+              type: string
+              example: "cambiame"
+
+  responses:
+    "200":
+      description: JWT token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzODk0ODE4LCJpYXQiOjE3MzM4NjYwMTgsImp0aSI6ImFiNjJjZWE4MWVlMDRkNTNiN2FiZDcxNzBhOWNiOTg1IiwidXNlcl9pZCI6MSwi"
+              user_id:
+                type: integer
+                example: 1

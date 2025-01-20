@@ -14,7 +14,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  web:
+  backend:
     build: 
       context: .
       dockerfile: ./build/Dockerfile.dev
