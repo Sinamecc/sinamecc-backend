@@ -17,11 +17,22 @@ dependencies = [
     "djangorestframework-simplejwt>=5.3.1,<5.4.0",
     "gunicorn>=23,<24",
     "psycopg2-binary>=2.9.0,<2.10.0",
+    "pytest-factoryboy>=2.7.0,<3.0.0",
 ]
-
-[tool.uv]
 
 [dependency-groups]
 dev = [
     "moto>=5.0.0,<5.1.0",
+    "pytest-django>=4.9.0,<5.0.0",
+]
+[tool.pytest]
+addopts = ["-p", "no:warnings"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.local"
+# -- recommended but optional:
+python_files = ["test_*.py"]
+pythonpath = "/"
+markers = [
+    "users: mark a test as a users test",
 ]

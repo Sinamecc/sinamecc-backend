@@ -1,0 +1,32 @@
+get:
+  summary: Get an user record by id
+  operationId: get-user-by-id
+  description: Get an user record by id
+  tags:
+    - users
+  parameters:
+    - in: path
+      name: id
+      description: The id of the user
+      required: true
+      schema:
+        type: integer 
+        example: 1
+  
+  responses:
+    '200':
+      description: User record
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                $ref: "../../schemas/users.yaml#/ResponseRecord"
+              code: 
+                type: integer
+                example: 0
+            
+  security:
+    - JWTAuth: []

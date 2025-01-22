@@ -1,6 +1,35 @@
 from rest_framework import serializers
 from users.models import CustomUser, ProfilePicture
 from django.contrib.auth.models import Group, Permission
+from core.auth import roles
+
+class UserSerializer(serializers.ModelSerializer):
+
+    roles = serializers.SerializerMethodField()
+    available_apps = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_staff',
+            'email',
+            'is_active',
+            'is_provider',
+            'is_administrador_dcc',
+            'phone',
+            'roles',
+            'available_apps'
+        )
+
+    def get_roles(self, obj):
+        return roles.AuthRolesServices.get_roles_from_user(obj)
+    
+    def get_available_apps(self, obj):
+        return roles.AuthRolesServices.get_app_roles_from_user(obj)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
