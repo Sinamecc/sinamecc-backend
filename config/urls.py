@@ -8,7 +8,7 @@ urlpatterns = [
     path(f'api/v1/', include('users.urls')),
     path(f'api/v1/', include('mitigation_action.urls')),
     re_path(r'^', include('report_data.urls')),
-    re_path(r'^', include('mitigation_action.workflow_steps.urls')),
+    # re_path(r'^', include('mitigation_action.workflow_steps.urls')),
     re_path(r'^', include('adaptation_action.urls')),
     re_path(r'^', include('workflow.urls')),
     re_path(r'^', include('mccr.workflow_steps.urls')),
