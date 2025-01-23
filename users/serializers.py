@@ -85,6 +85,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         )
 
 
+## Old serializers
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

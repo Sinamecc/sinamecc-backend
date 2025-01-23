@@ -1,6 +1,7 @@
 from django.urls import re_path, path
 from users import views
 from users._views.resources import UserResourcesViewSet
+from users._views.password_management import PasswordManagementViewSet
 from rest_framework.routers import DefaultRouter
 
 
@@ -76,6 +77,7 @@ urlpatterns_old = [
 
 router = DefaultRouter(trailing_slash=False, use_regex_path=False)
 router.register(r'users', UserResourcesViewSet, 'users')
+router.register(r'users', PasswordManagementViewSet, 'password-management')
 
 urlpatterns = []
 urlpatterns.extend(router.urls)

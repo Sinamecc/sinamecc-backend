@@ -24,6 +24,10 @@ paths:
     $ref: "./components/paths/users/record.yaml"
   /users:
     $ref: "./components/paths/users/record-list.yaml"
+  /users/change-password-request:
+    $ref: "./components/paths/users/change-password-request.yaml"
+  /users/change-password:
+    $ref: "./components/paths/users/change-password.yaml"
   /mitigation-action/{id}/:
     $ref: "./components/paths/mitigation-actions/record.yaml"
   /mitigation-action/:
@@ -34,7 +38,6 @@ paths:
     $ref: "./components/paths/adaptation-actions/record-list.yaml"
 
   
-
 components:
   securitySchemes:
     JWTAuth:
