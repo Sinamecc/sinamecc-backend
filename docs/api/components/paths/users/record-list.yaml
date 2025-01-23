@@ -38,3 +38,31 @@ get:
                 example: 0
   security:
     - JWTAuth: []
+
+post:
+  summary: Create a new user
+  operationId: create-user
+  description: Create a new user
+  tags:
+    - users
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/users.yaml#/CreateRequestBody"
+  responses:
+    '200':
+      description: User created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../schemas/users.yaml#/ResponseRecord"
+              code: 
+                type: integer
+                example: 0
+  security:
+    - JWTAuth: []

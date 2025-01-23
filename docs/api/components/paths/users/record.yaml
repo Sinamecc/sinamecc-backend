@@ -30,3 +30,71 @@ get:
             
   security:
     - JWTAuth: []
+
+put:
+  summary: Update an user record
+  operationId: update-user
+  description: Update an user record
+  tags:
+    - users
+  parameters:
+    - in: path
+      name: id
+      description: The id of the user
+      required: true
+      schema:
+        type: integer 
+        example: 1
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/users.yaml#/UpdateRequestBody"
+  responses:
+    '200':
+      description: User record updated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                $ref: "../../schemas/users.yaml#/ResponseRecord"
+              code: 
+                type: integer
+                example: 0
+  security:
+    - JWTAuth: []
+
+delete: 
+  summary: Delete an user record
+  operationId: delete-user
+  description: Delete an user record
+  tags:
+    - users
+  parameters:
+    - in: path
+      name: id
+      description: The id of the user
+      required: true
+      schema:
+        type: integer 
+        example: 1
+  responses:
+    '200':
+      description: User record deleted
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                $ref: "../../schemas/users.yaml#/ResponseRecord"
+              code: 
+                type: integer
+                example: 0
+  security:
+    - JWTAuth: []

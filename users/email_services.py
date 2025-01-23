@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.template import loader
-
-
-
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 User =  get_user_model()
 class UserEmailServices():
@@ -18,6 +16,35 @@ class UserEmailServices():
         self.SEND_MAIL_ERROR = "Unable to send the email to {0}, ERROR: {1}"
         self.template_path = "{module}/{template}.html"
         self.token_generator = PasswordResetTokenGenerator()
+
+    def notify_new_user_creation_to_password_change(
+        self,
+        user: AbstractUser,
+        password_recovery_url: str
+    ) -> None:
+        
+        template = loader.get_template(
+                    self.template_path.format(
+                        module='email',
+                        template='reset_password_to_new_user'
+                    )
+                )   
+
+        redirect_url = f"{self.email_services.base_dir_notification}/{password_recovery_url}"
+        full_name = f"{user.first_name} {user.last_name}".title()
+        context = {
+            'url': redirect_url,
+            'lang': 'es',
+            'full_name': full_name,
+            'username': user.username,
+            'email': user.email
+        }
+
+        message_body = template.render(context)
+
+        subject = 'Notificación de creación de usuario'
+
+        self.send_notification(user.email, subject, message_body)
     
     def send_notification(self, recipient, subject, message_body):
 
@@ -43,22 +70,6 @@ class UserEmailServices():
         return self.send_notification(user.email, subject, message_body)
     
 
-    def notify_new_user_creation_to_password_change(self, user, encoded_user_id):
-        
-        token = self.token_generator.make_token(user)
-
-        template_path_data = {'module': 'email', 'template': 'reset_password_to_new_user'}
-        template = loader.get_template(self.template_path.format(**template_path_data))
-
-        redirect_url = f"{self.email_services.base_dir_notification}/changePassword?code={encoded_user_id}&token={token}"
-        full_name = f"{user.first_name} {user.last_name}"
-        context = {"url": redirect_url, 'lang': 'es', 'full_name': full_name, 'username': user.username, 'email': user.email} ## at the moment
-
-        message_body = template.render(context)
-
-        subject = 'Notificación de creación de usuario'
-
-        return self.send_notification(user.email, subject, message_body)
     
 
     def notify_password_change_done(self, user):

@@ -79,4 +79,90 @@ ResponseRecord:
             provider:
               type: boolean
               example: true
-       
+
+CreateRequestBody:
+  type: object
+  properties:
+    username:
+      type: string
+      description: Username of the user.
+      example: johndoe
+    password:
+      type: string
+      description: Password for the user.
+      example: "password123"
+    first_name:
+      type: string
+      description: First name of the user.
+      example: John
+    last_name:
+      type: string
+      description: Last name of the user.
+      example: Doe
+    email:
+      type: string
+      description: Email address of the user.
+      example: johndoe@example.com
+    is_staff:
+      type: boolean
+      description: Indicates if the user is a staff member.
+      example: true
+    is_active:
+      type: boolean
+      description: Indicates if the user account is active.
+      example: true
+    is_provider:
+      type: boolean
+      description: Indicates if the user is a provider.
+      example: false
+    is_administrador_dcc:
+      type: boolean
+      description: Indicates if the user is an administrator of DCC.
+      example: false
+    phone:
+      type: string
+      description: Phone number of the user.
+      example: "+1234567890"
+
+
+UpdateRequestBody:
+  type: object
+  properties:
+    username:
+      type: string
+      description: Username of the user.
+      example: johndoe
+    first_name:
+      type: string
+      description: First name of the user.
+      example: John
+    last_name:
+      type: string
+      description: Last name of the user.
+      example: Doe
+    email:
+      type: string
+      description: Email address of the user.
+      example: test@test.com
+    is_staff:
+      type: boolean
+      description: Indicates if the user is a staff member.
+      example: true
+    is_active:
+      type: boolean
+      description: Indicates if the user account is active.
+      example: true
+    is_provider:
+      type: boolean
+      description: Indicates if the user is a provider.
+      example: false
+    is_administrador_dcc:
+      type: boolean
+      description: Indicates if the user is an administrator of DCC.
+      example: false
+    phone:
+      type: string
+      description: Phone number of the user.
+      example: "+1234567890"
+
+

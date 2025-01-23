@@ -8,8 +8,8 @@ from core.serializers.responses import SuccessResponseSerializers
 from users._services.resources import UserResourcesService
 
 
-
 class UserResourcesViewSet(viewsets.ViewSet):
+
     lookup_value_converter = 'int'
     service_class = UserResourcesService
 
@@ -33,7 +33,15 @@ class UserResourcesViewSet(viewsets.ViewSet):
         return Response(response, status=status.HTTP_200_OK,)
 
     def create(self, request: Request) -> Response:
-        pass
+        
+        _service = self.service_class()
+
+        user = _service.create(request.data)
+
+        response = SuccessResponseSerializers({'data': user}).data
+
+        return Response(response, status=status.HTTP_201_CREATED,)
+
 
     def retrieve(self, request: Request, pk: int) -> Response:
 
@@ -46,11 +54,22 @@ class UserResourcesViewSet(viewsets.ViewSet):
         return Response(response, status=status.HTTP_200_OK,)
 
     def update(self, request: Request, pk: int) -> Response:
-        pass
+        
+        _service = self.service_class()
 
-    def partial_update(self, request: Request, pk: int) -> Response:
-        pass
+        user = _service.update(pk, request.data)
+
+        response = SuccessResponseSerializers({'data': user}).data
+
+        return Response(response, status=status.HTTP_200_OK,)
 
     def destroy(self, request: Request, pk: int) -> Response:
-        pass
+        
+        _service = self.service_class()
+
+        user = _service.delete(pk)
+
+        response = SuccessResponseSerializers({'data': user}).data
+
+        return Response(response, status=status.HTTP_200_OK,)
     
