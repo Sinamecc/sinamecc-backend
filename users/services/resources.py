@@ -1,6 +1,6 @@
 from typing import Any
 from general.services import EmailServices
-from users.email_services import UserEmailServices
+from users.services.email import UserEmailServices
 from users.models import CustomUser as UserModel
 from users.exceptions import UserNotFoundException
 from users.serializers import UserCreateSerializer, UserSerializer, UserUpdateSerializer
@@ -16,28 +16,24 @@ class UserResourcesService:
     def __init__(self) -> None:
         self._email_services = UserEmailServices(EmailServices())
 
-    def get_by_id(self, id: int) -> dict[str, Any]:
+    def get_by_id(self, id: int) -> UserModel:
         try:
             user = UserModel.objects.get(pk=id)
 
         except UserModel.DoesNotExist:
             raise UserNotFoundException
-
-        serialized_user = UserSerializer(user).data
-
-        return serialized_user
+        
+        return user
 
 
-    def get_all(self, offset: int, limit: int) -> list[dict[str, Any]]:
+    def get_all(self, offset: int, limit: int) -> list[UserModel]:
         
         user_list = UserModel.objects.all()[offset: offset + limit]
 
-        serialized_user_list = UserSerializer(user_list, many=True).data
-
-        return serialized_user_list
+        return list(user_list)
         
     
-    def create(self, data: dict[str, Any]) -> dict[str, Any]:
+    def create(self, data: dict[str, Any]) -> UserModel:
 
         serialized_user = UserCreateSerializer(data=data)
         serialized_user.is_valid(raise_exception=True)
@@ -47,12 +43,10 @@ class UserResourcesService:
 
         self._email_services.notify_new_user_creation_to_password_change(user, _password_recovery_url)
 
-        serialized_new_user = UserSerializer(user).data
-
-        return serialized_new_user
+        return user
             
 
-    def update(self, id: int, data: dict[str, Any]) -> dict[str, Any]:
+    def update(self, id: int, data: dict[str, Any]) -> UserModel:
         
         try:
             user = UserModel.objects.get(pk=id)
@@ -63,10 +57,9 @@ class UserResourcesService:
         serialized_user.is_valid(raise_exception=True)
 
         user = serialized_user.save()
+        user.refresh_from_db()
 
-        serialized_user = UserSerializer(user).data
-
-        return serialized_user
+        return user
         
 
 

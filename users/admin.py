@@ -1,16 +1,7 @@
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from .services import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser
+from users.models import CustomUser as UserModel
 
-# Register your models here.
-
-class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    list_display = ['username', 'email','is_superuser','is_staff']
-
-admin.site.register(CustomUser, CustomUserAdmin)
-ROLEPERMISSIONS_REGISTER_ADMIN = True
+## It's not to manage the user model in the admin panel
+## It's just to show the user model in the admin panel
+admin.site.register(UserModel, UserAdmin)

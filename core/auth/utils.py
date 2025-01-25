@@ -3,19 +3,17 @@ from typing import Any
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
-from users.services import UserService
-
+from core.auth.roles_services import AuthRolesServices
+from django.contrib.auth.models import AbstractUser
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     @classmethod
-    def get_token(cls, user):
-        _service = UserService()
+    def get_token(cls, user: AbstractUser) -> dict[str, Any]:
+        
         payload = super(CustomTokenObtainPairSerializer, cls).get_token(user)
-        available_apps_status, available_apps_data = _service.get_user_roles(user)
         payload['email'] = user.email
         payload['username'] = user.username
-        if available_apps_status:
-                payload['available_apps'] = available_apps_data
+        payload['available_apps'] = AuthRolesServices.get_roles_from_user(user)
         
         return payload
     

@@ -1,6 +1,5 @@
 from django.urls import include, re_path, path
 from django.contrib import admin
-from users.utils import CustomTokenObtainPairView
 
 API_VERSION = 'v1'
 

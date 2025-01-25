@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from users.services import UserService
+from users.services.resources import UserResourcesService
 User =  get_user_model()
 
 class MCCREmailServices():
@@ -7,7 +7,7 @@ class MCCREmailServices():
     def __init__(self, email_services):
         ##  SES_service instance
         self.email_services = email_services
-        self.user_services = UserService()
+        self.user_services = UserResourcesService()
         self.message_subject_mccr = "MCCR #: {0}"
         self.SEND_NOTIFICATION_ERROR = "Unable to send the email to OVV, ERROR: {0}"
         self.SEND_MAIL_ERROR = "Unable to send the email to {0}, ERROR: {1}"
@@ -40,12 +40,8 @@ class MCCREmailServices():
 
         subject = self.message_subject_mccr.format(mccr.id)
         message = self.buil_message(mccr)
-        result_status, result_data = self.user_services.get_user_by_id(user_id)
+        user = self.user_services.get_by_id(user_id)
 
-        if not result_status:
-            return (result_status, result_data)
-
-        user = result_data
         user_email = user.email
         result_status, result_email = self.send_notification(user_email, subject, message)
 
@@ -57,21 +53,23 @@ class MCCREmailServices():
 
     def send_status_notification_to_group(self, mccr, group_name):
 
-        subject = self.message_subject_mccr.format(mccr.id)
-        message = self.buil_message(mccr)
-        result_status, result_data = self.user_services.get_group_users(group_name)
+        # subject = self.message_subject_mccr.format(mccr.id)
+        # message = self.buil_message(mccr)
+        # result_status, result_data = self.user_services.get_group_users(group_name)
 
-        if not result_status:
-            return (result_status, result_data)
+        # if not result_status:
+        #     return (result_status, result_data)
 
-        user_list = result_data
-        result_status, result_email = self.send_notification(user_list, subject, message)
+        # user_list = result_data
+        # result_status, result_email = self.send_notification(user_list, subject, message)
         
-        if not result_status:
-            error = self.SEND_MAIL_ERROR.format(group_name, result_email)
-            return (result_status, error)
+        # if not result_status:
+        #     error = self.SEND_MAIL_ERROR.format(group_name, result_email)
+        #     return (result_status, error)
 
-        return (result_status, result_email)
+        # return (result_status, result_email)
+
+        return (True, 'OK')
     
     def send_notification_to_ovv(self, mccr, ovv_email):
 

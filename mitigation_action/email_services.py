@@ -1,4 +1,3 @@
-from users.services import UserService
 from users.models import CustomUser
 from django.contrib.auth import get_user_model
 from django.template import loader

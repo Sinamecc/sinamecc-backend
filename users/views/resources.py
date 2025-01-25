@@ -5,7 +5,8 @@ from rest_framework.decorators import action
 from rest_framework import status
 from core.exceptions import InvalidQueryParamsException
 from core.serializers.responses import SuccessResponseSerializers
-from users._services.resources import UserResourcesService
+from users.services.resources import UserResourcesService
+from users.serializers import UserSerializer
 
 
 class UserResourcesViewSet(viewsets.ViewSet):
@@ -27,8 +28,10 @@ class UserResourcesViewSet(viewsets.ViewSet):
                     int(offset),
                     int(limit)
                 )
+        
+        serialized_users = UserSerializer(users, many=True).data
 
-        response = SuccessResponseSerializers({'data': users}).data
+        response = SuccessResponseSerializers({'data': serialized_users}).data
 
         return Response(response, status=status.HTTP_200_OK,)
 
@@ -38,7 +41,9 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         user = _service.create(request.data)
 
-        response = SuccessResponseSerializers({'data': user}).data
+        serialized_user = UserSerializer(user).data
+
+        response = SuccessResponseSerializers({'data': serialized_user}).data
 
         return Response(response, status=status.HTTP_201_CREATED,)
 
@@ -48,8 +53,10 @@ class UserResourcesViewSet(viewsets.ViewSet):
         _service = self.service_class()
 
         user = _service.get_by_id(pk)
+
+        serialized_user = UserSerializer(user).data
         
-        response = SuccessResponseSerializers({'data': user}).data
+        response = SuccessResponseSerializers({'data': serialized_user}).data
 
         return Response(response, status=status.HTTP_200_OK,)
 
@@ -59,7 +66,9 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         user = _service.update(pk, request.data)
 
-        response = SuccessResponseSerializers({'data': user}).data
+        serialized_user = UserSerializer(user).data
+
+        response = SuccessResponseSerializers({'data': serialized_user}).data
 
         return Response(response, status=status.HTTP_200_OK,)
 
@@ -67,9 +76,9 @@ class UserResourcesViewSet(viewsets.ViewSet):
         
         _service = self.service_class()
 
-        user = _service.delete(pk)
+        serialized_deleted_user = _service.delete(pk)
 
-        response = SuccessResponseSerializers({'data': user}).data
+        response = SuccessResponseSerializers({'data': serialized_deleted_user}).data
 
         return Response(response, status=status.HTTP_200_OK,)
     

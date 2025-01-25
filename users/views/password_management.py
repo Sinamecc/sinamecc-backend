@@ -7,7 +7,7 @@ from rest_framework.throttling import AnonRateThrottle
 
 from core.exceptions import MissingRequiredFieldsException, InvalidQueryParamsException, InvalidParameterException
 from core.serializers.responses import SuccessResponseSerializers
-from users._services.password_management import PasswordManagementService
+from users.services.password_management import PasswordManagementService
 
 class PasswordManagementViewSet(viewsets.ViewSet):
 
@@ -26,10 +26,13 @@ class PasswordManagementViewSet(viewsets.ViewSet):
             raise MissingRequiredFieldsException('Email is required')
         
         _service = self.service_class()
+        _service.change_password_request(email)
 
-        returned_data = _service.change_password_request(email)
+        default_response = {
+            'message': 'The request to change the password has been sent to the user email',
+        }
 
-        response = SuccessResponseSerializers({'data': returned_data}).data
+        response = SuccessResponseSerializers({'data': default_response}).data
 
         return Response(response, status=status.HTTP_200_OK,) 
     
@@ -56,13 +59,15 @@ class PasswordManagementViewSet(viewsets.ViewSet):
 
         _service = self.service_class()
 
-        returned_data = _service.update_password_by_request(
-                            token=token, 
-                            code=code,
-                            new_password=new_password,
-                        )
+        _service.update_password_by_request(
+            token=token, 
+            code=code,
+            new_password=new_password,
+        )
+        
+        data_for_responding = {'message': 'The password has been changed successfully'}
 
-        response = SuccessResponseSerializers({'data': returned_data}).data
+        response = SuccessResponseSerializers({'data': data_for_responding}).data
 
         return Response(response, status=status.HTTP_200_OK,)
 

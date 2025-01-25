@@ -16,14 +16,20 @@ tags:
     description: for testing backend
   - name: users
     description: User management
+  - name: roles
+    description: Role management
 
 paths:
   /token/:
     $ref: "./components/paths/users/jwt-token.yaml"
   /users/{id}:
-    $ref: "./components/paths/users/record.yaml"
+    $ref: "./components/paths/users/record.yaml#/user"
   /users:
-    $ref: "./components/paths/users/record-list.yaml"
+    $ref: "./components/paths/users/record.yaml#/user-list"
+  /users/roles:
+    $ref: "./components/paths/users/roles.yaml#/users-roles"
+  /users/{userId}/roles:
+    $ref: "./components/paths/users/roles.yaml#/user-roles"
   /users/change-password-request:
     $ref: "./components/paths/users/change-password-request.yaml"
   /users/change-password:

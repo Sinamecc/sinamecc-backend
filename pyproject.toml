@@ -36,4 +36,5 @@ python_files = ["test_*.py"]
 pythonpath = "/"
 markers = [
     "users: mark a test as a users test",
+    "testfast: mark a test as a fast test",
 ]

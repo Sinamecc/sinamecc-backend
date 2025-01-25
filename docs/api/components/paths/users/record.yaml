@@ -1,100 +1,170 @@
-get:
-  summary: Get an user record by id
-  operationId: get-user-by-id
-  description: Get an user record by id
-  tags:
-    - users
-  parameters:
-    - in: path
-      name: id
-      description: The id of the user
-      required: true
-      schema:
-        type: integer 
-        example: 1
-  
-  responses:
-    '200':
-      description: User record
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              data:
-                type: object
-                $ref: "../../schemas/users.yaml#/ResponseRecord"
-              code: 
-                type: integer
-                example: 0
-            
-  security:
-    - JWTAuth: []
-
-put:
-  summary: Update an user record
-  operationId: update-user
-  description: Update an user record
-  tags:
-    - users
-  parameters:
-    - in: path
-      name: id
-      description: The id of the user
-      required: true
-      schema:
-        type: integer 
-        example: 1
-  requestBody:
-    required: true
-    content:
-      application/json:
+user-list:
+  get:
+    summary: Get list of users
+    operationId: get-user-list
+    description: Get list of users
+    tags:
+      - users
+    parameters:
+      - in: query
+        name: offset
+        description: Number of records to skip
+        required: false
+        default: 0
         schema:
-          $ref: "../../schemas/users.yaml#/UpdateRequestBody"
-  responses:
-    '200':
-      description: User record updated
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              data:
-                type: object
-                $ref: "../../schemas/users.yaml#/ResponseRecord"
-              code: 
-                type: integer
-                example: 0
-  security:
-    - JWTAuth: []
+          type: integer
+          example: 0
+      - in: query
+        name: limit
+        description: Number of records to return
+        required: false
+        default: 10
+        schema:
+          type: integer
+          example: 10
+    responses:
+      '200':
+        description: List of users
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []
 
-delete: 
-  summary: Delete an user record
-  operationId: delete-user
-  description: Delete an user record
-  tags:
-    - users
-  parameters:
-    - in: path
-      name: id
-      description: The id of the user
+  post:
+    summary: Create a new user
+    operationId: create-user
+    description: Create a new user
+    tags:
+      - users
+    requestBody:
       required: true
-      schema:
-        type: integer 
-        example: 1
-  responses:
-    '200':
-      description: User record deleted
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              data:
-                type: object
-                $ref: "../../schemas/users.yaml#/ResponseRecord"
-              code: 
-                type: integer
-                example: 0
-  security:
-    - JWTAuth: []
+            $ref: "../../schemas/users.yaml#/CreateRequestBody"
+    responses:
+      '200':
+        description: User created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []
+user:
+  get:
+    summary: Get an user record by id
+    operationId: get-user-by-id
+    description: Get an user record by id
+    tags:
+      - users
+    parameters:
+      - in: path
+        name: id
+        description: The id of the user
+        required: true
+        schema:
+          type: integer 
+          example: 1
+    
+    responses:
+      '200':
+        description: User record
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+              
+    security:
+      - JWTAuth: []
+
+  put:
+    summary: Update an user record
+    operationId: update-user
+    description: Update an user record
+    tags:
+      - users
+    parameters:
+      - in: path
+        name: id
+        description: The id of the user
+        required: true
+        schema:
+          type: integer 
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/users.yaml#/UpdateRequestBody"
+    responses:
+      '200':
+        description: User record updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []
+
+  delete: 
+    summary: Delete an user record
+    operationId: delete-user
+    description: Delete an user record
+    tags:
+      - users
+    parameters:
+      - in: path
+        name: id
+        description: The id of the user
+        required: true
+        schema:
+          type: integer 
+          example: 1
+    responses:
+      '200':
+        description: User record deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []

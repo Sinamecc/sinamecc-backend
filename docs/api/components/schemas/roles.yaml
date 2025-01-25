@@ -1,0 +1,22 @@
+RoleRecord:
+  type: object
+  properties:
+    app:
+      type: array
+      items:
+        type: string
+      example: ["ppcn", "ma", "mccr", "aa", "rd"]
+    role:
+      type: string
+      example: "information_provider"
+    role_name:
+      type: string
+      example: "Information Provider"
+    available_permissions:
+      type: array
+      items:
+        type: object
+        properties:
+          create_adaptation_action:
+            type: string
+            example: "Create Adaptation Action"

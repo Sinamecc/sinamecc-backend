@@ -3,6 +3,10 @@ from rolepermissions import roles
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from typing import TypedDict
+from django.db import transaction
+
+from core.auth.exceptions import RoleGenericException
+
 
 UserModel =  get_user_model()
 
@@ -59,4 +63,33 @@ class AuthRolesServices:
 
                 
         return app_permissions
+    
 
+    @staticmethod
+    def get_all_registered_roles() -> list[RoleDict]:
+        serialized_roles_lists = []
+        for role in roles.registered_roles.values():
+            serialized_roles_lists.append(RoleDict(
+                app=role.app,
+                role=role.get_name(),
+                role_name=role.role,
+                available_permissions=[
+                    {permission.codename: permission.name}
+                    for permission in role.get_default_true_permissions()
+                ]
+            ))
+
+        return serialized_roles_lists
+
+
+    @staticmethod
+    def assign_roles_to_user(user: AbstractUser, role_list: list[str]) -> AbstractUser:
+        try:
+            with transaction.atomic():
+                roles.clear_roles(user)
+                [roles.assign_role(user, role) for role in role_list]
+
+        except Exception as e:
+            raise RoleGenericException('Could not assign roles to user')
+
+        return user

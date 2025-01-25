@@ -17,7 +17,7 @@ def user() -> UserModel:
 @pytest.mark.django_db
 def test_reset_password_without_email(user: UserModel, api_client: APIClient, mocker: MockFixture):
 
-    mocker.patch('users.email_services.UserEmailServices.notify_for_requesting_password_change', return_value=None)
+    mocker.patch('users.services.email.UserEmailServices.notify_for_requesting_password_change', return_value=None)
     NEW_PASSWORD = 'new_password'
     CURRENT_PASSWORD = 'current_password'
 
