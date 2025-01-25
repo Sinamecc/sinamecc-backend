@@ -2,7 +2,7 @@ from typing import Any
 from rest_framework import serializers
 from users.models import CustomUser, ProfilePicture
 from django.contrib.auth.models import Group, Permission
-from core.auth import roles
+from core.auth import roles_services
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -27,10 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_roles(self, obj):
-        return roles.AuthRolesServices.get_roles_from_user(obj)
+        return roles_services.AuthRolesServices.get_roles_from_user(obj)
     
     def get_available_apps(self, obj):
-        return roles.AuthRolesServices.get_app_roles_from_user(obj)
+        return roles_services.AuthRolesServices.get_app_roles_from_user(obj)
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:

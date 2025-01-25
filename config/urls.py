@@ -15,7 +15,6 @@ urlpatterns = [
     re_path(r'^', include('mccr.urls')),
     re_path(r'^', include('ppcn.workflow_steps.urls')),
     re_path(r'^', include('ppcn.urls')),
-    re_path(r'^api/v1/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^', include('general.urls'))
 ]

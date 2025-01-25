@@ -157,4 +157,4 @@ SIMPLE_JWT = {
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
-ROLEPERMISSIONS_MODULE = 'users.roles'
+ROLEPERMISSIONS_MODULE = 'core.auth.roles'

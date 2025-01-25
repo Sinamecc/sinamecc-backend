@@ -1,62 +1,155 @@
-from typing import Any
-from rolepermissions import roles
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth import get_user_model
-from typing import TypedDict
+from rolepermissions.roles import AbstractUserRole
+from ppcn.permissions.permissions import *
+from mitigation_action.permissions_data.permission import * 
+from mccr.permissions.permissions import  *
+from users.permissions.permissions import *  
+from adaptation_action.permissions_data.permissions import *
+from report_data.permissions_data.permissions import *
 
-UserModel =  get_user_model()
+class Admin(AbstractUserRole):
 
-class RoleDict(TypedDict):
-    app: str
-    role: str
-    role_name: str
-    available_permissions: list[dict[str, str]]
-
-class AppRolesDict(TypedDict):
-    reviewer: bool
-    provider: bool
-
-class AuthRolesServices:
-
-    @staticmethod
-    def get_roles_from_user(user: AbstractUser) -> list[RoleDict]: 
-        
-        user_roles = roles.get_user_roles(user)
-        serialized_roles_lists = []
-        for role in user_roles:
-            serialized_roles_lists.append(RoleDict(
-                app=role.app,
-                role=role.get_name(),
-                role_name=role.role,
-                available_permissions=[
-                    {permission.codename: permission.name}
-                    for permission in role.get_default_true_permissions()
-                ]
-            ))
-
-        return serialized_roles_lists
+    role = 'Administrator'
+    app = 'all'
+    type = 'admin'
+    available_permissions = {
+        **permission_ppcn,
+        **permission_ppcn_reviewer,
+        **permission_mitigation_action,
+        **permission_mitigation_action_reviewer, 
+        **permission_mccr, 
+        **permission_mccr_reviewer,
+        **permission_users,
+        **permission_adaptation_action,
+        **permission_adaptation_action_reviewer,
+        **permission_report_data,
+        **permission_report_data_reviewer,
+    }
     
-    @staticmethod
-    def get_app_roles_from_user(user: AbstractUser) -> dict[str, AppRolesDict]:
 
-        app_permissions = {}
-        user_roles = roles.get_user_roles(user)
+class Reviewer(AbstractUserRole):
+    
+    role = 'Reviewer'
+    app = ['ppcn', 'ma', 'mccr', 'aa', 'rd']
+    type = 'reviewer'
+    available_permissions = {
+        **permission_ppcn_reviewer,
+        **permission_mitigation_action_reviewer,
+        **permission_mccr_reviewer,
+        **permission_adaptation_action_reviewer,
+        **permission_report_data_reviewer,
+    }
 
-        for role in user_roles:
-            apps_list = []
-            if not isinstance(role.app, list):
-                apps_list.append(role.app)
-            else:
-                apps_list = role.app
-                
-            for app in apps_list:
-                if app in apps_list:
-                    app_permissions[app] = AppRolesDict(
-                        reviewer=False,
-                        provider=False
-                    )
-                    app_permissions.get(app)[role.type] = True
 
-                
-        return app_permissions
+class InformationProvider(AbstractUserRole):
 
+    role = 'Information Provider'
+    app = ['ppcn', 'ma', 'mccr', 'aa', 'rd']
+    type = 'provider'
+    available_permissions = {
+        **permission_ppcn,
+        **permission_mitigation_action,
+        **permission_mccr,
+        **permission_adaptation_action,
+        **permission_report_data,
+    }
+
+## PPCN Roles
+class ReviewerPPCN(AbstractUserRole):
+
+    role = 'Reviewer PPCN'
+    app = 'ppcn'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_ppcn,
+        **permission_ppcn_reviewer,
+    }
+
+class InformationProviderPPCN(AbstractUserRole):
+
+    role = 'Information Provider PPCN'
+    app = 'ppcn'
+    type = 'provider'
+    available_permissions = {
+        **permission_ppcn
+    }
+
+
+## Mitigation Action Roles
+class ReviewerMitigationAction(AbstractUserRole):
+
+    role = 'Reviewer Mitigation Action'
+    app = 'ma'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_mitigation_action,
+        **permission_mitigation_action_reviewer,
+    }
+
+class InformationProviderMitigationAction(AbstractUserRole):
+    
+    role = 'Information Provider Mitigation Action'
+    app = 'ma'
+    type = 'provider'
+    available_permissions = {
+        **permission_mitigation_action
+    }
+
+# MCCR Permissions 
+
+class ReviewerMCCR(AbstractUserRole):
+
+    role = 'Reviewer MCCR'
+    app = 'mccr'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_mccr, 
+        **permission_mccr_reviewer
+    }
+
+class InformationProviderMCCR(AbstractUserRole):
+    role = 'Information Provider MCCR'
+    app = 'mccr'
+    type = 'provider'
+    available_permissions = {
+        **permission_mccr
+    }
+
+## Adaptation Action Roles
+class ReviewerAdaptationAction(AbstractUserRole):
+
+    role = 'Reviewer Adaptation Action'
+    app = 'aa'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_adaptation_action,
+        **permission_adaptation_action_reviewer,
+    }
+
+class InformationProviderAdaptationAction(AbstractUserRole):
+
+    role = 'Information Provider Adaptation Action'
+    app = 'aa'
+    type = 'provider'
+    available_permissions = {
+        **permission_adaptation_action
+    }
+
+## Report Data Roles
+class ReviewerReportData(AbstractUserRole):
+
+    role = 'Reviewer Report Data'
+    app = 'rd'
+    type = 'reviewer'
+    available_permissions = {
+        **permission_report_data,
+        **permission_report_data_reviewer,
+    }
+
+class InformationProviderReportData(AbstractUserRole):
+    
+    role = 'Information Provider Report Data'
+    app = 'rd'
+    type = 'provider'
+    available_permissions = {
+        **permission_report_data
+    }

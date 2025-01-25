@@ -4,7 +4,6 @@ from users.email_services import UserEmailServices
 from users.models import CustomUser as UserModel
 from users.exceptions import UserNotFoundException
 from users.serializers import UserCreateSerializer, UserSerializer, UserUpdateSerializer
-from core.auth import roles
 from core.auth.password_recovery import AuthPasswordServices
 """
 NOTE: In the future we will change the way to return the data, currently we are returning a

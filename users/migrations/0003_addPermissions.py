@@ -1,7 +1,7 @@
 from django.db import migrations, models
 from users.serializers import NewCustomUserSerializer
 from rolepermissions.roles import assign_role
-from users.roles import Admin, Reviewer, InformationProvider
+from core.auth.roles import Admin, Reviewer, InformationProvider
 from django.contrib.auth import get_user_model
 
 

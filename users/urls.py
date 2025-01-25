@@ -3,8 +3,7 @@ from users import views
 from users._views.resources import UserResourcesViewSet
 from users._views.password_management import PasswordManagementViewSet
 from rest_framework.routers import DefaultRouter
-
-
+from users.utils import CustomTokenObtainPairView
 
 ## NOTE: This urlpattern gonna be remove in the future
 urlpatterns_old = [
@@ -79,6 +78,8 @@ router = DefaultRouter(trailing_slash=False, use_regex_path=False)
 router.register(r'users', UserResourcesViewSet, 'users')
 router.register(r'users', PasswordManagementViewSet, 'password-management')
 
-urlpatterns = []
+urlpatterns = [
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+]
 urlpatterns.extend(router.urls)
 urlpatterns.extend(urlpatterns_old)
