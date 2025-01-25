@@ -95,5 +95,5 @@ class UserEmailServices():
 
         subject = 'Contraseña Reestablecida'
 
-        return self.send_notification(user.email, subject, message_body)
+        self.send_notification(user.email, subject, message_body)
 

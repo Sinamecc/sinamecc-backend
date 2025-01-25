@@ -175,10 +175,6 @@ def test_delete_user(api_client: APIClient, user: UserModel):
 
 
 
-  
-
-
-
 # @pytest.mark.users
 # @pytest.mark.django_db
 # def test_unauthorized_user_operations(api_client: APIClient, user: UserModel):
