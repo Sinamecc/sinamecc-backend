@@ -15,7 +15,7 @@ class PasswordManagementViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=['POST'],
+        methods=['post'],
         url_path='change-password-request',
         throttle_classes=[AnonRateThrottle]
     )
@@ -36,7 +36,7 @@ class PasswordManagementViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=['POST'],
+        methods=['post'],
         url_path='change-password',
         throttle_classes=[AnonRateThrottle]
     )
