@@ -295,6 +295,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/69/a4b2f2dfa51fd18fd898e10cc41d73a30965da7cb3b683f1375b1dc3dd5c/django_storages-1.14.4-py3-none-any.whl", hash = "sha256:d61930acb4a25e3aebebc6addaf946a3b1df31c803a6bf1af2f31c9047febaa3", size = 31809 },
 ]
 
+[package.optional-dependencies]
+s3 = [
+    { name = "boto3" },
+]
+
 [[package]]
 name = "django-viewflow"
 version = "2.2.9"
@@ -761,7 +766,7 @@ dependencies = [
     { name = "django-environ" },
     { name = "django-fsm" },
     { name = "django-role-permissions" },
-    { name = "django-storages" },
+    { name = "django-storages", extra = ["s3"] },
     { name = "django-viewflow" },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
@@ -785,7 +790,7 @@ requires-dist = [
     { name = "django-environ", specifier = ">=0.11.0,<0.12.0" },
     { name = "django-fsm", specifier = "==3.0.0" },
     { name = "django-role-permissions", specifier = "==3.2.0" },
-    { name = "django-storages", specifier = ">=1.14,<1.15" },
+    { name = "django-storages", extras = ["s3"], specifier = ">=1.14,<1.15" },
     { name = "django-viewflow", specifier = ">=2.2.9,<2.6" },
     { name = "djangorestframework", specifier = ">=3.15,<3.16" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.3.1,<5.4.0" },
