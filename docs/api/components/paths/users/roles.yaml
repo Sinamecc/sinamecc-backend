@@ -1,0 +1,68 @@
+users-roles:
+  get:  
+    summary: Get a list of registered roles
+    description: Get a list of registered roles
+    tags:
+      - users
+      - roles
+    responses:
+      '200':
+        description: List of roles
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: "../../schemas/roles.yaml#/RoleRecord"
+                code:
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []
+
+user-roles:
+  post:
+    summary: Assign roles to a user
+    description: Assign roles to a user
+    operationId: assign-roles
+    tags:
+      - users
+      - roles
+    parameters:
+      - in: path
+        name: userId
+        description: The ID of the user
+        required: true
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              roles:
+                type: array
+                items:
+                  type: string
+                example: ["admin", "information_provider"]
+    responses:
+      '200':
+        description: Roles assigned
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code:
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []

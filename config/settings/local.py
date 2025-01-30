@@ -12,6 +12,19 @@ DATABASES = {
     }
 }
 
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {},
+#     },
+#     "staticfiles": {
+#         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#         "OPTIONS": {
+#             "location": "static",
+#         },
+#     },
+# }
+
 DEBUG = True
 
 
@@ -33,3 +46,6 @@ AWS_QUERYSTRING_AUTH = True
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:4200',
+]

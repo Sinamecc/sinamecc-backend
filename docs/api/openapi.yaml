@@ -14,10 +14,28 @@ tags:
     description: Adaptation action
   - name: report-data
     description: for testing backend
+  - name: users
+    description: User management
+  - name: roles
+    description: Role management
 
 paths:
   /token/:
     $ref: "./components/paths/users/jwt-token.yaml"
+  /users/{id}:
+    $ref: "./components/paths/users/record.yaml#/user"
+  /users:
+    $ref: "./components/paths/users/record.yaml#/user-list"
+  /users/me:
+    $ref: "./components/paths/users/record.yaml#/user-me"
+  /users/roles:
+    $ref: "./components/paths/users/roles.yaml#/users-roles"
+  /users/{userId}/roles:
+    $ref: "./components/paths/users/roles.yaml#/user-roles"
+  /users/change-password-request:
+    $ref: "./components/paths/users/change-password-request.yaml"
+  /users/change-password:
+    $ref: "./components/paths/users/change-password.yaml"
   /mitigation-action/{id}/:
     $ref: "./components/paths/mitigation-actions/record.yaml"
   /mitigation-action/:
@@ -27,6 +45,7 @@ paths:
   /adaptation-action/:
     $ref: "./components/paths/adaptation-actions/record-list.yaml"
 
+  
 components:
   securitySchemes:
     JWTAuth:
