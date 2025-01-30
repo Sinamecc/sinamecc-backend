@@ -168,3 +168,56 @@ user:
                   example: 0
     security:
       - JWTAuth: []
+
+user-me:
+  get:
+    summary: Get the current user
+    operationId: get-current-user
+    description: Get the current user
+    tags:
+      - users
+    responses:
+      '200':
+        description: Current user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []
+
+  put:
+    summary: Update the current user
+    operationId: update-current-user
+    description: Update the current user
+    tags:
+      - users
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/users.yaml#/UpdateRequestBody"
+    responses:
+      '200':
+        description: Current user updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: "../../schemas/users.yaml#/ResponseRecord"
+                code: 
+                  type: integer
+                  example: 0
+    security:
+      - JWTAuth: []

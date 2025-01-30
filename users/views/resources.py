@@ -82,3 +82,29 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         return Response(response, status=status.HTTP_200_OK,)
     
+    @action(detail=False, methods=['get'], url_path='me')
+    def get_me(self, request: Request) -> Response:
+
+        _service = self.service_class()
+
+        user = _service.get_by_id(request.user.id)
+
+        serialized_user = UserSerializer(user).data
+
+        response = SuccessResponseSerializers({'data': serialized_user}).data
+
+        return Response(response, status=status.HTTP_200_OK,)
+    
+
+    @get_me.mapping.put
+    def update_me(self, request: Request) -> Response:
+        
+        _service = self.service_class()
+
+        user = _service.update(request.user.id, request.data)
+
+        serialized_user = UserSerializer(user).data
+
+        response = SuccessResponseSerializers({'data': serialized_user}).data
+
+        return Response(response, status=status.HTTP_200_OK,)

@@ -12,6 +12,19 @@ DATABASES = {
     }
 }
 
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {},
+#     },
+#     "staticfiles": {
+#         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#         "OPTIONS": {
+#             "location": "static",
+#         },
+#     },
+# }
+
 DEBUG = True
 
 

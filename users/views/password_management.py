@@ -4,6 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.permissions import AllowAny
 
 from core.exceptions import MissingRequiredFieldsException, InvalidQueryParamsException, InvalidParameterException
 from core.serializers.responses import SuccessResponseSerializers
@@ -17,7 +18,8 @@ class PasswordManagementViewSet(viewsets.ViewSet):
         detail=False,
         methods=['post'],
         url_path='change-password-request',
-        throttle_classes=[AnonRateThrottle]
+        throttle_classes=[AnonRateThrottle],
+        permission_classes=[AllowAny]
     )
     def change_password_request(self, request: Request) -> Response:
 
@@ -41,7 +43,8 @@ class PasswordManagementViewSet(viewsets.ViewSet):
         detail=False,
         methods=['post'],
         url_path='change-password',
-        throttle_classes=[AnonRateThrottle]
+        throttle_classes=[AnonRateThrottle],
+        permission_classes=[AllowAny]
     )
     def update_password_by_request(self, request: Request) -> Response:
         

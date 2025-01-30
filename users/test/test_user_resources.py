@@ -174,6 +174,65 @@ def test_delete_user(api_client: APIClient, user: UserModel):
     assert 'available_apps' in response_data
 
 
+@pytest.mark.users
+@pytest.mark.django_db
+def test_get_user_me(api_client: APIClient, user: UserModel):
+    api_client.force_authenticate(user=user)
+    response = api_client.get('/api/v1/users/me')
+    response_data = response.data.get('data')
+    
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data.get('username') == user.username
+    assert response_data.get('first_name') == user.first_name
+    assert response_data.get('last_name') == user.last_name
+    assert response_data.get('is_staff') == user.is_staff
+    assert response_data.get('email') == user.email
+    assert response_data.get('is_active') == user.is_active
+    assert response_data.get('is_provider') == user.is_provider
+    assert response_data.get('is_administrador_dcc') == user.is_administrador_dcc
+    assert response_data.get('phone') == user.phone
+    assert 'roles' in response_data
+    assert 'available_apps' in response_data
+
+
+@pytest.mark.users
+@pytest.mark.django_db
+def test_update_user_me(api_client: APIClient, user: UserModel):
+    api_client.force_authenticate(user=user)
+    
+    test_user = UserCreationFactory.build()
+    
+    new_user_data = {
+        "username": test_user.username,
+        "password": "testpass123",  # Keep a static password for testing
+        "first_name": test_user.first_name,
+        "last_name": test_user.last_name,
+        "email": test_user.email,
+        "is_staff": test_user.is_staff,
+        "is_active": test_user.is_active,
+        "is_provider": test_user.is_provider,
+        "is_administrador_dcc": test_user.is_administrador_dcc,
+        "phone": test_user.phone
+    }
+
+    response = api_client.put('/api/v1/users/me', new_user_data, format='json')
+    response_data = response.data.get('data')
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response_data.get('username') == new_user_data['username']
+    assert response_data.get('first_name') == new_user_data['first_name']
+    assert response_data.get('email') == new_user_data['email']
+    assert response_data.get('is_staff') == new_user_data['is_staff']
+    assert response_data.get('is_active') == new_user_data['is_active']
+    assert response_data.get('is_provider') == new_user_data['is_provider']
+    assert response_data.get('is_administrador_dcc') == new_user_data['is_administrador_dcc']
+    assert response_data.get('phone') == new_user_data['phone']
+    assert 'roles' in response_data
+    assert 'available_apps' in response_data
+    assert 'password' not in response_data
+
+
+
 
 # @pytest.mark.users
 # @pytest.mark.django_db

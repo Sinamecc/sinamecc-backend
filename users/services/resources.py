@@ -74,6 +74,3 @@ class UserResourcesService:
         user.delete()
 
         return serialized_user
-
-
-    

@@ -26,6 +26,8 @@ paths:
     $ref: "./components/paths/users/record.yaml#/user"
   /users:
     $ref: "./components/paths/users/record.yaml#/user-list"
+  /users/me:
+    $ref: "./components/paths/users/record.yaml#/user-me"
   /users/roles:
     $ref: "./components/paths/users/roles.yaml#/users-roles"
   /users/{userId}/roles:
