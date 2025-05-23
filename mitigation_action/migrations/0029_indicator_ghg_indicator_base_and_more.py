@@ -20,4 +20,9 @@ class Migration(migrations.Migration):
             name='ghg_indicator_goal',
             field=models.DecimalField(decimal_places=2, max_digits=20, null=True),
         ),
+        migrations.AlterField(
+            model_name='financeinformation',
+            name='budget',
+            field=models.DecimalField(decimal_places=2, max_digits=20, null=True),
+        ),
     ]
