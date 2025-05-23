@@ -769,7 +769,7 @@ class Finance(models.Model):
 class FinanceInformation(models.Model):
 
     source_description = models.CharField(max_length=255, null=True)
-    budget = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    budget = models.DecimalField(max_digits=20, decimal_places=2, null=True)
     currency = models.TextField(null=True)
     reference_year =models.DateField(null=True)
     finance = models.ForeignKey(Finance, related_name='finance_information', null=True, on_delete=models.CASCADE)
