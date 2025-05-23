@@ -100,8 +100,5 @@ This project is licensed under the terms in the `LICENSE` file.
 The OpenAPI documentation is available at the file:
 ```
 docs/api/openapi.yaml
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> 17a3a3a (feat: add readme)
+
