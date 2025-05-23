@@ -624,6 +624,9 @@ class Indicator(models.Model):
     available_time_start_date = models.DateField(null=True)
     available_time_end_date = models.DateField(null=True)
 
+    ghg_indicator_goal = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    ghg_indicator_base = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+
     geographic_coverage = models.CharField(max_length=255, choices=GEOGRAPHIC, default='NATIONAL', null=True)
     other_geographic_coverage = models.CharField(max_length=255, blank=True, null=True)
     

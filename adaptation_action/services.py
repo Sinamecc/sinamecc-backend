@@ -1484,7 +1484,7 @@ class AdaptationActionServices():
             return  (False, self.ACCESS_DENIED_ALL)
         
         if adaptation_action_status:
-            result = (adaptation_action_status, AdaptationActionSerializer(adaptation_action_data, many=True).data)
+            result = (adaptation_action_status, AdaptationActionAllSerializer(adaptation_action_data, many=True).data)
         
         else:
             result = (adaptation_action_status, adaptation_action_data) 
