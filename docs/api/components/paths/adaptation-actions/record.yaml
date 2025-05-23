@@ -1,0 +1,91 @@
+patch:
+  summary: Change state of an adaptation action
+  operationId: update-state-adaptation-action
+  description: Change state of an adaptation action
+  tags:
+    - adaptation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the adaptation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+  requestBody:
+      description: The state change of the adaptation action
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/adaptation_actions.yaml#/UpdateStateRecord"
+
+  responses:
+    '200':
+      description: Adaptation action state updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/adaptation_actions.yaml#/UpdateStateRecord"
+  security:
+    - JWTAuth: []
+
+get:
+  summary: Get the state of an adaptation action
+  operationId: get-state-adaptation-action
+  description: Get the state of an adaptation action
+  tags:
+    - adaptation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the adaptation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+
+  responses:
+    '200':
+      description: Adaptation action state
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/adaptation_actions.yaml#/UpdateStateRecord"
+  security:
+    - JWTAuth: []
+
+put:
+  summary: Update an adaptation action
+  operationId: update-adaptation-action
+  description: Update an adaptation action record
+  tags:
+    - adaptation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the adaptation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+  requestBody:
+      description: The adaptation action record to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+
+  responses:
+    '200':
+      description: Adaptation action updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []

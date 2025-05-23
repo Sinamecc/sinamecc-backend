@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Sinamecc API
+  description: API documentation for Sinamecc backend
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local server
+
+tags:
+  - name: mitigation-action
+    description: Mitigation action
+  - name: adaptation-action
+    description: Adaptation action
+  - name: report-data
+    description: for testing backend
+  - name: users
+    description: User management
+  - name: roles
+    description: Role management
+
+paths:
+  /token/:
+    $ref: "./components/paths/users/jwt-token.yaml"
+  /users/{id}:
+    $ref: "./components/paths/users/record.yaml#/user"
+  /users:
+    $ref: "./components/paths/users/record.yaml#/user-list"
+  /users/me:
+    $ref: "./components/paths/users/record.yaml#/user-me"
+  /users/roles:
+    $ref: "./components/paths/users/roles.yaml#/users-roles"
+  /users/{userId}/roles:
+    $ref: "./components/paths/users/roles.yaml#/user-roles"
+  /users/change-password-request:
+    $ref: "./components/paths/users/change-password-request.yaml"
+  /users/change-password:
+    $ref: "./components/paths/users/change-password.yaml"
+  /mitigation-action/{id}/:
+    $ref: "./components/paths/mitigation-actions/record.yaml"
+  /mitigation-action/:
+    $ref: "./components/paths/mitigation-actions/record-list.yaml"
+  /adaptation-action/{id}/:
+    $ref: "./components/paths/adaptation-actions/record.yaml"
+  /adaptation-action/:
+    $ref: "./components/paths/adaptation-actions/record-list.yaml"
+
+  
+components:
+  securitySchemes:
+    JWTAuth:
+      type: apiKey
+      name: Authorization
+      in: header

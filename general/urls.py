@@ -4,11 +4,7 @@ from django.urls import path, re_path
 
 
 urlpatterns_to_delete = [
-    re_path(
-        r'^api/v1/user/(?P<username>[A-Za-z0-9\._-]+)$',
-        views.get_user_info_by_name,
-        name='get_user_info_by_name'
-    ),
+
     re_path(r'^.*$', views.handler404),
 ]
 

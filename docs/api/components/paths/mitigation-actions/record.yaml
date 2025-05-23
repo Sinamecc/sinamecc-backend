@@ -1,0 +1,91 @@
+patch:
+  summary: Change state of a mitigation action
+  operationId: update-state-mitigation-action
+  description: Change state of a mitigation action
+  tags:
+    - mitigation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the mitigation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+  requestBody:
+      description: The state change of the mitigation action
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+
+  responses:
+    '200':
+      description: Mitigation action state updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+  security:
+    - JWTAuth: []
+
+get:
+  summary: Get the state of a mitigation action
+  operationId: get-state-mitigation-action
+  description: Get the state of a mitigation action
+  tags:
+    - mitigation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the mitigation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+
+  responses:
+    '200':
+      description: Mitigation action state
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+  security:
+    - JWTAuth: []
+
+put:
+  summary: Update a mitigation action
+  operationId: update-mitigation-action
+  description: Update a mitigation action record
+  tags:
+    - mitigation-action
+  parameters:
+    - in: path
+      name: id
+      description: The id of the mitigation action
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a1b2c3d4-1234-5678-9abc-123456789abc
+  requestBody:
+      description: The mitigation action record to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+
+  responses:
+    '200':
+      description: Mitigation action updated
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
+  security:
+    - JWTAuth: []

@@ -106,6 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+PASSWORD_RESET_TIMEOUT = 86400  # 24 hours * 60 minutes * 60 seconds
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -132,9 +133,11 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    }
 }
 
 MEDIA_URL = '/media/'
@@ -151,4 +154,4 @@ SIMPLE_JWT = {
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
-ROLEPERMISSIONS_MODULE = 'users.roles'
+ROLEPERMISSIONS_MODULE = 'core.auth.roles'
