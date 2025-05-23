@@ -454,3 +454,41 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         
         return data
 
+
+
+
+
+
+class AdaptationActionAllSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationAction
+        fields = ('id', 'code', 'fsm_state',  'adaptation_action_information','user', 'created', 'updated')
+    
+    def _get_fsm_state_info(self, instance):
+        data = {
+            'state': instance.fsm_state, 
+            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
+        }
+
+        return data
+    
+    def _next_action(self, instance):
+        _workflow_service = AdaptationActionWorkflowStep(adaptation_action=instance)
+
+        return [
+            {
+                'state':state,
+                'label': _(FSM_STATE_TRANSLATION.get(state), 'label'),
+                'required_comments': True
+            } for state in _workflow_service.get_next_states() 
+        ]
+
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['fsm_state'] = self._get_fsm_state_info(instance)
+        data['next_state'] = self._next_action(instance)
+        data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
+    
+        return data

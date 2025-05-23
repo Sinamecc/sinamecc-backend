@@ -54,3 +54,4 @@ class States(str, Enum):
 
     def __str__(self):
         return self.value
+
