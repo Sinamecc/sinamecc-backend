@@ -26,5 +26,6 @@ EXPOSE 80
 STOPSIGNAL SIGTERM
 
 ENV FRONTEND_URL=$FRONTEND_URL
+ENV ENVIRONMENT=$ENVIRONMENT
 
 CMD ["gunicorn", "--access-logfile", "-", "--log-level", "debug", "--workers", "3", "--bind", "0.0.0.0:80", "config.wsgi:application"]
