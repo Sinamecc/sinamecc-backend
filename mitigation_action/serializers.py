@@ -452,6 +452,7 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
+    indicator = serializers.SlugRelatedField(read_only=True, slug_field='name')
     class Meta:
         model = MonitoringIndicator
         fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'report_line_text', 'web_service_conection', 'progress_report_period', 'progress_report_period_until', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
