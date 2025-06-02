@@ -1,14 +1,59 @@
 from rest_framework import serializers
-from mitigation_action.models import ActionAreas, ActionGoals, Finance, MitigationAction, Contact, Status, FinanceSourceType, GeographicScale,\
-    InitiativeType, FinanceStatus, InitiativeGoal, Initiative, MitigationActionStatus, GeographicLocation, GHGInformation, \
-    ImpactDocumentation, QAQCReductionEstimateQuestion, Indicator, MonitoringInformation, MonitoringIndicator, MonitoringReportingIndicator, \
-    ActionAreas, ActionGoals, DescarbonizationAxis, TransformationalVisions, Topics, SubTopics, Activity,  ImpactCategory, Categorization, SustainableDevelopmentGoals, \
-    GHGImpactSector, CarbonDeposit, Standard, InformationSource, InformationSourceType, ThematicCategorizationType, Classifier, IndicatorChangeLog, \
-    FinanceInformation, ActionAreasSelection, TopicsSelection, ChangeLog, DescarbonizationAxisSelection, Sector, SectorIPCC2006, CategoryIPCC2006, SubCategoryIPCC2006, SectorSelection
-from workflow.serializers import CommentSerializer
+
 from general.utils import get_translation_from_database as _
-from .workflow.states import FSM_STATE_TRANSLATION
+from mitigation_action.models import (
+    ActionAreas,
+    ActionAreasSelection,
+    ActionGoals,
+    Activity,
+    CarbonDeposit,
+    Categorization,
+    CategoryIPCC2006,
+    ChangeLog,
+    Classifier,
+    Contact,
+    DescarbonizationAxis,
+    DescarbonizationAxisSelection,
+    Finance,
+    FinanceInformation,
+    FinanceSourceType,
+    FinanceStatus,
+    GeographicLocation,
+    GeographicScale,
+    GHGImpactSector,
+    GHGInformation,
+    ImpactCategory,
+    ImpactDocumentation,
+    Indicator,
+    IndicatorChangeLog,
+    InformationSource,
+    InformationSourceType,
+    Initiative,
+    InitiativeGoal,
+    InitiativeType,
+    MitigationAction,
+    MitigationActionStatus,
+    MonitoringIndicator,
+    MonitoringInformation,
+    MonitoringReportingIndicator,
+    QAQCReductionEstimateQuestion,
+    Sector,
+    SectorIPCC2006,
+    SectorSelection,
+    Standard,
+    Status,
+    SubCategoryIPCC2006,
+    SubTopics,
+    SustainableDevelopmentGoals,
+    ThematicCategorizationType,
+    Topics,
+    TopicsSelection,
+    TransformationalVisions,
+)
+from workflow.serializers import CommentSerializer
+
 from .workflow.services import MitigationActionWorkflowStep
+from .workflow.states import FSM_STATE_TRANSLATION
 
 ##
 ## Auxiliar Class Serializer
@@ -79,16 +124,18 @@ class GHGImpactSectorSerializer(serializers.ModelSerializer):
 
 
 class CarbonDepositSerializer(serializers.ModelSerializer):
-    
     name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CarbonDeposit
-        fields = ('id', 'code', 'name')
-        
-    
+        fields = (
+            "id",
+            "code",
+            "name",
+        )
+
     def get_name(self, instance):
-        return _(instance, 'name')
+        return _(instance, "name")
 
 
 class StandardSerializer(serializers.ModelSerializer):
@@ -356,18 +403,31 @@ class SubCategoryIPCC2006Serializer(serializers.ModelSerializer):
 
 class SectorSelectionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
+
     class Meta:
         model = SectorSelection
-        fields = ('id', 'sector', 'sector_ipcc_2006', 'category_ipcc_2006',
-                  'sub_category_ipcc_2006',  'impact_documentation')
+        fields = (
+            "id",
+            "sector",
+            "sector_ipcc_2006",
+            "category_ipcc_2006",
+            "sub_category_ipcc_2006",
+            "impact_documentation",
+        )
         list_serializer_class = GenericListSerializer
-    
+
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
-        data['sector'] = SectorSerializer(instance.sector).data
-        data['sector_ipcc_2006'] = SectorIPCC2006Serializer(instance.sector_ipcc_2006).data
-        data['category_ipcc_2006'] = CategoryIPCC2006Serializer(instance.category_ipcc_2006).data
-        data['sub_category_ipcc_2006'] = SubCategoryIPCC2006Serializer(instance.sub_category_ipcc_2006.all(), many=True).data
+        data = super().to_representation(instance)
+        data["sector"] = SectorSerializer(instance.sector).data
+        data["sector_ipcc_2006"] = SectorIPCC2006Serializer(
+            instance.sector_ipcc_2006
+        ).data
+        data["category_ipcc_2006"] = CategoryIPCC2006Serializer(
+            instance.category_ipcc_2006
+        ).data
+        data["sub_category_ipcc_2006"] = SubCategoryIPCC2006Serializer(
+            instance.sub_category_ipcc_2006.all(), many=True
+        ).data
 
         return data
         
@@ -424,11 +484,18 @@ class TopicsSelectionSerializer(serializers.ModelSerializer):
         
 
 class CategorizationSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = Categorization
-        fields = ('id', 'action_area_selection', 'topics_selection', 'descarbonization_axis_selection', 'impact_category', 'is_part_to_another_mitigation_action', 'relation_description')
-    
+        fields = (
+            "id",
+            "action_area_selection",
+            "topics_selection",
+            "descarbonization_axis_selection",
+            "impact_category",
+            "is_part_to_another_mitigation_action",
+            "relation_description",
+        )
+
     def to_representation(self, instance):
         
         data = super().to_representation(instance)
@@ -450,13 +517,26 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
-
     id = serializers.IntegerField()
+
     class Meta:
         model = MonitoringIndicator
-        fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'report_line_text', 'web_service_conection', 'progress_report_period', 'progress_report_period_until', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
+        fields = (
+            "id",
+            "initial_date_report_period",
+            "final_date_report_period",
+            "data_updated_date",
+            "report_type",
+            "updated_data",
+            "report_line_text",
+            "web_service_conection",
+            "progress_report_period",
+            "progress_report_period_until",
+            "progress_report",
+            "indicator",
+            "monitoring_reporting_indicator",
+        )
         list_serializer_class = GenericListSerializer
-        
 
 
 class IndicatorChangeLogSerializer(serializers.ModelSerializer):
@@ -468,15 +548,33 @@ class IndicatorChangeLogSerializer(serializers.ModelSerializer):
 
 
 class IndicatorSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Indicator
-
-        fields = ('id', 'name', 'description', 'unit', 'methodological_detail', 'methodological_detail_file', 'reporting_periodicity', 'available_time_start_date', 'available_time_end_date', 
-                'ghg_indicator_goal', 'ghg_indicator_base','geographic_coverage', 'other_geographic_coverage', 'disaggregation', 'limitation','classifier', 'other_classifier' ,'ensure_sustainability',
-                'comments',
-                'information_source', 'type_of_data', 'other_type_of_data', 'contact', 'monitoring_information')
-    
+        fields = (
+            "id",
+            "name",
+            "description",
+            "unit",
+            "methodological_detail",
+            "reporting_periodicity",
+            "available_time_start_date",
+            "available_time_end_date",
+            "ghg_indicator_goal",
+            "ghg_indicator_base",
+            "geographic_coverage",
+            "other_geographic_coverage",
+            "disaggregation",
+            "limitation",
+            "classifier",
+            "other_classifier",
+            "ensure_sustainability",
+            "comments",
+            "information_source",
+            "type_of_data",
+            "other_type_of_data",
+            "contact",
+            "monitoring_information",
+        )
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -531,30 +629,36 @@ class MonitoringReportingIndicatorSerializer(serializers.ModelSerializer):
 
 
 class ImpactDocumentationSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = ImpactDocumentation
-        fields = ('id', 'estimate_reduction_co2', 'period_potential_reduction', 'base_line_definition', 'carbon_deposit', 'gases', 'calculation_methodology', 
-                    'estimate_calculation_documentation', 'estimate_calculation_documentation_file', 'mitigation_action_in_inventory', 'standard', 
-                    'other_standard', 'carbon_international_commerce', 'methodologies_to_use')
-    
-
-    def _get_estimate_calculation_documentation_file_url(self, instance):
-
-        if instance.estimate_calculation_documentation_file:
-
-            return 'fake/url/{0}'.format(instance.estimate_calculation_documentation_file.name)
-        
-        return None
+        fields = (
+            "id",
+            "estimate_reduction_co2",
+            "period_potential_reduction",
+            "base_line_definition",
+            "carbon_deposit",
+            "gases",
+            "calculation_methodology",
+            "estimate_calculation_documentation",
+            "mitigation_action_in_inventory",
+            "standard",
+            "other_standard",
+            "carbon_international_commerce",
+            "methodologies_to_use",
+        )
 
     def to_representation(self, instance):
-
         data = super().to_representation(instance)
-        data['question'] = QAQCReductionEstimateQuestionSerializer(instance.question.all(), many=True).data
-        data['carbon_deposit'] = CarbonDepositSerializer(instance.carbon_deposit.all(), many=True).data
-        data['standard'] =  StandardSerializer(instance.standard).data
-        data['estimate_calculation_documentation_file'] = self._get_estimate_calculation_documentation_file_url(instance)
-        data['sector_selection'] = SectorSelectionSerializer(instance.sector_selection.all(), many=True).data
+        data["question"] = QAQCReductionEstimateQuestionSerializer(
+            instance.question.all(), many=True
+        ).data
+        data["carbon_deposit"] = CarbonDepositSerializer(
+            instance.carbon_deposit.all(), many=True
+        ).data
+        data["standard"] = StandardSerializer(instance.standard).data
+        data["sector_selection"] = SectorSelectionSerializer(
+            instance.sector_selection.all(), many=True
+        ).data
 
         return data
 
@@ -562,24 +666,22 @@ class ImpactDocumentationSerializer(serializers.ModelSerializer):
 class GHGInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GHGInformation
-        fields = ('id', 'impact_emission', 'graphic_description', 'graphic_description_file', 'impact_sector', 'goals')
-    
-
-    def _get_graphic_description_file_url(self, instance):
-
-        if instance.graphic_description_file:
-
-            return 'fake/url/{0}'.format(instance.graphic_description_file.name)
-        
-        return None
-
+        fields = (
+            "id",
+            "impact_emission",
+            "graphic_description",
+            "impact_sector",
+            "goals",
+        )
 
     def to_representation(self, instance):
-        
         data = super().to_representation(instance)
-        data['impact_sector'] = GHGImpactSectorSerializer(instance.impact_sector.all(), many=True).data
-        data['goals'] = SustainableDevelopmentGoalsSerializer(instance.goals.all(), many=True).data
-        data['graphic_description_file'] = self._get_graphic_description_file_url(instance)
+        data["impact_sector"] = GHGImpactSectorSerializer(
+            instance.impact_sector.all(), many=True
+        ).data
+        data["goals"] = SustainableDevelopmentGoalsSerializer(
+            instance.goals.all(), many=True
+        ).data
 
         return data
 
@@ -587,26 +689,38 @@ class GHGInformationSerializer(serializers.ModelSerializer):
 class FinanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finance
-        fields = ('id', 'status', 'administration', 'source',
-                  'mideplan_registered', 'mideplan_project', 'executing_entity')
-        
-    
-        
+        fields = (
+            "id",
+            "status",
+            "administration",
+            "source",
+            "mideplan_registered",
+            "mideplan_project",
+            "executing_entity",
+        )
+
     def to_representation(self, instance):
-        
         data = super().to_representation(instance)
-        data['status'] = FinanceStatusSerializer(instance.status).data
-        data['source'] = FinanceSourceTypeSerializer(instance.source.all(), many=True).data
-        data['finance_information'] = FinanceInformationSerializer(instance.finance_information.all(), many=True).data
-        
+        data["status"] = FinanceStatusSerializer(instance.status).data
+        data["source"] = FinanceSourceTypeSerializer(instance.source.all(), many=True).data
+        data["finance_information"] = FinanceInformationSerializer(instance.finance_information.all(), many=True).data
+
         return data
 
 
 class FinanceInformationSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
+
     class Meta:
         model = FinanceInformation
-        fields = ('id', 'source_description', 'budget', 'currency', 'finance', 'reference_year')
+        fields = (
+            "id",
+            "source_description",
+            "budget",
+            "currency",
+            "finance",
+            "reference_year",
+        )
         list_serializer_class = GenericListSerializer
         
 
@@ -616,27 +730,23 @@ class InitiativeGoalSerializer(serializers.ModelSerializer):
         model = InitiativeGoal
         fields = ('id', 'goal', 'initiative')
         list_serializer_class = GenericListSerializer
-        
+
 
 class InitiativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Initiative
-        fields = ('id', 'name', 'objective', 'description', 'description_file', 'initiative_type')
-
-    def _get_description_file_url(self, instance):
-
-        if instance.description_file:
-
-            return 'fake/url/{0}'.format(instance.description_file.name)
-        
-        return None
-
+        fields = (
+            "id",
+            "name",
+            "objective",
+            "description",
+            "initiative_type",
+        )
 
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['initiative_type'] = InitiativeTypeSerializer(instance.initiative_type).data
-        data['description_file'] = self._get_description_file_url(instance)
         data['goal'] = InitiativeGoalSerializer(instance.goal.all(), many=True).data
 
         return data
@@ -658,38 +768,44 @@ class MitigationActionStatusSerializer(serializers.ModelSerializer):
 class GeographicLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GeographicLocation
-        fields = ('id', 'geographic_scale', 'location', 'location_file')
-
-    
-    def _get_location_file_url(self, instance):
-
-        if instance.location_file:
-
-            return 'fake/url/{0}'.format(instance.location_file.name)
-        
-        return None
-
+        fields = ('id', 'geographic_scale', 'location')
 
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['geographic_scale'] = GeographicScaleSerializer(instance.geographic_scale).data
-        data['location_file'] = self._get_location_file_url(instance)
+
 
         return data
 
 
 class ContactSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = Contact
-        fields = ('id', 'institution', 'full_name', 'job_title', 'email', 'phone', 'user', 'created', 'updated')
+        fields = (
+            "id",
+            "institution",
+            "full_name",
+            "job_title",
+            "email",
+            "phone",
+            "user",
+            "created",
+            "updated",
+        )
 
 
 class ChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChangeLog
-        fields = ('id', 'date', 'user', 'mitigation_action', 'previous_status', 'current_status')
+        fields = (
+            "id",
+            "date",
+            "user",
+            "mitigation_action",
+            "previous_status",
+            "current_status",
+        )
 
     def to_representation(self, instance):
 
@@ -707,14 +823,29 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 class MitigationActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MitigationAction
-        fields = ('id', 'fsm_state','contact', 'code', 'initiative', 'status_information', 'geographic_location', 'categorization','finance', 
-                    'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator', 'review_count', 'comments',
-                    'user', 'created', 'updated')
-        
+        fields = (
+            "id",
+            "fsm_state",
+            "contact",
+            "code",
+            "initiative",
+            "status_information",
+            "geographic_location",
+            "categorization",
+            "finance",
+            "ghg_information",
+            "impact_documentation",
+            "monitoring_information",
+            "monitoring_reporting_indicator",
+            "review_count",
+            "comments",
+            "user",
+            "created",
+            "updated",
+        )
+
         # only read code kwargs
-        extra_kwargs = {
-            'code': {'read_only': True}
-        }
+        extra_kwargs = {"code": {"read_only": True}}
           
     
     def _get_fsm_state_info(self, instance):

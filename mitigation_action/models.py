@@ -15,6 +15,7 @@ from general.helpers.validators import validate_year
 from time import gmtime, strftime
 from django.db import transaction
 from .workflow.states import States as FSM_STATE
+from .constants import MitigationActionFilesType
 
 
 
@@ -30,6 +31,34 @@ def directory_path(instance, filename):
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
 
+"""
+Refactor of some models to optimize the database structure and avoid redundancy.
+The first step is consolidating the file fields, basically, save all file into one model with metadata
+and then link it to the models that need it or with the main model (MitigationAction).
+"""
+
+def _directory_file_path(instance: "MitigationActionFileStorage", filename: str) -> str:
+    path = 'mitigation_action/{mitigation_action_id}/files/{type}/{filename}'
+
+    return path.format(
+        mitigation_action_id=instance.mitigation_action.id,
+        type=instance.file_type,
+        filename=filename
+    )
+
+class MitigationActionFileStorage(models.Model):
+
+    file = models.FileField(upload_to=_directory_file_path, storage=PrivateMediaStorage())
+    type = models.CharField(max_length=50, choices=MitigationActionFilesType.choices())
+    metadata = models.JSONField(blank=True, null=True)
+    mitigation_action = models.ForeignKey('mitigation_action.MitigationAction', related_name='files',on_delete=models.CASCADE,)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name ='Mitigation Action File Storage'
+        verbose_name_plural = 'Mitigation Action File Storage'
+        
 
 class Sector(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
@@ -495,7 +524,7 @@ class ImpactDocumentation(models.Model):
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
     estimate_calculation_documentation = models.TextField(null=True)
-    estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     mitigation_action_in_inventory = models.CharField(max_length=50, null=True)
 
     ## Section 4.3
@@ -618,7 +647,7 @@ class Indicator(models.Model):
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
     ## need to endpoint to upload file
-    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.TextField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     
     available_time_start_date = models.DateField(null=True)
@@ -638,7 +667,7 @@ class Indicator(models.Model):
     limitation = models.TextField(null=True)
     ensure_sustainability = models.TextField(null=True)
     ## need to endpoint to upload file
-    ensure_sustainability_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #ensure_sustainability_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     
     comments = models.TextField(null=True)
     ## FK
@@ -700,11 +729,11 @@ class MonitoringIndicator(models.Model):
     data_updated_date = models.DateField(null=True)
     report_type = models.TextField(null=True)
     updated_data = models.CharField(max_length=150, null=True)
-    updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     report_line_text = models.TextField(null=True)
-    report_line_text_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #report_line_text_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     web_service_conection = models.TextField(null=True)
-    web_service_conection_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #web_service_conection_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     
     progress_report_period = models.DateField(null=True)
     progress_report_period_until = models.DateField(null=True)
@@ -788,7 +817,7 @@ class GeographicLocation(models.Model):
 
     geographic_scale = models.ForeignKey(GeographicScale, related_name='geographic_location', null=True, on_delete=models.CASCADE)
     location = models.CharField(max_length=254, null=True)
-    location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -805,7 +834,7 @@ class Initiative(models.Model):
     name = models.CharField(max_length=500, null=True)
     objective = models.TextField(null=True)
     description = models.TextField(null=True)
-    description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     initiative_type = models.ForeignKey(InitiativeType, related_name='initiative', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -866,7 +895,7 @@ class GHGInformation(models.Model):
     ## TODO missing file to graphic description 
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
-    graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     impact_sector = models.ManyToManyField(GHGImpactSector, related_name='ghg_information', blank=True)
     goals = models.ManyToManyField(SustainableDevelopmentGoals, related_name='ghg_information', blank=True)
 
