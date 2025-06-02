@@ -1,10 +1,11 @@
-from users.models import CustomUser
 from django.contrib.auth import get_user_model
 from django.template import loader
 
+from users.models import CustomUser
+
 User =  get_user_model()
 
-class MitigationActionEmailServices():
+class EmailServices():
 
     def __init__(self, email_services):
         ##  SES_service instance

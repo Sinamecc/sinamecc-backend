@@ -1,3 +1,3 @@
-class MitigationActionFilesService:
+class FilesService:
     def __init__(self) -> None:
         pass

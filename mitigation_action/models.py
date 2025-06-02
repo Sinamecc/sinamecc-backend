@@ -1,23 +1,25 @@
 from __future__ import unicode_literals
+
 import uuid
-from django.db import models
+from time import gmtime, strftime
+
+from django.contrib.auth import get_user_model
+from django.db import models, transaction
 from django.utils.encoding import smart_str as smart_unicode
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
-from workflow.models import Comment, ReviewStatus
-from general.storages import PrivateMediaStorage
 from django_fsm import FSMField, transition
-from general.services import EmailServices
-from mitigation_action.email_services import MitigationActionEmailServices
-from general.services import EmailServices
-from general.permissions import PermissionsHelper
+
 from general.helpers.validators import validate_year
-from time import gmtime, strftime
-from django.db import transaction
-from .workflow.states import States as FSM_STATE
+from general.permissions import PermissionsHelper
+from general.services import EmailServices
+from general.storages import PrivateMediaStorage
+from mitigation_action.services.emails import (
+    EmailServices as MitigationActionEmailServices,
+)
+from workflow.models import Comment, ReviewStatus
+
 from .constants import MitigationActionFilesType
-
-
+from .workflow.states import States as FSM_STATE
 
 User =  get_user_model()
 permission = PermissionsHelper()

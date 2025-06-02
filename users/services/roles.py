@@ -1,7 +1,8 @@
-from typing import Any
 from core.auth.roles_services import AuthRolesServices, RoleDict
-from users.models import CustomUser as UserModel
 from users.exceptions import UserNotFoundException
+from users.models import CustomUser as UserModel
+
+
 class UserRolesServices:
 
     def get_registered_roles(self) -> list[RoleDict]:

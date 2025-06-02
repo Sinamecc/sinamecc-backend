@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.template import loader
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template import loader
+
 from general.services import EmailServices as SESServices
+
 User =  get_user_model()
 class UserEmailServices():
 

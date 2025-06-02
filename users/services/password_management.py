@@ -1,12 +1,16 @@
 import time
 from typing import Any
+
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_decode
+
 from core.auth.password_recovery import AuthPasswordServices
 from core.exceptions import InvalidParameterException
 from general.services import EmailServices
-from users.services.email import UserEmailServices
 from users.models import CustomUser as UserModel
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from users.services.emails import UserEmailServices
+
+
 class PasswordManagementService:
 
     def __init__(self) -> None:

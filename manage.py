@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-import os, sys, environ
+import os
+import sys
+
+import environ
 
 env = environ.Env(DEBUG=(bool, False))
 env.read_env()
