@@ -21,19 +21,17 @@ SINAMECC is Costa Rica’s National Climate Change System.
 
 2. (Optional) Create and activate a virtual environment for local development:
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # zsh
-   pip install -r requirements.txt
+   uv sync
    ```
 
 3. Start the application using Docker Compose:
    ```bash
-   docker compose up -d --build
+   make re-build
    ```
 
 4. Verify that containers are running:
    ```bash
-   docker compose ps
+   make up
    ```
 
 ## Makefile
