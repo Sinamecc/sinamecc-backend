@@ -21,9 +21,7 @@ class UserRolesViewSet(viewsets.ViewSet):
 
         roles = _service.get_registered_roles()
 
-        response = SuccessResponseSerializers({'data': roles}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(roles, status=status.HTTP_200_OK,)
 
     @action(detail=True, methods=['post'], url_path='roles', url_name='assign_role_to_user')
     def assign_role_to_user(self, request: Request, pk: int) -> Response:
@@ -39,6 +37,4 @@ class UserRolesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
 
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_user, status=status.HTTP_200_OK,)
