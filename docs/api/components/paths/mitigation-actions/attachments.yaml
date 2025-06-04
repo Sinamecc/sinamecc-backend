@@ -38,6 +38,27 @@ attachments:
     responses:
       '200':
         description: Files uploaded successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number_of_files:
+                  type: integer
+                  description: The number of files successfully uploaded.
+                  example: 2
+                mitigation_action_id:
+                  type: string
+                  description: The ID of the mitigation action to which the files were uploaded.
+                  example: "a1b2c3d4-1234-5678-9abc"
+                code:
+                  type: integer
+                  example: 0
+                  description: The response code indicating success.
+
+
+
+
       '400':
         description: Bad request, possibly due to invalid file format or size.
       '404':

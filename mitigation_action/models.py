@@ -50,7 +50,7 @@ def _directory_file_path(instance: "MitigationActionFileStorage", filename: str)
 
 class MitigationActionFileStorage(models.Model):
 
-    file = models.FileField(upload_to=_directory_file_path, storage=PrivateMediaStorage())
+    file = models.FileField(upload_to=_directory_file_path)
     type = models.CharField(max_length=50, choices=MitigationActionFilesType.choices())
     metadata = models.JSONField(blank=True, null=True)
     mitigation_action = models.ForeignKey('mitigation_action.MitigationAction', related_name='files',on_delete=models.CASCADE,)
