@@ -21,7 +21,7 @@ DATABASES = {
 
 STORAGES = {
     "default": {
-        "BACKEND": "core.aws.s3.S3StorageDefault",
+        "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
             "location": "content",
             "object_parameters": {
