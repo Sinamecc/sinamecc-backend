@@ -1,0 +1,46 @@
+attachments:
+  post:
+    summary: Upload files for a mitigation action
+    description: |
+        Upload one or more files to be associated with a specific mitigation action. Files can be documents, images, or other supporting materials that provide evidence or additional information for the mitigation action.
+        The uploaded files will be stored and linked to the specified mitigation action ID in the system. Note that appropriate file size limits and format restrictions may apply.
+    operationId: uploadFiles
+    tags:
+      - mitigation-action
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the mitigation action to which the files will be uploaded.
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                description: The files to upload.
+              type:
+                type: string
+                enum: 
+                  - initiative
+                  - geographic-location
+                  - ghg-information 
+                  - impact-documentation
+                description: The type of the files being uploaded, which helps categorize the files for the mitigation action.
+    responses:
+      '200':
+        description: Files uploaded successfully.
+      '400':
+        description: Bad request, possibly due to invalid file format or size.
+      '404':
+        description: Mitigation action not found.
+    security:
+      - JWTAuth: []

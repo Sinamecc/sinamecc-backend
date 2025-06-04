@@ -1,3 +1,120 @@
+  #  "contact": {
+  #     "id": 2,
+  #     "institution": "Environmental Protection Agency",
+  #     "full_name": "John Doe",
+  #     "job_title": "Climate Change Analyst",
+  #     "email": "john.doe@example.com",
+  #     "phone": "+1-800-555-1234",
+  #     "user": null,
+  #     "created": "2025-06-02T23:09:33.730352Z",
+  #     "updated": "2025-06-02T23:09:33.730397Z"
+  #   },
+
+GetRecord:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: The unique identifier of the mitigation action
+      example: "a1b2c3d4-1234-5678-9abc-123456789abc"
+    fsm_state:
+      type: object
+      properties:
+        state:
+          type: string
+          description: The current state of the mitigation action
+          example: "new"
+        label:
+          type: string
+          description: The label of the current state
+          example: "New Record"
+    contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the contact
+          example: 2
+        institution:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: The institution of the contact
+          example: "Environmental Protection Agency"
+        full_name:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: The full name of the contact
+          example: "John Doe"
+        job_title:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: The job title of the contact
+          example: "Climate Change Analyst"
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          nullable: true
+          description: The email of the contact
+          example: "test@test.com"
+        phone:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: The phone number of the contact
+          example: "+1-800-555-1234"
+        created:
+          type: string
+          format: date-time
+          description: The date and time when the mitigation action was created
+          example: "2025-06-02T23:09:33.730352Z"
+        updated:
+          type: string
+          format: date-time
+          description: The date and time when the mitigation action was last updated
+          example: "2025-06-02T23:09:33.730397Z"
+    files:
+      type: array
+      description: List of files associated with the mitigation action
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: The unique identifier of the file
+            example: 1
+          file:
+            type: string
+            format: uri
+            description: The URL of the file
+            example: https://aws.sinamecc.com/mitigation_action/a1b2c3d4-1234-5678-9abc/files/initiative/file.pdf?AWSAccessKey
+          type:
+            type: string
+            description: The type of the file (e.g., initiative, geographic-location, ghg-information, impact-documentation)
+            example: "initiative"
+          metadata:
+            type: object
+            properties:
+              size:
+                type: integer
+                description: The size of the file in bytes
+                example: 2284
+              filename:
+                type: string
+                description: The name of the file
+                example: "file.pdf"
+              content_type:
+                type: string
+                description: The content type of the file
+                example: "application/pdf"
+
+
+
+
 UpdateStateRecord:
   type: object
   properties:

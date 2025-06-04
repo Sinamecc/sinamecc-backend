@@ -33,7 +33,7 @@ user-roles:
       - roles
     parameters:
       - in: path
-        name: userId
+        name: id
         description: The ID of the user
         required: true
         schema:
