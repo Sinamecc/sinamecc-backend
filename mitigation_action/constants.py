@@ -1,4 +1,6 @@
 from enum import Enum
+
+
 # 'initiative': self._upload_file_to_initiative, 
 # 'geographic-location': self._upload_file_to_geographic_location,
 # 'ghg-information': self._upload_file_to_ghg_information,
@@ -22,3 +24,8 @@ class MitigationActionFilesType(str, Enum):
         }
 
         return [(key.value, labels[key]) for key in cls]
+    
+    @classmethod
+    def values(cls):
+        return [key.value for key in cls]
+

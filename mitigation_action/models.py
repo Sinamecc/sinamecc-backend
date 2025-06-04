@@ -44,7 +44,7 @@ def _directory_file_path(instance: "MitigationActionFileStorage", filename: str)
 
     return path.format(
         mitigation_action_id=instance.mitigation_action.id,
-        type=instance.file_type,
+        type=instance.type,
         filename=filename
     )
 

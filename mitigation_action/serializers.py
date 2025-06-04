@@ -32,6 +32,7 @@ from mitigation_action.models import (
     InitiativeGoal,
     InitiativeType,
     MitigationAction,
+    MitigationActionFileStorage,
     MitigationActionStatus,
     MonitoringIndicator,
     MonitoringInformation,
@@ -52,6 +53,7 @@ from mitigation_action.models import (
 )
 from workflow.serializers import CommentSerializer
 
+from .constants import MitigationActionFilesType
 from .workflow.services import MitigationActionWorkflowStep
 from .workflow.states import FSM_STATE_TRANSLATION
 
@@ -820,7 +822,38 @@ class ChangeLogSerializer(serializers.ModelSerializer):
 
 
     
+
+
+
+
+"""
+In the future we need to split this serializers in different files,
+for example:
+- catalogs.py
+- mitigation_action.py
+- indicators.py
+- monitoring.py
+- finance.py
+- etc.
+This will help to keep the code organized and maintainable.
+
+"""
+## Serializers Models
+# Files
+class MitigationActionFileStorageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MitigationActionFileStorage
+        fields = (
+            'id',
+            'file',
+            'type',
+            'metadata'
+        )
+
+
+## Main Serializer
 class MitigationActionSerializer(serializers.ModelSerializer):
+    files = MitigationActionFileStorageSerializer(many=True, read_only=True)
     class Meta:
         model = MitigationAction
         fields = (
@@ -840,6 +873,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
             "review_count",
             "comments",
             "user",
+            "files",
             "created",
             "updated",
         )
@@ -886,6 +920,16 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         
         return data
-
-
+## Serializers to validate request data
+## Files
+class FileListRequestBodySerializer(serializers.Serializer):
+    files = serializers.ListField(
+        child=serializers.FileField(),
+        max_length=10,  
+        min_length=1,  
+        
+    )
+    type = serializers.ChoiceField(
+        choices=MitigationActionFilesType.values()
+    )
 

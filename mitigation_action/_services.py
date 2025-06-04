@@ -1038,18 +1038,15 @@ class MitigationActionService():
 
     def get(self, request, mitigation_action_id):
 
-        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        mitigation_action = MitigationAction.objects.prefetch_related('files').filter(id=mitigation_action_id).first()
+        if mitigation_action is None:
+            result = (False, 'Mitigation Action with id {} does not exist'.format(mitigation_action_id))
         
-        if not mitigation_action_status:
-            result = (mitigation_action_status, mitigation_action_data)
+        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action):
+            result = (False, self.ACCESS_DENIED.format(mitigation_action.code))
         
-        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
-            result = (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
-        
-        elif mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
-
-
+        else:
+            result = (True, MitigationActionSerializer(mitigation_action).data)
         return result
     
 
