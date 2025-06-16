@@ -1,10 +1,14 @@
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from core import constants
 
-from ..serializers import FileListRequestBodySerializer
+from ..serializers import (
+    FileListRequestBodySerializer,
+    MitigationActionFileStorageSerializer,
+)
 from ..services.files import FilesService
 
 
@@ -26,3 +30,25 @@ class AttachmentViewSet(viewsets.ViewSet):
         )
 
         return Response(result, status=status.HTTP_201_CREATED)
+    
+    ## We use this because is a workaround for the fact that the `ViewSet` 
+    ## does not support `DELETE` method without `pk` in the URL.
+    def delete(self, request: Request, pk: str) -> Response:
+        file_ids = request.data.get('file_ids', [])
+        user_id = request.user.id
+        service = self._service_class()
+        result = service.delete_files(
+            mitigation_action_id=pk,
+            user_id=user_id,
+            file_ids=file_ids,
+        )
+
+        return Response(result, status=status.HTTP_200_OK)
+
+    def list(self, request: Request, pk: str) -> Response:
+        user_id = request.user.id
+        service = self._service_class()
+        files = service.get_files(mitigation_action_id=pk, user_id=user_id)
+        serialized_files = MitigationActionFileStorageSerializer(files, many=True).data
+        return Response(serialized_files, status=status.HTTP_200_OK)
+    

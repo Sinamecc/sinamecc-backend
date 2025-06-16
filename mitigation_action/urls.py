@@ -6,7 +6,7 @@ from mitigation_action import _views
 from .views import attachments
 
 router = DefaultRouter(trailing_slash=False)
-router.register('/attachments', attachments.AttachmentViewSet, basename='attachments')
+router.register('attachments', attachments.AttachmentViewSet, basename='attachments')
 
 MODULE = 'mitigation_action'
 
@@ -21,9 +21,11 @@ urlpatterns_to_delete =[
 
 urlpatterns = [
     path(
-        'mitigation-action/<uuid:pk>', include((router.urls, MODULE))
+        'mitigation-action/<uuid:pk>/', include((router.urls, MODULE))
     ),
 ]
+for url in router.urls:
+    print(url)
 urlpatterns.extend( 
     [
         path(
@@ -94,5 +96,3 @@ urlpatterns.extend(
 
 urlpatterns.extend(urlpatterns_to_delete)
 
-
-print(urlpatterns)
