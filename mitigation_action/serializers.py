@@ -102,6 +102,16 @@ class GenericListSerializer(serializers.ListSerializer):
 ## Start Catalogs Serializers
 ##
 
+class FileStorageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GenericFileStorage
+        fields = (
+            'id',
+            'file',
+            'type',
+            'metadata'
+        )
+
 class SustainableDevelopmentGoalsSerializer(serializers.ModelSerializer):
     
     description = serializers.SerializerMethodField()
@@ -522,7 +532,7 @@ class QAQCReductionEstimateQuestionSerializer(serializers.ModelSerializer):
 
 class MonitoringIndicatorSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-
+    files = FileStorageSerializer(many=True, read_only=True)
     class Meta:
         model = MonitoringIndicator
         fields = (
@@ -539,6 +549,7 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
             "progress_report",
             "indicator",
             "monitoring_reporting_indicator",
+            "files",
         )
         list_serializer_class = GenericListSerializer
 
@@ -552,6 +563,7 @@ class IndicatorChangeLogSerializer(serializers.ModelSerializer):
 
 
 class IndicatorSerializer(serializers.ModelSerializer):
+    files = FileStorageSerializer(many=True, read_only=True)
     class Meta:
         model = Indicator
         fields = (
@@ -578,6 +590,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
             "other_type_of_data",
             "contact",
             "monitoring_information",
+            "files",
         )
 
     def to_representation(self, instance):
@@ -842,20 +855,12 @@ This will help to keep the code organized and maintainable.
 """
 ## Serializers Models
 # Files
-class MitigationActionFileStorageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GenericFileStorage
-        fields = (
-            'id',
-            'file',
-            'type',
-            'metadata'
-        )
+
 
 
 ## Main Serializer
 class MitigationActionSerializer(serializers.ModelSerializer):
-    files = MitigationActionFileStorageSerializer(many=True, read_only=True)
+    files = FileStorageSerializer(many=True, read_only=True)
     class Meta:
         model = MitigationAction
         fields = (

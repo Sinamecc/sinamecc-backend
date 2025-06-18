@@ -766,6 +766,7 @@ class MonitoringIndicator(models.Model):
     indicator = models.ForeignKey(Indicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
     monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
 
+    files = GenericRelation(GenericFileStorage, related_query_name='monitoring_indicator_files')
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
