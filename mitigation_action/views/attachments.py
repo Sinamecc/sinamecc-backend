@@ -8,7 +8,9 @@ from core import constants
 from ..serializers import (
     FileListRequestBodySerializer,
     GetFilesListRequestBodySerializer,
-    MitigationActionFileStorageSerializer,
+)
+from ..serializers import (
+    FileStorageSerializer as MitigationActionFileStorageSerializer,
 )
 from ..services.files import FilesService
 

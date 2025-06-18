@@ -949,7 +949,7 @@ class FileListRequestBodySerializer(serializers.Serializer):
     def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         if MitigationActionFilesType.get_entity_types_from_value(
             data.get("type")
-        ) is None and not data.get("entity_type", 'mitigation-action'):
+        ) != data.get("entity_type", 'mitigation-action'):
             raise serializers.ValidationError(
                 f"Invalid 'type' value. Must be one of: {MitigationActionFilesType.get_entity_types()}"
             )
@@ -958,6 +958,7 @@ class FileListRequestBodySerializer(serializers.Serializer):
                 "Both 'entity_type' and 'entity_id' must be provided together or not at all."
             )
         
+      
         return data
 
 
