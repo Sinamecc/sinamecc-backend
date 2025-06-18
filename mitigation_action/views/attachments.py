@@ -7,6 +7,7 @@ from core import constants
 
 from ..serializers import (
     FileListRequestBodySerializer,
+    GetFilesListRequestBodySerializer,
     MitigationActionFileStorageSerializer,
 )
 from ..services.files import FilesService
@@ -27,6 +28,8 @@ class AttachmentViewSet(viewsets.ViewSet):
             user_id=user_id,
             file_type=serialized_body.get('type'),
             files=serialized_body.get('files', []),
+            object_id=serialized_body.get('entity_id', None),
+
         )
 
         return Response(result, status=status.HTTP_201_CREATED)
@@ -46,9 +49,25 @@ class AttachmentViewSet(viewsets.ViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     def list(self, request: Request, pk: str) -> Response:
+        """
+        This method lists the files. If no record ID and file type are provided,
+        it returns all files associated with the mitigation action.
+
+        Returns:
+            Response: List of files associated with the mitigation action.
+        """
+
         user_id = request.user.id
+        query_params = GetFilesListRequestBodySerializer(data=request.query_params)
+        query_params.is_valid(raise_exception=True)
+        serialized_query_params = query_params.validated_data
+
         service = self._service_class()
-        files = service.get_files(mitigation_action_id=pk, user_id=user_id)
+        files = service.get_files(
+            mitigation_action_id=pk,
+            user_id=user_id,
+            type_file=serialized_query_params.get('entity_type'),
+            object_id= serialized_query_params.get('entity_id')
+        )
         serialized_files = MitigationActionFileStorageSerializer(files, many=True).data
         return Response(serialized_files, status=status.HTTP_200_OK)
-    

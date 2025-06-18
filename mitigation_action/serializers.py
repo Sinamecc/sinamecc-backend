@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from general.utils import get_translation_from_database as _
@@ -18,6 +20,7 @@ from mitigation_action.models import (
     FinanceInformation,
     FinanceSourceType,
     FinanceStatus,
+    GenericFileStorage,
     GeographicLocation,
     GeographicScale,
     GHGImpactSector,
@@ -32,7 +35,6 @@ from mitigation_action.models import (
     InitiativeGoal,
     InitiativeType,
     MitigationAction,
-    MitigationActionFileStorage,
     MitigationActionStatus,
     MonitoringIndicator,
     MonitoringInformation,
@@ -842,7 +844,7 @@ This will help to keep the code organized and maintainable.
 # Files
 class MitigationActionFileStorageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MitigationActionFileStorage
+        model = GenericFileStorage
         fields = (
             'id',
             'file',
@@ -932,4 +934,40 @@ class FileListRequestBodySerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=MitigationActionFilesType.values()
     )
+    entity_id = serializers.CharField(
+        required=False
+    )
+    entity_type = serializers.ChoiceField(
+        choices=MitigationActionFilesType.get_entity_types(), required=False
+    )
 
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+        if MitigationActionFilesType.get_entity_types_from_value(
+            data.get("type")
+        ) is None and not data.get("entity_type", 'mitigation-action'):
+            raise serializers.ValidationError(
+                f"Invalid 'type' value. Must be one of: {MitigationActionFilesType.get_entity_types()}"
+            )
+        if bool(data.get('entity_type')) != bool(data.get('entity_id')):
+            raise serializers.ValidationError(
+                "Both 'entity_type' and 'entity_id' must be provided together or not at all."
+            )
+        
+        return data
+
+
+class GetFilesListRequestBodySerializer(serializers.Serializer):
+    entity_type = serializers.ChoiceField(
+        choices=MitigationActionFilesType.values(), required=False
+    )
+    entity_id = serializers.CharField(
+        required=False
+    )
+
+
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
+        if bool(data.get('entity_type')) != bool(data.get('entity_id')):
+            raise serializers.ValidationError(
+                "Both 'entity_type' and 'entity_id' must be provided together or not at all."
+            )
+        return data

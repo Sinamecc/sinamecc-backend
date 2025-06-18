@@ -14,6 +14,7 @@ attachments:
         description: The ID of the mitigation action to which the files will be uploaded.
         schema:
           type: string
+      
     requestBody:
       required: true
       content:
@@ -21,6 +22,17 @@ attachments:
           schema:
             type: object
             properties:
+              entity_id:
+                type: string
+                description: The ID of the entity model associated with the mitigation action.
+              entity_type:
+                type: string
+                description: The type of the entity model associated with the mitigation action.
+                enum: 
+                  - indicator
+                  - monitoring-indicator
+
+    
               files:
                 type: array
                 items:
@@ -34,6 +46,11 @@ attachments:
                   - geographic-location
                   - ghg-information 
                   - impact-documentation
+                  - indicator-sustainability
+                  - indicator-methodological-detail
+                  - monitoring-report-line-text
+                  - monitoring-updated-data
+                  - monitoring-web-service-connection
                 description: The type of the files being uploaded, which helps categorize the files for the mitigation action.
     responses:
       '200':
@@ -137,6 +154,21 @@ attachments:
         description: The ID of the mitigation action for which to retrieve files.
         schema:
           type: string
+      - name: entity_id
+        in: query
+        required: false
+        description: The ID of the entity model associated with the mitigation action, if applicable.
+        schema:
+          type: string
+      - name: entity_type
+        in: query
+        required: false
+        description: The type of the entity model associated with the mitigation action, if applicable.
+        schema:
+          type: string
+          enum:
+            - indicator
+            - monitoring-indicator
     responses:
       '200':
         description: Files retrieved successfully.

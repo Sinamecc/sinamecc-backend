@@ -4,6 +4,8 @@ import uuid
 from time import gmtime, strftime
 
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
 from django.utils.encoding import smart_str as smart_unicode
 from django.utils.translation import gettext_lazy as _
@@ -39,27 +41,46 @@ The first step is consolidating the file fields, basically, save all file into o
 and then link it to the models that need it or with the main model (MitigationAction).
 """
 
-def _directory_file_path(instance: "MitigationActionFileStorage", filename: str) -> str:
-    path = 'mitigation_action/{mitigation_action_id}/files/{type}/{filename}'
+def _directory_file_path(instance: "GenericFileStorage", filename: str) -> str:
+
+    path = 'mitigation_action/{type}/{object_id}/files/{filename}'
 
     return path.format(
-        mitigation_action_id=instance.mitigation_action.id,
+        object_id=instance.object_id,
         type=instance.type,
-        filename=filename
+        filename=str(uuid.uuid4())
     )
 
-class MitigationActionFileStorage(models.Model):
+class GenericFileStorage(models.Model):
+    """
+    A model to store files with generic relation to any model.
+    This model allows to store files with metadata and link them to any model using GenericForeignKey.
+    How to use:
+    1. mitigation_action.generic_files
 
+    """
     file = models.FileField(upload_to=_directory_file_path)
     type = models.CharField(max_length=50, choices=MitigationActionFilesType.choices())
     metadata = models.JSONField(blank=True, null=True)
-    mitigation_action = models.ForeignKey('mitigation_action.MitigationAction', related_name='files',on_delete=models.CASCADE,)
+
+    ## Get All files from records and sub records
+    mitigation_action = models.ForeignKey(
+        'MitigationAction',
+        related_name='generic_files',
+        on_delete=models.CASCADE,
+    )
+
+    # Generic relation
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
-        verbose_name ='Mitigation Action File Storage'
-        verbose_name_plural = 'Mitigation Action File Storage'
+        verbose_name = _('Generic File Storage')
+        verbose_name_plural = _('Generic File Storage')
         
 
 class Sector(models.Model):
@@ -683,7 +704,7 @@ class Indicator(models.Model):
     ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
-
+    files = GenericRelation(GenericFileStorage, related_query_name='indicator_files')
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -939,6 +960,9 @@ class MitigationAction(models.Model):
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
 
+
+    ## Save files 
+    files = GenericRelation('mitigation_action.GenericFileStorage', content_type_field='content_type', object_id_field='object_id')
     ## comments
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
