@@ -51,7 +51,7 @@ class FilesService:
 
 
 
-        ModelClass = FileType.get_models().get(type_file)
+        ModelClass = {'indicator': Indicator, 'monitoring_indicator': MonitoringIndicator}.get(type_file, None)
         if not ModelClass and not object_id:
             return list(ma_object.files.all())
 
