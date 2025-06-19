@@ -964,7 +964,7 @@ class FileListRequestBodySerializer(serializers.Serializer):
 
 class GetFilesListRequestBodySerializer(serializers.Serializer):
     entity_type = serializers.ChoiceField(
-        choices=MitigationActionFilesType.values(), required=False
+        choices=MitigationActionFilesType.get_entity_types(), required=False
     )
     entity_id = serializers.CharField(
         required=False
