@@ -24,8 +24,7 @@ urlpatterns = [
         'mitigation-action/<uuid:pk>', include((router.urls, MODULE))
     ),
 ]
-for url in router.urls:
-    print(url)
+
 urlpatterns.extend( 
     [
         path(
