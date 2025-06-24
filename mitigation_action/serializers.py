@@ -456,8 +456,15 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
         model = MonitoringIndicator
         fields = ('id', 'initial_date_report_period', 'final_date_report_period', 'data_updated_date', 'report_type', 'updated_data', 'report_line_text', 'web_service_conection', 'progress_report_period', 'progress_report_period_until', 'progress_report', 'indicator', 'monitoring_reporting_indicator')
         list_serializer_class = GenericListSerializer
-        
+    
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['indicator'] = instance.indicator.name
+
+        return data
+
+        
 
 class IndicatorChangeLogSerializer(serializers.ModelSerializer):
 
