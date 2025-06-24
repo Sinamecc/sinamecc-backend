@@ -993,7 +993,7 @@ class MitigationActionListSerializer(serializers.ModelSerializer):
         Returns the type of the Mitigation Action instance.
         """
         if instance.initiative:
-            return f"{instance.initiative.initiative_type.type} - {instance.initiative.name}"
+            return f"{instance.initiative.initiative_type.type} - {instance.initiative.initiative_type.name}"
         
         return None
 
