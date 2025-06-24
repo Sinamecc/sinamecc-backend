@@ -936,6 +936,58 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         
         return data
+    
+
+class MitigationActionListSerializer(serializers.ModelSerializer):
+    fsm_state = serializers.SerializerMethodField()
+    next_state = serializers.SerializerMethodField()
+    class Meta:
+        model = MitigationAction
+        fields = (
+            "id",
+            "fsm_state",
+            "next_state",
+            "code",
+            "review_count",
+            "user",
+            "created",
+            "updated",
+        )
+        # only read code kwargs
+        extra_kwargs = {"code": {"read_only": True}}
+
+    def get_fsm_state(self, instance):
+        """
+        Returns the FSM state information for the Mitigation Action instance.
+        """
+        return self._get_fsm_state_info(instance)
+
+    def get_next_state(self, instance):
+        """
+        Returns the next possible states for the Mitigation Action instance.
+        """
+        _workflow_service = MitigationActionWorkflowStep(mitigation_action=instance)
+
+        return [
+            {
+                'state': state,
+                'label': _(FSM_STATE_TRANSLATION.get(state), 'label'),
+                'required_comments': True
+            } for state in _workflow_service.get_next_states()
+        ]
+
+
+    def _get_fsm_state_info(self, instance):
+        data = {
+            'state': instance.fsm_state, 
+            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
+        }
+
+        return data
+
+
+
+
 ## Serializers to validate request data
 ## Files
 class FileListRequestBodySerializer(serializers.Serializer):

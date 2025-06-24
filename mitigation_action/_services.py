@@ -1068,7 +1068,7 @@ class MitigationActionService():
             return  (False, self.ACCESS_DENIED_ALL)
             
         if mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data, many=True).data)
+            result = (mitigation_action_status, MitigationActionListSerializer(mitigation_action_data, many=True).data)
         
         else:
             result = (mitigation_action_status, mitigation_action_data) 
