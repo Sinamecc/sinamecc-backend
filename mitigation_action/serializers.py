@@ -555,7 +555,9 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['indicator'] = instance.indicator.name
+
+        if hasattr(instance, 'indicator'):
+            data['indicator'] = instance.indicator.name
 
         return data
 
