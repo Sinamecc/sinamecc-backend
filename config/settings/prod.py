@@ -21,7 +21,7 @@ AWS_S3_REGION_NAME = "us-east-2"
 
 STORAGES = {
     "default": {
-        "BACKEND": "core.aws.s3.S3StorageDefault",
+        "BACKEND": "core.aws.s3.S3StorageGeneral",
         "OPTIONS": {
             "location": "content",
             "object_parameters": {
