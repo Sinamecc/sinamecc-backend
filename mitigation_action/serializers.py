@@ -553,6 +553,14 @@ class MonitoringIndicatorSerializer(serializers.ModelSerializer):
         )
         list_serializer_class = GenericListSerializer
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['indicator'] = instance.indicator.name
+
+        return data
+
+
+        
 
 class IndicatorChangeLogSerializer(serializers.ModelSerializer):
 
