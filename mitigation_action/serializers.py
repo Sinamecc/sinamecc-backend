@@ -941,11 +941,15 @@ class MitigationActionSerializer(serializers.ModelSerializer):
 class MitigationActionListSerializer(serializers.ModelSerializer):
     fsm_state = serializers.SerializerMethodField()
     next_state = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
     class Meta:
         model = MitigationAction
         fields = (
             "id",
             "fsm_state",
+            "type",
+            "name",
             "next_state",
             "code",
             "review_count",
@@ -955,6 +959,14 @@ class MitigationActionListSerializer(serializers.ModelSerializer):
         )
         # only read code kwargs
         extra_kwargs = {"code": {"read_only": True}}
+
+    def _get_fsm_state_info(self, instance):
+        data = {
+            'state': instance.fsm_state, 
+            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
+        }
+
+        return data
 
     def get_fsm_state(self, instance):
         """
@@ -976,15 +988,23 @@ class MitigationActionListSerializer(serializers.ModelSerializer):
             } for state in _workflow_service.get_next_states()
         ]
 
+    def get_type(self, instance):
+        """
+        Returns the type of the Mitigation Action instance.
+        """
+        if instance.initiative:
+            return f"{instance.initiative.initiative_type.type} - {instance.initiative.name}"
+        
+        return None
 
-    def _get_fsm_state_info(self, instance):
-        data = {
-            'state': instance.fsm_state, 
-            'label': _(FSM_STATE_TRANSLATION.get(instance.fsm_state), 'label')
-        }
-
-        return data
-
+    def get_name(self, instance):
+        """
+        Returns the name of the Mitigation Action instance.
+        """
+        if instance.initiative:
+            return instance.initiative.name
+        
+        return None
 
 
 

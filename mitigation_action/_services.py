@@ -1055,25 +1055,17 @@ class MitigationActionService():
         This logic we need to refactor. At the moment we are going to allow the Reviewer to see all the mitigation actions
         """
         user = request.user
-        mitigation_action_status, mitigation_action_data = None, None
 
         if has_role(user,['reviewer', 'reviewer_mitigation_action', 'admin']):
-            mitigation_action_status, mitigation_action_data = self._service_helper.get_all(MitigationAction)
+            mitigation_action_list = MitigationAction.objects.select_related('initiative').all()
         
         elif has_role(user, ['information_provider_mitigation_action', 'information_provider']):
-            mitigation_action_status, mitigation_action_data = \
-                self._service_helper.get_all(MitigationAction, user=user)
+            mitigation_action_list = MitigationAction.objects.select_related('initiative').filter(user=user).all()
                 
         else:
             return  (False, self.ACCESS_DENIED_ALL)
             
-        if mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionListSerializer(mitigation_action_data, many=True).data)
-        
-        else:
-            result = (mitigation_action_status, mitigation_action_data) 
-
-        return result
+        return (True, MitigationActionListSerializer(mitigation_action_list, many=True).data)
 
 
     def create(self, request):
