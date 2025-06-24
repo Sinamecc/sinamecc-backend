@@ -1,10 +1,12 @@
 from typing import Any
-from general.services import EmailServices
-from users.services.email import UserEmailServices
-from users.models import CustomUser as UserModel
-from users.exceptions import UserNotFoundException
-from users.serializers import UserCreateSerializer, UserSerializer, UserUpdateSerializer
+
 from core.auth.password_recovery import AuthPasswordServices
+from general.services import EmailServices
+from users.exceptions import UserNotFoundException
+from users.models import CustomUser as UserModel
+from users.serializers import UserCreateSerializer, UserSerializer, UserUpdateSerializer
+from users.services.emails import UserEmailServices
+
 """
 NOTE: In the future we will change the way to return the data, currently we are returning a
 tuple with the data and a boolean to indicate if the operation was successful or not, but this behavior

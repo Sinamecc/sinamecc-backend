@@ -31,9 +31,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
         
         serialized_users = UserSerializer(users, many=True).data
 
-        response = SuccessResponseSerializers({'data': serialized_users}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_users, status=status.HTTP_200_OK,)
 
     def create(self, request: Request) -> Response:
         
@@ -43,9 +41,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
 
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_201_CREATED,)
+        return Response(serialized_user, status=status.HTTP_201_CREATED,)
 
 
     def retrieve(self, request: Request, pk: int) -> Response:
@@ -56,9 +52,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
         
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_user, status=status.HTTP_200_OK,)
 
     def update(self, request: Request, pk: int) -> Response:
         
@@ -68,9 +62,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
 
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_user, status=status.HTTP_200_OK,)
 
     def destroy(self, request: Request, pk: int) -> Response:
         
@@ -78,9 +70,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_deleted_user = _service.delete(pk)
 
-        response = SuccessResponseSerializers({'data': serialized_deleted_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_deleted_user, status=status.HTTP_200_OK,)
     
     @action(detail=False, methods=['get'], url_path='me')
     def get_me(self, request: Request) -> Response:
@@ -91,9 +81,7 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
 
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_user, status=status.HTTP_200_OK,)
     
 
     @get_me.mapping.put
@@ -105,6 +93,4 @@ class UserResourcesViewSet(viewsets.ViewSet):
 
         serialized_user = UserSerializer(user).data
 
-        response = SuccessResponseSerializers({'data': serialized_user}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(serialized_user, status=status.HTTP_200_OK,)

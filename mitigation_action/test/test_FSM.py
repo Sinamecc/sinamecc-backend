@@ -1,15 +1,21 @@
-from django.test import TestCase, Client
-from django.utils import timezone
-from rest_framework import status
-from users.models import CustomUser
-from django.urls import reverse
-from django.contrib.auth.models import Group
-from mitigation_action.services import MitigationActionService
-import json, uuid, datetime, boto3
+import datetime
+import json
+import uuid
 from datetime import datetime
-from workflow.models import Comment, ReviewStatus
-from mitigation_action.models import MitigationAction
+
+import boto3
+from django.contrib.auth.models import Group
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils import timezone
 from moto import mock_ses
+from rest_framework import status
+
+from mitigation_action._services import MitigationActionService
+from mitigation_action.models import MitigationAction
+from users.models import CustomUser
+from workflow.models import Comment, ReviewStatus
+
 # initialize the APIClient app
 client = Client()
 

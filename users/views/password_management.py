@@ -34,9 +34,7 @@ class PasswordManagementViewSet(viewsets.ViewSet):
             'message': 'The request to change the password has been sent to the user email',
         }
 
-        response = SuccessResponseSerializers({'data': default_response}).data
-
-        return Response(response, status=status.HTTP_200_OK,) 
+        return Response(default_response, status=status.HTTP_200_OK,) 
     
 
     @action(
@@ -70,9 +68,7 @@ class PasswordManagementViewSet(viewsets.ViewSet):
         
         data_for_responding = {'message': 'The password has been changed successfully'}
 
-        response = SuccessResponseSerializers({'data': data_for_responding}).data
-
-        return Response(response, status=status.HTTP_200_OK,)
+        return Response(data_for_responding, status=status.HTTP_200_OK,)
 
 
         

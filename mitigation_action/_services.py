@@ -1,22 +1,39 @@
 
-from rolepermissions.checkers import has_object_permission
-from .workflow.services import MitigationActionWorkflowStep as WorkflowService
-from workflow.serializers import CommentSerializer
-from mitigation_action.workflow.models import *
-from mitigation_action.serializers import *
-from mitigation_action.models import MitigationAction, Contact, Status, FinanceSourceType, FinanceStatus, \
-    InitiativeType, GeographicScale, Finance, GHGInformation, ActionAreas, DescarbonizationAxis,Topics, \
-    ImpactCategory, SustainableDevelopmentGoals, GHGImpactSector, Classifier, ThematicCategorizationType, InformationSourceType
-
-from general.storages import S3Storage
 from django_fsm import RETURN_VALUE, can_proceed, has_transition_perm
-from general.services import HandlerErrors
-from workflow.services import WorkflowService as _WorkflowService
-from general.helpers.services import ServiceHelper
+from rolepermissions.checkers import has_object_permission, has_role
+
 from general.helpers.serializer import SerializersHelper
-from general.services import EmailServices
-from rolepermissions.checkers import has_role
+from general.helpers.services import ServiceHelper
+from general.services import EmailServices, HandlerErrors
+from general.storages import S3Storage
+from mitigation_action.models import (
+    ActionAreas,
+    Classifier,
+    Contact,
+    DescarbonizationAxis,
+    Finance,
+    FinanceSourceType,
+    FinanceStatus,
+    GeographicScale,
+    GHGImpactSector,
+    GHGInformation,
+    ImpactCategory,
+    InformationSourceType,
+    InitiativeType,
+    MitigationAction,
+    Status,
+    SustainableDevelopmentGoals,
+    ThematicCategorizationType,
+    Topics,
+)
+from mitigation_action.serializers import *
+from mitigation_action.workflow.models import *
+from workflow.serializers import CommentSerializer
+from workflow.services import WorkflowService as _WorkflowService
+
+from .workflow.services import MitigationActionWorkflowStep as WorkflowService
 from .workflow.states import States as MitigationActionStates
+
 handler = HandlerErrors()
 workflow_service = _WorkflowService()
 
@@ -1021,18 +1038,15 @@ class MitigationActionService():
 
     def get(self, request, mitigation_action_id):
 
-        mitigation_action_status, mitigation_action_data = self._service_helper.get_one(MitigationAction, mitigation_action_id)
+        mitigation_action = MitigationAction.objects.prefetch_related('files').filter(id=mitigation_action_id).first()
+        if mitigation_action is None:
+            result = (False, 'Mitigation Action with id {} does not exist'.format(mitigation_action_id))
         
-        if not mitigation_action_status:
-            result = (mitigation_action_status, mitigation_action_data)
+        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action):
+            result = (False, self.ACCESS_DENIED.format(mitigation_action.code))
         
-        elif not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
-            result = (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
-        
-        elif mitigation_action_status:
-            result = (mitigation_action_status, MitigationActionSerializer(mitigation_action_data).data)
-
-
+        else:
+            result = (True, MitigationActionSerializer(mitigation_action).data)
         return result
     
 

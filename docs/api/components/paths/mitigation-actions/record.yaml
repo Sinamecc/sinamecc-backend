@@ -53,7 +53,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../../schemas/mitigation_actions.yaml#/UpdateStateRecord"
+            $ref: "../../schemas/mitigation_actions.yaml#/GetRecord"
   security:
     - JWTAuth: []
 

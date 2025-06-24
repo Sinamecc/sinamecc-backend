@@ -9,7 +9,10 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-import os, datetime, environ
+import datetime
+import os
+
+import environ
 
 env = environ.Env(DEBUG=(bool, False))
 env.read_env() ## load variable env config/settings/.env
@@ -65,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    #'core.middlewares.responses.StructuredResponseMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -137,7 +141,10 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/day',
         'user': '1000/day'
-    }
+    },
+     "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",  # No browsable API
+    ]
 }
 
 MEDIA_URL = '/media/'

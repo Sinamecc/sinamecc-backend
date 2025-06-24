@@ -1,10 +1,15 @@
 from typing import Any
+
 from viewflow import fsm
 
 from general.services import EmailServices
-from mitigation_action.email_services import MitigationActionEmailServices
-from .states import States
 from mitigation_action.models import MitigationAction
+from mitigation_action.services.emails import (
+    EmailServices as MitigationActionEmailServices,
+)
+
+from .states import States
+
 
 class WorkFlow:
 

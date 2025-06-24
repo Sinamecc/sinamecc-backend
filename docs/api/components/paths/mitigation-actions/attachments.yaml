@@ -1,0 +1,210 @@
+attachments:
+  post:
+    summary: Upload files for a mitigation action
+    description: |
+        Upload one or more files to be associated with a specific mitigation action. Files can be documents, images, or other supporting materials that provide evidence or additional information for the mitigation action.
+        The uploaded files will be stored and linked to the specified mitigation action ID in the system. Note that appropriate file size limits and format restrictions may apply.
+    operationId: uploadFiles
+    tags:
+      - mitigation-action
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the mitigation action to which the files will be uploaded.
+        schema:
+          type: string
+      
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              entity_id:
+                type: string
+                description: The ID of the entity model associated with the mitigation action.
+              entity_type:
+                type: string
+                description: The type of the entity model associated with the mitigation action.
+                enum: 
+                  - indicator
+                  - monitoring-indicator
+
+    
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                description: The files to upload.
+              type:
+                type: string
+                enum: 
+                  - initiative
+                  - geographic-location
+                  - ghg-information 
+                  - impact-documentation
+                  - indicator-sustainability
+                  - indicator-methodological-detail
+                  - monitoring-report-line-text
+                  - monitoring-updated-data
+                  - monitoring-web-service-connection
+                description: The type of the files being uploaded, which helps categorize the files for the mitigation action.
+    responses:
+      '200':
+        description: Files uploaded successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number_of_files:
+                  type: integer
+                  description: The number of files successfully uploaded.
+                  example: 2
+                mitigation_action_id:
+                  type: string
+                  description: The ID of the mitigation action to which the files were uploaded.
+                  example: "a1b2c3d4-1234-5678-9abc"
+                code:
+                  type: integer
+                  example: 0
+                  description: The response code indicating success.
+
+
+
+
+      '400':
+        description: Bad request, possibly due to invalid file format or size.
+      '404':
+        description: Mitigation action not found.
+    security:
+      - JWTAuth: []
+  delete:
+    summary: Delete files from a mitigation action
+    description: |
+        Delete one or more files associated with a specific mitigation action. This operation allows users to remove files that are no longer needed or were uploaded in error.
+        The files will be permanently removed from the system, and this action cannot be undone.
+    operationId: deleteFiles
+    tags:
+      - mitigation-action
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the mitigation action from which the files will be deleted.
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              file_ids:
+                type: array
+                items:
+                  type: string
+
+                description: The IDs of the files to delete.
+    responses:
+      '200':
+        description: Files deleted successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    number_of_files:
+                      type: integer
+                      description: The number of files successfully deleted.
+                      example: 2
+                    mitigation_action_id:
+                      type: string
+                      description: The ID of the mitigation action from which the files were deleted.
+                      example: "a1b2c3d4-1234-5678-9abc"
+                code:
+                  type: integer
+                  example: 0
+                  description: The response code indicating success.
+      '400':
+        description: Bad request, possibly due to invalid file IDs.
+      '404':
+        description: Mitigation action or files not found.
+    security:
+      - JWTAuth: []
+  get:
+    summary: Retrieve files associated with a mitigation action
+    description: |
+        Retrieve a list of files associated with a specific mitigation action. This operation allows users to view all files that have been uploaded for the mitigation action, including documents, images, and other supporting materials.
+        The response will include metadata about each file, such as its name, type, and upload date.
+    operationId: getFiles
+    tags:
+      - mitigation-action
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the mitigation action for which to retrieve files.
+        schema:
+          type: string
+      - name: entity_id
+        in: query
+        required: false
+        description: The ID of the entity model associated with the mitigation action, if applicable.
+        schema:
+          type: string
+      - name: entity_type
+        in: query
+        required: false
+        description: The type of the entity model associated with the mitigation action, if applicable.
+        schema:
+          type: string
+          enum:
+            - indicator
+            - monitoring-indicator
+    responses:
+      '200':
+        description: Files retrieved successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The unique identifier of the file.
+                      file: 
+                        type: string
+                        description: The URL or path to access the file.
+                      type:
+                        type: string
+                        enum: 
+                          - initiative
+                          - geographic-location
+                          - ghg-information 
+                          - impact-documentation
+                        description: The type of the file, which helps categorize it for the mitigation action.
+                      metadata:
+                        type: object
+                        description: Additional metadata about the file, such as upload date, size, etc.
+
+                code:
+                  type: integer
+                  example: 0
+                  description: The response code indicating success.
+      '404':
+        description: Mitigation action not found or no files associated with it.
+    security:
+      - JWTAuth: []

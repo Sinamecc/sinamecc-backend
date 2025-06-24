@@ -1,22 +1,27 @@
 from __future__ import unicode_literals
+
 import uuid
-from django.db import models
+from time import gmtime, strftime
+
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.db import models, transaction
 from django.utils.encoding import smart_str as smart_unicode
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
-from workflow.models import Comment, ReviewStatus
-from general.storages import PrivateMediaStorage
 from django_fsm import FSMField, transition
-from general.services import EmailServices
-from mitigation_action.email_services import MitigationActionEmailServices
-from general.services import EmailServices
-from general.permissions import PermissionsHelper
+
 from general.helpers.validators import validate_year
-from time import gmtime, strftime
-from django.db import transaction
+from general.permissions import PermissionsHelper
+from general.services import EmailServices
+from general.storages import PrivateMediaStorage
+from mitigation_action.services.emails import (
+    EmailServices as MitigationActionEmailServices,
+)
+from workflow.models import Comment, ReviewStatus
+
+from .constants import MitigationActionFilesType
 from .workflow.states import States as FSM_STATE
-
-
 
 User =  get_user_model()
 permission = PermissionsHelper()
@@ -30,6 +35,53 @@ def directory_path(instance, filename):
 
     return path.format(instance._meta.verbose_name, strftime("%Y%m%d", gmtime()), filename)
 
+"""
+Refactor of some models to optimize the database structure and avoid redundancy.
+The first step is consolidating the file fields, basically, save all file into one model with metadata
+and then link it to the models that need it or with the main model (MitigationAction).
+"""
+
+def _directory_file_path(instance: "GenericFileStorage", filename: str) -> str:
+
+    path = 'mitigation_action/{type}/{object_id}/files/{filename}'
+
+    return path.format(
+        object_id=instance.object_id,
+        type=instance.type,
+        filename=str(uuid.uuid4())
+    )
+
+class GenericFileStorage(models.Model):
+    """
+    A model to store files with generic relation to any model.
+    This model allows to store files with metadata and link them to any model using GenericForeignKey.
+    How to use:
+    1. mitigation_action.generic_files
+
+    """
+    file = models.FileField(upload_to=_directory_file_path)
+    type = models.CharField(max_length=50, choices=MitigationActionFilesType.choices())
+    metadata = models.JSONField(blank=True, null=True)
+
+    ## Get All files from records and sub records
+    mitigation_action = models.ForeignKey(
+        'MitigationAction',
+        related_name='generic_files',
+        on_delete=models.CASCADE,
+    )
+
+    # Generic relation
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Generic File Storage')
+        verbose_name_plural = _('Generic File Storage')
+        
 
 class Sector(models.Model):
     code = models.CharField(max_length=255, blank=True, null=True)
@@ -495,7 +547,7 @@ class ImpactDocumentation(models.Model):
     base_line_definition = models.TextField(null=True)
     calculation_methodology = models.TextField(null=True)
     estimate_calculation_documentation = models.TextField(null=True)
-    estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #estimate_calculation_documentation_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     mitigation_action_in_inventory = models.CharField(max_length=50, null=True)
 
     ## Section 4.3
@@ -618,7 +670,7 @@ class Indicator(models.Model):
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
     ## need to endpoint to upload file
-    methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.TextField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
     
     available_time_start_date = models.DateField(null=True)
@@ -638,7 +690,7 @@ class Indicator(models.Model):
     limitation = models.TextField(null=True)
     ensure_sustainability = models.TextField(null=True)
     ## need to endpoint to upload file
-    ensure_sustainability_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #ensure_sustainability_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     
     comments = models.TextField(null=True)
     ## FK
@@ -652,7 +704,7 @@ class Indicator(models.Model):
     ## contact
     contact = models.ForeignKey(Contact, null=True, related_name='indicator', on_delete=models.SET_NULL)
     monitoring_information = models.ForeignKey(MonitoringInformation, related_name='indicator', null=True, on_delete=models.CASCADE)
-
+    files = GenericRelation(GenericFileStorage, related_query_name='indicator_files')
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -700,11 +752,11 @@ class MonitoringIndicator(models.Model):
     data_updated_date = models.DateField(null=True)
     report_type = models.TextField(null=True)
     updated_data = models.CharField(max_length=150, null=True)
-    updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #updated_data_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     report_line_text = models.TextField(null=True)
-    report_line_text_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #report_line_text_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     web_service_conection = models.TextField(null=True)
-    web_service_conection_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #web_service_conection_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     
     progress_report_period = models.DateField(null=True)
     progress_report_period_until = models.DateField(null=True)
@@ -714,6 +766,7 @@ class MonitoringIndicator(models.Model):
     indicator = models.ForeignKey(Indicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
     monitoring_reporting_indicator = models.ForeignKey(MonitoringReportingIndicator, related_name='monitoring_indicator', null=True, on_delete=models.CASCADE)
 
+    files = GenericRelation(GenericFileStorage, related_query_name='monitoring_indicator_files')
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -788,7 +841,7 @@ class GeographicLocation(models.Model):
 
     geographic_scale = models.ForeignKey(GeographicScale, related_name='geographic_location', null=True, on_delete=models.CASCADE)
     location = models.CharField(max_length=254, null=True)
-    location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #location_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -805,7 +858,7 @@ class Initiative(models.Model):
     name = models.CharField(max_length=500, null=True)
     objective = models.TextField(null=True)
     description = models.TextField(null=True)
-    description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     initiative_type = models.ForeignKey(InitiativeType, related_name='initiative', null=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -866,7 +919,7 @@ class GHGInformation(models.Model):
     ## TODO missing file to graphic description 
     impact_emission = models.TextField(null=True)
     graphic_description = models.TextField(null=True)
-    graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
+    #graphic_description_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     impact_sector = models.ManyToManyField(GHGImpactSector, related_name='ghg_information', blank=True)
     goals = models.ManyToManyField(SustainableDevelopmentGoals, related_name='ghg_information', blank=True)
 
@@ -908,6 +961,9 @@ class MitigationAction(models.Model):
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
 
+
+    ## Save files 
+    files = GenericRelation('mitigation_action.GenericFileStorage', content_type_field='content_type', object_id_field='object_id')
     ## comments
     review_count = models.IntegerField(null=True, blank=True, default=0)
     comments = models.ManyToManyField(Comment, blank=True)
