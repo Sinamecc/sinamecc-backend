@@ -1,5 +1,7 @@
 from rolepermissions.permissions import register_object_checker
-from users.roles import Reviewer, ReviewerMitigationAction, Admin
+
+from core.auth.roles import Admin, Reviewer, ReviewerMitigationAction
+
 
 @register_object_checker()
 def access_mitigation_action_register(role, user, mitigation_action_register):

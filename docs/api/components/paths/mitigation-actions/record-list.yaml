@@ -20,7 +20,8 @@ post:
         application/json:
           schema:
             $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
-
+  security:
+    - JWTAuth: []
 
 get:
   summary: Get a list of mitigation actions
