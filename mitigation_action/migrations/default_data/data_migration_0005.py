@@ -12,9 +12,9 @@ _finance_status_data = [
 
 
 _initiative_type_data = [
-     {'name_es': 'Tipo A - Instrumento de Política', 'name_en': 'Type A - Policy Instrument', 'code': 'policy_instrument', 'type': 'A'},
-     {'name_es': 'Tipo B - Proyectos y Programas', 'name_en': 'Type B - Projects and Programs', 'code': 'project', 'type': 'B'},
-     {'name_es': 'Tipo C - Actividad', 'name_en': 'Type B - Activity', 'code': 'activity' ,'type': 'C'}
+     {'name_es': 'Instrumento de Política', 'name_en': 'Policy Instrument', 'code': 'policy_instrument', 'type': 'A'},
+     {'name_es': 'Proyectos y Programas', 'name_en': 'Projects and Programs', 'code': 'project', 'type': 'B'},
+     {'name_es': 'Actividad', 'name_en': 'Activity', 'code': 'activity' ,'type': 'C'}
 ]
 
 
