@@ -243,7 +243,7 @@ class Activity(models.Model):
 
 class Instrument(models.Model):
     
-    name = models.CharField(max_length=250, null=True, blank=True)  #2.4.1
+    name = models.CharField(max_length=250, null=True)  #2.4.1
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -291,8 +291,8 @@ class Implementation(models.Model):
     
     start_date = models.DateField(null=True)                            #2.6.1
     end_date = models.DateField(null=True)                              #2.6.2
-    responsible_entity = models.CharField(max_length=50, null=True, blank=True)     #2.6.4
-    other_entity = models.CharField(max_length=250, null=True, blank=True)          #2.6.5
+    responsible_entity = models.CharField(max_length=50, null=True)     #2.6.4
+    other_entity = models.CharField(max_length=250, null=True)          #2.6.5
     action_code = models.TextField(null=True)                           #2.6.6
 
     created =  models.DateTimeField(auto_now_add=True)
