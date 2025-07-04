@@ -999,19 +999,6 @@ class MitigationActionService():
             result = (impact_documentation_status, impact_documentation_data)
             
         return result
-        
-
-    def _should_cancel_update(self, user, mitigation_action):
-        
-        no_edit_states = ['submitted', 'in_evaluation_by_DCC', 'rejected_by_DCC', 'accepted_by_DCC']
-        if has_role(user,['admin']):
-            return False  
-        
-        if (has_role(user, ['information_provider_mitigation_action', 'information_provider'])):
-            if mitigation_action.fsm_state in no_edit_states:
-                return True
-
-        return False
 
 
     ## upload files in the models
@@ -1138,7 +1125,8 @@ class MitigationActionService():
         if not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
             return  (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
         
-        if self._should_cancel_update(request.user, mitigation_action_data):
+        _workflow_service = WorkflowService(mitigation_action_data)
+        if _workflow_service._should_cancel_update(request.user):
             return (False, self.CANCEL_UPDATE.format(mitigation_action_data.code))
 
         if mitigation_action_status:
