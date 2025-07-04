@@ -59,6 +59,7 @@ class MitigationActionService():
         self.INDICATOR_ERROR = "The  indicator could not be saved"
         self.ACCESS_DENIED = "Access denied to this mitigation action register: {0}"
         self.ACCESS_DENIED_ALL = "Access denied to all mitigation action registers"
+        self.CANCEL_UPDATE = "You cannot edit this mitigation action register {0} because it is in the process of being updated by the DCC"
 
 
     # auxiliary functions
@@ -998,7 +999,6 @@ class MitigationActionService():
             result = (impact_documentation_status, impact_documentation_data)
             
         return result
-        
 
 
     ## upload files in the models
@@ -1125,6 +1125,10 @@ class MitigationActionService():
         if not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
             return  (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
         
+        _workflow_service = WorkflowService(mitigation_action_data)
+        if _workflow_service._should_cancel_update(request.user):
+            return (False, self.CANCEL_UPDATE.format(mitigation_action_data.code))
+
         if mitigation_action_status:
             mitigation_action = mitigation_action_data
              # fk's of object mitigation that have nested fields

@@ -5,6 +5,8 @@ from .states import States
 from .workflow import WorkFlow as MitigationActionWorkflow
 from django.contrib.auth.models import AbstractUser
 from viewflow.fsm import Transition
+from rolepermissions.checkers import has_role
+
 class MitigationActionWorkflowStep:
     
     workflow_state: MitigationActionWorkflow
@@ -106,3 +108,15 @@ class MitigationActionWorkflowStep:
             previous_status=previous_state,
             current_status=current_state
         )
+    
+    def _should_cancel_update(self, user):
+
+        no_edit_states = [States.SUBMITTED, States.IN_EVALUATION_BY_DCC, States.REJECTED_BY_DCC, States.ACCEPTED_BY_DCC]
+        if has_role(user,['admin']):
+            return False  
+        
+        if (has_role(user, ['information_provider_mitigation_action', 'information_provider'])):
+            if self.workflow_state.state in no_edit_states:
+                return True
+
+        return False
