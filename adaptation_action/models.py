@@ -443,6 +443,7 @@ class IndicatorAdaptation(models.Model):
         ('OTHER', 'Other')
     ]
     #Section 4
+    same_contact_info_as_registration = models.BooleanField(default=False, null=True) # 4.1.1
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
     unit = models.CharField(max_length=100, null=True)
@@ -461,7 +462,7 @@ class IndicatorAdaptation(models.Model):
     disaggregation = models.TextField(null=True)
 
     limitation = models.TextField(null=True)
-
+    associated_meta = models.CharField(max_length=100, null=True) # 4.1.12
     ## ensure sustainability
     additional_information = models.TextField(null=True)
     additional_information_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
