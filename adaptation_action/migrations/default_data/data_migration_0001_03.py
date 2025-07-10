@@ -407,55 +407,59 @@ _benefited_population = [
         'code': '2'
     },
     {
-        'name': 'Niñez (menores de 12 años)',
+        'name': 'Hombres',
         'code': '3'
     },
     {
-        'name': 'Adolescentes (12- 18 años)',
+        'name': 'Niñez (menores de 12 años)',
         'code': '4'
     },
     {
-        'name': 'Jóvenes (12-35 años)',
+        'name': 'Adolescentes: 12 a 17 años.',
         'code': '5'
     },
     {
-        'name': 'Población adulta mayor',
+        'name': 'Jóvenes: 18 a 35 años.',
         'code': '6'
     },
     {
-        'name': 'Población con discapacidad',
+        'name': 'Población adulta mayor',
         'code': '7'
     },
     {
-        'name': 'Pueblos indígenas',
+        'name': 'Población con discapacidad',
         'code': '8'
     },
     {
-        'name': 'Población migrante',
+        'name': 'Pueblos indígenas',
         'code': '9'
     },
     {
-        'name': 'Población afrodescendiente',
+        'name': 'Población migrante',
         'code': '10'
     },
     {
-        'name': 'Población LGBTIQ+',
+        'name': 'Población afrodescendiente.',
         'code': '11'
     },
     {
-        'name': 'Población productora (ganadería, agricultura, pesca)',
+        'name': 'Población LGBTIQ+',
         'code': '12'
     },
     {
-        'name': 'Organizaciones de base comunitaria y grupos locales',
+        'name': 'Población productora (ganadería, agricultura, pesca)',
         'code': '13'
     },
     {
-        'name': 'Gobiernos locales',
+        'name': 'Organizaciones de base comunitaria y grupos locales',
         'code': '14'
     },
     {
-        'name': 'Otro',
+        'name': 'Gobiernos locales',
         'code': '15'
+    },
+    {
+        'name': 'Otro',
+        'code': '16'
     }
 ]

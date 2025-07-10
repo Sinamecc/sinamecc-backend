@@ -29,6 +29,7 @@ class AdaptationActionServices():
         self.ACCESS_DENIED_ALL = "Access denied to all adaptation action registers"
         self.NO_INDICATOR = "The indicator id does not exist."
         self.NO_INDICATOR_MONITORING = "The indicator monitoring id does not exist."
+        self.CANCEL_UPDATE = "The update has been cancelled, the adaptation action {0} is not in a valid state to be updated."
 
 
     def _create_sub_record(self, data, sub_record_name):
@@ -1561,6 +1562,11 @@ class AdaptationActionServices():
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
+        
+        _workflow_service = WorkflowService(adaptation_action_data)
+        if _workflow_service._should_cancel_update(request.user):
+            return (False, self.CANCEL_UPDATE.format(adaptation_action_data.code))
+        
         ## permission access return here
         if not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
             return  (False, self.ACCESS_DENIED.format(adaptation_action_data.id))
