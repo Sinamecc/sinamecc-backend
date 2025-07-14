@@ -46,12 +46,13 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = ('id', 'app_scale', 'description', 'GIS', 'district', 'canton', 'created', 'updated')
-    
+        fields = ('id', 'app_scale', 'description', 'GIS', 'district', 'canton', 'province', 'created', 'updated')
+
     def to_representation(self, instance):
 
         data = super().to_representation(instance)
         data['district'] = DistrictSerializer(instance.district.all(), many=True).data
         data['canton'] = CantonSerializer(instance.canton.all(), many=True).data
+        data['province'] = ProvinceSerializer(instance.province.all(), many=True).data
 
         return data

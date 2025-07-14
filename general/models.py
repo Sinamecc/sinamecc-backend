@@ -87,6 +87,7 @@ class Address(models.Model):
 
     district = models.ManyToManyField(District, related_name="address", blank=True)
     canton = models.ManyToManyField(Canton, related_name="address", blank=True)
+    province = models.ManyToManyField(Province, related_name="address", blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
