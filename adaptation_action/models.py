@@ -639,8 +639,8 @@ class Category(models.Model):
     code = models.CharField(max_length=3, null=True)
     name = models.CharField(max_length=100, null=True) # 7.1.1.3
     category_group = models.ForeignKey(CategoryGroup, related_name='category', null=True, on_delete=models.CASCADE)
-    other_category = models.CharField(max_length=100, min_length=5, null=True) #7.1.1.4
-    description = models.CharField(max_length=600, min_length=50, null=True) #7.1.1.5
+    other_category = models.CharField(max_length=100, null=True) #7.1.1.4
+    description = models.CharField(max_length=600, null=True) #7.1.1.5
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -701,7 +701,7 @@ class Results(models.Model): #7.2.1
     name = models.CharField(max_length=100, null=True) # 7.2
 
     category_results = models.ForeignKey(CategoryResults, related_name='results', null=True, on_delete=models.CASCADE)
-    description = models.CharField(max_length=600, min_length=50, null=True) # 7.2.2
+    description = models.CharField(max_length=600, null=True) # 7.2.2
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -764,7 +764,7 @@ class AdaptationAction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     #Section 7
-    sustainable_development_impact = models.ManyToManyField(SustainableDevelopmentImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    sustainable_development_impact = models.ForeignKey(SustainableDevelopmentImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Adaptation Action")

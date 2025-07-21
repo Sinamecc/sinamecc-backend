@@ -308,6 +308,55 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(InformationSourceSerializer, data, record=information_source)
         
         return serializer
+    
+    def _get_serialized_dimension(self, data, dimension=False):
+
+        serializer = self._serializer_helper.get_serialized_record(DimensionSerializer, data, record=dimension)
+
+        return serializer
+    
+    def _get_serialized_category_group(self, data, category_group=False):
+
+        serializer = self._serializer_helper.get_serialized_record(CategoryGroupSerializer, data, record=category_group)
+
+        return serializer
+    
+    def _get_serialized_category(self, data, category=False):
+
+        serializer = self._serializer_helper.get_serialized_record(CategorySerializer, data, record=category)
+
+        return serializer
+    
+    def _get_serialized_sustainable_impact_scale(self, data, sustainable_impact_scale=False):
+
+        serializer = self._serializer_helper.get_serialized_record(SustainableImpactScaleSerializer, data, record=sustainable_impact_scale)
+
+        return serializer
+    
+    def _get_serialized_sustainable_impact_duration(self, data, sustainable_impact_duration=False):
+
+        serializer = self._serializer_helper.get_serialized_record(SustainableImpactDurationSerializer, data, record=sustainable_impact_duration)
+
+        return serializer
+    
+    def _get_serialized_category_results(self, data, category_results=False):
+
+        serializer = self._serializer_helper.get_serialized_record(CategoryResultsSerializer, data, record=category_results)
+
+        return serializer
+    
+    def _get_serialized_results(self, data, results=False):
+
+        serializer = self._serializer_helper.get_serialized_record(ResultsSerializer, data, record=results)
+
+        return serializer   
+    
+    def _get_serialized_sustainable_development_impact(self, data, sustainable_development_impact=False):
+
+        serializer = self._serializer_helper.get_serialized_record(SustainableDevelopmentImpactSerializer, data, record=sustainable_development_impact)
+
+        return serializer 
+    
 
     def _get_serialized_change_log(self, data, change_log=False, partial=False):
     
@@ -896,6 +945,174 @@ class AdaptationActionServices():
         else:
             result = (False, serialized_report_organization.errors)
 
+        return result
+
+
+    def _create_update_dimension(self, data, dimension=False):
+
+        if dimension:
+            serialized_dimension = self._get_serialized_dimension(data, dimension)
+        
+        else:
+            serialized_dimension = self._get_serialized_dimension(data)
+        
+        if serialized_dimension.is_valid():
+            dimension = serialized_dimension.save()
+            result = (True, dimension)
+        
+        else:
+            result = (False, serialized_dimension.errors)
+        
+        return result
+    
+
+    def _create_update_category_group(self, data, category_group=False):
+
+        if category_group:
+            serialized_category_group = self._get_serialized_category_group(data, category_group)
+        
+        else:
+            serialized_category_group = self._get_serialized_category_group(data)
+        
+        if serialized_category_group.is_valid():
+            category_group = serialized_category_group.save()
+            result = (True, category_group)
+        
+        else:
+            result = (False, serialized_category_group.errors)
+        
+        return result
+    
+
+    def _create_update_category(self, data, category=False):
+
+        _category_group = data.pop('category_group', None)
+        if (_category_group):
+            serialized_category_group = self._get_serialized_category_group(_category_group)
+
+            if(serialized_category_group.is_valid()):
+                category_group = serialized_category_group.save()
+                data['category_group'] = category_group.id
+        
+        if category:
+            serialized_category = self._get_serialized_category(data, category)
+        
+        else:
+            serialized_category = self._get_serialized_category(data)
+        
+        if serialized_category.is_valid():
+            category = serialized_category.save()
+            result = (True, category)
+        
+        else:
+            result = (False, serialized_category.errors)
+        
+        return result
+
+
+    def _create_update_sustainable_impact_scale(self, data, sustainable_impact_scale=False):
+
+        if sustainable_impact_scale:
+            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data, sustainable_impact_scale)
+        
+        else:
+            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data)
+        
+        if serialized_sustainable_impact_scale.is_valid():
+            sustainable_impact_scale = serialized_sustainable_impact_scale.save()
+            result = (True, sustainable_impact_scale)
+        
+        else:
+            result = (False, serialized_sustainable_impact_scale.errors)
+        
+        return result
+    
+
+    def _create_update_sustainable_impact_duration(self, data, sustainable_impact_duration=False):
+        
+        if sustainable_impact_duration:
+            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data, sustainable_impact_duration)
+        
+        else:
+            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data)
+        
+        if serialized_sustainable_impact_duration.is_valid():
+            sustainable_impact_duration = serialized_sustainable_impact_duration.save()
+            result = (True, sustainable_impact_duration)
+        
+        else:
+            result = (False, serialized_sustainable_impact_duration.errors)
+        
+        return result
+    
+
+    def _create_update_category_results(self, data, category_results=False):
+
+        _sustainable_impact_scale = data.pop('sustainable_impact_scale', None)
+        _sustainable_impact_duration = data.pop('sustainable_impact_duration', None)
+
+        if (_sustainable_impact_scale):
+
+            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data, _sustainable_impact_scale)
+            if(serialized_sustainable_impact_scale.is_valid()):
+                sustainable_impact_scale = serialized_sustainable_impact_scale.save()
+                data['sustainable_impact_scale'] = sustainable_impact_scale.id
+        
+        if (_sustainable_impact_duration):
+            
+            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data, _sustainable_impact_duration)
+            if(serialized_sustainable_impact_duration.is_valid()):
+                sustainable_impact_duration = serialized_sustainable_impact_duration.save()
+                data['sustainable_impact_duration'] = sustainable_impact_duration.id
+
+        if category_results:
+            serialized_category_results = self._get_serialized_category_results(data, category_results)
+        
+        else:
+            serialized_category_results = self._get_serialized_category_results(data)
+        
+        if serialized_category_results.is_valid():
+            category_results = serialized_category_results.save()
+            result = (True, category_results)
+        
+        else:
+            result = (False, serialized_category_results.errors)
+        
+        return result
+    
+    def _create_update_results(self, data, results=False):
+
+        if results:
+            serialized_results = self._get_serialized_results(data, results)
+        
+        else:
+            serialized_results = self._get_serialized_results(data)
+        
+        if serialized_results.is_valid():
+            results = serialized_results.save()
+            result = (True, results)
+        
+        else:
+            result = (False, serialized_results.errors)
+        
+        return result
+    
+
+    def _create_update_sustainable_development_impact(self, data, sustainable_development_impact=False):
+
+        if sustainable_development_impact:
+            serialized_sustainable_development_impact = self._get_serialized_sustainable_development_impact(data, sustainable_development_impact)
+        
+        else:
+            serialized_sustainable_development_impact = self._get_serialized_sustainable_development_impact(data)
+        
+        if serialized_sustainable_development_impact.is_valid():
+            sustainable_development_impact = serialized_sustainable_development_impact.save()
+            result = (True, sustainable_development_impact)
+        
+        else:
+            result = (False, serialized_sustainable_development_impact.errors)
+        
         return result
 
     def _get_all_type_climate_threat(self, request):
