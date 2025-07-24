@@ -1053,14 +1053,14 @@ class AdaptationActionServices():
 
         if (_sustainable_impact_scale):
 
-            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data, _sustainable_impact_scale)
+            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(_sustainable_impact_scale)
             if(serialized_sustainable_impact_scale.is_valid()):
                 sustainable_impact_scale = serialized_sustainable_impact_scale.save()
                 data['sustainable_impact_scale'] = sustainable_impact_scale.id
         
         if (_sustainable_impact_duration):
             
-            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data, _sustainable_impact_duration)
+            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(_sustainable_impact_duration)
             if(serialized_sustainable_impact_duration.is_valid()):
                 sustainable_impact_duration = serialized_sustainable_impact_duration.save()
                 data['sustainable_impact_duration'] = sustainable_impact_duration.id
@@ -1099,6 +1099,14 @@ class AdaptationActionServices():
     
 
     def _create_update_sustainable_development_impact(self, data, sustainable_development_impact=False):
+
+        _category = data.pop('category', None)
+        if (_category):
+            
+            serialized_category = self._get_serialized_category(_category)
+            if(serialized_category.is_valid()):
+                category = serialized_category.save()
+                data['category'] = category.id
 
         if sustainable_development_impact:
             serialized_sustainable_development_impact = self._get_serialized_sustainable_development_impact(data, sustainable_development_impact)
@@ -1775,7 +1783,7 @@ class AdaptationActionServices():
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)

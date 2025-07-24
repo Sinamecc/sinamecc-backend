@@ -397,84 +397,94 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         return data
     
 class DimensionSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Dimension
         fields = ('id', 'code', 'name', 'created', 'updated')
 
 
 class CategoryGroupSerializer(serializers.ModelSerializer):
-    dimension = DimensionSerializer()
 
     class Meta:
         model = CategoryGroup
         fields = ('id', 'code', 'name', 'dimension', 'created', 'updated')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['dimension'] = DimensionSerializer(instance.dimension).data if instance.dimension else None
+
+        return data
+
 
 class CategorySerializer(serializers.ModelSerializer):
-    category_group = CategoryGroupSerializer()
 
     class Meta:
         model = Category
         fields = ('id', 'code', 'name', 'category_group', 'other_category', 'description', 'created', 'updated')
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_group'] = CategoryGroupSerializer(instance.category_group).data
+
+        return data
 
 
 class SustainableImpactScaleSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = SustainableImpactScale
         fields = ('id', 'code', 'name', 'created', 'updated')
 
 
 class SustainableImpactDurationSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = SustainableImpactDuration
         fields = ('id', 'code', 'name', 'created', 'updated')
 
 
 class CategoryResultsSerializer(serializers.ModelSerializer):
-    sustainable_scale = SustainableImpactScaleSerializer()
-    sustainable_duration = SustainableImpactDurationSerializer()
 
     class Meta:
         model = CategoryResults
         fields = ('id', 'code', 'name', 'sustainable_scale', 'sustainable_duration', 'created', 'updated')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['sustainable_scale'] = SustainableImpactScaleSerializer(instance.sustainable_scale).data if instance.sustainable_scale else None
+        data['sustainable_duration'] = SustainableImpactDurationSerializer(instance.sustainable_duration).data if instance.sustainable_duration else None
+
+        return data
+
 
 class ResultsSerializer(serializers.ModelSerializer):
-    category_results = CategoryResultsSerializer()
 
     class Meta:
         model = Results
         fields = ('id', 'code', 'name', 'category_results', 'description', 'created', 'updated')
-
-
-class SustainableDevelopmentImpactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SustainableDevelopmentImpact
-        fields = ('id', 'category', 'impact_type', 'pertinent', 'relevant', 'result', 'created', 'updated')
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        data['category'] = CategorySerializer(instance.category).data if instance.category else None
-        data['result'] = ResultsSerializer(instance.result).data if instance.result else None
-
-        return data
-
-
-class SustainableDevelopmentImpactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SustainableDevelopmentImpact
-        fields = ('id', 'category', 'impact_type', 'pertinent', 'relevant', 'result', 'created', 'updated')
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        data['category'] = CategorySerializer(instance.category).data if instance.category else None
-        data['result'] = ResultsSerializer(instance.result).data if instance.result else None
-
-        return data
-
     
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_results'] = CategoryResultsSerializer(instance.category_results).data if instance.category_results else None
+
+        return data
+
+
+class SustainableDevelopmentImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SustainableDevelopmentImpact
+        fields = ('id', 'category', 'impact_type', 'pertinent', 'relevant', 'result', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        data['category'] = CategorySerializer(instance.category).data if instance.category else None
+        data['result'] = ResultsSerializer(instance.result).data if instance.result else None
+
+        return data
+
+
 class ChangeLogSerializer(serializers.ModelSerializer):
 
     class Meta:
