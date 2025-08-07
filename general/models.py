@@ -95,3 +95,47 @@ class Address(models.Model):
     class Meta:
         verbose_name = _("Address")
         verbose_name_plural = ("Addresses")
+
+##use in aa & ma
+class Dimension(models.Model): #Section: 7
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True) # 7.1.1.1
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Dimension")
+        verbose_name_plural = _("Dimensions")
+
+
+class CategoryGroup(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True) # 7.1.1.2
+    dimension = models.ForeignKey(Dimension, related_name='category_group', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True) 
+
+    class Meta:
+        verbose_name = _("Category Group")
+        verbose_name_plural = _("Category Groups")
+
+
+class Category(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=200, null=True) # 7.1.1.3
+    category_group = models.ForeignKey(CategoryGroup, related_name='category', null=True, on_delete=models.CASCADE)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")

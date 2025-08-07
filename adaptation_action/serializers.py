@@ -12,8 +12,8 @@ from django.urls import reverse
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
-             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation, \
-                SustainableDevelopmentImpact, Category, CategoryGroup, Dimension, SustainableImpactScale, SustainableImpactDuration, CategoryResults, Results
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation \
+                #SustainableDevelopmentImpact, Category, CategoryGroup, Dimension, SustainableImpactScale, SustainableImpactDuration, CategoryResults, Results
 from general.serializers import AddressSerializer
 
 from workflow.serializers import CommentSerializer
@@ -395,7 +395,7 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         data['data_to_update_file_action_impact'] = self._get_url(instance, 'data_to_update_file_action_impact')
 
         return data
-    
+"""
 class DimensionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -424,7 +424,7 @@ class CategorySerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['category_group'] = CategoryGroupSerializer(instance.category_group).data
+        data['category_group'] = CategoryGroupSerializer(instance.category_group).data if instance.category_group else None
 
         return data
 
@@ -483,7 +483,7 @@ class SustainableDevelopmentImpactSerializer(serializers.ModelSerializer):
         data['result'] = ResultsSerializer(instance.result).data if instance.result else None
 
         return data
-
+"""
 
 class ChangeLogSerializer(serializers.ModelSerializer):
 
@@ -496,7 +496,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact', 'review_count', 'comments','user', 'created', 'updated')
+        fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         data = {
@@ -535,15 +535,13 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['indicator_monitoring_list'] = IndicatorMonitoringSerializer(instance.indicator_monitoring.all(), many=True).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
-        data['sustainable_development_impact'] = SustainableDevelopmentImpactSerializer(instance.sustainable_development_impact).data
+        #data['sustainable_development_impact'] = SustainableDevelopmentImpactSerializer(instance.sustainable_development_impact).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(
             fsm_state=instance.fsm_state, review_number=instance.review_count
         ), many=True).data
         
         return data
-
-
 
 
 

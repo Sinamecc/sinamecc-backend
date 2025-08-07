@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from general.models import Address
+from general.models import Address, Category
 from django_fsm import FSMField, transition
 from time import gmtime, strftime
 from general.storages import PrivateMediaStorage
@@ -604,51 +604,24 @@ class ActionImpact(models.Model):
         verbose_name = _("Action Impact")
         verbose_name_plural = _("Action Impact")
 
+"""
+class CategoryOption(models.Model):
 
-class Dimension(models.Model): #Section: 7
-
-    code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=100, null=True) # 7.1.1.1
-
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Dimension")
-        verbose_name_plural = _("Dimensions")
-
-
-class CategoryGroup(models.Model):
-
-    code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=100, null=True) # 7.1.1.2
-    dimension = models.ForeignKey(Dimension, related_name='category_group', null=True, on_delete=models.CASCADE)
-
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True) 
-
-    class Meta:
-        verbose_name = _("Category Group")
-        verbose_name_plural = _("Category Groups")
-
-
-class Category(models.Model):
-
-    code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=100, null=True) # 7.1.1.3
-    category_group = models.ForeignKey(CategoryGroup, related_name='category', null=True, on_delete=models.CASCADE)
-    other_category = models.CharField(max_length=100, null=True) #7.1.1.4
+    categories = models.ManyToManyField(Category, related_name='category_options', blank=True) #7.1.1.1 to 7.1.1.3
+    other = models.CharField(max_length=100, null=True) #7.1.1.4
     description = models.CharField(max_length=600, null=True) #7.1.1.5
+    impact_type = models.BooleanField(default=False, null=True) #7.1.1.6
+    pertinent = models.BooleanField(default=False, null=True) #7.1.1.6
+    relevant = models.BooleanField(default=False, null=True) #7.1.1.6
+    
 
-    ## Logs
+    # Optionally, add logs or other fields as needed
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Category")
-        verbose_name_plural = _("Categories")
+        verbose_name = _("Category Option")
+        verbose_name_plural = _("Category Options")
 
 
 class SustainableImpactScale(models.Model):
@@ -730,7 +703,7 @@ class SustainableDevelopmentImpact(models.Model):
     class Meta:
         verbose_name = _("Sustainable Development Impact")
         verbose_name_plural = _("Sustainable Development Impacts")
-
+"""
 
 class AdaptationAction(models.Model):
     
@@ -764,7 +737,7 @@ class AdaptationAction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     #Section 7
-    sustainable_development_impact = models.ForeignKey(SustainableDevelopmentImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    #sustainable_development_impact = models.ForeignKey(SustainableDevelopmentImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Adaptation Action")

@@ -3,8 +3,8 @@ from botocore.exceptions import ClientError
 from django.conf import settings
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
-from general.serializers import ProvinceSerializer, CantonSerializer, DistrictSerializer
-from general.models import Province, Canton, District
+from general.serializers import ProvinceSerializer, CantonSerializer, DistrictSerializer, DimensionSerializer, CategorySerializer, CategoryGroupSerializer
+from general.models import Province, Canton, District, Dimension, Category, CategoryGroup
 import json
 
 class EmailServices():
@@ -248,3 +248,83 @@ class GeneralService():
                     response.extend(result_data)
     
             return (True, response)
+
+    def get_all_dimension(self, request):
+
+        dimension_status, dimension_data = self._service_helper.get_all(Dimension)
+
+        if dimension_status:
+            result = (dimension_status, DimensionSerializer(dimension_data, many=True).data)
+        
+        else:
+            result = (dimension_status, dimension_data) 
+
+        return result
+    
+
+    def get_all_category_group(self, request):
+
+        category_group_status, category_group_data = self._service_helper.get_all(CategoryGroup)
+
+        if category_group_status:
+            result = (category_group_status, CategoryGroupSerializer(category_group_data, many=True).data)
+        
+        else:
+            result = (category_group_status, category_group_data) 
+
+        return result
+
+    def get_category_group_list(self, request):
+
+        body = json.loads(request.body.decode('utf-8'))
+        dimension_list = body.get('dimension_list', [])
+        response = []
+        if dimension_list:
+            for _dimension in dimension_list:
+                code_dimension = _dimension.get('code_dimension', None)
+                category_group_status, category_group_data = self._service_helper.get_all(CategoryGroup, dimension__code = code_dimension)
+
+                if category_group_status:
+                    result_status, result_data = (category_group_status, CategoryGroupSerializer(category_group_data, many=True).data)
+        
+                else:
+                    result_status, result_data = (category_group_status, category_group_data) 
+                
+                response.extend(result_data)
+
+        return (True, response)
+    
+
+    def get_all_category(self, request):
+
+        category_status, category_data = self._service_helper.get_all(Category)
+
+        if category_status:
+            result = (category_status, CategorySerializer(category_data, many=True).data)
+
+        else:
+            result = (category_status, category_data)
+
+        return result
+    
+    def get_category_list(self, request):
+
+        body = json.loads(request.body.decode('utf-8'))
+        category_group_list = body.get('category_group_list', [])
+        response = []
+        if category_group_list:
+            for _category_group in category_group_list:
+                code_category_group = _category_group.get('code_category_group', None)
+                code_dimension = _category_group.get('code_dimension', None)
+                print(code_category_group, code_dimension)
+                category_status, category_data = self._service_helper.get_all(Category, category_group__code = code_category_group, category_group__dimension__code = code_dimension)
+
+                if category_status:
+                    result_status, result_data = (category_status, CategorySerializer(category_data, many=True).data)
+        
+                else:
+                    result_status, result_data = (category_status, category_data) 
+                
+                response.extend(result_data)
+
+        return (True, response)
