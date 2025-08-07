@@ -1,0 +1,91 @@
+dimension-list:
+  get:
+    tags:
+      - general
+    summary: List all dimensions
+    responses:
+      '200':
+        description: List of dimensions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/dimension-list'
+    security:
+      - JWTAuth: []
+
+category-group-list:
+  post:
+    tags:
+      - general
+    summary: Send list of dimension and get the category groups for each dimension
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/dimension-list-body'
+    responses:
+      '200':
+        description: Category group created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/category-group-list'
+    security:
+      - JWTAuth: []
+
+  get:
+    tags:
+      - general
+    summary: List all category groups
+    responses:
+      '200':
+        description: List of category groups
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-group-list'
+    security:
+      - JWTAuth: []
+
+
+category-list:
+  get:
+    tags:
+      - general
+    summary: List all categories
+    responses:
+      '200':
+        description: List of categories
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-list'
+    security:
+      - JWTAuth: []
+
+  post:
+    tags:
+      - general
+    summary: List categories by category_group_list
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/category-group-list-body'
+    responses:
+      '200':
+        description: List of categories
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/category-list'
+    security:
+      - JWTAuth: []

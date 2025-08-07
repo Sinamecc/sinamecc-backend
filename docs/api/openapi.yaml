@@ -18,6 +18,9 @@ tags:
     description: User management
   - name: roles
     description: Role management
+  - name: general
+    description: General
+
 
 paths:
   ## User Definitions
@@ -52,7 +55,19 @@ paths:
   /adaptation-action/:
     $ref: "./components/paths/adaptation-actions/record-list.yaml"
 
+  #Dimension
+  /general/dimension/:
+    $ref: "./components/paths/general/record.yaml#/dimension-list"
+
+  #Category Group
+  /general/category_group/:
+    $ref: "./components/paths/general/record.yaml#/category-group-list"
   
+  #Category
+  /general/category/:
+    $ref: "./components/paths/general/record.yaml#/category-list"
+  
+
 components:
   securitySchemes:
     JWTAuth:
