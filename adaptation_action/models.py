@@ -604,7 +604,7 @@ class ActionImpact(models.Model):
         verbose_name = _("Action Impact")
         verbose_name_plural = _("Action Impact")
 
-"""
+
 class CategoryOption(models.Model):
 
     categories = models.ManyToManyField(Category, related_name='category_options', blank=True) #7.1.1.1 to 7.1.1.3
@@ -624,42 +624,10 @@ class CategoryOption(models.Model):
         verbose_name_plural = _("Category Options")
 
 
-class SustainableImpactScale(models.Model):
-
+class CategoryResult(models.Model):
     code = models.CharField(max_length=3, null=True)
     name = models.CharField(max_length=100, null=True)
 
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Sustainable Impact Scale")
-        verbose_name_plural = _("Sustainable Impact Scales")
-
-class SustainableImpactDuration(models.Model):
-
-    code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=100, null=True)
-
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Sustainable Impact Duration")
-        verbose_name_plural = _("Sustainable Impact Durations")
-
-
-class CategoryResults(models.Model):
-
-    code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=10, null=True) 
-
-    sustainable_scale = models.ForeignKey(SustainableImpactScale, related_name='category_results', null=True, on_delete=models.CASCADE)
-    sustainable_duration = models.ForeignKey(SustainableImpactDuration, related_name='category_results', null=True, on_delete=models.CASCADE)
-
-    ## Logs
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -668,15 +636,25 @@ class CategoryResults(models.Model):
         verbose_name_plural = _("Category Results")
 
 
-class Results(models.Model): #7.2.1
+class Scale(models.Model):
 
     code = models.CharField(max_length=3, null=True)
-    name = models.CharField(max_length=100, null=True) # 7.2
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=500, null=True)
+    category_result = models.ManyToManyField(CategoryResult, related_name="scale", blank=True)
 
-    category_results = models.ForeignKey(CategoryResults, related_name='results', null=True, on_delete=models.CASCADE)
-    description = models.CharField(max_length=600, null=True) # 7.2.2
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
-    ## Logs
+    class Meta:
+        verbose_name = _("Category Option Results")
+        verbose_name_plural = _("Category Option Results")
+
+
+class Results(models.Model):
+    
+    scale = models.ManyToManyField(Scale, related_name="results", blank=True)
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -684,26 +662,6 @@ class Results(models.Model): #7.2.1
         verbose_name = _("Results")
         verbose_name_plural = _("Results")
 
-
-class SustainableDevelopmentImpact(models.Model):
-
-    # Section 7.1
-    category = models.ForeignKey(Category, related_name='sustainable_development_impact', null=True, on_delete=models.CASCADE)
-    impact_type = models.BooleanField(default=False, null=True) # 7.1.1.6
-    pertinent = models.BooleanField(default=False, null=True)
-    relevant = models.BooleanField(default=False, null=True)
-    # Section 7.2
-    result = models.ForeignKey(Results, related_name='sustainable_development_impact', null=True, on_delete=models.CASCADE) # 7.2.1
-
-
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Sustainable Development Impact")
-        verbose_name_plural = _("Sustainable Development Impacts")
-"""
 
 class AdaptationAction(models.Model):
     
@@ -737,7 +695,10 @@ class AdaptationAction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     #Section 7
-    #sustainable_development_impact = models.ForeignKey(SustainableDevelopmentImpact, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    
+    result = models.ManyToManyField(Results, related_name="adaptation_action", blank=True)
+    category_option = models.ManyToManyField(CategoryOption, related_name="adaptation_action", blank=True)
+
 
     class Meta:
         verbose_name = _("Adaptation Action")

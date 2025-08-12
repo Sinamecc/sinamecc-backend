@@ -309,55 +309,7 @@ class AdaptationActionServices():
         
         return serializer
     
-    def _get_serialized_dimension(self, data, dimension=False):
-
-        serializer = self._serializer_helper.get_serialized_record(DimensionSerializer, data, record=dimension)
-
-        return serializer
     
-    def _get_serialized_category_group(self, data, category_group=False):
-
-        serializer = self._serializer_helper.get_serialized_record(CategoryGroupSerializer, data, record=category_group)
-
-        return serializer
-    
-    def _get_serialized_category(self, data, category=False):
-
-        serializer = self._serializer_helper.get_serialized_record(CategorySerializer, data, record=category)
-
-        return serializer
-    
-    def _get_serialized_sustainable_impact_scale(self, data, sustainable_impact_scale=False):
-
-        serializer = self._serializer_helper.get_serialized_record(SustainableImpactScaleSerializer, data, record=sustainable_impact_scale)
-
-        return serializer
-    
-    def _get_serialized_sustainable_impact_duration(self, data, sustainable_impact_duration=False):
-
-        serializer = self._serializer_helper.get_serialized_record(SustainableImpactDurationSerializer, data, record=sustainable_impact_duration)
-
-        return serializer
-    
-    def _get_serialized_category_results(self, data, category_results=False):
-
-        serializer = self._serializer_helper.get_serialized_record(CategoryResultsSerializer, data, record=category_results)
-
-        return serializer
-    
-    def _get_serialized_results(self, data, results=False):
-
-        serializer = self._serializer_helper.get_serialized_record(ResultsSerializer, data, record=results)
-
-        return serializer   
-    
-    def _get_serialized_sustainable_development_impact(self, data, sustainable_development_impact=False):
-
-        serializer = self._serializer_helper.get_serialized_record(SustainableDevelopmentImpactSerializer, data, record=sustainable_development_impact)
-
-        return serializer 
-    
-
     def _get_serialized_change_log(self, data, change_log=False, partial=False):
     
         serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
@@ -376,7 +328,7 @@ class AdaptationActionServices():
         
         data = [{**indicator, 'adaptation_action': adaption_action_id}  for indicator in data ]
  
-        serializer = self._serialize_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
+        serializer = self._serializer_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
 
         return serializer
     
@@ -435,6 +387,101 @@ class AdaptationActionServices():
             result = (False, serializer.errors)
 
         return result
+    
+
+    def _get_serialized_category_result(self, data, category_result=False):
+
+        category_data_ids = []
+        for category_data in data:
+            
+            serializer = self._serializer_helper.get_serialized_record(CategoryResultSerializer, category_data)
+
+            if serializer.is_valid():
+                category = serializer.save()
+                category_data_ids.append(category.id)
+            
+            else:
+                print(serializer.errors)
+
+        return category_data_ids
+
+
+    def _get_serialized_scale(self, data, scale=False):
+
+        scale_ids = []
+        
+        for scale_data in data:
+            _category_result = scale_data.pop("category_result", None)
+            
+            if(_category_result):
+
+                serialized_category_result = self._get_serialized_category_result(_category_result)
+                scale_data['category_result'] = serialized_category_result
+                
+            if scale_data:
+                serialized_result = self._serializer_helper.get_serialized_record(ScaleSerializer, scale_data, record=scale)
+            
+            else:
+                serialized_result = self._serializer_helper.get_serialized_record(ScaleSerializer, scale_data)
+            
+            if serialized_result.is_valid():
+                result = serialized_result.save()
+                scale_ids.append(result.id)
+            
+            else:
+                print(serialized_result.errors)
+        
+        return scale_ids
+
+
+
+    def _create_update_result(self, data, result=False):
+        results = []
+        errors = []
+
+        for result_value in data:
+            _scale = result_value.pop('scale', None)
+            
+            if _scale:
+                serialized_scale = self._get_serialized_scale(_scale)
+                result_value['scale'] = serialized_scale
+
+            serialized_result = self._serializer_helper.get_serialized_record(ResultsSerializer, result_value)
+            
+            if serialized_result.is_valid():
+                saved_result = serialized_result.save()
+                results.append(saved_result)
+
+            else:
+                errors.append(serialized_result.errors)
+
+        
+        if errors:
+            return False, errors
+        
+        return True, results
+    
+            
+    def _create_update_category_option(self, data, category_option=False):
+        results = []
+        errors = []
+
+        for result_value in data:
+            serialized_result = self._serializer_helper.get_serialized_record(CategoryOptionSerializer, result_value)
+            
+            if serialized_result.is_valid():
+                saved_result = serialized_result.save()
+                results.append(saved_result)
+
+            else:
+                errors.append(serialized_result.errors)
+
+        
+        if errors:
+            return False, errors
+        
+        return True, results
+
 
     def _create_update_report_organization_type(self, data, report_organization_type = False):
 
@@ -946,182 +993,7 @@ class AdaptationActionServices():
             result = (False, serialized_report_organization.errors)
 
         return result
-
-
-    def _create_update_dimension(self, data, dimension=False):
-
-        if dimension:
-            serialized_dimension = self._get_serialized_dimension(data, dimension)
-        
-        else:
-            serialized_dimension = self._get_serialized_dimension(data)
-        
-        if serialized_dimension.is_valid():
-            dimension = serialized_dimension.save()
-            result = (True, dimension)
-        
-        else:
-            result = (False, serialized_dimension.errors)
-        
-        return result
     
-
-    def _create_update_category_group(self, data, category_group=False):
-
-        if category_group:
-            serialized_category_group = self._get_serialized_category_group(data, category_group)
-        
-        else:
-            serialized_category_group = self._get_serialized_category_group(data)
-        
-        if serialized_category_group.is_valid():
-            category_group = serialized_category_group.save()
-            result = (True, category_group)
-        
-        else:
-            result = (False, serialized_category_group.errors)
-        
-        return result
-    
-
-    def _create_update_category(self, data, category=False):
-
-        _category_group = data.pop('category_group', None)
-        if (_category_group):
-            serialized_category_group = self._get_serialized_category_group(_category_group)
-
-            if(serialized_category_group.is_valid()):
-                category_group = serialized_category_group.save()
-                data['category_group'] = category_group.id
-        
-        if category:
-            serialized_category = self._get_serialized_category(data, category)
-        
-        else:
-            serialized_category = self._get_serialized_category(data)
-        
-        if serialized_category.is_valid():
-            category = serialized_category.save()
-            result = (True, category)
-        
-        else:
-            result = (False, serialized_category.errors)
-        
-        return result
-
-
-    def _create_update_sustainable_impact_scale(self, data, sustainable_impact_scale=False):
-
-        if sustainable_impact_scale:
-            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data, sustainable_impact_scale)
-        
-        else:
-            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(data)
-        
-        if serialized_sustainable_impact_scale.is_valid():
-            sustainable_impact_scale = serialized_sustainable_impact_scale.save()
-            result = (True, sustainable_impact_scale)
-        
-        else:
-            result = (False, serialized_sustainable_impact_scale.errors)
-        
-        return result
-    
-
-    def _create_update_sustainable_impact_duration(self, data, sustainable_impact_duration=False):
-        
-        if sustainable_impact_duration:
-            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data, sustainable_impact_duration)
-        
-        else:
-            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(data)
-        
-        if serialized_sustainable_impact_duration.is_valid():
-            sustainable_impact_duration = serialized_sustainable_impact_duration.save()
-            result = (True, sustainable_impact_duration)
-        
-        else:
-            result = (False, serialized_sustainable_impact_duration.errors)
-        
-        return result
-    
-
-    def _create_update_category_results(self, data, category_results=False):
-
-        _sustainable_impact_scale = data.pop('sustainable_impact_scale', None)
-        _sustainable_impact_duration = data.pop('sustainable_impact_duration', None)
-
-        if (_sustainable_impact_scale):
-
-            serialized_sustainable_impact_scale = self._get_serialized_sustainable_impact_scale(_sustainable_impact_scale)
-            if(serialized_sustainable_impact_scale.is_valid()):
-                sustainable_impact_scale = serialized_sustainable_impact_scale.save()
-                data['sustainable_impact_scale'] = sustainable_impact_scale.id
-        
-        if (_sustainable_impact_duration):
-            
-            serialized_sustainable_impact_duration = self._get_serialized_sustainable_impact_duration(_sustainable_impact_duration)
-            if(serialized_sustainable_impact_duration.is_valid()):
-                sustainable_impact_duration = serialized_sustainable_impact_duration.save()
-                data['sustainable_impact_duration'] = sustainable_impact_duration.id
-
-        if category_results:
-            serialized_category_results = self._get_serialized_category_results(data, category_results)
-        
-        else:
-            serialized_category_results = self._get_serialized_category_results(data)
-        
-        if serialized_category_results.is_valid():
-            category_results = serialized_category_results.save()
-            result = (True, category_results)
-        
-        else:
-            result = (False, serialized_category_results.errors)
-        
-        return result
-    
-    def _create_update_results(self, data, results=False):
-
-        if results:
-            serialized_results = self._get_serialized_results(data, results)
-        
-        else:
-            serialized_results = self._get_serialized_results(data)
-        
-        if serialized_results.is_valid():
-            results = serialized_results.save()
-            result = (True, results)
-        
-        else:
-            result = (False, serialized_results.errors)
-        
-        return result
-    
-
-    def _create_update_sustainable_development_impact(self, data, sustainable_development_impact=False):
-
-        _category = data.pop('category', None)
-        if (_category):
-            
-            serialized_category = self._get_serialized_category(_category)
-            if(serialized_category.is_valid()):
-                category = serialized_category.save()
-                data['category'] = category.id
-
-        if sustainable_development_impact:
-            serialized_sustainable_development_impact = self._get_serialized_sustainable_development_impact(data, sustainable_development_impact)
-        
-        else:
-            serialized_sustainable_development_impact = self._get_serialized_sustainable_development_impact(data)
-        
-        if serialized_sustainable_development_impact.is_valid():
-            sustainable_development_impact = serialized_sustainable_development_impact.save()
-            result = (True, sustainable_development_impact)
-        
-        else:
-            result = (False, serialized_sustainable_development_impact.errors)
-        
-        return result
 
     def _get_all_type_climate_threat(self, request):
 
@@ -1728,7 +1600,7 @@ class AdaptationActionServices():
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'result']
 
         for field in field_list:
             if data.get(field, False):
@@ -1783,7 +1655,8 @@ class AdaptationActionServices():
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact',  
+            'result', 'category_option']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
@@ -1801,10 +1674,13 @@ class AdaptationActionServices():
              # fk's of object adaptation that have nested fields
             for field in field_list:
                 if data.get(field, False):
-                    record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field))
+                    record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field, False))
                     
                     if record_status:
-                        data[field] = record_data.id
+                        if isinstance(record_data, list):
+                            data[field] = [obj.id for obj in record_data]
+                        else:
+                            data[field] = record_data.id
                         
                     dict_data = record_data if isinstance(record_data, list) else [record_data]
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
@@ -1813,7 +1689,7 @@ class AdaptationActionServices():
             if all(validation_dict):
                 is_complete = data.pop('is_complete', False)
                 serialized_adaptation_action = self._get_serialized_adaptation_action(data, adaptation_action)
-                
+
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
         

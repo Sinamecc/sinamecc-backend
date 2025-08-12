@@ -12,9 +12,9 @@ from django.urls import reverse
 from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
-             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation \
-                #SustainableDevelopmentImpact, Category, CategoryGroup, Dimension, SustainableImpactScale, SustainableImpactDuration, CategoryResults, Results
-from general.serializers import AddressSerializer
+             Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation, \
+                CategoryOption, CategoryResult, Scale, Results
+from general.serializers import AddressSerializer, CategorySerializer
 
 from workflow.serializers import CommentSerializer
 
@@ -395,95 +395,50 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         data['data_to_update_file_action_impact'] = self._get_url(instance, 'data_to_update_file_action_impact')
 
         return data
-"""
-class DimensionSerializer(serializers.ModelSerializer):
 
+
+class CategoryOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Dimension
-        fields = ('id', 'code', 'name', 'created', 'updated')
-
-
-class CategoryGroupSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CategoryGroup
-        fields = ('id', 'code', 'name', 'dimension', 'created', 'updated')
+        model = CategoryOption
+        fields = ('id','categories','other','description','impact_type','pertinent','relevant','created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['dimension'] = DimensionSerializer(instance.dimension).data if instance.dimension else None
-
+        data['categories'] = CategorySerializer(instance.categories.all(), many=True).data
         return data
-
-
-class CategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Category
-        fields = ('id', 'code', 'name', 'category_group', 'other_category', 'description', 'created', 'updated')
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['category_group'] = CategoryGroupSerializer(instance.category_group).data if instance.category_group else None
 
-        return data
-
-
-class SustainableImpactScaleSerializer(serializers.ModelSerializer):
-
+class CategoryResultSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SustainableImpactScale
+        model = CategoryResult
         fields = ('id', 'code', 'name', 'created', 'updated')
 
 
-class SustainableImpactDurationSerializer(serializers.ModelSerializer):
+class ScaleSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = SustainableImpactDuration
-        fields = ('id', 'code', 'name', 'created', 'updated')
-
-
-class CategoryResultsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CategoryResults
-        fields = ('id', 'code', 'name', 'sustainable_scale', 'sustainable_duration', 'created', 'updated')
+        model = Scale
+        fields = ('id','code','name','description','category_result','created','updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['sustainable_scale'] = SustainableImpactScaleSerializer(instance.sustainable_scale).data if instance.sustainable_scale else None
-        data['sustainable_duration'] = SustainableImpactDurationSerializer(instance.sustainable_duration).data if instance.sustainable_duration else None
+        data['category_result'] = CategoryResultSerializer(instance.category_result.all(), many=True).data
 
         return data
 
 
 class ResultsSerializer(serializers.ModelSerializer):
-
+    
     class Meta:
         model = Results
-        fields = ('id', 'code', 'name', 'category_results', 'description', 'created', 'updated')
+        fields = ('id', 'scale', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['scale'] = ScaleSerializer(instance.scale.all(), many=True).data
+
+        return data
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['category_results'] = CategoryResultsSerializer(instance.category_results).data if instance.category_results else None
-
-        return data
-
-
-class SustainableDevelopmentImpactSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = SustainableDevelopmentImpact
-        fields = ('id', 'category', 'impact_type', 'pertinent', 'relevant', 'result', 'created', 'updated')
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        data['category'] = CategorySerializer(instance.category).data if instance.category else None
-        data['result'] = ResultsSerializer(instance.result).data if instance.result else None
-
-        return data
-"""
 
 class ChangeLogSerializer(serializers.ModelSerializer):
 
@@ -496,7 +451,9 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdaptationAction
-        fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information','activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', 'action_impact', 'review_count', 'comments','user', 'created', 'updated')
+        fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information', \
+                  'activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', \
+                    'review_count', 'result', 'category_option', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         data = {
@@ -535,15 +492,14 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['indicator_monitoring_list'] = IndicatorMonitoringSerializer(instance.indicator_monitoring.all(), many=True).data
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
-        #data['sustainable_development_impact'] = SustainableDevelopmentImpactSerializer(instance.sustainable_development_impact).data
+        data['result'] = ResultsSerializer(instance.result.all(), many=True).data
+        data['category_option'] = CategoryOptionSerializer(instance.category_option.all(), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(
             fsm_state=instance.fsm_state, review_number=instance.review_count
         ), many=True).data
         
         return data
-
-
 
 
 class AdaptationActionAllSerializer(serializers.ModelSerializer):
@@ -579,3 +535,4 @@ class AdaptationActionAllSerializer(serializers.ModelSerializer):
         data['adaptation_action_information'] = AdaptationActionInformationSerializer(instance.adaptation_action_information).data
     
         return data
+    
