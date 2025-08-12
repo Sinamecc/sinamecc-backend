@@ -73,12 +73,36 @@ put:
         format: uuid
         example: a1b2c3d4-1234-5678-9abc-123456789abc
   requestBody:
-      description: The adaptation action record to update
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+    description: The adaptation action record to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+        example:
+          contact:
+            institution: "Environmental Protection Agency"
+            full_name: "John Doe"
+            job_title: "Climate Change Analyst"
+            email: "john.doe@example.com"
+            phone: "+1-800-555-1234"
+          result:
+            - scale:
+                - code: "aa"
+                  name: "TEST2"
+                  category_result: []
+                - code: "aa"
+                  name: "TEST9"
+                  category_result:
+                    - code: "tes"
+                      name: "name test"
+          category_option:
+            - categories: [1, 2]
+              other: "Test other"
+              description: "Test large text description"
+              impact_type: true
+              pertinent: false
+              relevant: true
 
   responses:
     '200':
