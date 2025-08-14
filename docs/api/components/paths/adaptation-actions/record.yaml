@@ -91,11 +91,13 @@ put:
                 - code: "aa"
                   name: "TEST2"
                   category_result: []
+                  description: "Description test"
                 - code: "aa"
                   name: "TEST9"
                   category_result:
                     - code: "tes"
                       name: "name test"
+                  description: "Description test 2"
           category_option:
             - category_section:
                 - category: 1
