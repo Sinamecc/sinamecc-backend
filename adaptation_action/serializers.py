@@ -13,7 +13,7 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation, \
-                CategoryOption, CategoryResult, Scale, Results
+                CategoryOption, CategoryResult, Scale, Results, OtherOption, CategorySection
 from general.serializers import AddressSerializer, CategorySerializer
 
 from workflow.serializers import CommentSerializer
@@ -397,14 +397,36 @@ class ActionImpactSerializer(serializers.ModelSerializer):
         return data
 
 
-class CategoryOptionSerializer(serializers.ModelSerializer):
+class OtherOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CategoryOption
-        fields = ('id','categories','other','description','impact_type','pertinent','relevant','created', 'updated')
+        model = OtherOption
+        fields = ('id', 'name', 'description', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['categories'] = CategorySerializer(instance.categories.all(), many=True).data
+        return data
+
+
+class CategorySectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategorySection
+        fields = ('id', 'category', 'description', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category'] = CategorySerializer(instance.category).data
+        return data
+
+
+class CategoryOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryOption
+        fields = ('id','category_section','other','impact_type','pertinent','relevant','created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_section'] = CategorySectionSerializer(instance.category_section.all(), many=True).data
+        data['other'] = OtherOptionSerializer(instance.other.all(), many=True).data
         return data
     
 

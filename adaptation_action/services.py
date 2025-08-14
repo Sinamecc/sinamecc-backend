@@ -460,13 +460,58 @@ class AdaptationActionServices():
             return False, errors
         
         return True, results
+
+
+    def _get_serialized_other(self, data, other=False):
+
+        other_option_result = []
+
+        for other_data in data:
+            serializer = self._serializer_helper.get_serialized_record(OtherOptionSerializer, other_data)
+
+            if serializer.is_valid():
+                other = serializer.save()
+                other_option_result.append(other.id)
+
+            else:
+                print(serializer.errors)
+
+        return other_option_result
+
     
-            
+    def _get_serialized_category_section(self, data, category_section=False):
+
+        category_section_result = []
+
+        for category_section_data in data:
+            serializer = self._serializer_helper.get_serialized_record(CategorySectionSerializer, category_section_data)
+
+            if serializer.is_valid():
+                category_section = serializer.save()
+                category_section_result.append(category_section.id)
+
+            else:
+                print(serializer.errors)
+
+        return category_section_result
+    
+
     def _create_update_category_option(self, data, category_option=False):
         results = []
         errors = []
 
         for result_value in data:
+            _other = result_value.pop('other', None)
+            _category_section = result_value.pop('category_section', None)
+
+            if _other:
+                serialized_other = self._get_serialized_other(_other)
+                result_value['other'] = serialized_other
+
+            if _category_section:
+                serialized_category_section = self._get_serialized_category_section(_category_section)
+                result_value['category_section'] = serialized_category_section
+
             serialized_result = self._serializer_helper.get_serialized_record(CategoryOptionSerializer, result_value)
             
             if serialized_result.is_valid():

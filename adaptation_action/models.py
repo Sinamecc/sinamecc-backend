@@ -605,11 +605,38 @@ class ActionImpact(models.Model):
         verbose_name_plural = _("Action Impact")
 
 
+class OtherOption(models.Model):
+
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=600, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Other Option")
+        verbose_name_plural = _("Other Options")
+
+
+class CategorySection(models.Model):
+
+    category = models.ForeignKey(Category, related_name='category_section', null=True, on_delete=models.CASCADE) #7.1.1
+    description = models.CharField(max_length=600, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Section")
+        verbose_name_plural = _("Category Sections")
+
+
 class CategoryOption(models.Model):
 
-    categories = models.ManyToManyField(Category, related_name='category_options', blank=True) #7.1.1.1 to 7.1.1.3
-    other = models.CharField(max_length=100, null=True) #7.1.1.4
-    description = models.CharField(max_length=600, null=True) #7.1.1.5
+    category_section = models.ManyToManyField(CategorySection, related_name='category_options', blank=True) #7.1.1.1 to 7.1.1.3
+    other = models.ManyToManyField(OtherOption, related_name='category_options', blank=True) #7.1.1.4
     impact_type = models.BooleanField(default=False, null=True) #7.1.1.6
     pertinent = models.BooleanField(default=False, null=True) #7.1.1.6
     relevant = models.BooleanField(default=False, null=True) #7.1.1.6

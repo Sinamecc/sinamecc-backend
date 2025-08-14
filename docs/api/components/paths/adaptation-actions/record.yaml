@@ -97,12 +97,18 @@ put:
                     - code: "tes"
                       name: "name test"
           category_option:
-            - categories: [1, 2]
-              other: "Test other"
-              description: "Test large text description"
+            - category_section:
+                - category: 1
+                  description: "Description test"
+                - category: 2
+                  description: "Descrition test 2"
+              other:
+                - name: "test"
+                  description: "Test large text description"
               impact_type: true
               pertinent: false
               relevant: true
+
 
   responses:
     '200':
