@@ -667,7 +667,7 @@ class Scale(models.Model):
 
     code = models.CharField(max_length=3, null=True)
     name = models.CharField(max_length=100, null=True)
-    description = models.CharField(max_length=500, null=True)
+    description = models.CharField(max_length=600, null=True)
     category_result = models.ManyToManyField(CategoryResult, related_name="scale", blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
