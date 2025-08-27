@@ -114,3 +114,76 @@ category-group-list-body:
       items:
         $ref: '#/category-group-code'
 
+
+category-ct:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Tecnología"
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877237Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877245Z"
+
+category-ct-list:
+  type: array
+  items:
+    $ref: '#/category-ct'
+
+
+characteristic:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Investigación y Desarrollo (I+D)"
+    category_ct:
+      $ref: '#/category-ct'
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877237Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877245Z"
+
+
+characteristic-list:
+  type: array
+  items:
+    $ref: '#/characteristic'
+
+
+category-ct-body:
+  type: object
+  properties:
+    code_category_ct:
+      type: string
+      example: "01"
+
+
+category-ct-list-body:
+  type: object
+  properties:
+    category_ct_list:
+      type: array
+      items:
+        $ref: '#/category-ct-body'

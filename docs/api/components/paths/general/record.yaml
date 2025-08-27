@@ -89,3 +89,58 @@ category-list:
               $ref: '../../schemas/project.yaml#/category-list'
     security:
       - JWTAuth: []
+
+category-ct-list:
+  get:
+    tags:
+      - general
+    summary: List all category CT
+    responses:
+      '200':
+        description: List of category CT
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-ct-list'
+    security:
+      - JWTAuth: []
+
+
+characteristic-list:
+  get:
+    tags:
+      - general
+    summary: List all characteristics
+    responses:
+      '200':
+        description: List of characteristics
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/characteristic-list'
+    security:
+      - JWTAuth: []
+  
+  post:
+    tags:
+      - general
+    summary: List characteristics by category_ct_list
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/category-ct-list-body'
+    responses:
+      '200':
+        description: List of characteristics
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/characteristic-list'
+    security:
+      - JWTAuth: []

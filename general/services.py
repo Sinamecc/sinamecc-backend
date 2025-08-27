@@ -3,8 +3,9 @@ from botocore.exceptions import ClientError
 from django.conf import settings
 from general.helpers.services import ServiceHelper
 from general.helpers.serializer import SerializersHelper
-from general.serializers import ProvinceSerializer, CantonSerializer, DistrictSerializer, DimensionSerializer, CategorySerializer, CategoryGroupSerializer
-from general.models import Province, Canton, District, Dimension, Category, CategoryGroup
+from general.serializers import ProvinceSerializer, CantonSerializer, DistrictSerializer, DimensionSerializer, CategorySerializer, CategoryGroupSerializer, \
+    CategoryCTSerializer, CharacteristicSerializer
+from general.models import Province, Canton, District, Dimension, Category, CategoryGroup, CategoryCT, Characteristic
 import json
 
 class EmailServices():
@@ -328,3 +329,48 @@ class GeneralService():
                 response.extend(result_data)
 
         return (True, response)
+
+
+    def get_all_category_ct(self, request):
+        category_ct_status, category_ct_data = self._service_helper.get_all(CategoryCT)
+
+        if category_ct_status:
+            result = (category_ct_status, CategoryCTSerializer(category_ct_data, many=True).data)
+
+        else:
+            result = (category_ct_status, category_ct_data)
+
+        return result
+
+    def get_characteristic_list(self, request):
+
+        body = json.loads(request.body.decode('utf-8'))
+        category_ct_list = body.get('category_ct_list', [])
+        response = []
+        if category_ct_list:
+            for _category_ct in category_ct_list:
+                code_category_ct = _category_ct.get('code_category_ct', None)
+                characteristic_status, characteristic_data = self._service_helper.get_all(Characteristic, category_ct__code=code_category_ct)
+
+                if characteristic_status:
+                    result_status, result_data = (characteristic_status, CharacteristicSerializer(characteristic_data, many=True).data)
+
+                else:
+                    result_status, result_data = (characteristic_status, characteristic_data)
+
+                response.extend(result_data)
+
+        return (True, response)
+    
+
+    def get_all_characteristic(self, request):
+
+        characteristic_status, characteristic_data = self._service_helper.get_all(Characteristic)
+
+        if characteristic_status:
+            result = (characteristic_status, CharacteristicSerializer(characteristic_data, many=True).data)
+
+        else:
+            result = (characteristic_status, characteristic_data)
+
+        return result

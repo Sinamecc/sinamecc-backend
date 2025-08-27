@@ -139,3 +139,31 @@ class Category(models.Model):
     class Meta:
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
+
+#use in section 8 aa & ma
+
+class CategoryCT(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=200, null=True) 
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category CT")
+        verbose_name_plural = _("Categories CT")
+
+
+class Characteristic(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=200, null=True)
+    category_ct = models.ForeignKey(CategoryCT, related_name="characteristics", null=True, on_delete=models.CASCADE)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Characteristic")
+        verbose_name_plural = _("Characteristics")

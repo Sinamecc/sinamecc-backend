@@ -49,6 +49,16 @@ urlpatterns = [
         views.get_category,
         name='get_category'
     ),
+    path(
+        'api/v1/general/category_ct/',
+        views.get_category_ct,
+        name='get_category_ct'
+    ),
+    path(
+        'api/v1/general/characteristic/',
+        views.get_characteristic,
+        name='get_characteristic'
+    )
 ]
 
 urlpatterns.extend(urlpatterns_to_delete)

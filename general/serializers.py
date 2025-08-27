@@ -3,7 +3,7 @@ from django.db.models import fields
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from general.models import Address, Canton, Province, District, Dimension, Category, CategoryGroup
+from general.models import Address, Canton, Province, District, Dimension, Category, CategoryGroup, CategoryCT, Characteristic
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,4 +86,21 @@ class CategorySerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['category_group'] = CategoryGroupSerializer(instance.category_group).data
         
+        return data
+
+class CategoryCTSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CategoryCT
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
+class CharacteristicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Characteristic
+        fields = ('id', 'code', 'name', 'category_ct', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
         return data
