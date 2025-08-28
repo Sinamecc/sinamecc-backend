@@ -517,35 +517,28 @@ class AdaptationActionServices():
     
 
     def _create_update_category_option(self, data, category_option=False):
-        results = []
-        errors = []
-
-        for result_value in data:
-            _other = result_value.pop('other', None)
-            _category_section = result_value.pop('category_section', None)
-
-            if _other:
-                serialized_other = self._get_serialized_other(_other)
-                result_value['other'] = serialized_other
-
-            if _category_section:
-                serialized_category_section = self._get_serialized_category_section(_category_section)
-                result_value['category_section'] = serialized_category_section
-
-            serialized_result = self._serializer_helper.get_serialized_record(CategoryOptionSerializer, result_value)
-            
-            if serialized_result.is_valid():
-                saved_result = serialized_result.save()
-                results.append(saved_result)
-
-            else:
-                errors.append(serialized_result.errors)
-
         
-        if errors:
-            return False, errors
-        
-        return True, results
+        _other = data.pop('other', None)
+        _category_section = data.pop('category_section', None)
+
+        if _other:
+            serialized_other = self._get_serialized_other(_other)
+            data['other'] = serialized_other
+
+        if _category_section:
+            serialized_category_section = self._get_serialized_category_section(_category_section)
+            data['category_section'] = serialized_category_section
+
+        serialized_result = self._serializer_helper.get_serialized_record(CategoryOptionSerializer, data)
+
+        if serialized_result.is_valid():
+            saved_result = serialized_result.save()
+            result = (True, saved_result)
+
+        else:
+            result = (False, serialized_result.errors)
+
+        return result
 
 
     def _create_update_final_result(self, data, final_result = False):

@@ -767,7 +767,7 @@ class AdaptationAction(models.Model):
     #Section 7
     
     result = models.ManyToManyField(Results, related_name="adaptation_action", blank=True)
-    category_option = models.ManyToManyField(CategoryOption, related_name="adaptation_action", blank=True)
+    category_option = models.ForeignKey(CategoryOption, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     #Section 8
     process = models.ForeignKey(Processes, related_name="adaptation_action", null=True, on_delete=models.CASCADE)

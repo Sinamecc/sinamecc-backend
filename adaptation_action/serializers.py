@@ -540,7 +540,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['general_report'] = GeneralReportSerializer(instance.general_report).data
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
         data['result'] = ResultsSerializer(instance.result.all(), many=True).data
-        data['category_option'] = CategoryOptionSerializer(instance.category_option.all(), many=True).data
+        data['category_option'] = CategoryOptionSerializer(instance.category_option).data
         data['process'] = ProcessesSerializer(instance.process).data
         data['final_result'] = ResultsSerializer(instance.final_result.all(), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data

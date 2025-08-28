@@ -99,17 +99,17 @@ put:
                       name: "name test"
                   description: "Description test 2"
           category_option:
-            - category_section:
-                - category: 1
-                  description: "Description test"
-                - category: 2
-                  description: "Descrition test 2"
-              other:
-                - name: "test"
-                  description: "Test large text description"
-              impact_type: true
-              pertinent: false
-              relevant: true
+            category_section:
+              - category: 1
+                description: "Description test"
+              - category: 2
+                description: "Description test 2"
+            other:
+              - name: "test"
+                description: "Test large text description"
+            impact_type: true
+            pertinent: false
+            relevant: true
           process:
             characteristic: [1, 12]
             other: "Text example"
