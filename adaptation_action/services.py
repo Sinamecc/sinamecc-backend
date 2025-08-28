@@ -352,8 +352,28 @@ class AdaptationActionServices():
 
         return serializer
 
+
+    def _get_serialized_specific_impact(self, data, specific_impact=None):
+        
+        specific_impact_result = []
+
+        for specific_impact_data in data:
+            serializer = self._serializer_helper.get_serialized_record(SpecificImpactSerializer, specific_impact_data)
+
+            if serializer.is_valid():
+                specific_impact = serializer.save()
+                specific_impact_result.append(specific_impact.id)
+
+        return specific_impact_result
     
-    
+
+    def _get_serialized_process(self, data, process=None):
+
+        serializer = self._serializer_helper.get_serialized_record(ProcessesSerializer, data, record=process)
+
+        return serializer
+
+
     def _create_update_contact(self, data, contact=None):
         
         if contact:
@@ -527,6 +547,33 @@ class AdaptationActionServices():
         
         return True, results
 
+
+    def _create_update_final_result(self, data, final_result = False):
+
+        return self._create_update_result(data, final_result)
+
+
+    def _create_update_process(self, data, process = False):
+        _specific_impact = data.pop('specific_impact')
+
+        if _specific_impact:
+            serialized_specific_impact = self._get_serialized_specific_impact(_specific_impact)
+            data['specific_impact'] = serialized_specific_impact
+
+        if process:
+            serialized_process = self._get_serialized_process(data, process)
+
+        else:
+            serialized_process = self._get_serialized_process(data)
+
+        if serialized_process.is_valid():
+            process = serialized_process.save()
+            result = (True, process)
+
+        else:
+            result = (False, serialized_process.errors)
+
+        return result
 
     def _create_update_report_organization_type(self, data, report_organization_type = False):
 
@@ -1701,7 +1748,7 @@ class AdaptationActionServices():
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact',  
-            'result', 'category_option']
+            'result', 'category_option', 'process', 'final_result']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)

@@ -110,7 +110,24 @@ put:
               impact_type: true
               pertinent: false
               relevant: true
-
+          process:
+            characteristic: [1, 12]
+            other: "Text example"
+            specific_impact:
+              - description: "Test description data"
+                category_ct: 2
+          final_result:
+            - scale:
+                - code: "aa"
+                  name: "TEST2"
+                  category_result: []
+                  description: "Description test"
+                - code: "aa"
+                  name: "TEST9"
+                  category_result:
+                    - code: "tes"
+                      name: "name test"
+                  description: "Description test 2"
 
   responses:
     '200':

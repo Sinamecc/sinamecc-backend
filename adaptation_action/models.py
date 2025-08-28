@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from general.models import Address, Category
+from general.models import Address, Category, Characteristic, CategoryCT
 from django_fsm import FSMField, transition
 from time import gmtime, strftime
 from general.storages import PrivateMediaStorage
@@ -690,6 +690,34 @@ class Results(models.Model):
         verbose_name_plural = _("Results")
 
 
+class SpecificImpact(models.Model):
+
+    category_ct = models.ForeignKey(CategoryCT, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
+    description = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Specific Impact")
+        verbose_name_plural = _("Specific Impacts")
+
+
+class Processes(models.Model):
+
+    characteristic = models.ManyToManyField(Characteristic, related_name="processes", blank=True)
+    other = models.CharField(max_length=70, null=True)
+    specific_impact = models.ManyToManyField(SpecificImpact, related_name="processes", blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Processes")
+        verbose_name_plural = _("Processes")
+
+
+
 class AdaptationAction(models.Model):
     
     #Section 1
@@ -725,6 +753,10 @@ class AdaptationAction(models.Model):
     
     result = models.ManyToManyField(Results, related_name="adaptation_action", blank=True)
     category_option = models.ManyToManyField(CategoryOption, related_name="adaptation_action", blank=True)
+
+    #Section 8
+    process = models.ForeignKey(Processes, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    final_result = models.ManyToManyField(Results, related_name="adaptation_action_final", blank=True)
 
 
     class Meta:

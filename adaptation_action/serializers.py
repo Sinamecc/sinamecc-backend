@@ -13,8 +13,8 @@ from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInfo
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation, \
-                CategoryOption, CategoryResult, Scale, Results, OtherOption, CategorySection
-from general.serializers import AddressSerializer, CategorySerializer
+                CategoryOption, CategoryResult, Scale, Results, OtherOption, CategorySection, SpecificImpact, Processes
+from general.serializers import AddressSerializer, CategoryCTSerializer, CategorySerializer, CharacteristicSerializer
 
 from workflow.serializers import CommentSerializer
 
@@ -462,6 +462,31 @@ class ResultsSerializer(serializers.ModelSerializer):
         return data
     
 
+class SpecificImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SpecificImpact
+        fields = ('id', 'category_ct', 'description', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
+        return data
+    
+
+class ProcessesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Processes
+        fields = ('id', 'characteristic', 'other', 'specific_impact', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['characteristic'] = CharacteristicSerializer(instance.characteristic.all(), many=True).data
+        data['specific_impact'] = SpecificImpactSerializer(instance.specific_impact.all(), many=True).data
+        return data
+
+
 class ChangeLogSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -475,7 +500,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         model = AdaptationAction
         fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information', \
                   'activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', \
-                    'review_count', 'result', 'category_option', 'comments','user', 'created', 'updated')
+                    'review_count', 'result', 'category_option', 'process', 'final_result', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         data = {
@@ -516,6 +541,8 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['action_impact'] = ActionImpactSerializer(instance.action_impact).data
         data['result'] = ResultsSerializer(instance.result.all(), many=True).data
         data['category_option'] = CategoryOptionSerializer(instance.category_option.all(), many=True).data
+        data['process'] = ProcessesSerializer(instance.process).data
+        data['final_result'] = ResultsSerializer(instance.final_result.all(), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(
             fsm_state=instance.fsm_state, review_number=instance.review_count
