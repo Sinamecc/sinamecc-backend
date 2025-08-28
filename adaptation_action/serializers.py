@@ -331,6 +331,13 @@ class IndicatorSerializer(serializers.ModelSerializer):
 
         return data
 
+class IndicatorResumeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IndicatorAdaptation
+        fields = ('id', 'name', 'description')
+
+
 #Serializer section 5-6
 
 
@@ -404,7 +411,7 @@ class OtherOptionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
         return data
 
 
@@ -416,7 +423,7 @@ class CategorySectionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category'] = CategorySerializer(instance.category).data
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
         return data
 
 
@@ -447,7 +454,7 @@ class ScaleSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category_result'] = CategoryResultSerializer(instance.category_result.all(), many=True).data
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
 
         return data
 
@@ -474,7 +481,7 @@ class SpecificImpactSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
-        data['indicator'] = IndicatorSerializer(instance.indicator).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
         return data
     
 
