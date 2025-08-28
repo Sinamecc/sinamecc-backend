@@ -122,4 +122,19 @@ urlpatterns = [
         views.get_benefited_population,
         name='get_benefited_population'
     ),
+    path(
+        'api/v1/adaptation-action/all_indicator/<uuid:adaptation_action_id>/',
+        views.get_indicator,
+        name='get_indicator'
+    ),
+    path(
+        'api/v1/adaptation-action/indicator/<int:indicator_id>/',
+        views.get_put_indicator,
+        name='get_put_indicator'
+    ),
+    path(
+        'api/v1/adaptation-action/indicator/',
+        views.get_put_indicator,
+        name='get_put_indicator'
+    ),
 ]

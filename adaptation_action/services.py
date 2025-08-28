@@ -972,7 +972,6 @@ class AdaptationActionServices():
         return result
     
     
-    
     def _create_update_indicator(self, data, indicator_adaptation=None):
 
         fields = ['information_source', 'contact']
@@ -985,11 +984,11 @@ class AdaptationActionServices():
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
-
+    
         if all(validation_dict):
 
             serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-            
+                    
             if serialized_indicator_adaptation.is_valid():
                 indicator_adaptation = serialized_indicator_adaptation.save()
 
@@ -1084,6 +1083,60 @@ class AdaptationActionServices():
         else:
             result = (False, serialized_report_organization.errors)
 
+        return result
+    
+
+    def _get_all_indicator(self, request, adaptation_action_id=None):
+
+        indicator_status, indicator_data = self._service_helper.get_all(IndicatorAdaptation, adaptation_action_id=adaptation_action_id)
+        if indicator_status:
+            result = (indicator_status, IndicatorSerializer(indicator_data, many=True).data)
+        else:
+            result = (indicator_status, indicator_data)
+        return result
+
+
+    def _get_indicator(self, request, adaptation_action_id=None):
+
+        if not adaptation_action_id:
+            return (False, "Missing adaptation_action_id")
+
+        indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, adaptation_action_id=adaptation_action_id)
+        if indicator_status:
+            result = (indicator_status, IndicatorSerializer(indicator_data).data)
+        else:
+            result = (indicator_status, indicator_data)
+        return result
+
+    
+    def _create_indicator(self, request, indicator_adaptation=False):
+
+        data = request.data.copy()
+        fields = ['information_source', 'contact']
+        validation_dict = {}
+        for field in fields:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+    
+        if all(validation_dict):
+
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+                    
+            if serialized_indicator_adaptation.is_valid():
+                indicator_adaptation = serialized_indicator_adaptation.save()
+
+                result = (True, serialized_indicator_adaptation.data)
+
+            else:
+                result = (False, serialized_indicator_adaptation.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
         return result
     
 

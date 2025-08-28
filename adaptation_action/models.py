@@ -605,6 +605,22 @@ class ActionImpact(models.Model):
         verbose_name_plural = _("Action Impact")
 
 
+class QuantifiedIndicator(models.Model):
+
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="quantified_indicator", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Quantified Indicator")
+        verbose_name_plural = _("Quantified Indicators")
+
+
 class OtherOption(models.Model):
 
     name = models.CharField(max_length=100, null=True)
@@ -715,7 +731,6 @@ class Processes(models.Model):
     class Meta:
         verbose_name = _("Processes")
         verbose_name_plural = _("Processes")
-
 
 
 class AdaptationAction(models.Model):
