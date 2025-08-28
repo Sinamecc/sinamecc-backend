@@ -92,21 +92,41 @@ put:
                   name: "TEST2"
                   category_result: []
                   description: "Description test"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
                 - code: "aa"
                   name: "TEST9"
                   category_result:
                     - code: "tes"
                       name: "name test"
                   description: "Description test 2"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
           category_option:
             category_section:
               - category: 1
                 description: "Description test"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
               - category: 2
                 description: "Description test 2"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
             other:
               - name: "test"
                 description: "Test large text description"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
             impact_type: true
             pertinent: false
             relevant: true
@@ -116,18 +136,30 @@ put:
             specific_impact:
               - description: "Test description data"
                 category_ct: 2
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
           final_result:
             - scale:
                 - code: "aa"
                   name: "TEST2"
                   category_result: []
                   description: "Description test"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
                 - code: "aa"
                   name: "TEST9"
                   category_result:
                     - code: "tes"
                       name: "name test"
                   description: "Description test 2"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
 
   responses:
     '200':

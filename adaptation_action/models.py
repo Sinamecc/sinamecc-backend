@@ -605,26 +605,14 @@ class ActionImpact(models.Model):
         verbose_name_plural = _("Action Impact")
 
 
-class QuantifiedIndicator(models.Model):
-
-    indicator = models.ForeignKey(IndicatorAdaptation, related_name="quantified_indicator", null=True, on_delete=models.CASCADE)
-    base_value = models.CharField(max_length=70, null=True)
-    expected_value = models.CharField(max_length=70, null=True)
-    accumulated_value = models.CharField(max_length=70, null=True)
-
-    ## Logs
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("Quantified Indicator")
-        verbose_name_plural = _("Quantified Indicators")
-
-
 class OtherOption(models.Model):
 
     name = models.CharField(max_length=100, null=True)
     description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="other_option", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -639,6 +627,10 @@ class CategorySection(models.Model):
 
     category = models.ForeignKey(Category, related_name='category_section', null=True, on_delete=models.CASCADE) #7.1.1
     description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="category_section", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
 
     ## Logs
     created = models.DateTimeField(auto_now_add=True)
@@ -685,6 +677,10 @@ class Scale(models.Model):
     name = models.CharField(max_length=100, null=True)
     description = models.CharField(max_length=600, null=True)
     category_result = models.ManyToManyField(CategoryResult, related_name="scale", blank=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="scale", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -710,6 +706,10 @@ class SpecificImpact(models.Model):
 
     category_ct = models.ForeignKey(CategoryCT, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
     description = models.TextField(null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

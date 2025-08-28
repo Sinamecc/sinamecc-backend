@@ -400,21 +400,23 @@ class ActionImpactSerializer(serializers.ModelSerializer):
 class OtherOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OtherOption
-        fields = ('id', 'name', 'description', 'created', 'updated')
+        fields = ('id', 'name', 'description', 'indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
         return data
 
 
 class CategorySectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategorySection
-        fields = ('id', 'category', 'description', 'created', 'updated')
+        fields = ('id', 'category', 'indicator', 'base_value', 'expected_value', 'accumulated_value', 'description', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category'] = CategorySerializer(instance.category).data
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
         return data
 
 
@@ -440,11 +442,12 @@ class ScaleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scale
-        fields = ('id','code','name','description','category_result','created','updated')
+        fields = ('id','code','name','description','category_result','indicator', 'base_value', 'expected_value', 'accumulated_value','created','updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category_result'] = CategoryResultSerializer(instance.category_result.all(), many=True).data
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
 
         return data
 
@@ -466,11 +469,12 @@ class SpecificImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SpecificImpact
-        fields = ('id', 'category_ct', 'description', 'created', 'updated')
+        fields = ('id', 'category_ct', 'description','indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
+        data['indicator'] = IndicatorSerializer(instance.indicator).data
         return data
     
 
