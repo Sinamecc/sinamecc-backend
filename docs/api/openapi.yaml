@@ -20,7 +20,8 @@ tags:
     description: Role management
   - name: general
     description: General
-
+  - name: indicator
+    description: Indicators
 
 paths:
   ## User Definitions
@@ -74,6 +75,13 @@ paths:
   #Characteristic
   /general/characteristic/:
     $ref: "./components/paths/general/record.yaml#/characteristic-list"
+
+  #Adaptation Indicators
+  /adaptation-action/all_indicator/{id}/:
+    $ref: "./components/paths/general/record.yaml#/aa-indicator"
+
+  /adaptation-action/indicator/:
+    $ref: "./components/paths/general/record.yaml#/aa-create-indicator"
 
 components:
   securitySchemes:

@@ -144,3 +144,51 @@ characteristic-list:
               $ref: '../../schemas/project.yaml#/characteristic-list'
     security:
       - JWTAuth: []
+
+
+aa-indicator:
+  get:
+    tags:
+      - indicator
+    summary: Get all indicators from a single adaptation action
+    parameters:
+      - in: path
+        name: id
+        description: The id of the adaptation action
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-1234-5678-9abc-123456789abc
+    responses:
+      '200':
+        description: List of indicators for the adaptation action
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+      - JWTAuth: []
+
+aa-create-indicator:
+  post:
+    tags:
+      - indicator
+    summary: Create a new indicator for a single adaptation action
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    responses:
+      '201':
+        description: Indicator created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+      - JWTAuth: []

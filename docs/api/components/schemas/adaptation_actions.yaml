@@ -69,3 +69,134 @@ _ContactSchema:
       nullable: true
       description: The phone number of the contact
       example: "+1-800-555-1234"
+
+
+AdaptationIndicator:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 22
+    same_contact_info_as_registration:
+      type: boolean
+      example: false
+    name:
+      type: string
+      example: "Índice de vulnerabilidad climática7"
+    description:
+      type: string
+      example: "Indicador que mide el nivel de vulnerabilidad de las comunidades frente al cambio climático."
+    unit:
+      type: string
+      example: "Porcentaje"
+    methodological_detail:
+      type: string
+      example: "Se utiliza una encuesta anual a nivel nacional con metodología aprobada por el Ministerio de Ambiente."
+    reporting_periodicity:
+      type: string
+      example: "YEARLY"
+    available_time_start_date:
+      type: string
+      format: date
+      example: "2020-01-01"
+    available_time_end_date:
+      type: string
+      format: date
+      example: "2025-12-31"
+    geographic_coverage:
+      type: string
+      example: "REGIONAL"
+    other_geographic_coverage:
+      type: string
+      nullable: true
+      example: null
+    adaptation_action:
+      type: string
+      example: "d928e392-79aa-4631-88c5-78271d41f85b"
+    disaggregation:
+      type: string
+      example: "Sexo, edad y nivel educativo"
+    limitation:
+      type: string
+      example: "Cobertura incompleta en zonas rurales"
+    associated_meta:
+      type: string
+      example: "ODS 13.1"
+    additional_information:
+      type: string
+      example: "Datos provistos por la Dirección Nacional de Estadística"
+    comments:
+      type: string
+      example: "En proceso de validación por el comité técnico"
+    information_source:
+      type: object
+      properties:
+        responsible_institution:
+          type: string
+          example: ""
+        type_information:
+          type: array
+          items:
+            type: string
+          example: []
+        other_type:
+          type: string
+          example: ""
+        statistical_operation:
+          type: string
+          example: ""
+    type_of_data:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ""
+        code:
+          type: string
+          example: ""
+    other_type_of_data:
+      type: string
+      nullable: true
+      example: null
+    classifier:
+      type: array
+      items:
+        type: string
+      example: []
+    other_classifier:
+      type: string
+      nullable: true
+      example: null
+    contact:
+      type: object
+      properties:
+        contact_position:
+          type: string
+          example: ""
+        contact_name:
+          type: string
+          example: ""
+        address:
+          type: string
+          example: ""
+        email:
+          type: string
+          example: ""
+        institution:
+          type: string
+          example: ""
+        phone:
+          type: string
+          example: ""
+    additional_information_file:
+      type: string
+      example: "/api/v1/adaptation-action/d928e392-79aa-4631-88c5-78271d41f85b/indicator-id/22/"
+    methodological_detail_file:
+      type: string
+      example: "/api/v1/adaptation-action/d928e392-79aa-4631-88c5-78271d41f85b/indicator-id/22/"
+    indicator_base_line:
+      type: string
+      example: "20% en 2020"
+    file_base_line:
+      type: string
+      example: "/api/v1/adaptation-action/d928e392-79aa-4631-88c5-78271d41f85b/indicator-id/22/"

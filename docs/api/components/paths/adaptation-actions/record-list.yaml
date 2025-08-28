@@ -42,3 +42,5 @@ get:
               $ref: "../../schemas/mitigation_actions.yaml#/CreateRecord"
   security:
     - JWTAuth: []
+
+
