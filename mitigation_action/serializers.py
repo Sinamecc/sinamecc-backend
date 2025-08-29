@@ -52,7 +52,17 @@ from mitigation_action.models import (
     Topics,
     TopicsSelection,
     TransformationalVisions,
+    CategoryOption,
+    CategoryResult,
+    Scale,
+    Results,
+    OtherOption,
+    CategorySection,
+    SpecificImpact,
+    Processes
 )
+
+from general.serializers import CategoryCTSerializer, CategorySerializer, CharacteristicSerializer
 from workflow.serializers import CommentSerializer
 
 from .constants import MitigationActionFilesType
@@ -579,6 +589,7 @@ class IndicatorSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "mitigation_action",
             "unit",
             "methodological_detail",
             "reporting_periodicity",
@@ -865,7 +876,107 @@ This will help to keep the code organized and maintainable.
 ## Serializers Models
 # Files
 
+##Section 7-8
 
+class IndicatorResumeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Indicator
+        fields = ('id', 'name', 'description')
+
+
+class OtherOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OtherOption
+        fields = ('id', 'name', 'description', 'indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
+        return data
+
+
+class CategorySectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategorySection
+        fields = ('id', 'category', 'indicator', 'base_value', 'expected_value', 'accumulated_value', 'description', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category'] = CategorySerializer(instance.category).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
+        return data
+
+
+class CategoryOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryOption
+        fields = ('id','category_section','other','impact_type','pertinent','relevant','created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_section'] = CategorySectionSerializer(instance.category_section.all(), many=True).data
+        data['other'] = OtherOptionSerializer(instance.other.all(), many=True).data
+        return data
+
+
+class CategoryResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryResult
+        fields = ('id', 'code', 'name', 'created', 'updated')
+
+
+class ScaleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Scale
+        fields = ('id','code','name','description','category_result','indicator', 'base_value', 'expected_value', 'accumulated_value','created','updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_result'] = CategoryResultSerializer(instance.category_result.all(), many=True).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
+
+        return data
+
+
+class ResultsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Results
+        fields = ('id', 'scale', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['scale'] = ScaleSerializer(instance.scale.all(), many=True).data
+
+        return data
+
+
+class SpecificImpactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SpecificImpact
+        fields = ('id', 'category_ct', 'description','indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
+        data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
+        return data
+
+
+class ProcessesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Processes
+        fields = ('id', 'characteristic', 'other', 'specific_impact', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['characteristic'] = CharacteristicSerializer(instance.characteristic.all(), many=True).data
+        data['specific_impact'] = SpecificImpactSerializer(instance.specific_impact.all(), many=True).data
+        return data
 
 ## Main Serializer
 class MitigationActionSerializer(serializers.ModelSerializer):
@@ -887,6 +998,10 @@ class MitigationActionSerializer(serializers.ModelSerializer):
             "monitoring_information",
             "monitoring_reporting_indicator",
             "review_count",
+            "result",
+            "category_option",
+            "process",
+            "final_result",
             "comments",
             "user",
             "files",
@@ -932,6 +1047,10 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['impact_documentation'] = ImpactDocumentationSerializer(instance.impact_documentation).data
         data['monitoring_information'] = MonitoringInformationSerializer(instance.monitoring_information).data
         data['monitoring_reporting_indicator'] = MonitoringReportingIndicatorSerializer(instance.monitoring_reporting_indicator).data
+        data['result'] = ResultsSerializer(instance.result.all(), many=True).data
+        data['category_option'] = CategoryOptionSerializer(instance.category_option).data
+        data['process'] = ProcessesSerializer(instance.process).data
+        data['final_result'] = ResultsSerializer(instance.final_result.all(), many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(fsm_state=instance.fsm_state, review_number=instance.review_count), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         

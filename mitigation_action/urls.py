@@ -89,6 +89,21 @@ urlpatterns.extend(
             _views.get_comments,
             name='get_comments_by_review_number'
         ),
+        path(
+            'mitigation-action/all_indicator/<uuid:mitigation_action_id>/',
+            _views.get_indicator,
+            name='get_indicator'
+        ),
+        path(
+            'mitigation-action/indicator/<int:indicator_id>/',
+            _views.get_put_indicator,
+            name='get_put_indicator'
+        ),
+        path(
+            'mitigation-action/indicator/',
+            _views.get_put_indicator,
+            name='get_put_indicator'
+        ),
 
     ]
 )

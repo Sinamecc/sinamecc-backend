@@ -11,6 +11,7 @@ from django.utils.encoding import smart_str as smart_unicode
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 
+from general.models import Category, Characteristic, CategoryCT
 from general.helpers.validators import validate_year
 from general.permissions import PermissionsHelper
 from general.services import EmailServices
@@ -669,6 +670,7 @@ class Indicator(models.Model):
     description = models.TextField(null=True)
     unit = models.CharField(max_length=255, null=True)
     methodological_detail = models.TextField(null=True)
+    mitigation_action = models.ForeignKey('MitigationAction', null=True, related_name='indicator', on_delete=models.SET_NULL)
     ## need to endpoint to upload file
     #methodological_detail_file = models.FileField(null=True, upload_to=directory_path, storage=PrivateMediaStorage())
     reporting_periodicity = models.TextField(max_length=50, choices=PERIODICITY, default='YEARLY', null=True)
@@ -932,6 +934,135 @@ class GHGInformation(models.Model):
         verbose_name_plural = _("GHG Informaction")
 
 
+##Section 7-8
+class OtherOption(models.Model):
+
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(Indicator, related_name="other_option_ma", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Other Option")
+        verbose_name_plural = _("Other Options")
+
+
+class CategorySection(models.Model):
+
+    category = models.ForeignKey(Category, related_name='category_section_ma', null=True, on_delete=models.CASCADE) #7.1.1
+    description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(Indicator, related_name="category_section_ma", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Section")
+        verbose_name_plural = _("Category Sections")
+
+
+class CategoryOption(models.Model):
+
+    category_section = models.ManyToManyField(CategorySection, related_name='category_options_ma', blank=True) #7.1.1.1 to 7.1.1.3
+    other = models.ManyToManyField(OtherOption, related_name='category_options_ma', blank=True) #7.1.1.4
+    impact_type = models.BooleanField(default=False, null=True) #7.1.1.6
+    pertinent = models.BooleanField(default=False, null=True) #7.1.1.6
+    relevant = models.BooleanField(default=False, null=True) #7.1.1.6
+
+
+    # Optionally, add logs or other fields as needed
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Option")
+        verbose_name_plural = _("Category Options")
+
+
+class CategoryResult(models.Model):
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Results")
+        verbose_name_plural = _("Category Results")
+
+
+class Scale(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=600, null=True)
+    category_result = models.ManyToManyField(CategoryResult, related_name="scale_ma", blank=True)
+    indicator = models.ForeignKey(Indicator, related_name="scale_ma", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Option Results")
+        verbose_name_plural = _("Category Option Results")
+
+
+class Results(models.Model):
+
+    scale = models.ManyToManyField(Scale, related_name="results_ma", blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Results")
+        verbose_name_plural = _("Results")
+
+
+class SpecificImpact(models.Model):
+
+    category_ct = models.ForeignKey(CategoryCT, related_name="specific_impacts_ma", null=True, on_delete=models.CASCADE)
+    description = models.TextField(null=True)
+    indicator = models.ForeignKey(Indicator, related_name="specific_impacts_ma", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Specific Impact")
+        verbose_name_plural = _("Specific Impacts")
+
+
+class Processes(models.Model):
+
+    characteristic = models.ManyToManyField(Characteristic, related_name="processes_ma", blank=True)
+    other = models.CharField(max_length=70, null=True)
+    specific_impact = models.ManyToManyField(SpecificImpact, related_name="processes_ma", blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Processes")
+        verbose_name_plural = _("Processes")
+
+
 
 class MitigationAction(models.Model):
 
@@ -961,6 +1092,13 @@ class MitigationAction(models.Model):
     # Timestamps and log 
     user = models.ForeignKey(User, related_name='mitigation_action', on_delete=models.CASCADE)
 
+    #section 7
+    result = models.ManyToManyField(Results, related_name="mitigation_action", blank=True)
+    category_option = models.ForeignKey(CategoryOption, related_name="mitigation_action", null=True, on_delete=models.CASCADE)
+
+    #Section 8
+    process = models.ForeignKey(Processes, related_name="mitigation_action", null=True, on_delete=models.CASCADE)
+    final_result = models.ManyToManyField(Results, related_name="mitigation_action_final", blank=True)
 
     ## Save files 
     files = GenericRelation('mitigation_action.GenericFileStorage', content_type_field='content_type', object_id_field='object_id')
