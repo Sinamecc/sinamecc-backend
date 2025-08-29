@@ -79,6 +79,18 @@ put:
         application/json:
           schema:
             $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+          example:
+            contact:
+              institution: "Environmental Protection Agency"
+              full_name: "John Doe"
+              job_title: "Climate Change Analyst"
+              email: "john.doe@example.com"
+              phone: "+1-800-555-1234"
+            instrument:
+              name: "Test instrument"
+              adaptation_axis_relation:
+                - code: "01"
+                  value: "Test value"
 
   responses:
     '200':

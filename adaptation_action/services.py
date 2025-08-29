@@ -125,6 +125,19 @@ class AdaptationActionServices():
 
         return serializers
     
+
+    def _get_serialized_adaptation_axis_relation(self, data, adaptation_axis_relation=False):
+
+        adaptation_axis_relation_result = []
+        for adaptation_axis_relation_data in data:
+            serialized_adaptation_axis_relation = self._serializer_helper.get_serialized_record(AdaptationAxisRelationSerializer, adaptation_axis_relation_data)
+
+            if serialized_adaptation_axis_relation.is_valid():
+                adaptation_axis_relation = serialized_adaptation_axis_relation.save()
+                adaptation_axis_relation_result.append(adaptation_axis_relation.id)
+
+        return adaptation_axis_relation_result
+
     def _create_update_progress_log(self, data, progress_log=False):
 
         if progress_log:
@@ -591,7 +604,14 @@ class AdaptationActionServices():
             return result
     
     def _create_update_instrument(self, data, instrument = False):
-            
+
+            _adaptation_axis_relation = data.pop('adaptation_axis_relation', None)
+
+            if(_adaptation_axis_relation):
+
+                serialized_adaptation_axis_relation = self._get_serialized_adaptation_axis_relation(_adaptation_axis_relation)
+                data['adaptation_axis_relation'] = serialized_adaptation_axis_relation
+
             if instrument:
                 serialized_instrument = self._get_serialized_instrument(data, instrument)
             
