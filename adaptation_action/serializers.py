@@ -9,7 +9,7 @@ from django.conf import settings
 from general.utils import get_translation_from_database as _
 from django.urls import reverse
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, AdaptationAxisRelation, ChangeLog, ClimateThreat, \
      FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
          NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation
@@ -178,11 +178,24 @@ class ActivitySerializer(serializers.ModelSerializer):
     def get_description(self, instance):
         return _(instance, 'description')
 
+
+class AdaptationAxisRelationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdaptationAxisRelation
+        fields = ('id', 'code', 'value', 'created', 'updated')
+
+
 class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ('id', 'name', 'created', 'updated')
+        fields = ('id', 'name', 'adaptation_axis_relation', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['adaptation_axis_relation'] = AdaptationAxisRelationSerializer(instance.adaptation_axis_relation.all(), many=True).data
+        return data
 
 class TypeClimateThreatSerializer(serializers.ModelSerializer):
 

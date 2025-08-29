@@ -241,9 +241,25 @@ class Activity(models.Model):
         verbose_name = _('Activity')
         verbose_name_plural = _('Activities')
 
+
+class AdaptationAxisRelation(models.Model):
+
+    code = models.TextField(null=True)
+    value = models.TextField(null=True)
+
+    ## logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Adaptation Axis Relation')
+        verbose_name_plural = _('Adaptation Axis Relations')
+
+
 class Instrument(models.Model):
     
     name = models.CharField(max_length=250, null=True)  #2.4.1
+    adaptation_axis_relation = models.ManyToManyField(AdaptationAxisRelation, related_name="instruments", blank=True)
 
     created =  models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
