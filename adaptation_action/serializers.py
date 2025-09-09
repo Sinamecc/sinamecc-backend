@@ -9,9 +9,9 @@ from django.conf import settings
 from general.utils import get_translation_from_database as _
 from django.urls import reverse
 
-from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, ChangeLog, ClimateThreat, \
-     FinanceAdaptation, FinanceSourceType, FinanceStatus, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
-         NDCArea, NDCContribution, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
+from adaptation_action.models import ODS, AdaptationAction, AdaptationActionInformation, AdaptationAxisGuideline, AdaptationActionType, AdaptationAxis, BarrierOption, ChangeLog, ClimateThreat, \
+     FinanceAdaptation, FinanceSourceType, FinanceStatus, ImpactIdentification, Implementation, IndicatorAdaptation, InformationSource, InformationSourceType, Instrument, Mideplan, \
+         NDCArea, NDCContribution, OtherBarrierOption, OtherBarrierOption, ReportOrganization, ReportOrganizationType, ThematicCategorizationType, Topics, SubTopics, Activity, TypeClimateThreat, \
              Classifier, ProgressLog, IndicatorSource, IndicatorMonitoring, GeneralReport, GeneralImpact, TemporalityImpact, ActionImpact, FinanceInstrument, Contact, BenefitedPopulation, \
                 CategoryOption, CategoryResult, Scale, Results, OtherOption, CategorySection, SpecificImpact, Processes
 from general.serializers import AddressSerializer, CategoryCTSerializer, CategorySerializer, CharacteristicSerializer
@@ -498,6 +498,33 @@ class ProcessesSerializer(serializers.ModelSerializer):
         return data
 
 
+class BarrierOptionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = BarrierOption
+        fields = ('id', 'code', 'name', 'description', 'created', 'updated')
+
+
+class OtherBarrierOptionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = OtherBarrierOption
+        fields = ('id', 'description', 'created', 'updated')
+
+
+class ImpactIdentificationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ImpactIdentification
+        fields = ('id','vision', 'short_term', 'long_term', 'medium_term', 'barrier_option', 'other_barrier_option', \
+                  'is_directly_addressed', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['barrier_option'] = BarrierOptionSerializer(instance.barrier_option.all(), many=True).data
+        data['other_barrier_option'] = OtherBarrierOptionSerializer(instance.other_barrier_option.all(), many=True).data
+        return data
+
 class ChangeLogSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -511,7 +538,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         model = AdaptationAction
         fields = ('id', 'code', 'fsm_state', 'report_organization', 'address', 'adaptation_action_information', \
                   'activity', 'instrument', 'climate_threat', 'implementation', 'finance', 'progress_log', 'general_report', \
-                    'review_count', 'result', 'category_option', 'process', 'final_result', 'comments','user', 'created', 'updated')
+                    'review_count', 'result', 'category_option', 'process', 'final_result', 'impact_identification', 'comments','user', 'created', 'updated')
 
     def _get_fsm_state_info(self, instance):
         data = {
@@ -554,6 +581,7 @@ class AdaptationActionSerializer(serializers.ModelSerializer):
         data['category_option'] = CategoryOptionSerializer(instance.category_option).data
         data['process'] = ProcessesSerializer(instance.process).data
         data['final_result'] = ResultsSerializer(instance.final_result.all(), many=True).data
+        data['impact_identification'] = ImpactIdentificationSerializer(instance.impact_identification).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all()[:10], many=True).data
         data['comments'] = CommentSerializer(instance.comments.filter(
             fsm_state=instance.fsm_state, review_number=instance.review_count

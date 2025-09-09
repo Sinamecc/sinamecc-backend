@@ -1276,6 +1276,70 @@ class MitigationActionService():
         return result
 
 
+    def _get_serialized_barrier_option(self, data, barrier_option=None):
+
+        barrier_option_result = []
+
+        for barrier_option_data in data:
+            serializer = self._serialize_helper.get_serialized_record(BarrierOptionSerializer, barrier_option_data)
+
+            if serializer.is_valid():
+                barrier_option = serializer.save()
+                barrier_option_result.append(barrier_option.id)
+
+        return barrier_option_result
+
+
+    def _get_serialized_other_barrier_option(self, data, other_barrier_option=None):
+        
+        other_barrier_option_result = []
+
+        for other_barrier_option_data in data:
+            serializer = self._serialize_helper.get_serialized_record(OtherBarrierOptionSerializer, other_barrier_option_data)
+
+            if serializer.is_valid():
+                other_barrier_option = serializer.save()
+                other_barrier_option_result.append(other_barrier_option.id)
+
+        return other_barrier_option_result
+
+
+    def _get_serialized_impact_identification(self, data, impact_identification=None):
+
+        serializer = self._serialize_helper.get_serialized_record(ImpactIdentificationSerializer, data, record=impact_identification)
+
+        return serializer 
+
+
+    def _create_update_impact_identification(self, data, impact_identification=False):
+
+        _barrier_option = data.pop('barrier_option', None)
+        _other_barrier_option = data.pop('other_barrier_option', None)
+
+        if _barrier_option:
+            serialized_barrier_option = self._get_serialized_barrier_option(_barrier_option)
+            data['barrier_option'] = serialized_barrier_option
+
+        if _other_barrier_option:
+            serialized_other_barrier_option = self._get_serialized_other_barrier_option(_other_barrier_option)
+            data['other_barrier_option'] = serialized_other_barrier_option
+
+        if impact_identification:
+            serialized_impact_identification = self._get_serialized_impact_identification(data, impact_identification)
+
+        else:
+            serialized_impact_identification = self._get_serialized_impact_identification(data)
+
+        if serialized_impact_identification.is_valid():
+            impact_identification = serialized_impact_identification.save()
+            result = (True, impact_identification)
+
+        else:
+            result = (False, serialized_impact_identification.errors)
+
+        return result
+
+
     def _create_update_final_result(self, data, final_result = False):
 
         return self._create_update_result(data, final_result)
@@ -1353,7 +1417,7 @@ class MitigationActionService():
 
         field_list = ['contact', 'status_information', 'geographic_location', 'initiative', 'finance', 'categorization',
                         'ghg_information', 'impact_documentation', 'monitoring_information', 'monitoring_reporting_indicator',
-                        'result', 'category_option', 'process', 'final_result'] 
+                        'result', 'category_option', 'process', 'final_result', 'impact_identification'] 
 
         mitigation_action_status, mitigation_action_data = \
             self._service_helper.get_one(MitigationAction, mitigation_action_id)

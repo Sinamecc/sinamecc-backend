@@ -8,6 +8,7 @@ from mitigation_action.models import (
     ActionAreasSelection,
     ActionGoals,
     Activity,
+    BarrierOption,
     CarbonDeposit,
     Categorization,
     CategoryIPCC2006,
@@ -27,6 +28,7 @@ from mitigation_action.models import (
     GHGInformation,
     ImpactCategory,
     ImpactDocumentation,
+    ImpactIdentification,
     Indicator,
     IndicatorChangeLog,
     InformationSource,
@@ -39,6 +41,7 @@ from mitigation_action.models import (
     MonitoringIndicator,
     MonitoringInformation,
     MonitoringReportingIndicator,
+    OtherBarrierOption,
     QAQCReductionEstimateQuestion,
     Sector,
     SectorIPCC2006,
@@ -978,6 +981,36 @@ class ProcessesSerializer(serializers.ModelSerializer):
         data['specific_impact'] = SpecificImpactSerializer(instance.specific_impact.all(), many=True).data
         return data
 
+
+class BarrierOptionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = BarrierOption
+        fields = ('id', 'code', 'name', 'description', 'created', 'updated')
+
+
+class OtherBarrierOptionSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = OtherBarrierOption
+        fields = ('id', 'description', 'created', 'updated')
+
+
+class ImpactIdentificationSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ImpactIdentification
+        fields = ('id','vision', 'short_term', 'long_term', 'medium_term', 'barrier_option', 'other_barrier_option', \
+                  'is_directly_addressed', 'created', 'updated')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['barrier_option'] = BarrierOptionSerializer(instance.barrier_option.all(), many=True).data
+        data['other_barrier_option'] = OtherBarrierOptionSerializer(instance.other_barrier_option.all(), many=True).data
+        return data
+
+
+
 ## Main Serializer
 class MitigationActionSerializer(serializers.ModelSerializer):
     files = FileStorageSerializer(many=True, read_only=True)
@@ -1002,6 +1035,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
             "category_option",
             "process",
             "final_result",
+            "impact_identification",
             "comments",
             "user",
             "files",
@@ -1051,6 +1085,7 @@ class MitigationActionSerializer(serializers.ModelSerializer):
         data['category_option'] = CategoryOptionSerializer(instance.category_option).data
         data['process'] = ProcessesSerializer(instance.process).data
         data['final_result'] = ResultsSerializer(instance.final_result.all(), many=True).data
+        data['impact_identification'] = ImpactIdentificationSerializer(instance.impact_identification).data
         data['comments'] = CommentSerializer(instance.comments.filter(fsm_state=instance.fsm_state, review_number=instance.review_count), many=True).data
         data['change_log'] = ChangeLogSerializer(instance.change_log.all().order_by('-date')[0:5], many=True).data
         

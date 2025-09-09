@@ -372,6 +372,41 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(ProcessesSerializer, data, record=process)
 
         return serializer
+    
+    
+    def _get_serialized_barrier_option(self, data, barrier_option=None):
+
+        barrier_option_result = []
+
+        for barrier_option_data in data:
+            serializer = self._serializer_helper.get_serialized_record(BarrierOptionSerializer, barrier_option_data)
+
+            if serializer.is_valid():
+                barrier_option = serializer.save()
+                barrier_option_result.append(barrier_option.id)
+
+        return barrier_option_result
+
+
+    def _get_serialized_other_barrier_option(self, data, other_barrier_option=None):
+        
+        other_barrier_option_result = []
+
+        for other_barrier_option_data in data:
+            serializer = self._serializer_helper.get_serialized_record(OtherBarrierOptionSerializer, other_barrier_option_data)
+
+            if serializer.is_valid():
+                other_barrier_option = serializer.save()
+                other_barrier_option_result.append(other_barrier_option.id)
+
+        return other_barrier_option_result
+
+
+    def _get_serialized_impact_identification(self, data, impact_identification=None):
+
+        serializer = self._serializer_helper.get_serialized_record(ImpactIdentificationSerializer, data, record=impact_identification)
+
+        return serializer 
 
 
     def _create_update_contact(self, data, contact=None):
@@ -567,6 +602,36 @@ class AdaptationActionServices():
             result = (False, serialized_process.errors)
 
         return result
+
+
+    def _create_update_impact_identification(self, data, impact_identification = False):
+
+        _barrier_option = data.pop('barrier_option', None)
+        _other_barrier_option = data.pop('other_barrier_option', None)
+
+        if _barrier_option:
+            serialized_barrier_option = self._get_serialized_barrier_option(_barrier_option)
+            data['barrier_option'] = serialized_barrier_option
+
+        if _other_barrier_option:
+            serialized_other_barrier_option = self._get_serialized_other_barrier_option(_other_barrier_option)
+            data['other_barrier_option'] = serialized_other_barrier_option
+
+        if impact_identification:
+            serialized_impact_identification = self._get_serialized_impact_identification(data, impact_identification)
+
+        else:
+            serialized_impact_identification = self._get_serialized_impact_identification(data)
+
+        if serialized_impact_identification.is_valid():
+            impact_identification = serialized_impact_identification.save()
+            result = (True, impact_identification)
+
+        else:
+            result = (False, serialized_impact_identification.errors)
+
+        return result
+
 
     def _create_update_report_organization_type(self, data, report_organization_type = False):
 
@@ -1794,7 +1859,7 @@ class AdaptationActionServices():
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
             'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact',  
-            'result', 'category_option', 'process', 'final_result']
+            'result', 'category_option', 'process', 'final_result', 'impact_identification']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)

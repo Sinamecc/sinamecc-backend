@@ -733,6 +733,51 @@ class Processes(models.Model):
         verbose_name_plural = _("Processes")
 
 
+class BarrierOption(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+    description = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Barrier Option")
+        verbose_name_plural = _("Barrier Options")
+
+
+class OtherBarrierOption(models.Model):
+    
+    description = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Other Barrier Option")
+        verbose_name_plural = _("Other Barrier Options")
+
+
+class ImpactIdentification(models.Model):
+
+    vision = models.CharField(max_length=1000, null=True)
+    short_term = models.CharField(max_length=1000, null=True)
+    medium_term = models.CharField(max_length=1000, null=True)
+    long_term = models.CharField(max_length=1000, null=True)
+
+    barrier_option = models.ManyToManyField(BarrierOption, related_name="barrier", blank=True)
+    other_barrier_option = models.ManyToManyField(OtherBarrierOption, related_name="barrier", blank=True)
+    is_directly_addressed = models.BooleanField(default=False, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Impact Identification")
+        verbose_name_plural = _("Impact Identifications")
+
+
 class AdaptationAction(models.Model):
     
     #Section 1
@@ -772,7 +817,7 @@ class AdaptationAction(models.Model):
     #Section 8
     process = models.ForeignKey(Processes, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
     final_result = models.ManyToManyField(Results, related_name="adaptation_action_final", blank=True)
-
+    impact_identification = models.ForeignKey(ImpactIdentification, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Adaptation Action")
