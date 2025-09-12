@@ -476,11 +476,11 @@ class SpecificImpactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SpecificImpact
-        fields = ('id', 'category_ct', 'description','indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
+        fields = ('id', 'characteristic', 'description','indicator', 'base_value', 'expected_value', 'accumulated_value', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['category_ct'] = CategoryCTSerializer(instance.category_ct).data
+        data["characteristic"] = CharacteristicSerializer(instance.characteristic).data
         data['indicator'] = IndicatorResumeSerializer(instance.indicator).data
         return data
     
@@ -489,11 +489,10 @@ class ProcessesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Processes
-        fields = ('id', 'characteristic', 'other', 'specific_impact', 'created', 'updated')
+        fields = ('id', 'other', 'specific_impact', 'created', 'updated')
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['characteristic'] = CharacteristicSerializer(instance.characteristic.all(), many=True).data
         data['specific_impact'] = SpecificImpactSerializer(instance.specific_impact.all(), many=True).data
         return data
 

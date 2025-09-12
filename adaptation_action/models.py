@@ -704,7 +704,7 @@ class Results(models.Model):
 
 class SpecificImpact(models.Model):
 
-    category_ct = models.ForeignKey(CategoryCT, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
+    characteristic = models.ForeignKey(Characteristic, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
     description = models.TextField(null=True)
     indicator = models.ForeignKey(IndicatorAdaptation, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
     base_value = models.CharField(max_length=70, null=True)
@@ -721,7 +721,6 @@ class SpecificImpact(models.Model):
 
 class Processes(models.Model):
 
-    characteristic = models.ManyToManyField(Characteristic, related_name="processes", blank=True)
     other = models.CharField(max_length=70, null=True)
     specific_impact = models.ManyToManyField(SpecificImpact, related_name="processes", blank=True)
 

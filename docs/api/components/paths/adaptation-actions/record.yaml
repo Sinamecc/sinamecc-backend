@@ -131,11 +131,10 @@ put:
             pertinent: false
             relevant: true
           process:
-            characteristic: [1, 12]
             other: "Text example"
             specific_impact:
               - description: "Test description data"
-                category_ct: 2
+                characteristic: 2
                 indicator: 1
                 base_value: "test base"
                 expected_value: "test expected"
