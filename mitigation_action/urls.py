@@ -90,7 +90,7 @@ urlpatterns.extend(
             name='get_comments_by_review_number'
         ),
         path(
-            'mitigation-action/all_indicator/<uuid:mitigation_action_id>/',
+            'mitigation-action/all-indicator/<uuid:mitigation_action_id>/',
             _views.get_indicator,
             name='get_indicator'
         ),

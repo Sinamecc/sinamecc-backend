@@ -123,7 +123,7 @@ urlpatterns = [
         name='get_benefited_population'
     ),
     path(
-        'api/v1/adaptation-action/all_indicator/<uuid:adaptation_action_id>/',
+        'api/v1/adaptation-action/all-indicator/<uuid:adaptation_action_id>/',
         views.get_indicator,
         name='get_indicator'
     ),
