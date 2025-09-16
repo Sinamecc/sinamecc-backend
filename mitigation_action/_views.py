@@ -99,3 +99,23 @@ def get_comments(request, mitigation_action_id, fsm_state=False, review_number=F
         result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, mitigation_action_id, fsm_state, review_number)
 
     return result
+
+
+@api_view(['GET', 'PUT', 'POST'])
+def get_put_indicator(request, mitigation_action_id=False):
+    if request.method == 'GET' and mitigation_action_id:
+        result = view_helper.execute_by_name('_get_indicator', request, mitigation_action_id)
+
+    elif request.method == 'PUT':
+        result = view_helper.execute_by_name('_create_update_indicator', request, mitigation_action_id)
+
+    elif request.method == 'POST':
+        result = view_helper.execute_by_name('_create_indicator', request)
+
+    return result
+
+
+@api_view(['GET'])
+def get_indicator(request, mitigation_action_id):
+    result = view_helper.execute_by_name('_get_all_indicator', request, mitigation_action_id)
+    return result

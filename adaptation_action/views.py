@@ -302,3 +302,25 @@ def get_comments(request, adaptation_action_id, fsm_state=None, review_number=No
         result = view_helper.execute_by_name('get_comments_by_fsm_state_or_review_number', request, adaptation_action_id, fsm_state, review_number)
         
     return result
+
+
+@api_view(['GET', 'PUT', 'POST'])
+@has_permission_decorator('read_adaptation_action')
+def get_put_indicator(request, adaptation_action_id=False):
+    if request.method == 'GET' and adaptation_action_id:
+        result = view_helper.execute_by_name('_get_indicator', request, adaptation_action_id)
+
+    elif request.method == 'PUT':
+        result = view_helper.execute_by_name('_create_update_indicator', request, adaptation_action_id)
+
+    elif request.method == 'POST':
+        result = view_helper.execute_by_name('_create_indicator', request)
+
+    return result
+
+
+@api_view(['GET'])
+@has_permission_decorator('read_adaptation_action')
+def get_indicator(request, adaptation_action_id):
+    result = view_helper.execute_by_name('_get_all_indicator', request, adaptation_action_id)
+    return result

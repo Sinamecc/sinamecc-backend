@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from general.models import Address
+from general.models import Address, Category, Characteristic, CategoryCT
 from django_fsm import FSMField, transition
 from time import gmtime, strftime
 from general.storages import PrivateMediaStorage
@@ -604,6 +604,179 @@ class ActionImpact(models.Model):
         verbose_name = _("Action Impact")
         verbose_name_plural = _("Action Impact")
 
+
+class OtherOption(models.Model):
+
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="other_option", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Other Option")
+        verbose_name_plural = _("Other Options")
+
+
+class CategorySection(models.Model):
+
+    category = models.ForeignKey(Category, related_name='category_section', null=True, on_delete=models.CASCADE) #7.1.1
+    description = models.CharField(max_length=600, null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="category_section", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    ## Logs
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Section")
+        verbose_name_plural = _("Category Sections")
+
+
+class CategoryOption(models.Model):
+
+    category_section = models.ManyToManyField(CategorySection, related_name='category_options', blank=True) #7.1.1.1 to 7.1.1.3
+    other = models.ManyToManyField(OtherOption, related_name='category_options', blank=True) #7.1.1.4
+    impact_type = models.BooleanField(default=False, null=True) #7.1.1.6
+    pertinent = models.BooleanField(default=False, null=True) #7.1.1.6
+    relevant = models.BooleanField(default=False, null=True) #7.1.1.6
+    
+
+    # Optionally, add logs or other fields as needed
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Option")
+        verbose_name_plural = _("Category Options")
+
+
+class CategoryResult(models.Model):
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Results")
+        verbose_name_plural = _("Category Results")
+
+
+class Scale(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+    description = models.CharField(max_length=600, null=True)
+    category_result = models.ManyToManyField(CategoryResult, related_name="scale", blank=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="scale", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Category Option Results")
+        verbose_name_plural = _("Category Option Results")
+
+
+class Results(models.Model):
+    
+    scale = models.ManyToManyField(Scale, related_name="results", blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Results")
+        verbose_name_plural = _("Results")
+
+
+class SpecificImpact(models.Model):
+
+    characteristic = models.ForeignKey(Characteristic, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
+    description = models.TextField(null=True)
+    indicator = models.ForeignKey(IndicatorAdaptation, related_name="specific_impacts", null=True, on_delete=models.CASCADE)
+    base_value = models.CharField(max_length=70, null=True)
+    expected_value = models.CharField(max_length=70, null=True)
+    accumulated_value = models.CharField(max_length=70, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Specific Impact")
+        verbose_name_plural = _("Specific Impacts")
+
+
+class Processes(models.Model):
+
+    other = models.CharField(max_length=70, null=True)
+    specific_impact = models.ManyToManyField(SpecificImpact, related_name="processes", blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Processes")
+        verbose_name_plural = _("Processes")
+
+
+class BarrierOption(models.Model):
+
+    code = models.CharField(max_length=3, null=True)
+    name = models.CharField(max_length=100, null=True)
+    description = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Barrier Option")
+        verbose_name_plural = _("Barrier Options")
+
+
+class OtherBarrierOption(models.Model):
+    
+    description = models.TextField(null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Other Barrier Option")
+        verbose_name_plural = _("Other Barrier Options")
+
+
+class ImpactIdentification(models.Model):
+
+    vision = models.CharField(max_length=1000, null=True)
+    short_term = models.CharField(max_length=1000, null=True)
+    medium_term = models.CharField(max_length=1000, null=True)
+    long_term = models.CharField(max_length=1000, null=True)
+
+    barrier_option = models.ManyToManyField(BarrierOption, related_name="barrier", blank=True)
+    other_barrier_option = models.ManyToManyField(OtherBarrierOption, related_name="barrier", blank=True)
+    is_directly_addressed = models.BooleanField(default=False, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("Impact Identification")
+        verbose_name_plural = _("Impact Identifications")
+
+
 class AdaptationAction(models.Model):
     
     #Section 1
@@ -635,6 +808,15 @@ class AdaptationAction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    #Section 7
+    
+    result = models.ManyToManyField(Results, related_name="adaptation_action", blank=True)
+    category_option = models.ForeignKey(CategoryOption, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+
+    #Section 8
+    process = models.ForeignKey(Processes, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
+    final_result = models.ManyToManyField(Results, related_name="adaptation_action_final", blank=True)
+    impact_identification = models.ForeignKey(ImpactIdentification, related_name="adaptation_action", null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Adaptation Action")

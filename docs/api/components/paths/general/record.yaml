@@ -1,0 +1,194 @@
+dimension-list:
+  get:
+    tags:
+      - general
+    summary: List all dimensions
+    responses:
+      '200':
+        description: List of dimensions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/dimension-list'
+    security:
+      - JWTAuth: []
+
+category-group-list:
+  post:
+    tags:
+      - general
+    summary: Send list of dimension and get the category groups for each dimension
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/dimension-list-body'
+    responses:
+      '200':
+        description: Category group created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/category-group-list'
+    security:
+      - JWTAuth: []
+
+  get:
+    tags:
+      - general
+    summary: List all category groups
+    responses:
+      '200':
+        description: List of category groups
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-group-list'
+    security:
+      - JWTAuth: []
+
+
+category-list:
+  get:
+    tags:
+      - general
+    summary: List all categories
+    responses:
+      '200':
+        description: List of categories
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-list'
+    security:
+      - JWTAuth: []
+
+  post:
+    tags:
+      - general
+    summary: List categories by category_group_list
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/category-group-list-body'
+    responses:
+      '200':
+        description: List of categories
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/category-list'
+    security:
+      - JWTAuth: []
+
+category-ct-list:
+  get:
+    tags:
+      - general
+    summary: List all category CT
+    responses:
+      '200':
+        description: List of category CT
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/category-ct-list'
+    security:
+      - JWTAuth: []
+
+
+characteristic-list:
+  get:
+    tags:
+      - general
+    summary: List all characteristics
+    responses:
+      '200':
+        description: List of characteristics
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/project.yaml#/characteristic-list'
+    security:
+      - JWTAuth: []
+  
+  post:
+    tags:
+      - general
+    summary: List characteristics by category_ct_list
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/project.yaml#/category-ct-list-body'
+    responses:
+      '200':
+        description: List of characteristics
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/project.yaml#/characteristic-list'
+    security:
+      - JWTAuth: []
+
+
+aa-indicator:
+  get:
+    tags:
+      - indicator
+    summary: Get all indicators from a single adaptation action
+    parameters:
+      - in: path
+        name: id
+        description: The id of the adaptation action
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-1234-5678-9abc-123456789abc
+    responses:
+      '200':
+        description: List of indicators for the adaptation action
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+      - JWTAuth: []
+
+aa-create-indicator:
+  post:
+    tags:
+      - indicator
+    summary: Create a new indicator for a single adaptation action
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    responses:
+      '201':
+        description: Indicator created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+      - JWTAuth: []

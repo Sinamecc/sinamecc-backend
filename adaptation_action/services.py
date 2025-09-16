@@ -308,7 +308,8 @@ class AdaptationActionServices():
         serializer = self._serializer_helper.get_serialized_record(InformationSourceSerializer, data, record=information_source)
         
         return serializer
-
+    
+    
     def _get_serialized_change_log(self, data, change_log=False, partial=False):
     
         serializer = self._serializer_helper.get_serialized_record(ChangeLogSerializer, data, record=change_log, partial=partial)
@@ -327,7 +328,7 @@ class AdaptationActionServices():
         
         data = [{**indicator, 'adaptation_action': adaption_action_id}  for indicator in data ]
  
-        serializer = self._serialize_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
+        serializer = self._serializer_helper.get_serialized_record(IndicatorAdaptation, data, record=indicator_list, many=True,  partial=True)
 
         return serializer
     
@@ -351,8 +352,63 @@ class AdaptationActionServices():
 
         return serializer
 
+
+    def _get_serialized_specific_impact(self, data, specific_impact=None):
+        
+        specific_impact_result = []
+
+        for specific_impact_data in data:
+            serializer = self._serializer_helper.get_serialized_record(SpecificImpactSerializer, specific_impact_data)
+
+            if serializer.is_valid():
+                specific_impact = serializer.save()
+                specific_impact_result.append(specific_impact.id)
+
+        return specific_impact_result
+    
+
+    def _get_serialized_process(self, data, process=None):
+
+        serializer = self._serializer_helper.get_serialized_record(ProcessesSerializer, data, record=process)
+
+        return serializer
     
     
+    def _get_serialized_barrier_option(self, data, barrier_option=None):
+
+        barrier_option_result = []
+
+        for barrier_option_data in data:
+            serializer = self._serializer_helper.get_serialized_record(BarrierOptionSerializer, barrier_option_data)
+
+            if serializer.is_valid():
+                barrier_option = serializer.save()
+                barrier_option_result.append(barrier_option.id)
+
+        return barrier_option_result
+
+
+    def _get_serialized_other_barrier_option(self, data, other_barrier_option=None):
+        
+        other_barrier_option_result = []
+
+        for other_barrier_option_data in data:
+            serializer = self._serializer_helper.get_serialized_record(OtherBarrierOptionSerializer, other_barrier_option_data)
+
+            if serializer.is_valid():
+                other_barrier_option = serializer.save()
+                other_barrier_option_result.append(other_barrier_option.id)
+
+        return other_barrier_option_result
+
+
+    def _get_serialized_impact_identification(self, data, impact_identification=None):
+
+        serializer = self._serializer_helper.get_serialized_record(ImpactIdentificationSerializer, data, record=impact_identification)
+
+        return serializer 
+
+
     def _create_update_contact(self, data, contact=None):
         
         if contact:
@@ -386,6 +442,196 @@ class AdaptationActionServices():
             result = (False, serializer.errors)
 
         return result
+    
+
+    def _get_serialized_category_result(self, data, category_result=False):
+
+        category_data_ids = []
+        for category_data in data:
+            
+            serializer = self._serializer_helper.get_serialized_record(CategoryResultSerializer, category_data)
+
+            if serializer.is_valid():
+                category = serializer.save()
+                category_data_ids.append(category.id)
+            
+            else:
+                print(serializer.errors)
+
+        return category_data_ids
+
+
+    def _get_serialized_scale(self, data, scale=False):
+
+        scale_ids = []
+        
+        for scale_data in data:
+            _category_result = scale_data.pop("category_result", None)
+            
+            if(_category_result):
+
+                serialized_category_result = self._get_serialized_category_result(_category_result)
+                scale_data['category_result'] = serialized_category_result
+                
+            if scale_data:
+                serialized_result = self._serializer_helper.get_serialized_record(ScaleSerializer, scale_data, record=scale)
+            
+            else:
+                serialized_result = self._serializer_helper.get_serialized_record(ScaleSerializer, scale_data)
+            
+            if serialized_result.is_valid():
+                result = serialized_result.save()
+                scale_ids.append(result.id)
+            
+            else:
+                print(serialized_result.errors)
+        
+        return scale_ids
+
+
+
+    def _create_update_result(self, data, result=False):
+        results = []
+        errors = []
+
+        for result_value in data:
+            _scale = result_value.pop('scale', None)
+            
+            if _scale:
+                serialized_scale = self._get_serialized_scale(_scale)
+                result_value['scale'] = serialized_scale
+
+            serialized_result = self._serializer_helper.get_serialized_record(ResultsSerializer, result_value)
+            
+            if serialized_result.is_valid():
+                saved_result = serialized_result.save()
+                results.append(saved_result)
+
+            else:
+                errors.append(serialized_result.errors)
+
+        
+        if errors:
+            return False, errors
+        
+        return True, results
+
+
+    def _get_serialized_other(self, data, other=False):
+
+        other_option_result = []
+
+        for other_data in data:
+            serializer = self._serializer_helper.get_serialized_record(OtherOptionSerializer, other_data)
+
+            if serializer.is_valid():
+                other = serializer.save()
+                other_option_result.append(other.id)
+
+            else:
+                print(serializer.errors)
+
+        return other_option_result
+
+    
+    def _get_serialized_category_section(self, data, category_section=False):
+
+        category_section_result = []
+
+        for category_section_data in data:
+            serializer = self._serializer_helper.get_serialized_record(CategorySectionSerializer, category_section_data)
+
+            if serializer.is_valid():
+                category_section = serializer.save()
+                category_section_result.append(category_section.id)
+
+            else:
+                print(serializer.errors)
+
+        return category_section_result
+    
+
+    def _create_update_category_option(self, data, category_option=False):
+        
+        _other = data.pop('other', None)
+        _category_section = data.pop('category_section', None)
+
+        if _other:
+            serialized_other = self._get_serialized_other(_other)
+            data['other'] = serialized_other
+
+        if _category_section:
+            serialized_category_section = self._get_serialized_category_section(_category_section)
+            data['category_section'] = serialized_category_section
+
+        serialized_result = self._serializer_helper.get_serialized_record(CategoryOptionSerializer, data)
+
+        if serialized_result.is_valid():
+            saved_result = serialized_result.save()
+            result = (True, saved_result)
+
+        else:
+            result = (False, serialized_result.errors)
+
+        return result
+
+
+    def _create_update_final_result(self, data, final_result = False):
+
+        return self._create_update_result(data, final_result)
+
+
+    def _create_update_process(self, data, process = False):
+        _specific_impact = data.pop('specific_impact')
+
+        if _specific_impact:
+            serialized_specific_impact = self._get_serialized_specific_impact(_specific_impact)
+            data['specific_impact'] = serialized_specific_impact
+
+        if process:
+            serialized_process = self._get_serialized_process(data, process)
+
+        else:
+            serialized_process = self._get_serialized_process(data)
+
+        if serialized_process.is_valid():
+            process = serialized_process.save()
+            result = (True, process)
+
+        else:
+            result = (False, serialized_process.errors)
+
+        return result
+
+
+    def _create_update_impact_identification(self, data, impact_identification = False):
+
+        _barrier_option = data.pop('barrier_option', None)
+        _other_barrier_option = data.pop('other_barrier_option', None)
+
+        if _barrier_option:
+            serialized_barrier_option = self._get_serialized_barrier_option(_barrier_option)
+            data['barrier_option'] = serialized_barrier_option
+
+        if _other_barrier_option:
+            serialized_other_barrier_option = self._get_serialized_other_barrier_option(_other_barrier_option)
+            data['other_barrier_option'] = serialized_other_barrier_option
+
+        if impact_identification:
+            serialized_impact_identification = self._get_serialized_impact_identification(data, impact_identification)
+
+        else:
+            serialized_impact_identification = self._get_serialized_impact_identification(data)
+
+        if serialized_impact_identification.is_valid():
+            impact_identification = serialized_impact_identification.save()
+            result = (True, impact_identification)
+
+        else:
+            result = (False, serialized_impact_identification.errors)
+
+        return result
+
 
     def _create_update_report_organization_type(self, data, report_organization_type = False):
 
@@ -784,7 +1030,6 @@ class AdaptationActionServices():
         return result
     
     
-    
     def _create_update_indicator(self, data, indicator_adaptation=None):
 
         fields = ['information_source', 'contact']
@@ -797,11 +1042,11 @@ class AdaptationActionServices():
                     data[field] = record_data.id
                 dict_data = record_data if isinstance(record_data, list) else [record_data]
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
-
+    
         if all(validation_dict):
 
             serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-            
+                    
             if serialized_indicator_adaptation.is_valid():
                 indicator_adaptation = serialized_indicator_adaptation.save()
 
@@ -897,6 +1142,61 @@ class AdaptationActionServices():
             result = (False, serialized_report_organization.errors)
 
         return result
+    
+
+    def _get_all_indicator(self, request, adaptation_action_id=None):
+
+        indicator_status, indicator_data = self._service_helper.get_all(IndicatorAdaptation, adaptation_action_id=adaptation_action_id)
+        if indicator_status:
+            result = (indicator_status, IndicatorSerializer(indicator_data, many=True).data)
+        else:
+            result = (indicator_status, indicator_data)
+        return result
+
+
+    def _get_indicator(self, request, adaptation_action_id=None):
+
+        if not adaptation_action_id:
+            return (False, "Missing adaptation_action_id")
+
+        indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, adaptation_action_id=adaptation_action_id)
+        if indicator_status:
+            result = (indicator_status, IndicatorSerializer(indicator_data).data)
+        else:
+            result = (indicator_status, indicator_data)
+        return result
+
+    
+    def _create_indicator(self, request, indicator_adaptation=False):
+
+        data = request.data.copy()
+        fields = ['information_source', 'contact']
+        validation_dict = {}
+        for field in fields:
+            if data.get(field, False):
+                record_status, record_data = self._create_sub_record(data.get(field), field)
+                
+                if record_status:
+                    data[field] = record_data.id
+                dict_data = record_data if isinstance(record_data, list) else [record_data]
+                validation_dict.setdefault(record_status,[]).extend(dict_data)
+    
+        if all(validation_dict):
+
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
+                    
+            if serialized_indicator_adaptation.is_valid():
+                indicator_adaptation = serialized_indicator_adaptation.save()
+
+                result = (True, serialized_indicator_adaptation.data)
+
+            else:
+                result = (False, serialized_indicator_adaptation.errors)
+        else:
+            result = (False, validation_dict.get(False))
+            
+        return result
+    
 
     def _get_all_type_climate_threat(self, request):
 
@@ -1503,7 +1803,7 @@ class AdaptationActionServices():
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         # fk's of object adaptation_action that have nested fields
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'result']
 
         for field in field_list:
             if data.get(field, False):
@@ -1558,7 +1858,8 @@ class AdaptationActionServices():
         indicator_list = data.pop('indicator_list', [])
         ind_monitoring_list = data.pop('indicator_monitoring_list', [])
         field_list = ['report_organization', 'address', 'adaptation_action_information', 'instrument', 'climate_threat', 'implementation', 'finance',
-            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact']
+            'status', 'source', 'finance_instrument', 'mideplan', 'progress_log', 'general_report', 'action_impact', 'sustainable_development_impact',  
+            'result', 'category_option', 'process', 'final_result', 'impact_identification']
 
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
@@ -1576,10 +1877,13 @@ class AdaptationActionServices():
              # fk's of object adaptation that have nested fields
             for field in field_list:
                 if data.get(field, False):
-                    record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field))
+                    record_status, record_data = self._create_or_update_record(adaptation_action, field, data.get(field, False))
                     
                     if record_status:
-                        data[field] = record_data.id
+                        if isinstance(record_data, list):
+                            data[field] = [obj.id for obj in record_data]
+                        else:
+                            data[field] = record_data.id
                         
                     dict_data = record_data if isinstance(record_data, list) else [record_data]
                     validation_dict.setdefault(record_status,[]).extend(dict_data)
@@ -1588,7 +1892,7 @@ class AdaptationActionServices():
             if all(validation_dict):
                 is_complete = data.pop('is_complete', False)
                 serialized_adaptation_action = self._get_serialized_adaptation_action(data, adaptation_action)
-                
+
                 if serialized_adaptation_action.is_valid():
                     adaptation_action = serialized_adaptation_action.save()
         

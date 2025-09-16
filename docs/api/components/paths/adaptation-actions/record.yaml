@@ -73,12 +73,107 @@ put:
         format: uuid
         example: a1b2c3d4-1234-5678-9abc-123456789abc
   requestBody:
-      description: The adaptation action record to update
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+    description: The adaptation action record to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/adaptation_actions.yaml#/CreateRecord"
+        example:
+          contact:
+            institution: "Environmental Protection Agency"
+            full_name: "John Doe"
+            job_title: "Climate Change Analyst"
+            email: "john.doe@example.com"
+            phone: "+1-800-555-1234"
+          result:
+            - scale:
+                - code: "aa"
+                  name: "TEST2"
+                  category_result: []
+                  description: "Description test"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
+                - code: "aa"
+                  name: "TEST9"
+                  category_result:
+                    - code: "tes"
+                      name: "name test"
+                  description: "Description test 2"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
+          category_option:
+            category_section:
+              - category: 1
+                description: "Description test"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
+              - category: 2
+                description: "Description test 2"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
+            other:
+              - name: "test"
+                description: "Test large text description"
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
+            impact_type: true
+            pertinent: false
+            relevant: true
+          process:
+            other: "Text example"
+            specific_impact:
+              - description: "Test description data"
+                characteristic: 2
+                indicator: 1
+                base_value: "test base"
+                expected_value: "test expected"
+                accumulated_value: "test accumulated"
+          final_result:
+            - scale:
+                - code: "aa"
+                  name: "TEST2"
+                  category_result: []
+                  description: "Description test"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
+                - code: "aa"
+                  name: "TEST9"
+                  category_result:
+                    - code: "tes"
+                      name: "name test"
+                  description: "Description test 2"
+                  indicator: 1
+                  base_value: "test base"
+                  expected_value: "test expected"
+                  accumulated_value: "test accumulated"
+          impact_identification:
+            vision: "Reducir la vulnerabilidad climática en la región"
+            short_term: "Implementar acciones inmediatas en 2025"
+            medium_term: "Fortalecer capacidades locales para 2030"
+            long_term: "Lograr resiliencia total para 2050"
+            barrier_option:
+              - code: "F01"
+                name: "Falta de financiamiento"
+                description: "No hay recursos suficientes para implementar la acción"
+              - code: "T01"
+                name: "Desconocimiento técnico"
+                description: "No se cuenta con personal capacitado"
+            other_barrier_option:
+              - description: "Baja participación comunitaria"
+            is_directly_addressed: true
 
   responses:
     '200':

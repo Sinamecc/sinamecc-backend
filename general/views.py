@@ -56,3 +56,68 @@ def get_post_district(request, district_id=False):
         result = view_helper.execute_by_name("get_district_list", request)
         
     return result
+
+@api_view(['GET'])
+def get_dimension(request, dimension_id=False):
+
+    service = GeneralService()
+    view_helper = ViewHelper(service)
+    
+    if request.method == 'GET' and not dimension_id:
+        result = view_helper.execute_by_name("get_all_dimension", request)
+    
+    
+    return result
+
+@api_view(['GET', 'POST'])
+def get_category_group(request, category_group_id=False):
+
+    service = GeneralService()
+    view_helper = ViewHelper(service)
+    
+    if request.method == 'GET' and not category_group_id:
+        result = view_helper.execute_by_name("get_all_category_group", request)
+
+    elif request.method == 'POST' and not category_group_id:
+        result = view_helper.execute_by_name("get_category_group_list", request)
+
+    return result
+
+@api_view(['GET', 'POST'])
+def get_category(request, category_id=False):
+
+    service = GeneralService()
+    view_helper = ViewHelper(service)
+    
+    if request.method == 'GET' and not category_id:
+        result = view_helper.execute_by_name("get_all_category", request)
+
+    elif request.method == 'POST' and not category_id:
+        result = view_helper.execute_by_name("get_category_list", request)
+
+    return result
+
+@api_view(['GET'])
+def get_category_ct(request, category_ct_id=False):
+
+    service = GeneralService()
+    view_helper = ViewHelper(service)
+
+    if request.method == 'GET' and not category_ct_id:
+        result = view_helper.execute_by_name("get_all_category_ct", request)
+
+    return result
+
+@api_view(['GET', 'POST'])
+def get_characteristic(request, characteristic_id=False):
+
+    service = GeneralService()
+    view_helper = ViewHelper(service)
+
+    if request.method == 'GET' and not characteristic_id:
+        result = view_helper.execute_by_name("get_all_characteristic", request)
+
+    if request.method == 'POST' and not characteristic_id:
+        result = view_helper.execute_by_name("get_characteristic_list", request)
+
+    return result

@@ -18,6 +18,10 @@ tags:
     description: User management
   - name: roles
     description: Role management
+  - name: general
+    description: General
+  - name: indicator
+    description: Indicators
 
 paths:
   ## User Definitions
@@ -52,7 +56,33 @@ paths:
   /adaptation-action/:
     $ref: "./components/paths/adaptation-actions/record-list.yaml"
 
+  #Dimension
+  /general/dimension/:
+    $ref: "./components/paths/general/record.yaml#/dimension-list"
+
+  #Category Group
+  /general/category_group/:
+    $ref: "./components/paths/general/record.yaml#/category-group-list"
   
+  #Category
+  /general/category/:
+    $ref: "./components/paths/general/record.yaml#/category-list"
+
+  #Category_CT
+  /general/category_ct/:
+    $ref: "./components/paths/general/record.yaml#/category-ct-list"
+
+  #Characteristic
+  /general/characteristic/:
+    $ref: "./components/paths/general/record.yaml#/characteristic-list"
+
+  #Adaptation Indicators
+  /adaptation-action/all_indicator/{id}/:
+    $ref: "./components/paths/general/record.yaml#/aa-indicator"
+
+  /adaptation-action/indicator/:
+    $ref: "./components/paths/general/record.yaml#/aa-create-indicator"
+
 components:
   securitySchemes:
     JWTAuth:

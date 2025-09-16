@@ -1,0 +1,189 @@
+Dimension:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Ambiental"
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877237Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877245Z"
+
+dimension-list:
+  type: array
+  items:
+    $ref: '#/Dimension'
+
+category-group:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Aire"
+    dimension:
+      $ref: '#/Dimension'  # o usa la ruta externa si está en otro archivo
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877808Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877813Z"
+
+category-group-list:
+  type: array
+  items:
+    $ref: '#/category-group'
+
+dimension-code:
+  type: object
+  properties:
+    code_dimension:
+      type: string
+      example: "01"
+
+dimension-list-body:
+  type: object
+  properties:
+    dimension_list:
+      type: array
+      items:
+        $ref: '#/dimension-code'
+
+Category:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Calidad del aire"
+    category_group:
+      $ref: '#/category-group'
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.878140Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.878144Z"
+
+category-list:
+  type: array
+  items:
+    $ref: '#/Category'
+
+
+category-group-code:
+  type: object
+  properties:
+    code_dimension:
+      type: string
+      example: "01"
+    code_category_group:
+      type: string
+      example: "01"
+
+category-group-list-body:
+  type: object
+  properties:
+    category_group_list:
+      type: array
+      items:
+        $ref: '#/category-group-code'
+
+
+category-ct:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Tecnología"
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877237Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877245Z"
+
+category-ct-list:
+  type: array
+  items:
+    $ref: '#/category-ct'
+
+
+characteristic:
+  type: object
+  properties:
+    id:
+      type: integer
+      example: 1
+    code:
+      type: string
+      example: "01"
+    name:
+      type: string
+      example: "Investigación y Desarrollo (I+D)"
+    category_ct:
+      $ref: '#/category-ct'
+    created:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877237Z"
+    updated:
+      type: string
+      format: date-time
+      example: "2025-08-07T20:09:31.877245Z"
+
+
+characteristic-list:
+  type: array
+  items:
+    $ref: '#/characteristic'
+
+
+category-ct-body:
+  type: object
+  properties:
+    code_category_ct:
+      type: string
+      example: "01"
+
+
+category-ct-list-body:
+  type: object
+  properties:
+    category_ct_list:
+      type: array
+      items:
+        $ref: '#/category-ct-body'
