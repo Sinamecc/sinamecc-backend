@@ -192,3 +192,81 @@ aa-create-indicator:
               $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
     security:
       - JWTAuth: []
+
+#Ejemplo: /adaptation-action/indicator/1/
+aa-get-update-indicator:
+  get:
+    tags:
+      - indicator
+    summary: Get a single indicator by its ID
+    parameters:
+      - in: path
+        name: id
+        description: The id of the indicator
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: Indicator details
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+    - JWTAuth: []
+  
+  put:
+    tags:
+      - indicator
+    summary: Update a single indicator by its ID
+    parameters:
+      - in: path
+        name: id
+        description: The id of the indicator
+        required: true
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    responses:
+      '200':
+        description: Indicator updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../../schemas/adaptation_actions.yaml#/AdaptationIndicator'
+    security:
+      - JWTAuth: []
+  
+  delete:
+    tags:
+      - indicator
+    summary: Delete a single indicator by its ID
+    parameters:
+      - in: path
+        name: id
+        description: The id of the indicator
+        required: true
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: Indicator deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Indicator deleted successfully
+    security:
+      - JWTAuth: []

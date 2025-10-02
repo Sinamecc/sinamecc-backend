@@ -348,7 +348,7 @@ class AdaptationActionServices():
     
     def _get_serialized_indicator_adaptation(self, data, indicator_adaptation=None):
 
-        serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation)
+        serializer = self._serializer_helper.get_serialized_record(IndicatorSerializer, data, record=indicator_adaptation, partial=True)
 
         return serializer
 
@@ -1028,10 +1028,11 @@ class AdaptationActionServices():
             result = (False, error)
         
         return result
-    
-    
-    def _create_update_indicator(self, data, indicator_adaptation=None):
 
+
+    def _update_indicator(self, request, indicator_adaptation=None):
+        data = request.data.copy()
+        indicator_instance = IndicatorAdaptation.objects.filter(id=indicator_adaptation).first()
         fields = ['information_source', 'contact']
         validation_dict = {}
         for field in fields:
@@ -1044,14 +1045,14 @@ class AdaptationActionServices():
                 validation_dict.setdefault(record_status,[]).extend(dict_data)
     
         if all(validation_dict):
-
-            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(data, indicator_adaptation)
-                    
+            serialized_indicator_adaptation = self._get_serialized_indicator_adaptation(
+            data,
+            indicator_adaptation=indicator_instance
+        )
             if serialized_indicator_adaptation.is_valid():
                 indicator_adaptation = serialized_indicator_adaptation.save()
-
-                result = (True, indicator_adaptation)
-
+                result_data = IndicatorSerializer(indicator_instance).data
+                result = (True, result_data)
             else:
                 result = (False, serialized_indicator_adaptation.errors)
         else:
@@ -1059,7 +1060,15 @@ class AdaptationActionServices():
             
         return result
 
-    
+    def _delete_indicator(self, request, indicator_adaptation):
+        indicator_instance = IndicatorAdaptation.objects.filter(id=indicator_adaptation).first()
+        if indicator_instance:
+            indicator_instance.delete()
+            return (True, "Indicator deleted successfully")
+        else:
+            return (False, "Indicator not found")
+        
+
     def _get_indicator_monitoring_for_updating_creating(self, ind_monitoring_data_list, ind_monitoring_list, adaptation_action):
         
         for ind_monitoring_data in ind_monitoring_data_list:
@@ -1074,7 +1083,7 @@ class AdaptationActionServices():
             
         result = (True, ind_monitoring_data_list)
         
-        return result
+        return result 
 
         
     def _create_update_indicator_monitoring_list(self, indicator_monitoring_list_data, adaptation_action):
@@ -1159,7 +1168,7 @@ class AdaptationActionServices():
         if not adaptation_action_id:
             return (False, "Missing adaptation_action_id")
 
-        indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, adaptation_action_id=adaptation_action_id)
+        indicator_status, indicator_data = self._service_helper.get_one(IndicatorAdaptation, record_id=adaptation_action_id)
         if indicator_status:
             result = (indicator_status, IndicatorSerializer(indicator_data).data)
         else:
@@ -1852,7 +1861,6 @@ class AdaptationActionServices():
     
     
     def update(self, request, adaptation_action_id):
-
         validation_dict = {}
         data = request.data.copy()
         indicator_list = data.pop('indicator_list', [])

@@ -83,6 +83,9 @@ paths:
   /adaptation-action/indicator/:
     $ref: "./components/paths/general/record.yaml#/aa-create-indicator"
 
+  /adaptation-action/indicator/{id}/:
+    $ref: "./components/paths/general/record.yaml#/aa-get-update-indicator"
+
 components:
   securitySchemes:
     JWTAuth:
