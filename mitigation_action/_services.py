@@ -1425,10 +1425,12 @@ class MitigationActionService():
         ## permission access return here
         if not has_object_permission('access_mitigation_action_register', request.user, mitigation_action_data):
             return  (False, self.ACCESS_DENIED.format(mitigation_action_data.code))
-        
-        _workflow_service = WorkflowService(mitigation_action_data)
-        if _workflow_service._should_cancel_update(request.user):
-            return (False, self.CANCEL_UPDATE.format(mitigation_action_data.code))
+
+        excluded_keys = {'result', 'category_option', 'process', 'final_result', 'impact_identification'}
+        if not any(key in request.data for key in excluded_keys):
+            _workflow_service = WorkflowService(mitigation_action_data)
+            if _workflow_service._should_cancel_update(request.user):
+                return (False, self.CANCEL_UPDATE.format(mitigation_action_data.code))
 
         if mitigation_action_status:
             mitigation_action = mitigation_action_data

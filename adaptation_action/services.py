@@ -1864,9 +1864,11 @@ class AdaptationActionServices():
         adaptation_action_status, adaptation_action_data = \
             self._service_helper.get_one(AdaptationAction, adaptation_action_id)
         
-        _workflow_service = WorkflowService(adaptation_action_data)
-        if _workflow_service._should_cancel_update(request.user):
-            return (False, self.CANCEL_UPDATE.format(adaptation_action_data.code))
+        excluded_keys = {'result', 'category_option', 'process', 'final_result', 'impact_identification'}
+        if not any(key in request.data for key in excluded_keys):
+            _workflow_service = WorkflowService(adaptation_action_data)
+            if _workflow_service._should_cancel_update(request.user):
+                return (False, self.CANCEL_UPDATE.format(adaptation_action_data.code))
         
         ## permission access return here
         if not has_object_permission('access_adaptation_action_register', request.user, adaptation_action_data):
