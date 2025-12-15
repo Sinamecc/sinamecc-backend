@@ -24,16 +24,23 @@ user-list:
           example: 10
     responses:
       '200':
-        description: List of users
+        description: List of users with total count
         content:
           application/json:
             schema:
               type: object
               properties:
                 data:
-                  type: array
-                  items:
-                    $ref: "../../schemas/users.yaml#/ResponseRecord"
+                  type: object
+                  properties:
+                    users:
+                      type: array
+                      items:
+                        $ref: "../../schemas/users.yaml#/ResponseRecord"
+                    total:
+                      type: integer
+                      description: Total number of users
+                      example: 125
                 code: 
                   type: integer
                   example: 0
