@@ -31,7 +31,12 @@ class UserResourcesViewSet(viewsets.ViewSet):
         
         serialized_users = UserSerializer(users, many=True).data
 
-        return Response(serialized_users, status=status.HTTP_200_OK,)
+        total = _service.get_count()
+
+        return Response({
+            "users": serialized_users,
+            "total": total
+        }, status=status.HTTP_200_OK)
 
     def create(self, request: Request) -> Response:
         
