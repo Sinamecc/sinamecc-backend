@@ -62,6 +62,7 @@ def test_get_all_users(api_client: APIClient, user_list: List[UserModel]):
     assert response.status_code == status.HTTP_200_OK
     assert len(response_user_list_data) == len(user_list)
     assert isinstance(total, int)
+    assert total >= len(user_list)
 
     for i, user in enumerate(user_list):
         assert response_user_list_data[i].get('username') == user.username
