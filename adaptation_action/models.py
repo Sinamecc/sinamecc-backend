@@ -440,6 +440,7 @@ class IndicatorAdaptation(models.Model):
         ('REGIONAL', 'Regional'),
         ('PROVINCIAL', 'Provincial'),
         ('CANTONAL', 'Cantonal'),
+        ('DISTRICT', 'District'),
         ('OTHER', 'Other')
     ]
     #Section 4
