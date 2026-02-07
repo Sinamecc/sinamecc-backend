@@ -304,18 +304,20 @@ def get_comments(request, adaptation_action_id, fsm_state=None, review_number=No
     return result
 
 
-@api_view(['GET', 'PUT', 'POST'])
+@api_view(['GET', 'PUT', 'POST', 'DELETE'])
 @has_permission_decorator('read_adaptation_action')
-def get_put_indicator(request, adaptation_action_id=False):
-    if request.method == 'GET' and adaptation_action_id:
-        result = view_helper.execute_by_name('_get_indicator', request, adaptation_action_id)
+def get_put_indicator(request, indicator_id=False):
+    if request.method == 'GET' and indicator_id:
+        result = view_helper.execute_by_name('_get_indicator', request, indicator_id)
 
     elif request.method == 'PUT':
-        result = view_helper.execute_by_name('_create_update_indicator', request, adaptation_action_id)
+        result = view_helper.execute_by_name('_update_indicator', request, indicator_id)
 
     elif request.method == 'POST':
         result = view_helper.execute_by_name('_create_indicator', request)
 
+    elif request.method == 'DELETE' and indicator_id:
+        result = view_helper.execute_by_name('_delete_indicator', request, indicator_id)
     return result
 
 
