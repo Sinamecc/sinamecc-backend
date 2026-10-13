@@ -29,7 +29,7 @@ jobs:
       id-token: write
       contents: read
     outputs:
-      ci_commit_sha: ${{ steps.push-images.outputs.ci_commit_sha }}
+      image_tag: ${{ steps.push-images.outputs.image_tag }}
       ecr_registry: ${{ steps.push-images.outputs.ecr_registry }}
     steps:
       - uses: actions/checkout@v4
