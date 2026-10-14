@@ -53,7 +53,7 @@ jobs:
 
             echo "> Replacing container $CONTAINER"
             docker rm -f "$CONTAINER" || true
-            docker run -d --name "$CONTAINER" \z
+            docker run -d --name "$CONTAINER" \
               --restart unless-stopped \
               -e DATABASE_URL="$DATABASE_URL" \
               -e ENVIRONMENT=prod \
