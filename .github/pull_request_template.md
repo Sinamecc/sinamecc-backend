@@ -25,3 +25,12 @@ Please delete options that are not relevant.
     Some changes are not visible in the screenshot. Please include the changes in the description.
 2. Screenshot of the change or documentation update.
     Some changes are not visible in the screenshot. Please include the changes in the description.
+
+## AI Disclaimer
+
+Please delete this section if no AI tools were used.
+
+This change was developed with AI assistance. All AI-assisted changes were reviewed and manually tested by a human.
+
+- [ ] Claude
+- [ ] Codex
