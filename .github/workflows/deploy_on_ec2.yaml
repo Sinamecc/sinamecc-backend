@@ -42,6 +42,7 @@ jobs:
           envs: DATABASE_URL,IMAGE,REGISTRY,CONTAINER
           script: |
             set -e
+            touch healthcheck.log
 
             echo "> Logging into ECR"
             /usr/local/bin/aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin "$REGISTRY"
