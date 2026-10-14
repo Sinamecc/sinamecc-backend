@@ -33,8 +33,14 @@ class UserResourcesService:
         user_list = UserModel.objects.all()[offset: offset + limit]
 
         return list(user_list)
-        
     
+    def get_count(self) -> int:
+    
+        count = UserModel.objects.count()
+
+        return count
+    
+
     def create(self, data: dict[str, Any]) -> UserModel:
 
         serialized_user = UserCreateSerializer(data=data)
