@@ -44,7 +44,7 @@ jobs:
             set -e
 
             echo "> Logging into ECR"
-            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin "$REGISTRY"
+            /usr/local/bin/aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin "$REGISTRY"
 
             echo "> Pulling image $IMAGE"
             docker pull "$IMAGE"
