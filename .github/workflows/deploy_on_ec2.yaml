@@ -1,4 +1,4 @@
-name: Deploy on EC2
+name: Deploy SINAMECC Backend
 on:
   workflow_dispatch:
     inputs:
