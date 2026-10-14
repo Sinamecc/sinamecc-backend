@@ -57,7 +57,7 @@ jobs:
               --restart unless-stopped \
               -e DATABASE_URL="$DATABASE_URL" \
               -e ENVIRONMENT=prod \
-              -p 80:80 \
+              -p 8000:8000 \
               "$IMAGE"
 
             echo "> Pruning dangling images"
